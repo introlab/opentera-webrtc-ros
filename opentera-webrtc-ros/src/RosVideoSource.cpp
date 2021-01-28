@@ -6,7 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-using namespace introlab;
+using namespace opentera;
 
 /**
  * @brief Construct a RosVideoSource
@@ -15,7 +15,7 @@ using namespace introlab;
  * @param isScreenCast the transport layer should be configured to stream a screen rather then a camera
  */
 RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast):
-        VideoSource(needsDenoising, isScreenCast) { }
+        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast)) { }
 
 /**
  * @brief Process a frame received from ROS

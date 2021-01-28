@@ -6,14 +6,14 @@
 #include <ros/publisher.h>
 #include <std_msgs/String.h>
 
-namespace introlab {
+namespace opentera {
 
     /**
      * @brief Implement a ROS node to bridge WebRTC data channel to ROS topics
      */
     class RosDataChannelBridge
     {
-        std::unique_ptr<DataChannelClient> m_signallingClient;
+        std::unique_ptr<DataChannelClient> m_signalingClient;
 
         ros::Subscriber m_dataSubscriber;
         ros::Publisher m_dataPublisher;

@@ -1,10 +1,10 @@
 #ifndef OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_VIDEO_SOURCE_H
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_VIDEO_SOURCE_H
 
-#include <OpenteraWebrtcNativeClient/VideoSource.h>
+#include <OpenteraWebrtcNativeClient/Sources/VideoSource.h>
 #include <sensor_msgs/Image.h>
 
-namespace introlab
+namespace opentera
 {
     /**
      * @brief A webrtc video source that sinks images from a ROS topic
