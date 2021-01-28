@@ -52,11 +52,18 @@ include_directories(
 
 link_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/lib
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/lib/opencv4/3rdparty/lib              
 )
 
 set (opentera_webrtc_native_client_libs
   opencv_core 
   opencv_imgproc
+  ade 
+  ippicv 
+  ippiw 
+  ittnotify   
+  libopenjp2  
+  zlib
   OpenteraWebrtcNativeClient
   sioclient
   sioclient_tls
@@ -119,6 +126,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME}_topic_streamer
   src/RosVideoSource.cpp
+  src/RosAudioSource.cpp
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
 )
@@ -144,7 +152,7 @@ target_link_libraries(${PROJECT_NAME}_topic_streamer
 
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
   ${catkin_LIBRARIES}
-   ${opentera_webrtc_native_client_libs}
+  ${opentera_webrtc_native_client_libs}
 )
 
 

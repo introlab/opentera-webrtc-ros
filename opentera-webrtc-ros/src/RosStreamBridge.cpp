@@ -20,18 +20,33 @@ RosStreamBridge::RosStreamBridge()
 
     // WebRTC video stream interfaces
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
+    m_audioSource = make_shared<RosAudioSource>();
+    
     m_videoSink = make_shared<VideoSink>([&](const cv::Mat& bgrImg, uint64_t timestampUs){
         onFrameReceived(bgrImg, timestampUs);
     });
 
     // Signaling client connection
+    /*
+            StreamClient(SignalingServerConfiguration signalingServerConfiguration,
+                WebrtcConfiguration webrtcConfiguration,
+                std::shared_ptr<VideoSource> videoSource,
+                std::shared_ptr<AudioSource> audioSource);
+    
+     std::shared_ptr<opentera::RosVideoSource>&, std::shared_ptr<opentera::VideoSink>&)’
+    
+    */
     m_signalingClient = make_unique<StreamClient>(
             RosSignalingServerConfiguration::fromRosParam("streamer"),
             WebrtcConfiguration::create(),
             m_videoSource,
-            m_videoSink);
+            m_audioSource);
 
     m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
+
+    //TODO configure callbacks for audio & video
+
+
 
     // Subscribe to image topic when signaling client connects
     m_signalingClient->setOnSignalingConnectionOpened([&]{
