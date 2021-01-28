@@ -26,9 +26,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Fetch latest opentera-webrtc-teleop build
-set(opentera_webrtc_native_archive "opentera-webrtc-native-client-0.1.0.tar.gz")
-set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.1.0/opentera-webrtc-native-client-0.1.0.tar.gz")
-set(opentera_webrtc_native_archive_hash "a32a25432f8053a0fe8bd3e799362784")
+set(opentera_webrtc_native_version "0.1.1")
+set(opentera_webrtc_native_archive "opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.1.1.tar.gz")
+set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.1.1/opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.1.1.tar.gz")
+set(opentera_webrtc_native_archive_hash "3016ba2a1c4550661b8f9256bd894217")
 
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive})
     file(DOWNLOAD ${opentera_webrtc_native_client_url} ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive}
@@ -45,14 +46,14 @@ add_custom_target(
 )
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/include
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/include/opencv4
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/include/rapidjson
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/opencv4
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/rapidjson
 )
 
 link_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/lib
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-0.1.0/lib/opencv4/3rdparty/lib              
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib/opencv4/3rdparty/lib              
 )
 
 set (opentera_webrtc_native_client_libs
