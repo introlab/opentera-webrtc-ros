@@ -39,8 +39,7 @@ RosStreamBridge::RosStreamBridge()
     m_signalingClient = make_unique<StreamClient>(
             RosSignalingServerConfiguration::fromRosParam("streamer"),
             WebrtcConfiguration::create(),
-            m_videoSource,
-            m_audioSource);
+            m_videoSource);
 
     m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
 

@@ -53,7 +53,7 @@ include_directories(
 
 link_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib/opencv4/3rdparty/lib              
+    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib/opencv4/3rdparty              
 )
 
 set (opentera_webrtc_native_client_libs
