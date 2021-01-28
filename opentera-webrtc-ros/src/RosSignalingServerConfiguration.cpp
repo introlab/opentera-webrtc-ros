@@ -1,7 +1,7 @@
 #include <ros/node_handle.h>
 #include <RosSignalingServerconfiguration.h>
 
-using namespace introlab;
+using namespace opentera;
 using namespace std;
 using namespace ros;
 
@@ -12,7 +12,7 @@ using namespace ros;
  * @param defaultClientName Default name for the webrtc peer
  * @return The signaling server configuration
  */
-SignallingServerConfiguration RosSignalingServerConfiguration::fromRosParam(const std::string& defaultClientName)
+SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam(const std::string& defaultClientName)
 {
     NodeHandle pnh("~signaling");
 
@@ -28,5 +28,5 @@ SignallingServerConfiguration RosSignalingServerConfiguration::fromRosParam(cons
     string password;
     pnh.param<string>("room_password", password, "abc");
 
-    return SignallingServerConfiguration::create(serverUrl, clientName, room, password);
+    return SignalingServerConfiguration::create(serverUrl, clientName, room, password);
 }

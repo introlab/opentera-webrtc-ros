@@ -3,7 +3,7 @@
 #include <RosSignalingServerconfiguration.h>
 #include <cv_bridge/cv_bridge.h>
 
-using namespace introlab;
+using namespace opentera;
 using namespace ros;
 using namespace std;
 
@@ -25,7 +25,7 @@ RosStreamBridge::RosStreamBridge()
     });
 
     // Signaling client connection
-    m_signallingClient = make_unique<StreamClient>(
+    m_signalingClient = make_unique<StreamClient>(
             RosSignalingServerConfiguration::fromRosParam("streamer"),
             WebrtcConfiguration::create(),
             m_videoSource,
@@ -34,7 +34,7 @@ RosStreamBridge::RosStreamBridge()
     m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
 
     // Subscribe to image topic when signaling client connects
-    m_signallingClient->setOnSignallingConnectionOpen([&]{
+    m_signalingClient->setOnSignalingConnectionOpened([&]{
         ROS_INFO("Signaling connection opened, streaming topic...");
         m_imageSubsriber = m_nh.subscribe(
                 "ros_image",
@@ -44,13 +44,13 @@ RosStreamBridge::RosStreamBridge()
     });
 
     // Shutdown ROS when signaling client disconnect
-    m_signallingClient->setOnSignallingConnectionClosed([]{
+    m_signalingClient->setOnSignalingConnectionClosed([]{
         ROS_WARN("Signaling connection closed, shutting down...");
         requestShutdown();
     });
 
     // Shutdown ROS on signaling client error
-    m_signallingClient->setOnSignallingConnectionError([](auto msg){
+    m_signalingClient->setOnSignalingConnectionError([](auto msg){
         ROS_ERROR("Signaling connection error %s, shutting down...", msg.c_str());
         requestShutdown();
     });
@@ -77,7 +77,7 @@ void RosStreamBridge::onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampU
 RosStreamBridge::~RosStreamBridge()
 {
     ROS_INFO("ROS is shutting down, closing signaling client connection.");
-    m_signallingClient->closeSync();
+    m_signalingClient->closeSync();
     ROS_INFO("Signaling client disconnected, goodbye.");
 }
 
@@ -87,7 +87,7 @@ RosStreamBridge::~RosStreamBridge()
 void RosStreamBridge::run()
 {
     ROS_INFO("Connecting to signaling server at.");
-    m_signallingClient->connect();
+    m_signalingClient->connect();
     spin();
 }
 

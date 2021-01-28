@@ -7,7 +7,7 @@
 #include <OpenteraWebrtcNativeClient/StreamClient.h>
 #include <OpenteraWebrtcNativeClient/Sinks/VideoSink.h>
 
-namespace introlab {
+namespace opentera {
 
     /**
      * @brief A ros node that bridges streams with ROS topics
@@ -19,7 +19,7 @@ namespace introlab {
         ros::NodeHandle m_nh;
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<VideoSink> m_videoSink;
-        std::unique_ptr<StreamClient> m_signallingClient;
+        std::unique_ptr<StreamClient> m_signalingClient;
 
         ros::Subscriber m_imageSubsriber;
         ros::Publisher m_imagePublisher;
