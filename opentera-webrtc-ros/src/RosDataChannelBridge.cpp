@@ -29,7 +29,9 @@ RosDataChannelBridge::RosDataChannelBridge()
     // Setup data channel callback
     m_signalingClient->setOnDataChannelMessageString([&](const Client& client, const string& data) {
         PeerData msg;
+        //PeerData should have a json string sent by client.data()
         msg.data = data;
+        
         msg.sender.id = client.id();
         msg.sender.name = client.name();
         m_dataPublisher.publish(msg);
