@@ -26,10 +26,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Fetch latest opentera-webrtc-teleop build
-set(opentera_webrtc_native_version "0.2.0")
-set(opentera_webrtc_native_archive "opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.0.tar.gz")
-set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.2.0/opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.0.tar.gz")
-set(opentera_webrtc_native_archive_hash "a1cb4e3f6920c1399b9ecb74825f8c46")
+set(opentera_webrtc_native_version "0.2.1")
+set(opentera_webrtc_native_archive "opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
+set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.2.1/opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
+set(opentera_webrtc_native_archive_hash "daf46d18fcd74677757a9e93a36c5535")
 
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive})
     file(DOWNLOAD ${opentera_webrtc_native_client_url} ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive}

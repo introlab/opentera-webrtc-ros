@@ -1,6 +1,6 @@
 # opentera-webrtc-ros
 
-Based on [opentera-webrtc-teleop](https://github.com/introlab/opentera-webrtc-teleop). We are now using a pre-built version 0.2.0 of our library to speed-up compilation.
+Based on [opentera-webrtc-teleop](https://github.com/introlab/opentera-webrtc-teleop). We are now using a pre-built version 0.2.1 of our library to speed-up compilation.
 
 
 # Authors
