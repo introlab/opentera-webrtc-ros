@@ -6,11 +6,16 @@ The following ROS packages are required:
 * std_msgs
 * sensor_msgs
 
-Additionally, some environment variables must be configured to link against the OpenTera WebRTC native client:
-* `OPEN_TERA_WEBRTC_NATIVE_CLIENT_ROOT_DIR` :
-points to `OpenteraWebrtcNativeClient` directory.
-* `OPEN_TERA_WEBRTC_NATIVE_CLIENT_LIB` :
-points to the instance of `libOpenteraWebrtcNativeClient.a` file to link against.
+Additionally, some environment variables must be configured to link against the OpenTera WebRTC native client. 
+A dist dir is created when you do from opentera-webrtc build directory :
+```bash
+make install
+```
+
+```bash
+# This needs to be set before building with catkin_make
+export OPENTERA_WEBRTC_DIST_DIR=<opentera-webrtc dist directory>
+```
 
 Finally the OpenTera WebRTC native client and its dependencies must have been built with same build type, Debug or
 Release as the desired build output.
