@@ -4,7 +4,9 @@ project(opentera_webrtc_ros)
 
 ## Set compile options
 
-add_compile_options(-std=c++14)
+set (CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_CXX_FLAGS "-fPIC")
 add_compile_definitions(WEBRTC_POSIX)
 
@@ -25,35 +27,32 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-## Fetch latest opentera-webrtc-teleop build
-set(opentera_webrtc_native_version "0.2.1")
-set(opentera_webrtc_native_archive "opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
-set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.2.1/opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
-set(opentera_webrtc_native_archive_hash "daf46d18fcd74677757a9e93a36c5535")
-
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive})
-    file(DOWNLOAD ${opentera_webrtc_native_client_url} ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive}
-        TIMEOUT 60 #seconds
-        EXPECTED_MD5 ${opentera_webrtc_native_archive_hash}
-        TLS_VERIFY ON)
+# You must set the environment variable
+# OPENTERA_WEBRTC_DIST_DIR where opentera-webrtc is installed
+if(NOT DEFINED ENV{OPENTERA_WEBRTC_DIST_DIR})
+    message(FATAL_ERROR "Environment variable OPENTERA_WEBRTC_DIST_DIR must be set.")
 endif()
 
-# Extract archive
-add_custom_target(
-    extracted_webrtc_native_client
-    COMMAND tar xvzf ${opentera_webrtc_native_archive}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
+# TODO version is hard coded for now
+set(OPENTERA_WEBRTC_INCLUDE_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/${CMAKE_BUILD_TYPE}/opentera-webrtc-native-client-0.2.2/include)
+set(OPENTERA_WEBRTC_LIB_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/${CMAKE_BUILD_TYPE}/opentera-webrtc-native-client-0.2.2/lib)
+
+# TODO UGLY!
+set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/../3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/include)
+set(OPENTERA_WEBRTC_NATIVE_LIB_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/../3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/lib)
+
+
+message(STATUS "**************************** ${OPENTERA_WEBRTC_INCLUDE_DIR} ${OPENTERA_WEBRTC_LIB_DIR}")
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/opencv4
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/rapidjson
+    ${OPENTERA_WEBRTC_INCLUDE_DIR}
+    ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
 )
 
 link_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib/opencv4/3rdparty              
+    ${OPENTERA_WEBRTC_LIB_DIR}
+    ${OPENTERA_WEBRTC_LIB_DIR}/opencv4/3rdparty
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}      
 )
 
 set (opentera_webrtc_native_client_libs
@@ -67,7 +66,8 @@ set (opentera_webrtc_native_client_libs
   zlib
   OpenteraWebrtcNativeClient
   sioclient
-  webrtc boringssl
+  webrtc 
+  boringssl
   dl 
   X11 
   expat
@@ -130,13 +130,13 @@ add_executable(${PROJECT_NAME}_topic_streamer
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
 )
-add_dependencies(${PROJECT_NAME}_topic_streamer extracted_webrtc_native_client)
+# add_dependencies(${PROJECT_NAME}_topic_streamer extracted_webrtc_native_client)
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
 )
-add_dependencies(${PROJECT_NAME}_data_channel_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} extracted_webrtc_native_client)
+# add_dependencies(${PROJECT_NAME}_data_channel_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} extracted_webrtc_native_client)
 
 ## Rename C++ executable without prefix
 
