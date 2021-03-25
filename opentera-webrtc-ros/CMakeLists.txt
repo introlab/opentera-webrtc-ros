@@ -8,7 +8,6 @@ set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "-fPIC")
-add_compile_definitions(WEBRTC_POSIX)
 
 if(NOT CMAKE_BUILD_TYPE )
   MESSAGE(STATUS "not define build type, set to release" )
@@ -27,46 +26,36 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-# You must set the environment variable
-# OPENTERA_WEBRTC_DIST_DIR where opentera-webrtc is installed
-if(NOT DEFINED ENV{OPENTERA_WEBRTC_DIST_DIR})
-    message(FATAL_ERROR "Environment variable OPENTERA_WEBRTC_DIST_DIR must be set.")
-endif()
+add_definitions(-DWEBRTC_POSIX)
 
-# TODO version is hard coded for now
-set(OPENTERA_WEBRTC_INCLUDE_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/${CMAKE_BUILD_TYPE}/opentera-webrtc-native-client-0.2.2/include)
-set(OPENTERA_WEBRTC_LIB_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/${CMAKE_BUILD_TYPE}/opentera-webrtc-native-client-0.2.2/lib)
+set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
+set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
+add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
+find_package(OpenCV REQUIRED core imgproc)
 
-# TODO UGLY!
-set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/../3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/include)
-set(OPENTERA_WEBRTC_NATIVE_LIB_DIR $ENV{OPENTERA_WEBRTC_DIST_DIR}/../3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/lib)
+
+# TODO Fixme. Version is hard coded for now
+set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/include)
+set(OPENTERA_WEBRTC_NATIVE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-4389.742109.0/lib)
 
 
 message(STATUS "**************************** ${OPENTERA_WEBRTC_INCLUDE_DIR} ${OPENTERA_WEBRTC_LIB_DIR}")
 
 include_directories(
-    ${OPENTERA_WEBRTC_INCLUDE_DIR}
     ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/socket.io-client-cpp/src
 )
 
 link_directories(
-    ${OPENTERA_WEBRTC_LIB_DIR}
-    ${OPENTERA_WEBRTC_LIB_DIR}/opencv4/3rdparty
     ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}      
 )
 
 set (opentera_webrtc_native_client_libs
   opencv_core 
   opencv_imgproc
-  ade 
-  ippicv 
-  ippiw 
-  ittnotify   
-  libopenjp2  
-  zlib
   OpenteraWebrtcNativeClient
-  sioclient
-  webrtc 
   boringssl
   dl 
   X11 
