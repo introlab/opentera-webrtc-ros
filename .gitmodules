@@ -1,0 +1,3 @@
+[submodule "opentera-webrtc-ros/opentera-webrtc"]
+	path = opentera-webrtc-ros/opentera-webrtc
+	url = https://github.com/introlab/opentera-webrtc.git

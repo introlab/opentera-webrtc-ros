@@ -6,11 +6,16 @@ The following ROS packages are required:
 * std_msgs
 * sensor_msgs
 
-Additionally, some environment variables must be configured to link against the OpenTera WebRTC native client:
-* `OPEN_TERA_WEBRTC_NATIVE_CLIENT_ROOT_DIR` :
-points to `OpenteraWebrtcNativeClient` directory.
-* `OPEN_TERA_WEBRTC_NATIVE_CLIENT_LIB` :
-points to the instance of `libOpenteraWebrtcNativeClient.a` file to link against.
+
+# Clone the repository with the submodules in the catkin workspace src directory
+```bash
+git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
+```
+
+# TODO
+
+Complete the following documentation.
+
 
 Finally the OpenTera WebRTC native client and its dependencies must have been built with same build type, Debug or
 Release as the desired build output.

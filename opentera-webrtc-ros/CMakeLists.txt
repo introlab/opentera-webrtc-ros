@@ -3,10 +3,10 @@ include(ExternalProject)
 project(opentera_webrtc_ros)
 
 ## Set compile options
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-std=c++14)
 set(CMAKE_CXX_FLAGS "-fPIC")
-add_compile_definitions(WEBRTC_POSIX)
 
 if(NOT CMAKE_BUILD_TYPE )
   MESSAGE(STATUS "not define build type, set to release" )
@@ -16,7 +16,6 @@ elseif(NOT (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQU
 endif()
 
 ## Find catkin macros and libraries
-
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   cv_bridge
@@ -25,66 +24,46 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-## Fetch latest opentera-webrtc-teleop build
-set(opentera_webrtc_native_version "0.2.1")
-set(opentera_webrtc_native_archive "opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
-set(opentera_webrtc_native_client_url "https://github.com/introlab/opentera-webrtc-teleop/releases/download/0.2.1/opentera-webrtc-native-client-Linux-Ubuntu-20.04-x86_64-0.2.1.tar.gz")
-set(opentera_webrtc_native_archive_hash "daf46d18fcd74677757a9e93a36c5535")
+# This is required for WebRTC
+add_definitions(-DWEBRTC_POSIX)
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive})
-    file(DOWNLOAD ${opentera_webrtc_native_client_url} ${CMAKE_CURRENT_BINARY_DIR}/${opentera_webrtc_native_archive}
-        TIMEOUT 60 #seconds
-        EXPECTED_MD5 ${opentera_webrtc_native_archive_hash}
-        TLS_VERIFY ON)
-endif()
+# Disable tests because of conflicts with gtest with catkin
+set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
+# Use system opencv that is shared with ROS
+set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
+# Disable generation of Python doc, this is causing problems with catkin otherwise
+set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC OFF)
+add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
 
-# Extract archive
-add_custom_target(
-    extracted_webrtc_native_client
-    COMMAND tar xvzf ${opentera_webrtc_native_archive}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
+find_package(OpenCV REQUIRED core imgproc)
+
+
+# TODO Fixme. Version is hard coded for now
+set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include)
+set(OPENTERA_WEBRTC_NATIVE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib)
 
 include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/opencv4
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/include/rapidjson
+    ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/socket.io-client-cpp/src
 )
 
 link_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib
-    ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc-native-client-${opentera_webrtc_native_version}/lib/opencv4/3rdparty              
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}    
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm  
 )
 
 set (opentera_webrtc_native_client_libs
   opencv_core 
   opencv_imgproc
-  ade 
-  ippicv 
-  ippiw 
-  ittnotify   
-  libopenjp2  
-  zlib
   OpenteraWebrtcNativeClient
-  sioclient
-  webrtc boringssl
+  boringssl
+  webrtc
   dl 
   X11 
   expat
 )
-
-
-## System dependencies are found with CMake's conventions
-## find_package(OpenCV REQUIRED core imgproc)
-
-# if(NOT DEFINED ENV{OPEN_TERA_WEBRTC_NATIVE_CLIENT_ROOT_DIR})
-#   message(FATAL_ERROR "OPEN_TERA_WEBRTC_NATIVE_CLIENT_ROOT_DIR environnement variable must be configured.")
-# endif()
-
-# if(NOT DEFINED ENV{OPEN_TERA_WEBRTC_NATIVE_CLIENT_LIB})
-#   message(FATAL_ERROR "OPEN_TERA_WEBRTC_NATIVE_CLIENT_LIB environnement variable must be configured.")
-# endif()
-
 
 ##############################
 ## Generate custom messages ##
@@ -103,7 +82,6 @@ generate_messages(DEPENDENCIES std_msgs)
 ###################################
 ## catkin specific configuration ##
 ###################################
-
 catkin_package(CATKIN_DEPENDS message_runtime)
 
 
@@ -112,47 +90,38 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 ###########
 
 ## Specify additional locations of header files
-
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
 
-## Specify additional locations of library files
-
-
 
 ## Declare a C++ executable
-
 add_executable(${PROJECT_NAME}_topic_streamer
   src/RosVideoSource.cpp
   src/RosAudioSource.cpp
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
 )
-add_dependencies(${PROJECT_NAME}_topic_streamer extracted_webrtc_native_client)
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
 )
-add_dependencies(${PROJECT_NAME}_data_channel_bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} extracted_webrtc_native_client)
 
 ## Rename C++ executable without prefix
-
 set_target_properties(${PROJECT_NAME}_topic_streamer PROPERTIES OUTPUT_NAME topic_streamer PREFIX "")
 set_target_properties(${PROJECT_NAME}_data_channel_bridge PROPERTIES OUTPUT_NAME data_channel_bridge PREFIX "")
 
 ## Specify libraries to link a library or executable target against
-
 target_link_libraries(${PROJECT_NAME}_topic_streamer
-  ${catkin_LIBRARIES}
   ${opentera_webrtc_native_client_libs}
+  ${catkin_LIBRARIES}
 )
 
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
-  ${catkin_LIBRARIES}
   ${opentera_webrtc_native_client_libs}
+  ${catkin_LIBRARIES}
 )
 
 
@@ -163,18 +132,10 @@ target_link_libraries(${PROJECT_NAME}_data_channel_bridge
 # all install targets should use catkin DESTINATION variables
 
 ## Mark executables for installation
-
 install(
   TARGETS
     ${PROJECT_NAME}_topic_streamer
     ${PROJECT_NAME}_data_channel_bridge
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
 
