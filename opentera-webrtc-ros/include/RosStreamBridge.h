@@ -26,6 +26,8 @@ namespace opentera {
         ros::Subscriber m_imageSubsriber;
         ros::Publisher m_imagePublisher;
 
+        ros::Publisher m_audioPublisher;
+
 
         static void loadStreamParams(bool &denoise, bool &screencast);
         void onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs);

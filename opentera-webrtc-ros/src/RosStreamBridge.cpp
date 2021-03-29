@@ -3,6 +3,8 @@
 #include <RosSignalingServerconfiguration.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opentera_webrtc_ros/PeerImage.h>
+#include <opentera_webrtc_ros/PeerAudio.h>
+#include <audio_utils/AudioFrame.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -47,6 +49,7 @@ RosStreamBridge::RosStreamBridge() {
 
     //m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
     m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
+    m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
 
     //TODO configure callbacks for audio & video
 
@@ -110,17 +113,23 @@ RosStreamBridge::RosStreamBridge() {
 
         publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
     });
-    m_signalingClient->setOnAudioFrameReceived([](const Client& client,
+    m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
         const void* audioData,
         int bitsPerSample,
         int sampleRate,
         size_t numberOfChannels,
         size_t numberOfFrames)
     {
-        ROS_INFO("Audio frame received:");
-        ROS_INFO_STREAM("\tFrom: " << "id: " << client.id() << ", name: " << client.name());
-        ROS_INFO_STREAM("\tbitsPerSample=" << bitsPerSample << ", sampleRate=" << sampleRate  << 
-                        ", numberOfChannels=" << numberOfChannels << ", numberOfFrames=" << numberOfFrames << endl);
+        audio_utils::AudioFrame frame;
+        frame.format = "signed_16";
+        frame.channel_count = numberOfChannels;
+        frame.sampling_frequency = sampleRate;
+        frame.frame_sample_count = numberOfFrames;
+
+        uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
+        frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
+
+        publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);
     });
 }
 

@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   sensor_msgs
+  audio_utils
 )
 
 # This is required for WebRTC
@@ -74,6 +75,7 @@ add_message_files(FILES
   Peer.msg
   PeerData.msg
   PeerImage.msg
+  PeerAudio.msg
 )
 
 # Actually generate the language-specific message and service files
@@ -81,6 +83,7 @@ generate_messages(
   DEPENDENCIES 
   std_msgs
   sensor_msgs
+  audio_utils
 )
 
 
