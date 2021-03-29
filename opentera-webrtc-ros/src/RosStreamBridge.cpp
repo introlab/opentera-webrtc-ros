@@ -2,16 +2,20 @@
 #include <RosStreamBridge.h>
 #include <RosSignalingServerconfiguration.h>
 #include <cv_bridge/cv_bridge.h>
+#include <opentera_webrtc_ros/PeerImage.h>
+
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 
 using namespace opentera;
 using namespace ros;
 using namespace std;
+using namespace opentera_webrtc_ros;
 
 /**
  * @brief construct a topic streamer node
  */
-RosStreamBridge::RosStreamBridge()
-{
+RosStreamBridge::RosStreamBridge() {
     bool needsDenoising;
     bool isScreencast;
 
@@ -22,9 +26,9 @@ RosStreamBridge::RosStreamBridge()
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
     m_audioSource = make_shared<RosAudioSource>();
     
-    m_videoSink = make_shared<VideoSink>([&](const cv::Mat& bgrImg, uint64_t timestampUs){
-        onFrameReceived(bgrImg, timestampUs);
-    });
+    // m_videoSink = make_shared<VideoSink>([&](const cv::Mat& bgrImg, uint64_t timestampUs){
+    //     onFrameReceived(bgrImg, timestampUs);
+    // });
 
     // Signaling client connection
     /*
@@ -41,7 +45,8 @@ RosStreamBridge::RosStreamBridge()
             WebrtcConfiguration::create(),
             m_videoSource);
 
-    m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
+    //m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
+    m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
 
     //TODO configure callbacks for audio & video
 
@@ -67,6 +72,55 @@ RosStreamBridge::RosStreamBridge()
     m_signalingClient->setOnSignalingConnectionError([](auto msg){
         ROS_ERROR("Signaling connection error %s, shutting down...", msg.c_str());
         requestShutdown();
+    });
+
+    m_signalingClient->setOnRoomClientsChanged([](const vector<RoomClient>& roomClients){
+        ROS_INFO("Signaling on room clients changed: ");
+        for (const auto& client : roomClients) {
+            ROS_INFO_STREAM("\tid: " << client.id() << ", name: " << client.name() << ", isConnected: " << client.isConnected());
+        }
+    });
+
+    // Connection's event
+    m_signalingClient->setOnClientConnected([](const Client& client){
+        ROS_INFO_STREAM("Signaling on client connected: " << "id: " << client.id() << ", name: " << client.name());
+    });
+    m_signalingClient->setOnClientDisconnected([](const Client& client){
+        ROS_INFO_STREAM("Signaling on client disconnected: " << "id: " << client.id() << ", name: " << client.name());
+    });
+
+    // Stream event
+    m_signalingClient->setOnAddRemoteStream([](const Client& client) {
+        ROS_INFO_STREAM("Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
+    });
+    m_signalingClient->setOnRemoveRemoteStream([](const Client& client) {
+        ROS_INFO_STREAM("Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
+    });
+
+    // Video and audio frame
+    m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS){
+        // TMP
+        // cv::imshow(client.id(), bgrImg);
+        // cv::waitKey(1);
+
+        std_msgs::Header imgHeader;
+        imgHeader.stamp.fromNSec(1000 * timestampUS);
+
+        sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
+
+        publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
+    });
+    m_signalingClient->setOnAudioFrameReceived([](const Client& client,
+        const void* audioData,
+        int bitsPerSample,
+        int sampleRate,
+        size_t numberOfChannels,
+        size_t numberOfFrames)
+    {
+        ROS_INFO("Audio frame received:");
+        ROS_INFO_STREAM("\tFrom: " << "id: " << client.id() << ", name: " << client.name());
+        ROS_INFO_STREAM("\tbitsPerSample=" << bitsPerSample << ", sampleRate=" << sampleRate  << 
+                        ", numberOfChannels=" << numberOfChannels << ", numberOfFrames=" << numberOfFrames << endl);
     });
 }
 

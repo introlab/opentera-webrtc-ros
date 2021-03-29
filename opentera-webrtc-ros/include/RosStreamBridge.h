@@ -26,8 +26,12 @@ namespace opentera {
         ros::Subscriber m_imageSubsriber;
         ros::Publisher m_imagePublisher;
 
+
         static void loadStreamParams(bool &denoise, bool &screencast);
         void onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs);
+
+        template <typename T>
+        void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame);
 
     public:
         RosStreamBridge();
@@ -35,6 +39,17 @@ namespace opentera {
 
         void run();
     };
+
+    template <typename T>
+    void RosStreamBridge::publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame)
+    {
+        T peerFrameMsg;
+        peerFrameMsg.sender.id = client.id();
+        peerFrameMsg.sender.name = client.name();
+        peerFrameMsg.frame = frame;
+
+        publisher.publish(peerFrameMsg);
+    }
 
 }
 

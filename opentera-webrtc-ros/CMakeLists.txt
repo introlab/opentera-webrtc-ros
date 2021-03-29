@@ -73,10 +73,15 @@ set (opentera_webrtc_native_client_libs
 add_message_files(FILES
   Peer.msg
   PeerData.msg
+  PeerImage.msg
 )
 
 # Actually generate the language-specific message and service files
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(
+  DEPENDENCIES 
+  std_msgs
+  sensor_msgs
+)
 
 
 ###################################
