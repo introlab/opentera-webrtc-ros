@@ -12,7 +12,6 @@ git clone https://github.com/introlab/audio_utils.git --recurse-submodules
 ```
 See https://github.com/introlab/audio_utils for more informations about the dependency and the usage;
 
-
 # Clone the repository with the submodules in the catkin workspace src directory
 ```bash
 git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
