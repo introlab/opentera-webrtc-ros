@@ -20,9 +20,14 @@ using namespace opentera_webrtc_ros;
 RosStreamBridge::RosStreamBridge() {
     bool needsDenoising;
     bool isScreencast;
+    bool canSendStream;
+    bool canReceiveStream;
+
+    nodeName = ros::this_node::getName();
 
     // Load ROS parameters
     loadStreamParams(needsDenoising, isScreencast);
+    loadNodeParams(canSendStream, canReceiveStream);
 
     // WebRTC video stream interfaces
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
@@ -51,86 +56,95 @@ RosStreamBridge::RosStreamBridge() {
     m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
     m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
 
-    //TODO configure callbacks for audio & video
-
-
-
-    // Subscribe to image topic when signaling client connects
-    m_signalingClient->setOnSignalingConnectionOpened([&]{
-        ROS_INFO("Signaling connection opened, streaming topic...");
-        m_imageSubsriber = m_nh.subscribe(
-                "ros_image",
-                1,
-                &RosVideoSource::imageCallback,
-                m_videoSource.get());
-    });
+    
 
     // Shutdown ROS when signaling client disconnect
-    m_signalingClient->setOnSignalingConnectionClosed([]{
-        ROS_WARN("Signaling connection closed, shutting down...");
+    m_signalingClient->setOnSignalingConnectionClosed([&]{
+        ROS_WARN_STREAM(nodeName << " --> " << "Signaling connection closed, shutting down...");
         requestShutdown();
     });
 
     // Shutdown ROS on signaling client error
-    m_signalingClient->setOnSignalingConnectionError([](auto msg){
-        ROS_ERROR("Signaling connection error %s, shutting down...", msg.c_str());
+    m_signalingClient->setOnSignalingConnectionError([&](auto msg){
+        ROS_ERROR_STREAM(nodeName << " --> " << "Signaling connection error " << msg.c_str() << ", shutting down...");
         requestShutdown();
     });
 
-    m_signalingClient->setOnRoomClientsChanged([](const vector<RoomClient>& roomClients){
-        ROS_INFO("Signaling on room clients changed: ");
+    m_signalingClient->setOnRoomClientsChanged([&](const vector<RoomClient>& roomClients){
+        ROS_INFO_STREAM(nodeName << " --> " << "Signaling on room clients changed: ");
         for (const auto& client : roomClients) {
             ROS_INFO_STREAM("\tid: " << client.id() << ", name: " << client.name() << ", isConnected: " << client.isConnected());
         }
     });
 
     // Connection's event
-    m_signalingClient->setOnClientConnected([](const Client& client){
-        ROS_INFO_STREAM("Signaling on client connected: " << "id: " << client.id() << ", name: " << client.name());
+    m_signalingClient->setOnClientConnected([&](const Client& client){
+        ROS_INFO_STREAM(nodeName << " --> " 
+                        << "Signaling on client connected: " << "id: " << client.id() << ", name: " << client.name());
     });
-    m_signalingClient->setOnClientDisconnected([](const Client& client){
-        ROS_INFO_STREAM("Signaling on client disconnected: " << "id: " << client.id() << ", name: " << client.name());
-    });
-
-    // Stream event
-    m_signalingClient->setOnAddRemoteStream([](const Client& client) {
-        ROS_INFO_STREAM("Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
-    });
-    m_signalingClient->setOnRemoveRemoteStream([](const Client& client) {
-        ROS_INFO_STREAM("Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
+    m_signalingClient->setOnClientDisconnected([&](const Client& client){
+        ROS_INFO_STREAM(nodeName << " --> " 
+                        << "Signaling on client disconnected: " << "id: " << client.id() << ", name: " << client.name());
     });
 
-    // Video and audio frame
-    m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS){
-        // TMP
-        // cv::imshow(client.id(), bgrImg);
-        // cv::waitKey(1);
 
-        std_msgs::Header imgHeader;
-        imgHeader.stamp.fromNSec(1000 * timestampUS);
+    if (canSendStream) {
 
-        sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
+        // Subscribe to image topic when signaling client connects
+        m_signalingClient->setOnSignalingConnectionOpened([&]{
+            ROS_INFO_STREAM(nodeName << " --> " << "Signaling connection opened, streaming topic...");
+            m_imageSubsriber = m_nh.subscribe(
+                    "ros_image",
+                    1,
+                    &RosVideoSource::imageCallback,
+                    m_videoSource.get());
+        });
+    }
 
-        publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
-    });
-    m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
-        const void* audioData,
-        int bitsPerSample,
-        int sampleRate,
-        size_t numberOfChannels,
-        size_t numberOfFrames)
-    {
-        audio_utils::AudioFrame frame;
-        frame.format = "signed_16";
-        frame.channel_count = numberOfChannels;
-        frame.sampling_frequency = sampleRate;
-        frame.frame_sample_count = numberOfFrames;
+    if (canReceiveStream) {
 
-        uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
-        frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
+        // Stream event
+        m_signalingClient->setOnAddRemoteStream([&](const Client& client) {
+            ROS_INFO_STREAM(nodeName << " --> "
+                            << "Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
+        });
+        m_signalingClient->setOnRemoveRemoteStream([&](const Client& client) {
+            ROS_INFO_STREAM(nodeName << " --> "
+                            << "Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
+        });
 
-        publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);
-    });
+        // Video and audio frame
+        m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS){
+            // TMP
+            // cv::imshow(client.id(), bgrImg);
+            // cv::waitKey(1);
+
+            std_msgs::Header imgHeader;
+            imgHeader.stamp.fromNSec(1000 * timestampUS);
+
+            sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
+
+            publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
+        });
+        m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
+            const void* audioData,
+            int bitsPerSample,
+            int sampleRate,
+            size_t numberOfChannels,
+            size_t numberOfFrames)
+        {
+            audio_utils::AudioFrame frame;
+            frame.format = "signed_16";
+            frame.channel_count = numberOfChannels;
+            frame.sampling_frequency = sampleRate;
+            frame.frame_sample_count = numberOfFrames;
+
+            uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
+            frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
+
+            publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);
+        });
+    }    
 }
 
 /**
@@ -180,6 +194,13 @@ void RosStreamBridge::loadStreamParams(bool &denoise, bool &screencast)
 
     pnh.param("is_screen_cast", screencast, false);
     pnh.param("needs_denoising", denoise, false);
+}
+
+void RosStreamBridge::loadNodeParams(bool &canSendStream, bool &canReceiveStream) {
+    NodeHandle pnh("~");
+
+    pnh.param("can_send_stream", canSendStream, true);
+    pnh.param("can_receive_stream", canReceiveStream, true);
 }
 
 /**

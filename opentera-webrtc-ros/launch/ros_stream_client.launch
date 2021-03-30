@@ -11,6 +11,8 @@
       room_name: "chat"       # Room name to join
       room_password: "abc"    # Room password
     </rosparam>
+    <rosparam param="can_send_stream">true</rosparam>
+    <rosparam param="can_receive_stream">true</rosparam>
     <remap from="ros_image" to="camera1/image_raw"/>
   </node>
   
@@ -26,6 +28,8 @@
       room_name: "chat"       # Room name to join
       room_password: "abc"    # Room password
     </rosparam>
+    <rosparam param="can_send_stream">true</rosparam>
+    <rosparam param="can_receive_stream">false</rosparam>
     <remap from="ros_image" to="camera2/image_raw"/>
   </node>
   

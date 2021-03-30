@@ -17,6 +17,8 @@ namespace opentera {
      */
     class RosStreamBridge
     {
+        std::string nodeName;
+
         ros::NodeHandle m_nh;
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
@@ -30,6 +32,7 @@ namespace opentera {
 
 
         static void loadStreamParams(bool &denoise, bool &screencast);
+        static void loadNodeParams(bool &canSendStream, bool &canReceiveSTream);
         void onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs);
 
         template <typename T>
