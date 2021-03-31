@@ -1,0 +1,11 @@
+Header header
+opentera_webrtc_ros_msgs/DatabaseEvent[] database_events
+opentera_webrtc_ros_msgs/DeviceEvent[] device_events
+opentera_webrtc_ros_msgs/JoinSessionEvent[] join_session_events
+opentera_webrtc_ros_msgs/JoinSessionReplyEvent[] join_session_reply_events
+opentera_webrtc_ros_msgs/LeaveSessionEvent[] leave_session_events
+opentera_webrtc_ros_msgs/LogEvent[] log_events
+opentera_webrtc_ros_msgs/ParticipantEvent[] participant_events
+opentera_webrtc_ros_msgs/StopSessionEvent[] stop_session_events
+opentera_webrtc_ros_msgs/UserEvent[] user_events
+
