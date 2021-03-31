@@ -9,6 +9,16 @@ import json
 # ROS
 import rospy
 from std_msgs.msg import String
+from opentera_webrtc_ros_msgs.msg import OpenTeraEvent
+from opentera_webrtc_ros_msgs.msg import DatabaseEvent
+from opentera_webrtc_ros_msgs.msg import DeviceEvent
+from opentera_webrtc_ros_msgs.msg import JoinSessionEvent
+from opentera_webrtc_ros_msgs.msg import JoinSessionReplyEvent
+from opentera_webrtc_ros_msgs.msg import LeaveSessionEvent
+from opentera_webrtc_ros_msgs.msg import LogEvent
+from opentera_webrtc_ros_msgs.msg import ParticipantEvent
+from opentera_webrtc_ros_msgs.msg import StopSessionEvent
+from opentera_webrtc_ros_msgs.msg import UserEvent
 
 # OpenTera
 import opentera.messages.python as messages
@@ -24,7 +34,7 @@ class OpenTeraROSClient:
     def __init__(self, url: str, token: str):
         self.__base_url = url
         self.__token = token
-        self.__event_publisher = rospy.Publisher('events', String, queue_size=10)
+        self.__event_publisher = rospy.Publisher('events', OpenTeraEvent, queue_size=10)
 
     async def _fetch(self, client, url, params=None):
         if params is None:
@@ -95,71 +105,97 @@ class OpenTeraROSClient:
         try:
             if 'message' in msg_dict:
                 message = ParseDict(msg_dict['message'], messages.TeraEvent(), ignore_unknown_fields=True)
+
+                # All events in same message
+                opentera_events = OpenTeraEvent()
+
                 for any_msg in message.events:
                     # Test for DeviceEvent
                     device_event = messages.DeviceEvent()
                     if any_msg.Unpack(device_event):
-                        # TODO Handle device_event
-                        print('device_event:', device_event)
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(device_event, including_default_value_fields=True)))
+                        print('device_event')
+                        event = DeviceEvent()
+                        event.device_uuid = device_event.device_uuid
+                        event.type = device_event.type
+                        event.device_name = device_event.device_name
+                        event.device_status = device_event.device_status
+                        opentera_events.device_events.append(event)
 
                     # Test for JoinSessionEvent
                     join_session_event = messages.JoinSessionEvent()
                     if any_msg.Unpack(join_session_event):
-                        # TODO Handle join_session_event
-                        print('join_session_event:', join_session_event)
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(join_session_event, including_default_value_fields=True)))
+                        print('join_session_event')
+                        event = JoinSessionEvent()
+                        event.session_url = join_session_event.session_url
+                        event.session_creator_name = join_session_event.session_creator_name
+                        event.session_uuid = join_session_event.session_uuid
+                        event.session_participants = join_session_event.session_participants
+                        event.session_users = join_session_event.session_users
+                        event.session_devices = join_session_event.session_devices
+                        event.join_msg = join_session_event.join_msg
+                        event.session_parameters = join_session_event.session_parameters
+                        event.service_uuid = join_session_event.service_uuid
+                        opentera_events.join_session_events.append(event)
 
                     # Test for ParticipantEvent
                     participant_event = messages.ParticipantEvent()
                     if any_msg.Unpack(participant_event):
-                        print('participant_event:', participant_event)
-                        # TODO Handle participant_event
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(participant_event, including_default_value_fields=True)))
+                        print('participant_event')
+                        event = ParticipantEvent()
+                        event.participant_uuid = participant_event.participant_uuid
+                        event.type = participant_event.type
+                        event.participant_name = participant_event.participant_name
+                        event.participant_project_name = participant_event.participant_project_name
+                        event.participant_site_name = participant_event.participant_site_name
+                        opentera_events.participant_events.append(event)
 
                     # Test for StopSessionEvent
                     stop_session_event = messages.StopSessionEvent()
                     if any_msg.Unpack(stop_session_event):
-                        print('stop_session_event:', stop_session_event)
-                        # TODO Handle stop_session_event
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(stop_session_event, including_default_value_fields=True)))
+                        print('stop_session_event')
+                        event = StopSessionEvent()
+                        event.session_uuid = stop_session_event.session_uuid
+                        event.service_uuid = stop_session_event.service_uuid
+                        opentera_events.stop_session_events.append(event)
 
                     # Test for UserEvent
                     user_event = messages.UserEvent()
                     if any_msg.Unpack(user_event):
-                        # TODO Handle user_event
-                        print('user_event:', user_event)
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(user_event, including_default_value_fields=True)))
+                        print('user_event')
+                        event = UserEvent()
+                        event.user_uuid = user_event.user_uuid
+                        event.type = user_event.type
+                        event.user_fullname = user_event.user_fullname
+                        opentera_events.user_events.append(event)
 
                     # Test for LeaveSessionEvent
                     leave_session_event = messages.LeaveSessionEvent()
                     if any_msg.Unpack(leave_session_event):
-                        # TODO Handle leave_session_event
-                        print('leave_session_event:', leave_session_event)
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(leave_session_event, including_default_value_fields=True)))
+                        print('leave_session_event')
+                        event = LeaveSessionEvent()
+                        event.session_uuid = leave_session_event.session_uuid
+                        event.service_uuid = leave_session_event.service_uuid
+                        event.leaving_participants = leave_session_event.leaving_participants
+                        event.leaving_users = leave_session_event.leaving_users
+                        event.leaving_devices = leave_session_event.leaving_devices
+                        opentera_events.leave_session_events.append(event)
 
                     # Test for JoinSessionReply
                     join_session_reply = messages.JoinSessionReplyEvent()
                     if any_msg.Unpack(join_session_reply):
-                        print('join_session_reply:', join_session_reply)
-                        # TODO Handle join_session_reply
-                        # TODO convert this to ROS message
-                        self.__event_publisher.publish(
-                            String(MessageToJson(join_session_event, including_default_value_fields=True)))
+                        print('join_session_reply')
+                        event = JoinSessionReplyEvent()
+                        event.session_uuid = join_session_reply.session_uuid
+                        event.user_uuid = join_session_reply.user_uuid
+                        event.participant_uuid = join_session_reply.participant_uuid
+                        event.device_uuid = join_session_reply.device_uuid
+                        event.join_reply = join_session_reply.join_reply
+                        event.reply_msg = join_session_reply.reply_msg
+                        opentera_events.join_session_reply_events.append(event)
 
-                    # TODO Look for useful events
+                    # TODO Handle other events if required.
+
+                self.__event_publisher.publish(opentera_events)
 
         except ParseError as e:
             print(e)
