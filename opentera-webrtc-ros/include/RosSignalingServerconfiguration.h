@@ -11,7 +11,7 @@ namespace opentera {
     class RosSignalingServerConfiguration: public SignalingServerConfiguration
     {
     public:
-        static SignalingServerConfiguration fromRosParam(const std::string& defaultClientName);
+        static SignalingServerConfiguration fromRosParam();
     };
 }
 

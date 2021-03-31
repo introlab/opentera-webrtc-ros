@@ -110,11 +110,13 @@ add_executable(${PROJECT_NAME}_topic_streamer
   src/RosAudioSource.cpp
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
+  src/RosNodeParameters.cpp
 )
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
+  src/RosNodeParameters.cpp
 )
 
 ## Rename C++ executable without prefix

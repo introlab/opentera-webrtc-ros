@@ -1,11 +1,12 @@
 <launch>
   <node name="data_channel_bridge" pkg="opentera_webrtc_ros" type="data_channel_bridge">
-    <rosparam>
-    ~signaling:
-      server_url: "http://localhost:8080" # Signaling server URL
-      client_name: "data_bridge" # Peer name as which to join the room
-      room_name: "chat"       # Room name to join
-      room_password: "abc"    # Room password
+    <rosparam param="signaling">
+    {
+      server_url: "http://localhost:8080",   # Signaling server URL
+      client_name: "data_bridge",                # Peer name as which to join the room
+      room_name: "chat",                      # Room name to join
+      room_password: "abc"                    # Room password
+    }
     </rosparam>
   </node>
 </launch>

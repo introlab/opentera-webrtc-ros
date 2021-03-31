@@ -5,9 +5,7 @@
 #include <opentera_webrtc_ros/PeerImage.h>
 #include <opentera_webrtc_ros/PeerAudio.h>
 #include <audio_utils/AudioFrame.h>
-
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
+#include <RosNodeParameters.h>
 
 using namespace opentera;
 using namespace ros;
@@ -26,37 +24,21 @@ RosStreamBridge::RosStreamBridge() {
     nodeName = ros::this_node::getName();
 
     // Load ROS parameters
-    loadStreamParams(needsDenoising, isScreencast);
-    loadNodeParams(canSendStream, canReceiveStream);
+    RosNodeParameters::loadStreamParams(canSendStream, canReceiveStream, needsDenoising, isScreencast);
 
     // WebRTC video stream interfaces
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
     m_audioSource = make_shared<RosAudioSource>();
     
-    // m_videoSink = make_shared<VideoSink>([&](const cv::Mat& bgrImg, uint64_t timestampUs){
-    //     onFrameReceived(bgrImg, timestampUs);
-    // });
-
-    // Signaling client connection
-    /*
-            StreamClient(SignalingServerConfiguration signalingServerConfiguration,
-                WebrtcConfiguration webrtcConfiguration,
-                std::shared_ptr<VideoSource> videoSource,
-                std::shared_ptr<AudioSource> audioSource);
-    
-     std::shared_ptr<opentera::RosVideoSource>&, std::shared_ptr<opentera::VideoSink>&)’
-    
-    */
     m_signalingClient = make_unique<StreamClient>(
-            RosSignalingServerConfiguration::fromRosParam("streamer"),
+            RosSignalingServerConfiguration::fromRosParam(),
             WebrtcConfiguration::create(),
             m_videoSource);
 
-    //m_imagePublisher = m_nh.advertise<sensor_msgs::Image>("webrtc_image", 1, false);
     m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
     m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
 
-    
+
 
     // Shutdown ROS when signaling client disconnect
     m_signalingClient->setOnSignalingConnectionClosed([&]{
@@ -114,17 +96,8 @@ RosStreamBridge::RosStreamBridge() {
         });
 
         // Video and audio frame
-        m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS){
-            // TMP
-            // cv::imshow(client.id(), bgrImg);
-            // cv::waitKey(1);
-
-            std_msgs::Header imgHeader;
-            imgHeader.stamp.fromNSec(1000 * timestampUS);
-
-            sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
-
-            publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
+        m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS) {
+            onVideoFrameReceived(client, bgrImg, timestampUS);
         });
         m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
             const void* audioData,
@@ -133,16 +106,7 @@ RosStreamBridge::RosStreamBridge() {
             size_t numberOfChannels,
             size_t numberOfFrames)
         {
-            audio_utils::AudioFrame frame;
-            frame.format = "signed_16";
-            frame.channel_count = numberOfChannels;
-            frame.sampling_frequency = sampleRate;
-            frame.frame_sample_count = numberOfFrames;
-
-            uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
-            frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
-
-            publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);
+            onAudioFrameReceived(client, audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
         });
     }    
 }
@@ -150,16 +114,47 @@ RosStreamBridge::RosStreamBridge() {
 /**
  * @brief publish an image using the node image publisher
  *
+ * @param client Client who sent the frame
  * @param bgrImg BGR8 encoded image
  * @param timestampUs image timestamp in microseconds
  */
-void RosStreamBridge::onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs)
+void RosStreamBridge::onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs)
 {
     std_msgs::Header imgHeader;
     imgHeader.stamp.fromNSec(1000 * timestampUs);
 
-    sensor_msgs::ImagePtr imgMsg = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
-    m_imagePublisher.publish(imgMsg);
+    sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
+
+    publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
+}
+
+/**
+ * @brief Format a PeerAudio message for publishing
+ * 
+ * @param client Client who sent the frame
+ * @param audioData
+ * @param bitsPerSample format of the sample
+ * @param sampleRate Sampling frequency
+ * @param numberOfChannels
+ * @param numberOfFrames
+ */
+void RosStreamBridge::onAudioFrameReceived(const Client& client,
+    const void* audioData,
+    int bitsPerSample,
+    int sampleRate,
+    size_t numberOfChannels,
+    size_t numberOfFrames) 
+{
+    audio_utils::AudioFrame frame;
+    frame.format = "signed_" + to_string(bitsPerSample);
+    frame.channel_count = numberOfChannels;
+    frame.sampling_frequency = sampleRate;
+    frame.frame_sample_count = numberOfFrames;
+
+    uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
+    frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
+
+    publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);       
 }
 
 /**
@@ -180,27 +175,6 @@ void RosStreamBridge::run()
     ROS_INFO("Connecting to signaling server at.");
     m_signalingClient->connect();
     spin();
-}
-
-/**
- * @brief Load video stream parameters from ROS parameter server
- *
- * @param denoise whether the images require denoising
- * @param screencast whether the images are a screen capture
- */
-void RosStreamBridge::loadStreamParams(bool &denoise, bool &screencast)
-{
-    NodeHandle pnh("~stream");
-
-    pnh.param("is_screen_cast", screencast, false);
-    pnh.param("needs_denoising", denoise, false);
-}
-
-void RosStreamBridge::loadNodeParams(bool &canSendStream, bool &canReceiveStream) {
-    NodeHandle pnh("~");
-
-    pnh.param("can_send_stream", canSendStream, true);
-    pnh.param("can_receive_stream", canReceiveStream, true);
 }
 
 /**

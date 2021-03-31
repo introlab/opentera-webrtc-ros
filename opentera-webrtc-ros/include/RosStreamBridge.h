@@ -30,10 +30,13 @@ namespace opentera {
 
         ros::Publisher m_audioPublisher;
 
-
-        static void loadStreamParams(bool &denoise, bool &screencast);
-        static void loadNodeParams(bool &canSendStream, bool &canReceiveSTream);
-        void onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs);
+        void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
+        void onAudioFrameReceived(const Client& client,
+            const void* audioData,
+            int bitsPerSample,
+            int sampleRate,
+            size_t numberOfChannels,
+            size_t numberOfFrames);
 
         template <typename T>
         void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame);
@@ -45,6 +48,13 @@ namespace opentera {
         void run();
     };
 
+    /**
+     * @brief publish a Peer message using the given node publisher
+     * 
+     * @param publisher ROS node publisher
+     * @param client Client who sent the message
+     * @param frame The message to peer with a client
+     */
     template <typename T>
     void RosStreamBridge::publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame)
     {

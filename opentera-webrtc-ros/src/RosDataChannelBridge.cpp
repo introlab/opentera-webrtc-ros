@@ -18,7 +18,7 @@ RosDataChannelBridge::RosDataChannelBridge()
 
     // Create signaling client
     m_signalingClient = make_unique<DataChannelClient>(
-            RosSignalingServerConfiguration::fromRosParam("data_bridge"),
+            RosSignalingServerConfiguration::fromRosParam(),
             WebrtcConfiguration::create(),
             DataChannelConfiguration::create());
 

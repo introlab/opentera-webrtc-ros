@@ -1,35 +1,41 @@
 <launch>
-  <node name="topic_streamer1" pkg="opentera_webrtc_ros" type="topic_streamer">
-    <rosparam>
-    ~stream:
-        is_screen_cast: false     # Is the image source a screen capture?
-        needs_denoising: false    # Does the image source needs denoising?
-
-    ~signaling:
-      server_url: "http://localhost:8080" # Signaling server URL
-      client_name: "streamer" # Peer name as which to join the room
-      room_name: "chat"       # Room name to join
-      room_password: "abc"    # Room password
+  <node name="topic_streamer1" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen">
+    <rosparam param="stream">
+    {
+      can_send_stream: true,        # Is the node can send stream to the signaling server
+      can_receive_stream: true,     # Is the node can receive stream to the signaling server
+      is_screen_cast: false,        # Is the image source a screen capture?
+      needs_denoising: false        # Does the image source needs denoising?
+    }
     </rosparam>
-    <rosparam param="can_send_stream">true</rosparam>
-    <rosparam param="can_receive_stream">true</rosparam>
+    <rosparam param="signaling">
+    {
+      server_url: "http://localhost:40075",   # Signaling server URL
+      client_name: "Camera 1",                # Peer name as which to join the room
+      room_name: "chat",                      # Room name to join
+      room_password: "abc"                    # Room password
+    }
+    </rosparam>
     <remap from="ros_image" to="camera1/image_raw"/>
   </node>
   
-  <node name="topic_streamer2" pkg="opentera_webrtc_ros" type="topic_streamer">
-    <rosparam>
-    ~stream:
-        is_screen_cast: false     # Is the image source a screen capture?
-        needs_denoising: false    # Does the image source needs denoising?
-
-    ~signaling:
-      server_url: "http://localhost:8080" # Signaling server URL
-      client_name: "streamer" # Peer name as which to join the room
-      room_name: "chat"       # Room name to join
-      room_password: "abc"    # Room password
+  <node name="topic_streamer2" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen">
+    <rosparam param="stream">
+    {
+      can_send_stream: true,        # Is the node can send stream to the signaling server
+      can_receive_stream: false,    # Is the node can receive stream to the signaling server
+      is_screen_cast: false,        # Is the image source a screen capture?
+      needs_denoising: false        # Does the image source needs denoising?
+    }
     </rosparam>
-    <rosparam param="can_send_stream">true</rosparam>
-    <rosparam param="can_receive_stream">false</rosparam>
+    <rosparam param="signaling">
+    {
+      server_url: "http://localhost:40075",   # Signaling server URL
+      client_name: "Camera 2",                # Peer name as which to join the room
+      room_name: "chat",                      # Room name to join
+      room_password: "abc"                    # Room password
+    }
+    </rosparam>
     <remap from="ros_image" to="camera2/image_raw"/>
   </node>
   
