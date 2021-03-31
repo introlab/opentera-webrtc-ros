@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>opentera_client_ros</name>
+
   <version>0.0.0</version>
   <description>The opentera-client-ros package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="dominic@todo.todo">dominic</maintainer>
+  <maintainer email="dominic.letourneau@usherbrooke.ca">Dominic Létourneau</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -58,7 +59,6 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>opentera_webrtc_ros_msgs</exec_depend>
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
