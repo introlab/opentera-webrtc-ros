@@ -2,15 +2,15 @@
 #include <RosStreamBridge.h>
 #include <RosSignalingServerconfiguration.h>
 #include <cv_bridge/cv_bridge.h>
-#include <opentera_webrtc_ros/PeerImage.h>
-#include <opentera_webrtc_ros/PeerAudio.h>
+#include <opentera_webrtc_ros_msgs/PeerImage.h>
+#include <opentera_webrtc_ros_msgs/PeerAudio.h>
 #include <audio_utils/AudioFrame.h>
 #include <RosNodeParameters.h>
 
 using namespace opentera;
 using namespace ros;
 using namespace std;
-using namespace opentera_webrtc_ros;
+using namespace opentera_webrtc_ros_msgs;
 
 /**
  * @brief construct a topic streamer node
