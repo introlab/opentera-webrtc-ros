@@ -10,8 +10,12 @@ namespace opentera {
      */
     class RosSignalingServerConfiguration: public SignalingServerConfiguration
     {
+
+        static std::string getQueryFrom(const std::string& query, const std::string& queries);
+
     public:
         static SignalingServerConfiguration fromRosParam();
+        static SignalingServerConfiguration fromUrl(const std::string& url);
     };
 }
 

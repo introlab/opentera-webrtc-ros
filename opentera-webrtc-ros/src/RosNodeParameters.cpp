@@ -5,6 +5,11 @@ using namespace opentera;
 using namespace ros;
 using namespace std;
 
+bool RosNodeParameters::isStandAlone() {
+    NodeHandle pnh("~");
+    return pnh.param<bool>("is_stand_alone", true);
+}
+
 /**
  * @brief Load stream parameters from ROS parameter server
  *
@@ -24,6 +29,22 @@ void RosNodeParameters::loadStreamParams(bool &canSendStream, bool &canReceiveSt
     canReceiveStream = isInParams("can_receive_stream", dict) ? dict["can_receive_stream"] : true;
     denoise = isInParams("needs_denoising", dict) ? dict["needs_denoising"] : false;
     screencast = isInParams("is_screen_cast", dict) ? dict["is_screen_cast"] : false;
+}
+
+/**
+ * @brief Load signaling parameters from ROS parameter server
+ *
+ * @param clientName Client's name
+ * @param room Room's name
+ */
+void RosNodeParameters::loadSignalingParams(std::string &clientName, std::string &room) {
+    NodeHandle pnh("~");
+
+    std::map<std::string, std::string> dict;
+    pnh.getParam("signaling", dict);
+
+    clientName = isInParams("client_name", dict) ? dict["client_name"] : "streamer";
+    room = isInParams("room_name", dict) ? dict["room_name"] : "chat";
 }
 
 /**

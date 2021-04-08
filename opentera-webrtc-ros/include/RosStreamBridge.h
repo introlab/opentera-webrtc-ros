@@ -7,6 +7,7 @@
 #include <RosAudioSource.h>
 #include <OpenteraWebrtcNativeClient/StreamClient.h>
 #include <OpenteraWebrtcNativeClient/Sinks/VideoSink.h>
+#include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
 
 namespace opentera {
 
@@ -30,6 +31,16 @@ namespace opentera {
 
         ros::Publisher m_audioPublisher;
 
+        ros::Subscriber m_eventSubscriber;
+
+        void init(bool &canSendStream,
+            bool &canReceiveStream,
+            bool &denoise,
+            bool &screencast,
+            const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+        void initNode();
+        void initNode(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
             const void* audioData,
@@ -37,6 +48,7 @@ namespace opentera {
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
+        void onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event);
 
         template <typename T>
         void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame);

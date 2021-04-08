@@ -13,11 +13,13 @@ namespace opentera {
         template <typename T>
         static bool isInParams(const std::string &key, const std::map<std::string, T> &dict);
 
+        static bool isStandAlone();
         static void loadStreamParams(bool &canSendStream,
             bool &canReceiveStream,
             bool &denoise,
             bool &screencast);
 
+        static void loadSignalingParams(std::string &clientName,std::string &room);
         static void loadSignalingParams(std::string &serverUrl,
             std::string &clientName,
             std::string &room,

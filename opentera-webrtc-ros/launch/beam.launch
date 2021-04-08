@@ -1,0 +1,42 @@
+<launch>
+
+    <node pkg="opentera_client_ros" type="opentera_client_ros.py" name="opentera_client_ros"></node>
+
+    <!-- Camera 1 -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer1"/>
+        <arg name="is_stand_alone" value="false"/>
+
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+
+        <arg name="server_url" value="http://localhost:40075"/>
+        <arg name="client_name" value="Camera 1"/>
+        <arg name="room_name" value="chat"/>
+        <arg name="room_password" value="abc"/>
+
+        <arg name="camera_name" value="camera1"/>
+        <arg name="camera_id" value="2"/>
+    </include>
+
+    <!-- Camera 2
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer2"/>
+
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="false"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+
+        <arg name="server_url" value="http://localhost:40075"/>
+        <arg name="client_name" value="Camera 2"/>
+        <arg name="room_name" value="chat"/>
+        <arg name="room_password" value="abc"/>
+
+        <arg name="camera_name" value="camera2"/>
+        <arg name="camera_id" value="3"/>
+    </include> -->
+
+</launch>
