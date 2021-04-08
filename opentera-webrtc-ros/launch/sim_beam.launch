@@ -1,0 +1,59 @@
+<?xml version='1.0'?>
+<launch>
+    <arg name="robot_name" value="beam"/>
+    <arg name="rviz" default="true"/>
+    <arg name="rtabmapviz" default="true"/>
+    <arg name="localization" default="false"/>
+    <arg name="database_path" default="~/.ros/rtabmap.db"/>
+    <arg name="camera_name" default="realsense"/>
+    <arg name="camera_depth_topic"  default="depth"/> <!-- If using a real rgbd use: aligned_depth_to_color-->
+    <arg name="simulation" default="true"/>
+    
+
+    <!--We resume the logic in empty_world.launch, changing the name of the world to be launched-->
+    <group if="$(arg simulation)">
+        <include file="$(find gazebo_ros)/launch/empty_world.launch">
+            <arg name="world_name" value="$(find sim_gazebo)/worlds/MTLhouse.world"/>
+            <arg name="debug" value="false"/>
+            <arg name="gui" value="true"/>
+            <arg name="paused" value="false"/>
+            <arg name="use_sim_time" value="true"/>
+            <arg name="headless" value="false"/>
+        </include> 
+    </group>
+    
+    <group unless="$(arg simulation)">
+        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+            <arg name="align_depth" value="true"/>
+            <arg name="camera" value="realsense"/>
+        </include>
+    </group>
+    
+    <!-- Launch for the beam robot -->
+    <group if="$(eval robot_name == 'beam')">
+        <include file="$(find sim_gazebo)/launch/beam.launch">
+            <arg name="robot_name" value="$(arg robot_name)"/>
+            <arg name="rviz" value="$(arg rviz)"/>
+            <arg name="rtabmapviz" value="$(arg rtabmapviz)"/>
+            <arg name="localization" value="$(arg localization)"/>
+            <arg name="database_path" value="$(arg database_path)"/>
+            <arg name="camera_name" default="$(arg camera_name)"/>
+            <arg name="camera_depth_topic"  default="$(arg camera_depth_topic)"/>
+            <arg name="simulation" default="$(arg simulation)"/>
+        </include>
+    </group>
+
+    <!--include file="$(find odas_ros)/launch/odas.launch"/-->
+    
+    <!--include file="$(find sound_tracking)/launch/sound_tracking.launch">
+        <arg name="input_odom" value="odom"/> 
+        <arg name="baseFrequence" value="1000"/>
+    </include-->
+
+    <!--Launching move_base to move robot around-->
+    <include file="$(find sim_gazebo)/launch/nav_base.launch"/>
+
+    <!-- Launching streaming client -->
+    <include file="$(find opentera_webrtc_ros)/launch/beam.launch"/>
+
+</launch>

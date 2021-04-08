@@ -14,8 +14,7 @@
   <arg name="room_name" default="chat"/>
   <arg name="room_password" default="abc"/>
 
-  <arg name="camera_name" default="camera0"/>
-  <arg name="camera_id" default="0"/>
+  <arg name="camera_topic" default="ros_image"/>
 
   <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen">
     <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
@@ -35,11 +34,7 @@
       room_password: $(arg room_password)                    # Room password
     }
     </rosparam>
-    <remap from="ros_image" to="$(arg camera_name)/image_raw"/>
-  </node>
-
-  <node name="$(arg camera_name)" pkg="cv_camera" type="cv_camera_node">
-    <param name="device_id" value="$(arg camera_id)"/>
+    <remap from="ros_image" to="$(arg camera_topic)"/>
   </node>
   
 </launch>

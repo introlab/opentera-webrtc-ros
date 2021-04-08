@@ -17,13 +17,13 @@
         <arg name="room_name" value="chat"/>
         <arg name="room_password" value="abc"/>
 
-        <arg name="camera_name" value="camera1"/>
-        <arg name="camera_id" value="2"/>
+        <arg name="camera_topic" value="/beam/camera1/image_raw"/>
     </include>
 
-    <!-- Camera 2
+    <!-- Camera 2 -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer2"/>
+        <arg name="is_stand_alone" value="false"/>
 
         <arg name="can_send_stream" value="true"/>
         <arg name="can_receive_stream" value="false"/>
@@ -35,8 +35,7 @@
         <arg name="room_name" value="chat"/>
         <arg name="room_password" value="abc"/>
 
-        <arg name="camera_name" value="camera2"/>
-        <arg name="camera_id" value="3"/>
-    </include> -->
+        <arg name="camera_topic" value="/realsense/color/image_raw"/>
+    </include>
 
 </launch>
