@@ -21,17 +21,17 @@
     <rosparam param="stream" subst_value="true">
     {
       can_send_stream: $(arg can_send_stream),        # Is the node can send stream to the signaling server
-      can_receive_stream: $(arg can_receive_stream),     # Is the node can receive stream to the signaling server
-      is_screen_cast: $(arg is_screen_cast),        # Is the image source a screen capture?
-      needs_denoising: $(arg needs_denoising)        # Does the image source needs denoising?
+      can_receive_stream: $(arg can_receive_stream),  # Is the node can receive stream to the signaling server
+      is_screen_cast: $(arg is_screen_cast),          # Is the image source a screen capture?
+      needs_denoising: $(arg needs_denoising)         # Does the image source needs denoising?
     }
     </rosparam>
     <rosparam param="signaling" subst_value="true">
     {
-      server_url: $(arg server_url),   # Signaling server URL
-      client_name: $(arg client_name),                # Peer name as which to join the room
-      room_name: $(arg room_name),                      # Room name to join
-      room_password: $(arg room_password)                    # Room password
+      server_url: $(arg server_url),        # Signaling server URL
+      client_name: $(arg client_name),      # Peer name as which to join the room
+      room_name: $(arg room_name),          # Room name to join
+      room_password: $(arg room_password)   # Room password
     }
     </rosparam>
     <remap from="ros_image" to="$(arg camera_topic)"/>

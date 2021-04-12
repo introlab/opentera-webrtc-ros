@@ -6,8 +6,9 @@
 #include <RosVideoSource.h>
 #include <RosAudioSource.h>
 #include <OpenteraWebrtcNativeClient/StreamClient.h>
-#include <OpenteraWebrtcNativeClient/Sinks/VideoSink.h>
 #include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
+
+#include <RosWebRTCBridge.h>
 
 namespace opentera {
 
@@ -16,30 +17,29 @@ namespace opentera {
      *
      * View README.md for more details
      */
-    class RosStreamBridge
+    class RosStreamBridge: public RosWebRTCBridge<StreamClient>
     {
         std::string nodeName;
 
-        ros::NodeHandle m_nh;
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
-        std::shared_ptr<VideoSink> m_videoSink;
-        std::unique_ptr<StreamClient> m_signalingClient;
 
         ros::Subscriber m_imageSubsriber;
         ros::Publisher m_imagePublisher;
 
         ros::Publisher m_audioPublisher;
 
-        ros::Subscriber m_eventSubscriber;
-
         void init(bool &canSendStream,
             bool &canReceiveStream,
             bool &denoise,
             bool &screencast,
             const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+
         void initNode();
         void initNode(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+
+        virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events);
+        virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events);
 
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
@@ -48,36 +48,11 @@ namespace opentera {
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
-        void onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event);
-
-        template <typename T>
-        void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame);
 
     public:
         RosStreamBridge();
         virtual ~RosStreamBridge();
-
-        void run();
     };
-
-    /**
-     * @brief publish a Peer message using the given node publisher
-     * 
-     * @param publisher ROS node publisher
-     * @param client Client who sent the message
-     * @param frame The message to peer with a client
-     */
-    template <typename T>
-    void RosStreamBridge::publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(T::frame)& frame)
-    {
-        T peerFrameMsg;
-        peerFrameMsg.sender.id = client.id();
-        peerFrameMsg.sender.name = client.name();
-        peerFrameMsg.frame = frame;
-
-        publisher.publish(peerFrameMsg);
-    }
-
 }
 
 #endif

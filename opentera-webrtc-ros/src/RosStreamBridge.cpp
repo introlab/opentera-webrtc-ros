@@ -7,6 +7,8 @@
 #include <audio_utils/AudioFrame.h>
 #include <RosNodeParameters.h>
 
+#include <RosWebRTCBridge.h>
+
 using namespace opentera;
 using namespace ros;
 using namespace std;
@@ -15,11 +17,11 @@ using namespace opentera_webrtc_ros_msgs;
 /**
  * @brief construct a topic streamer node
  */
-RosStreamBridge::RosStreamBridge() {
+RosStreamBridge::RosStreamBridge(): RosWebRTCBridge() 
+{
     if (RosNodeParameters::isStandAlone()) {
         initNode();
-    } else {
-        m_eventSubscriber = m_nh.subscribe("events", 1, &RosStreamBridge::onEvent, this);
+        connect();
     }
 }
 
@@ -35,7 +37,6 @@ void RosStreamBridge::initNode() {
 
     // Initialize the node
     init(canSendStream, canReceiveStream, needsDenoising, isScreencast, signalingServerConfiguration);
-    m_signalingClient->connect();
 }
 
 /**
@@ -51,7 +52,6 @@ void RosStreamBridge::initNode(const opentera::SignalingServerConfiguration &sig
 
     // Initialize the node
     init(canSendStream, canReceiveStream, needsDenoising, isScreencast, signalingServerConfiguration);
-    m_signalingClient->connect();
 }
 
 void RosStreamBridge::init(bool &canSendStream,
@@ -68,15 +68,11 @@ void RosStreamBridge::init(bool &canSendStream,
     m_audioSource = make_shared<RosAudioSource>();
     
     m_signalingClient = make_unique<StreamClient>(
-            //RosSignalingServerConfiguration::fromRosParam(),
             signalingServerConfiguration,
             WebrtcConfiguration::create(),
             m_videoSource);
 
     m_signalingClient->setTlsVerificationEnabled(false);
-
-    m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
-    m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
 
     // Shutdown ROS when signaling client disconnect
     m_signalingClient->setOnSignalingConnectionClosed([&]{
@@ -123,6 +119,9 @@ void RosStreamBridge::init(bool &canSendStream,
 
     if (canReceiveStream) {
 
+        m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
+        m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
+
         // Stream event
         m_signalingClient->setOnAddRemoteStream([&](const Client& client) {
             ROS_INFO_STREAM(nodeName << " --> "
@@ -147,6 +146,15 @@ void RosStreamBridge::init(bool &canSendStream,
             onAudioFrameReceived(client, audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
         });
     } 
+}
+
+void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) {
+    initNode(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
+    connect();
+}
+
+void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) {
+    disconnect();
 }
 
 /**
@@ -195,71 +203,9 @@ void RosStreamBridge::onAudioFrameReceived(const Client& client,
     publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);       
 }
 
-/**
- * @brief Callback called when receiving a message from the /events topic.
- * 
- * @param event The message received.
- */ 
-void RosStreamBridge::onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event) {
-    const OpenTeraEvent msg = *(event.getMessage());
-
-    if (msg.database_events.size()) {
-        ROS_INFO("DATABASE_EVENTS");
-    }
-
-    if (msg.device_events.size()) {
-        ROS_INFO("DEVICE_EVENTS");
-    }
-
-    if (msg.join_session_events.size()) {
-        ROS_INFO("JOIN_SESSION_EVENTS");
-
-        initNode(RosSignalingServerConfiguration::fromUrl(msg.join_session_events[0].session_url));
-    }
-
-    if (msg.join_session_reply_events.size()) {
-        ROS_INFO("JOIN_SESSION_REPLY_EVENTS");
-    }
-
-    if (msg.leave_session_events.size()) {
-        ROS_INFO("LEAVE_SESSION_EVENTS");
-    }
-
-    if (msg.log_events.size()) {
-        ROS_INFO("LOG_EVENTS");
-    }
-
-    if (msg.participant_events.size()) {
-        ROS_INFO("PARTICIPANT_EVENTS");
-    }
-
-    if (msg.stop_session_events.size()) {
-        ROS_INFO("STOP_SESSION_EVENTS");
-    }
-
-    if (msg.user_events.size()) {
-        ROS_INFO("USER_EVENTS");
-    }
-}
-
-/**
- * @brief Close signaling client connection when this object is destroyed
- */
 RosStreamBridge::~RosStreamBridge()
 {
-    ROS_INFO("ROS is shutting down, closing signaling client connection.");
-    m_signalingClient->closeSync();
-    ROS_INFO("Signaling client disconnected, goodbye.");
-}
 
-/**
- * @brief Connect to server and process images forever
- */
-void RosStreamBridge::run()
-{
-    ROS_INFO("Connecting to signaling server at.");
-    //m_signalingClient->connect();
-    spin();
 }
 
 /**
