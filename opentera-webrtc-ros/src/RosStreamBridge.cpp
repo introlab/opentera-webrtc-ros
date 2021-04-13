@@ -20,51 +20,20 @@ using namespace opentera_webrtc_ros_msgs;
 RosStreamBridge::RosStreamBridge(): RosWebRTCBridge() 
 {
     if (RosNodeParameters::isStandAlone()) {
-        initNode();
+        init(RosSignalingServerConfiguration::fromRosParam());
         connect();
     }
 }
 
-/**
- * @brief Initiate and connect a topic streamer node
- */ 
-void RosStreamBridge::initNode() {
-    bool needsDenoising, isScreencast, canSendStream, canReceiveStream;
-
-    // Load ROS parameters
-    RosNodeParameters::loadStreamParams(canSendStream, canReceiveStream, needsDenoising, isScreencast);
-    SignalingServerConfiguration signalingServerConfiguration = RosSignalingServerConfiguration::fromRosParam();
-
-    // Initialize the node
-    init(canSendStream, canReceiveStream, needsDenoising, isScreencast, signalingServerConfiguration);
-}
-
-/**
- * @brief Initiate and connect a topic streamer node
- * 
- * @param signalingServerConfiguration A signaling server configuration
- */ 
-void RosStreamBridge::initNode(const opentera::SignalingServerConfiguration &signalingServerConfiguration) {
-    bool needsDenoising, isScreencast, canSendStream, canReceiveStream;
-
-    // Load ROS parameters
-    RosNodeParameters::loadStreamParams(canSendStream, canReceiveStream, needsDenoising, isScreencast);
-
-    // Initialize the node
-    init(canSendStream, canReceiveStream, needsDenoising, isScreencast, signalingServerConfiguration);
-}
-
-void RosStreamBridge::init(bool &canSendStream,
-    bool &canReceiveStream,
-    bool &denoise,
-    bool &screencast,
-    const SignalingServerConfiguration &signalingServerConfiguration) 
+void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signalingServerConfiguration) 
 {
+    bool needsDenoising, isScreencast;
 
-    nodeName = ros::this_node::getName();
+    // Load ROS parameters
+    RosNodeParameters::loadStreamParams(m_canSendStream, m_canReceiveStream, needsDenoising, isScreencast);
 
     // WebRTC video stream interfaces
-    m_videoSource = make_shared<RosVideoSource>(denoise, screencast);
+    m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
     m_audioSource = make_shared<RosAudioSource>();
     
     m_signalingClient = make_unique<StreamClient>(
@@ -74,50 +43,20 @@ void RosStreamBridge::init(bool &canSendStream,
 
     m_signalingClient->setTlsVerificationEnabled(false);
 
-    // Shutdown ROS when signaling client disconnect
-    m_signalingClient->setOnSignalingConnectionClosed([&]{
-        ROS_WARN_STREAM(nodeName << " --> " << "Signaling connection closed, shutting down...");
-        requestShutdown();
-    });
+    // if (canSendStream) {
 
-    // Shutdown ROS on signaling client error
-    m_signalingClient->setOnSignalingConnectionError([&](auto msg){
-        ROS_ERROR_STREAM(nodeName << " --> " << "Signaling connection error " << msg.c_str() << ", shutting down...");
-        requestShutdown();
-    });
+    //     // Subscribe to image topic when signaling client connects
+    //     // m_signalingClient->setOnSignalingConnectionOpened([&]{
+    //     //     ROS_INFO_STREAM(nodeName << " --> " << "Signaling connection opened, streaming topic...");
+    //     //     m_imageSubsriber = m_nh.subscribe(
+    //     //             "ros_image",
+    //     //             1,
+    //     //             &RosVideoSource::imageCallback,
+    //     //             m_videoSource.get());
+    //     // });
+    // }
 
-    m_signalingClient->setOnRoomClientsChanged([&](const vector<RoomClient>& roomClients){
-        ROS_INFO_STREAM(nodeName << " --> " << "Signaling on room clients changed: ");
-        for (const auto& client : roomClients) {
-            ROS_INFO_STREAM("\tid: " << client.id() << ", name: " << client.name() << ", isConnected: " << client.isConnected());
-        }
-    });
-
-    // Connection's event
-    m_signalingClient->setOnClientConnected([&](const Client& client){
-        ROS_INFO_STREAM(nodeName << " --> " 
-                        << "Signaling on client connected: " << "id: " << client.id() << ", name: " << client.name());
-    });
-    m_signalingClient->setOnClientDisconnected([&](const Client& client){
-        ROS_INFO_STREAM(nodeName << " --> " 
-                        << "Signaling on client disconnected: " << "id: " << client.id() << ", name: " << client.name());
-    });
-
-
-    if (canSendStream) {
-
-        // Subscribe to image topic when signaling client connects
-        m_signalingClient->setOnSignalingConnectionOpened([&]{
-            ROS_INFO_STREAM(nodeName << " --> " << "Signaling connection opened, streaming topic...");
-            m_imageSubsriber = m_nh.subscribe(
-                    "ros_image",
-                    1,
-                    &RosVideoSource::imageCallback,
-                    m_videoSource.get());
-        });
-    }
-
-    if (canReceiveStream) {
+    if (m_canReceiveStream) {
 
         m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
         m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
@@ -133,28 +72,67 @@ void RosStreamBridge::init(bool &canSendStream,
         });
 
         // Video and audio frame
-        m_signalingClient->setOnVideoFrameReceived([&](const Client& client, const cv::Mat& bgrImg, uint64_t timestampUS) {
-            onVideoFrameReceived(client, bgrImg, timestampUS);
-        });
-        m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
-            const void* audioData,
-            int bitsPerSample,
-            int sampleRate,
-            size_t numberOfChannels,
-            size_t numberOfFrames)
-        {
-            onAudioFrameReceived(client, audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
-        });
+        m_signalingClient->setOnVideoFrameReceived(std::bind(&RosStreamBridge::onVideoFrameReceived, this,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3));
+        m_signalingClient->setOnAudioFrameReceived(std::bind(&RosStreamBridge::onAudioFrameReceived, this,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3,
+            std::placeholders::_4,
+            std::placeholders::_5,
+            std::placeholders::_6));
+        // m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
+        //     const void* audioData,
+        //     int bitsPerSample,
+        //     int sampleRate,
+        //     size_t numberOfChannels,
+        //     size_t numberOfFrames)
+        // {
+        //     onAudioFrameReceived(client, audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
+        // });
     } 
 }
 
-void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) {
-    initNode(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
+void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) 
+{
+    // TODO: Handle each item of the vector
+    init(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
     connect();
 }
 
-void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) {
+void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) 
+{
     disconnect();
+}
+
+
+void RosStreamBridge::onSignalingConnectionOpened() 
+{
+    RosWebRTCBridge::onSignalingConnectionOpened();
+
+    if (m_canSendStream) {
+        m_imageSubsriber = m_nh.subscribe(
+            "ros_image",
+            1,
+            &RosVideoSource::imageCallback,
+            m_videoSource.get());
+    }
+}
+
+void RosStreamBridge::onSignalingConnectionClosed() 
+{
+    RosWebRTCBridge::onSignalingConnectionClosed();
+    ROS_WARN_STREAM(nodeName << " --> " << "shutting down...");
+    ros::requestShutdown();
+}
+
+void RosStreamBridge::onSignalingConnectionError(const std::string& msg) 
+{
+    RosWebRTCBridge::onSignalingConnectionError(msg);
+    ROS_ERROR_STREAM(nodeName << " --> " << "shutting down...");
+    ros::requestShutdown();
 }
 
 /**

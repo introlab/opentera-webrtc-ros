@@ -38,4 +38,15 @@
         <arg name="camera_topic" value="/realsense/color/image_raw"/>
     </include>
 
+    <!-- Data Channel -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
+        <arg name="name" value="data_streamer"/>
+        <arg name="is_stand_alone" value="false"/>
+
+        <arg name="server_url" value="http://localhost:40075"/>
+        <arg name="client_name" value="Data Channel"/>
+        <arg name="room_name" value="chat"/>
+        <arg name="room_password" value="abc"/>
+    </include>
+
 </launch>

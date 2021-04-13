@@ -19,8 +19,6 @@ namespace opentera {
      */
     class RosStreamBridge: public RosWebRTCBridge<StreamClient>
     {
-        std::string nodeName;
-
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
 
@@ -29,17 +27,17 @@ namespace opentera {
 
         ros::Publisher m_audioPublisher;
 
-        void init(bool &canSendStream,
-            bool &canReceiveStream,
-            bool &denoise,
-            bool &screencast,
-            const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+        bool m_canSendStream;
+        bool m_canReceiveStream;
 
-        void initNode();
-        void initNode(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+        void init(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
 
         virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events);
         virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events);
+
+        virtual void onSignalingConnectionOpened();
+        virtual void onSignalingConnectionClosed();
+        virtual void onSignalingConnectionError(const std::string& msg);
 
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,

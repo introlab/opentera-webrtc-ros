@@ -12,20 +12,40 @@ using namespace opentera_webrtc_ros;
 /**
  * @brief Construct a data channel bridge
  */
-RosDataChannelBridge::RosDataChannelBridge()
+RosDataChannelBridge::RosDataChannelBridge(): RosWebRTCBridge()
 {
-    NodeHandle nh;
+    if (RosNodeParameters::isStandAlone()) {
+        initSignalingClient(RosSignalingServerConfiguration::fromRosParam());
+        initAdvertiseTopics();
+        initDataChannelCallback();
+        connect();
+    }
+}
 
+/**
+ * @brief Close signaling client connection when this object is destroyed
+ */
+RosDataChannelBridge::~RosDataChannelBridge()
+{
+
+}
+
+void RosDataChannelBridge::initSignalingClient(const opentera::SignalingServerConfiguration &signalingServerConfiguration) {
     // Create signaling client
     m_signalingClient = make_unique<DataChannelClient>(
-            RosSignalingServerConfiguration::fromRosParam(),
+            signalingServerConfiguration,
             WebrtcConfiguration::create(),
             DataChannelConfiguration::create());
 
-    // Advertise topics
-    m_dataPublisher = nh.advertise<PeerData>("webrtc_data", 10);
-    m_dataSubscriber = nh.subscribe("ros_data", 10, &RosDataChannelBridge::onRosData, this);
+    m_signalingClient->setTlsVerificationEnabled(false);
+}
 
+void RosDataChannelBridge::initAdvertiseTopics() {
+    m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data", 10);
+    m_dataSubscriber = m_nh.subscribe("ros_data", 10, &RosDataChannelBridge::onRosData, this);
+}
+
+void RosDataChannelBridge::initDataChannelCallback() {
     // Setup data channel callback
     m_signalingClient->setOnDataChannelMessageString([&](const Client& client, const string& data) {
         PeerData msg;
@@ -36,28 +56,31 @@ RosDataChannelBridge::RosDataChannelBridge()
         msg.sender.name = client.name();
         m_dataPublisher.publish(msg);
     });
-
-    // Shutdown ROS when signaling client disconnect
-    m_signalingClient->setOnSignalingConnectionClosed([]{
-        ROS_WARN("Signaling connection closed, shutting down...");
-        requestShutdown();
-    });
-
-    // Shutdown ROS on signaling client error
-    m_signalingClient->setOnSignalingConnectionError([](auto msg){
-        ROS_ERROR("Signaling connection error %s, shutting down...", msg.c_str());
-        requestShutdown();
-    });
 }
 
-/**
- * @brief Close signaling client connection when this object is destroyed
- */
-RosDataChannelBridge::~RosDataChannelBridge()
+void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) {
+    initSignalingClient(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
+    initAdvertiseTopics();
+    initDataChannelCallback();
+    connect();
+}
+
+void RosDataChannelBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) {
+    disconnect();
+}
+
+void RosDataChannelBridge::onSignalingConnectionClosed() 
 {
-    ROS_INFO("ROS is shutting down, closing signaling client connection.");
-    m_signalingClient->closeSync();
-    ROS_INFO("Signaling client disconnected, goodbye.");
+    RosWebRTCBridge::onSignalingConnectionClosed();
+    ROS_WARN_STREAM(nodeName << " --> " << "shutting down...");
+    ros::requestShutdown();
+}
+
+void RosDataChannelBridge::onSignalingConnectionError(const std::string& msg) 
+{
+    RosWebRTCBridge::onSignalingConnectionError(msg);
+    ROS_ERROR_STREAM(nodeName << " --> " << "shutting down...");
+    ros::requestShutdown();
 }
 
 /**
@@ -71,15 +94,6 @@ RosDataChannelBridge::~RosDataChannelBridge()
 void RosDataChannelBridge::onRosData(const StringConstPtr& msg)
 {
     m_signalingClient->sendToAll(msg->data);
-}
-
-/**
- * @brief Connect to the server and forward data forever
- */
-void RosDataChannelBridge::run()
-{
-    m_signalingClient->connect();
-    spin();
 }
 
 /**
