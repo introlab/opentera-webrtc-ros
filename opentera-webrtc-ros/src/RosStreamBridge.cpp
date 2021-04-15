@@ -175,8 +175,9 @@ void RosStreamBridge::onAudioFrameReceived(const Client& client,
     frame.sampling_frequency = sampleRate;
     frame.frame_sample_count = numberOfFrames;
 
-    uint8_t* charBuf = (uint8_t*)const_cast<void*>(audioData);
-    frame.data = vector<uint8_t>(charBuf, charBuf + sizeof(charBuf));
+    const uint8_t* buffer = reinterpret_cast<const uint8_t*>(audioData);
+    size_t bufferSize = numberOfChannels * numberOfFrames * bitsPerSample / 8;
+    frame.data = vector<uint8_t>(buffer, buffer + bufferSize);
 
     publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);       
 }
