@@ -17,7 +17,7 @@ using namespace opentera_webrtc_ros_msgs;
 /**
  * @brief construct a topic streamer node
  */
-RosStreamBridge::RosStreamBridge(): RosWebRTCBridge() 
+RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh): RosWebRTCBridge(nh), m_videoSource(nullptr), m_audioSource(nullptr)
 {
     if (RosNodeParameters::isStandAlone()) {
         init(RosSignalingServerConfiguration::fromRosParam());
@@ -25,6 +25,11 @@ RosStreamBridge::RosStreamBridge(): RosWebRTCBridge()
     }
 }
 
+/**
+ * @brief Initialize the stream client and his callback
+ * 
+ * @param signalingServerConfiguration Signaling server configuration
+ */
 void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signalingServerConfiguration) 
 {
     bool needsDenoising, isScreencast;
@@ -42,19 +47,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
             m_videoSource);
 
     m_signalingClient->setTlsVerificationEnabled(false);
-
-    // if (canSendStream) {
-
-    //     // Subscribe to image topic when signaling client connects
-    //     // m_signalingClient->setOnSignalingConnectionOpened([&]{
-    //     //     ROS_INFO_STREAM(nodeName << " --> " << "Signaling connection opened, streaming topic...");
-    //     //     m_imageSubsriber = m_nh.subscribe(
-    //     //             "ros_image",
-    //     //             1,
-    //     //             &RosVideoSource::imageCallback,
-    //     //             m_videoSource.get());
-    //     // });
-    // }
 
     if (m_canReceiveStream) {
 
@@ -83,15 +75,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
             std::placeholders::_4,
             std::placeholders::_5,
             std::placeholders::_6));
-        // m_signalingClient->setOnAudioFrameReceived([&](const Client& client,
-        //     const void* audioData,
-        //     int bitsPerSample,
-        //     int sampleRate,
-        //     size_t numberOfChannels,
-        //     size_t numberOfFrames)
-        // {
-        //     onAudioFrameReceived(client, audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
-        // });
     } 
 }
 
@@ -113,7 +96,7 @@ void RosStreamBridge::onSignalingConnectionOpened()
     RosWebRTCBridge::onSignalingConnectionOpened();
 
     if (m_canSendStream) {
-        m_imageSubsriber = m_nh.subscribe(
+        m_imageSubscriber = m_nh.subscribe(
             "ros_image",
             1,
             &RosVideoSource::imageCallback,
@@ -197,7 +180,8 @@ RosStreamBridge::~RosStreamBridge()
 int main(int argc, char** argv)
 {
     init(argc, argv, "stream_bridge");
+    ros::NodeHandle nh;
 
-    RosStreamBridge node;
+    RosStreamBridge node(nh);
     node.run();
 }

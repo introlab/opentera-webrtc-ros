@@ -1,18 +1,18 @@
 #include <ros/ros.h>
 #include <RosDataChannelBridge.h>
 #include <RosSignalingServerconfiguration.h>
-#include <opentera_webrtc_ros/PeerData.h>
+#include <opentera_webrtc_ros_msgs/PeerData.h>
 
 using namespace opentera;
 using namespace ros;
 using namespace std_msgs;
 using namespace std;
-using namespace opentera_webrtc_ros;
+using namespace opentera_webrtc_ros_msgs;
 
 /**
  * @brief Construct a data channel bridge
  */
-RosDataChannelBridge::RosDataChannelBridge(): RosWebRTCBridge()
+RosDataChannelBridge::RosDataChannelBridge(const ros::NodeHandle& nh): RosWebRTCBridge(nh)
 {
     if (RosNodeParameters::isStandAlone()) {
         initSignalingClient(RosSignalingServerConfiguration::fromRosParam());
@@ -30,7 +30,12 @@ RosDataChannelBridge::~RosDataChannelBridge()
 
 }
 
-void RosDataChannelBridge::initSignalingClient(const opentera::SignalingServerConfiguration &signalingServerConfiguration) {
+/**
+ * @brief Initialize the data channel client
+ * 
+ * @param signalingServerConfiguration Signaling server configuration
+ */
+void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration &signalingServerConfiguration) {
     // Create signaling client
     m_signalingClient = make_unique<DataChannelClient>(
             signalingServerConfiguration,
@@ -40,11 +45,17 @@ void RosDataChannelBridge::initSignalingClient(const opentera::SignalingServerCo
     m_signalingClient->setTlsVerificationEnabled(false);
 }
 
+/**
+ * @brief Initialize the subscriber and publisher
+ */
 void RosDataChannelBridge::initAdvertiseTopics() {
     m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data", 10);
     m_dataSubscriber = m_nh.subscribe("ros_data", 10, &RosDataChannelBridge::onRosData, this);
 }
 
+/**
+ * @brief Initialize the data channel client callback
+ */
 void RosDataChannelBridge::initDataChannelCallback() {
     // Setup data channel callback
     m_signalingClient->setOnDataChannelMessageString([&](const Client& client, const string& data) {
@@ -106,7 +117,8 @@ void RosDataChannelBridge::onRosData(const StringConstPtr& msg)
 int main(int argc, char** argv)
 {
     init(argc, argv, "data_channel_bridge");
+    ros::NodeHandle nh;
 
-    RosDataChannelBridge node;
+    RosDataChannelBridge node(nh);
     node.run();
 }

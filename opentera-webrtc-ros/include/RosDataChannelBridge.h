@@ -22,16 +22,16 @@ namespace opentera {
         void initAdvertiseTopics();
         void initDataChannelCallback();
 
-        virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events);
-        virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events);
+        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
+        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
 
-        virtual void onSignalingConnectionClosed();
-        virtual void onSignalingConnectionError(const std::string& msg);
+        void onSignalingConnectionClosed() override;
+        void onSignalingConnectionError(const std::string& msg) override;
 
         void onRosData(const std_msgs::StringConstPtr & msg);
 
     public:
-        RosDataChannelBridge();
+        RosDataChannelBridge(const ros::NodeHandle& nh);
         virtual ~RosDataChannelBridge();
     };
 }

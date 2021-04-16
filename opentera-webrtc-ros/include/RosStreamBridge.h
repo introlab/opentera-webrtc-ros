@@ -22,7 +22,7 @@ namespace opentera {
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
 
-        ros::Subscriber m_imageSubsriber;
+        ros::Subscriber m_imageSubscriber;
         ros::Publisher m_imagePublisher;
 
         ros::Publisher m_audioPublisher;
@@ -32,12 +32,12 @@ namespace opentera {
 
         void init(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
 
-        virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events);
-        virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events);
+        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
+        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
 
-        virtual void onSignalingConnectionOpened();
-        virtual void onSignalingConnectionClosed();
-        virtual void onSignalingConnectionError(const std::string& msg);
+        void onSignalingConnectionOpened() override;
+        void onSignalingConnectionClosed() override;
+        void onSignalingConnectionError(const std::string& msg) override;
 
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
@@ -48,7 +48,7 @@ namespace opentera {
             size_t numberOfFrames);
 
     public:
-        RosStreamBridge();
+        RosStreamBridge(const ros::NodeHandle& nh);
         virtual ~RosStreamBridge();
     };
 }

@@ -2,6 +2,7 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_WEBRTC_BRIDGE_H
 
 #include <ros/ros.h>
+#include <signal.h>
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 #include <OpenteraWebrtcNativeClient/Utils/Client.h>
@@ -71,7 +72,7 @@ namespace opentera {
         void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(PeerMsg::frame)& frame);
 
     public:
-        RosWebRTCBridge();
+        RosWebRTCBridge(const ros::NodeHandle& nh);
         virtual ~RosWebRTCBridge() = 0;
 
         void run();
@@ -80,12 +81,16 @@ namespace opentera {
     /**
      * @brief construct a topic streamer node
      * 
-     * @param initStandAloneNode Function that initialize the node in a "Stand Alone" mode.
-     * @param iniNode Function that initialize
+     * @param nh node handle.
      */
     template<typename T>
-    RosWebRTCBridge<T>::RosWebRTCBridge()
+    RosWebRTCBridge<T>::RosWebRTCBridge(const ros::NodeHandle& nh): m_signalingClient(nullptr), m_nh(nh)
     {
+        // On CTRL+C exit
+        signal(SIGINT, [](int sig){
+            ros::requestShutdown();
+        });
+
         nodeName = ros::this_node::getName();
 
         if (!RosNodeParameters::isStandAlone())
@@ -109,7 +114,10 @@ namespace opentera {
     template<typename T>
     void RosWebRTCBridge<T>::connect() {
         connectSignalingClientEvents();
-        m_signalingClient->connect();
+        if (m_signalingClient != nullptr) {
+            ROS_INFO("Connecting to signaling server at.");
+            m_signalingClient->connect();
+        }
     }
 
     /**
@@ -117,7 +125,9 @@ namespace opentera {
      */
     template<typename T>
     void RosWebRTCBridge<T>::disconnect() {
-        m_signalingClient->closeSync();
+        if (m_signalingClient != nullptr) {
+            m_signalingClient->closeSync();
+        }
     }
 
     /**
@@ -145,7 +155,6 @@ namespace opentera {
     template<typename T>
     void RosWebRTCBridge<T>::run()
     {
-        ROS_INFO("Connecting to signaling server at.");
         ros::spin();
     }
 
@@ -164,47 +173,47 @@ namespace opentera {
     void RosWebRTCBridge<T>::onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event) {
         const opentera_webrtc_ros_msgs::OpenTeraEvent msg = *(event.getMessage());
 
-        if (msg.database_events.size()) {
+        if (!msg.database_events.empty()) {
             ROS_INFO("DATABASE_EVENTS");
             onDataBaseEvents(msg.database_events);
         }
 
-        if (msg.device_events.size()) {
+        if (!msg.device_events.empty()) {
             ROS_INFO("DEVICE_EVENTS");
             onDeviceEvents(msg.device_events);
         }
 
-        if (msg.join_session_events.size()) {
+        if (!msg.join_session_events.empty()) {
             ROS_INFO("JOIN_SESSION_EVENTS");
             onJoinSessionEvents(msg.join_session_events);
         }
 
-        if (msg.join_session_reply_events.size()) {
+        if (!msg.join_session_reply_events.empty()) {
             ROS_INFO("JOIN_SESSION_REPLY_EVENTS");
             onJoinSessionReplyEvents(msg.join_session_reply_events);
         }
 
-        if (msg.leave_session_events.size()) {
+        if (!msg.leave_session_events.empty()) {
             ROS_INFO("LEAVE_SESSION_EVENTS");
             onLeaveSessionEvents(msg.leave_session_events);
         }
 
-        if (msg.log_events.size()) {
+        if (!msg.log_events.empty()) {
             ROS_INFO("LOG_EVENTS");
             onLogEvents(msg.log_events);
         }
 
-        if (msg.participant_events.size()) {
+        if (!msg.participant_events.empty()) {
             ROS_INFO("PARTICIPANT_EVENTS");
             onParticipantEvents(msg.participant_events);
         }
 
-        if (msg.stop_session_events.size()) {
+        if (!msg.stop_session_events.empty()) {
             ROS_INFO("STOP_SESSION_EVENTS");
             onStopSessionEvents(msg.stop_session_events);
         }
 
-        if (msg.user_events.size()) {
+        if (!msg.user_events.empty()) {
             ROS_INFO("USER_EVENTS");
             onUserEvents(msg.user_events);
         }
@@ -288,22 +297,27 @@ namespace opentera {
      * SIGNALING CLIENT CALLBACK
      ***********************************************************************/
 
+    /**
+     * @brief Connect signaling client callback
+     */
     template<typename T>
     void RosWebRTCBridge<T>::connectSignalingClientEvents() {
 
-        m_signalingClient->setOnSignalingConnectionOpened(std::bind(&RosWebRTCBridge::onSignalingConnectionOpened, this));
-        m_signalingClient->setOnSignalingConnectionClosed(std::bind(&RosWebRTCBridge::onSignalingConnectionClosed, this));
-        m_signalingClient->setOnSignalingConnectionError(std::bind(&RosWebRTCBridge::onSignalingConnectionError, this, std::placeholders::_1));
+        if (m_signalingClient != nullptr) {
+            m_signalingClient->setOnSignalingConnectionOpened(std::bind(&RosWebRTCBridge::onSignalingConnectionOpened, this));
+            m_signalingClient->setOnSignalingConnectionClosed(std::bind(&RosWebRTCBridge::onSignalingConnectionClosed, this));
+            m_signalingClient->setOnSignalingConnectionError(std::bind(&RosWebRTCBridge::onSignalingConnectionError, this, std::placeholders::_1));
 
-        m_signalingClient->setOnRoomClientsChanged(std::bind(&RosWebRTCBridge::onRoomClientsChanged, this, std::placeholders::_1));
+            m_signalingClient->setOnRoomClientsChanged(std::bind(&RosWebRTCBridge::onRoomClientsChanged, this, std::placeholders::_1));
 
-        m_signalingClient->setCallAcceptor(std::bind(&RosWebRTCBridge::callAcceptor, this, std::placeholders::_1));
-        m_signalingClient->setOnCallRejected(std::bind(&RosWebRTCBridge::onCallRejected, this, std::placeholders::_1));
+            m_signalingClient->setCallAcceptor(std::bind(&RosWebRTCBridge::callAcceptor, this, std::placeholders::_1));
+            m_signalingClient->setOnCallRejected(std::bind(&RosWebRTCBridge::onCallRejected, this, std::placeholders::_1));
 
-        m_signalingClient->setOnClientConnected(std::bind(&RosWebRTCBridge::onClientConnected, this, std::placeholders::_1));
-        m_signalingClient->setOnClientDisconnected(std::bind(&RosWebRTCBridge::onClientDisconnected, this, std::placeholders::_1));
+            m_signalingClient->setOnClientConnected(std::bind(&RosWebRTCBridge::onClientConnected, this, std::placeholders::_1));
+            m_signalingClient->setOnClientDisconnected(std::bind(&RosWebRTCBridge::onClientDisconnected, this, std::placeholders::_1));
 
-        m_signalingClient->setOnError(std::bind(&RosWebRTCBridge::onError, this, std::placeholders::_1));
+            m_signalingClient->setOnError(std::bind(&RosWebRTCBridge::onError, this, std::placeholders::_1));
+        }
     }
 
     /**
