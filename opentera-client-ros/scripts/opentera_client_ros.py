@@ -220,3 +220,4 @@ if __name__ == '__main__':
 
         client = OpenTeraROSClient(url=url, token=token)
         client.run()
+

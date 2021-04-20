@@ -6,7 +6,9 @@
 #include <RosVideoSource.h>
 #include <RosAudioSource.h>
 #include <OpenteraWebrtcNativeClient/StreamClient.h>
-#include <OpenteraWebrtcNativeClient/Sinks/VideoSink.h>
+#include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
+
+#include <RosWebRTCBridge.h>
 
 namespace opentera {
 
@@ -15,27 +17,40 @@ namespace opentera {
      *
      * View README.md for more details
      */
-    class RosStreamBridge
+    class RosStreamBridge: public RosWebRTCBridge<StreamClient>
     {
-        ros::NodeHandle m_nh;
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
-        std::shared_ptr<VideoSink> m_videoSink;
-        std::unique_ptr<StreamClient> m_signalingClient;
 
-        ros::Subscriber m_imageSubsriber;
+        ros::Subscriber m_imageSubscriber;
         ros::Publisher m_imagePublisher;
 
-        static void loadStreamParams(bool &denoise, bool &screencast);
-        void onFrameReceived(const cv::Mat& bgrImg, uint64_t timestampUs);
+        ros::Publisher m_audioPublisher;
+
+        bool m_canSendStream;
+        bool m_canReceiveStream;
+
+        void init(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+
+        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
+        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
+
+        void onSignalingConnectionOpened() override;
+        void onSignalingConnectionClosed() override;
+        void onSignalingConnectionError(const std::string& msg) override;
+
+        void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
+        void onAudioFrameReceived(const Client& client,
+            const void* audioData,
+            int bitsPerSample,
+            int sampleRate,
+            size_t numberOfChannels,
+            size_t numberOfFrames);
 
     public:
-        RosStreamBridge();
+        RosStreamBridge(const ros::NodeHandle& nh);
         virtual ~RosStreamBridge();
-
-        void run();
     };
-
 }
 
 #endif

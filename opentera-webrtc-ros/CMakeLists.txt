@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   sensor_msgs
+  audio_utils
 )
 
 # This is required for WebRTC
@@ -65,18 +66,11 @@ set (opentera_webrtc_native_client_libs
   expat
 )
 
-##############################
-## Generate custom messages ##
-##############################
-
-# Declare the message files to be built
-add_message_files(FILES
-  Peer.msg
-  PeerData.msg
-)
-
 # Actually generate the language-specific message and service files
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(
+  DEPENDENCIES 
+  opentera_webrtc_ros_msgs
+)
 
 
 ###################################
@@ -102,11 +96,13 @@ add_executable(${PROJECT_NAME}_topic_streamer
   src/RosAudioSource.cpp
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
+  src/RosNodeParameters.cpp
 )
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
+  src/RosNodeParameters.cpp
 )
 
 ## Rename C++ executable without prefix

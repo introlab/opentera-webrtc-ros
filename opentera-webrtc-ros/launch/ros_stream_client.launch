@@ -1,40 +1,40 @@
 <launch>
-  <node name="topic_streamer1" pkg="opentera_webrtc_ros" type="topic_streamer">
-    <rosparam>
-    ~stream:
-        is_screen_cast: false     # Is the image source a screen capture?
-        needs_denoising: false    # Does the image source needs denoising?
 
-    ~signaling:
-      server_url: "http://localhost:8080" # Signaling server URL
-      client_name: "streamer" # Peer name as which to join the room
-      room_name: "chat"       # Room name to join
-      room_password: "abc"    # Room password
-    </rosparam>
-    <remap from="ros_image" to="camera1/image_raw"/>
-  </node>
-  
-  <node name="topic_streamer2" pkg="opentera_webrtc_ros" type="topic_streamer">
-    <rosparam>
-    ~stream:
-        is_screen_cast: false     # Is the image source a screen capture?
-        needs_denoising: false    # Does the image source needs denoising?
+  <!-- Arguments -->
+  <arg name="name" default="topic_streamer"/>
+  <arg name="is_stand_alone" default="true"/>
 
-    ~signaling:
-      server_url: "http://localhost:8080" # Signaling server URL
-      client_name: "streamer" # Peer name as which to join the room
-      room_name: "chat"       # Room name to join
-      room_password: "abc"    # Room password
+  <arg name="can_send_stream" default="true"/>
+  <arg name="can_receive_stream" default="true"/>
+  <arg name="is_screen_cast" default="false"/>
+  <arg name="needs_denoising" default="false"/>
+
+  <arg name="server_url" default="http://localhost:8080"/>
+  <arg name="client_name" default="streamer"/>
+  <arg name="room_name" default="chat"/>
+  <arg name="room_password" default="abc"/>
+
+  <arg name="camera_topic" default="ros_image"/>
+
+  <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen">
+    <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
+    <rosparam param="stream" subst_value="true">
+    {
+      can_send_stream: $(arg can_send_stream),        # Is the node can send stream to the signaling server
+      can_receive_stream: $(arg can_receive_stream),  # Is the node can receive stream to the signaling server
+      is_screen_cast: $(arg is_screen_cast),          # Is the image source a screen capture?
+      needs_denoising: $(arg needs_denoising)         # Does the image source needs denoising?
+    }
     </rosparam>
-    <remap from="ros_image" to="camera2/image_raw"/>
-  </node>
-  
-  <node name="camera1" pkg="cv_camera" type="cv_camera_node">
-    <param name="device_id" value="2"/>
-  </node>
-  
-  <node name="camera2" pkg="cv_camera" type="cv_camera_node">
-    <param name="device_id" value="3"/>
+    <rosparam param="signaling" subst_value="true">
+    {
+      server_url: $(arg server_url),        # Signaling server URL
+      client_name: $(arg client_name),      # Peer name as which to join the room
+      room_name: $(arg room_name),          # Room name to join
+      room_password: $(arg room_password)   # Room password
+    }
+    </rosparam>
+    <remap from="ros_image" to="$(arg camera_topic)"/>
   </node>
   
 </launch>
