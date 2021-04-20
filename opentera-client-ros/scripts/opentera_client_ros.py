@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # PYTHONPATH is set properly when loading a workspace.
 
 # Asyncio
@@ -206,7 +206,7 @@ class OpenTeraROSClient:
 if __name__ == '__main__':
     # Init ROS
     rospy.init_node('opentera_client_ros', anonymous=True)
-    config_file_name = rospy.get_param('/config_file', '../config/local_config.json')
+    config_file_name = rospy.get_param('~config_file', '../config/local_config.json')
 
     # Read config file
     # Should be a param for this node
