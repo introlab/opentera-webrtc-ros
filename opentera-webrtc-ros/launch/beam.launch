@@ -14,7 +14,7 @@
 
         <arg name="server_url" value="http://localhost:40075"/>
         <arg name="client_name" value="Camera 1"/>
-        <arg name="room_name" value="chat"/>
+        <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="abc"/>
 
         <arg name="camera_topic" value="/beam/camera1/image_raw"/>
@@ -32,21 +32,27 @@
 
         <arg name="server_url" value="http://localhost:40075"/>
         <arg name="client_name" value="Camera 2"/>
-        <arg name="room_name" value="chat"/>
+        <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="abc"/>
 
         <arg name="camera_topic" value="/realsense/color/image_raw"/>
     </include>
 
-    <!-- Data Channel -->
+    <!-- Data Channel  -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
         <arg name="name" value="data_streamer"/>
         <arg name="is_stand_alone" value="false"/>
 
         <arg name="server_url" value="http://localhost:40075"/>
         <arg name="client_name" value="Data Channel"/>
-        <arg name="room_name" value="chat"/>
+        <arg name="room_name" value="Teleop"/>
         <arg name="room_password" value="abc"/>
+    </include>
+
+    <!-- Json Message Handler -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_json_data_handler.launch">
+        <arg name="name" value="json_data_handler"/>
+        <arg name="input_topic" value="/webrtc_data"/>
     </include>
 
 </launch>

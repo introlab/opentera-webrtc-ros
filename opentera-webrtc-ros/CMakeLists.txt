@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   audio_utils
+  geometry_msgs
 )
 
 # This is required for WebRTC
@@ -87,6 +88,7 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  lib
 )
 
 
@@ -105,9 +107,14 @@ add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosNodeParameters.cpp
 )
 
+add_executable(${PROJECT_NAME}_json_data_handler
+  src/RosJsonDataHandler.cpp
+)
+
 ## Rename C++ executable without prefix
 set_target_properties(${PROJECT_NAME}_topic_streamer PROPERTIES OUTPUT_NAME topic_streamer PREFIX "")
 set_target_properties(${PROJECT_NAME}_data_channel_bridge PROPERTIES OUTPUT_NAME data_channel_bridge PREFIX "")
+set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_topic_streamer
@@ -117,6 +124,10 @@ target_link_libraries(${PROJECT_NAME}_topic_streamer
 
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
   ${opentera_webrtc_native_client_libs}
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_json_data_handler
   ${catkin_LIBRARIES}
 )
 
@@ -132,6 +143,7 @@ install(
   TARGETS
     ${PROJECT_NAME}_topic_streamer
     ${PROJECT_NAME}_data_channel_bridge
+    ${PROJECT_NAME}_json_data_handler
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
