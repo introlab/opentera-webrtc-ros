@@ -1,0 +1,109 @@
+<?xml version='1.0'?>
+<launch>
+    <!-- Loading arguments -->
+    <arg name="simulation"          default="false"/>
+    <arg name="camera_name"         default="realsense"/>
+	<arg name="robot_name"          default="beam"/>
+	<arg name="rviz"                default="true"/>
+	<arg name="rviz_config_file"    default="rviz_cfg.rviz"/>
+    <arg name="rviz_cfg"            default="-d $(find beam_control)/config/$(arg rviz_config_file)"/>
+    <arg name="rtabmapviz"          default="false"/>
+    <arg name="localization"        default="false"/>
+    <arg name="database_path"       default="~/.ros/rtabmap.db"/>
+    <arg name="joystick_port"       default="js0"/>
+    <arg name="run_local"           default="true"/>
+
+    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="$(arg rviz_cfg)"/>
+    
+    <!-- Teleop mode --><!--
+    <include file="$(find control)/launch/teleop_joystick.launch">
+        <arg name="robot_name"      value="$(arg robot_name)" />
+        <arg name="joystick_port"   value="$(arg joystick_port)"/>
+    </include> -->
+
+    <group if="$(arg simulation)">
+
+         <!-- Initiate an empty world in Gazebo -->
+         <include file="$(find gazebo_ros)/launch/empty_world.launch">
+            <arg name="world_name"          value="$(find sim_gazebo)/worlds/MTLhouse.world"/>
+            <arg name="debug"               value="false"/>
+            <arg name="gui"                 value="true"/>
+            <arg name="paused"              value="false"/>
+            <arg name="use_sim_time"        value="true"/>
+            <arg name="headless"            value="false"/>
+        </include> 
+
+        <!-- Spawn the beam into Gazebo -->
+        <node name="$(arg robot_name)_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+            args="
+                -x 1.0 
+                -y 0.0 
+                -z 0.2 
+                -urdf 
+                -param robot_description 
+                -model $(arg robot_name) ">
+        </node>
+
+    </group>
+
+    <!-- Launches the group into the beam -->  
+    <group unless="$(arg run_local)">
+        <group unless="$(arg simulation)">
+            <machine name="beam" address="192.168.1.169" user="introlab" password="introlab" env-loader="/home/introlab/agewell_ws/src/agewell-smart-beam/ros_env.sh" default="true"/>
+        </group>
+    </group>
+
+    <group unless="$(arg simulation)">
+
+        <include file="$(find odometry)/launch/odometry.launch">
+            <arg name="output_odom"         value="/odom"/>
+        </include>
+
+        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+            <arg name="align_depth"         value="true"/>
+            <arg name="unite_imu_method"    value="copy"/>
+            <arg name="enable_gyro"         value="true"/>
+            <arg name="enable_accel"        value="true"/>
+            <arg name="camera"              value="realsense"/>
+            <arg name="enable_pointcloud"   value="true"/>
+        </include>
+
+        <include file="$(find camera)/launch/camera.launch">
+            <arg name="hasConfig"           value="true"/>
+            <arg name="config"              value="USB500W05G.yaml"/>
+            <arg name="frame_id"            value="camera_link"/>
+            <arg name="id"                  value="3"/>
+            <arg name="name"                value="front_camera"/>
+            <arg name="rate"                value="30"/>
+        </include>
+
+        <!--<node name="image_proc" pkg="image_proc" type="image_proc" ns="front_camera"/>-->
+
+        <include file="$(find odas_ros)/launch/odas.launch">
+            <arg name="configuration_path"  value="/home/introlab/agewell_ws/src/agewell-smart-beam/ros_pkgs/Framework/inputs/odas_ros/config/configuration_beam.cfg "/>
+            <arg name="frame_id"            value="odas_link"/>
+        </include>
+
+    </group>
+
+    <!-- Rtabmap Launcher-->
+    <include file="$(find beam_slam)/launch/rtab_map_slam.launch">
+        <arg name="camera_name"             value="$(arg camera_name)"/>
+        <arg name="rtabmapviz"              value="$(arg rtabmapviz)"/>
+        <arg name="localization"            value="$(arg localization)"/>
+        <arg name="database_path"           value="$(arg database_path)"/>
+        <arg name="camera_depth_topic"      value="aligned_depth_to_color"/>
+    </include>
+
+    <!-- Launching move_base to move robot around -->
+    <include file="$(find sim_gazebo)/launch/move_base.launch"/>
+
+    <param name="robot_description" command="xacro '$(find beam_description)/urdf/beam.xacro'"/>
+    
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <!-- Launching streaming client -->
+    <include file="$(find opentera_webrtc_ros)/launch/beam.launch"/>
+
+</launch>

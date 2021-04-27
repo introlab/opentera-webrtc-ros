@@ -6,6 +6,11 @@ The following ROS packages are required:
 * std_msgs
 * sensor_msgs
 
+Also add the following [repository](https://github.com/introlab/audio_utils) in the catkin workspace src directory:
+```bash
+git clone https://github.com/introlab/audio_utils.git --recurse-submodules
+```
+See https://github.com/introlab/audio_utils for more informations about the dependency and his usage;
 
 # Clone the repository with the submodules in the catkin workspace src directory
 ```bash
@@ -24,10 +29,8 @@ Release as the desired build output.
 
 ## Description
 
-Implement a ROS node that publish received images as a WebRTC stream.
-It also forwards images received on the WebRTC stream to ROS.
-
-For now the node only handle a single video track in each direction and no audio.
+Implement a ROS node that publish received images and audio as a WebRTC stream.
+It also forwards images and audio received on the WebRTC stream to ROS.
 
 ### Subscribes
 
@@ -35,21 +38,31 @@ For now the node only handle a single video track in each direction and no audio
 
 ### Advertises
 
-* webrtc_image : `sensor_msgs::Image`
+* webrtc_image : `opentera_webrtc_ros::PeerImage`
+* webrtc_audio : `opentera_webrtc_ros::PeerAudio`
 
 ## Default Parameters
 
-```yaml
-~stream:
-  is_screen_cast: false     # Is the image source a screen capture?
-  needs_denoising: false    # Does the image source needs denoising?
-
-~signaling:
-  server_url: "http://localhost:8080" # Signaling server URL
-  client_name: "streamer" # Peer name as which to join the room
-  room_name: "chat"       # Room name to join
-  room_password: "abc"    # Room password
+```xml
+<rosparam param="is_stand_alone">true</rosparam>
+<rosparam param="stream">
+  {
+    can_send_stream: true,        # Does the node can send stream to the signaling server
+    can_receive_stream: true,     # Does the node can receive stream to the signaling server
+    is_screen_cast: false,        # Is the image source a screen capture?
+    needs_denoising: false        # Does the image source needs denoising?
+  }
+</rosparam>
+<rosparam param="signaling">
+  {
+    server_url: "http://localhost:8080",    # Signaling server URL
+    client_name: "streamer",                # Peer name as which to join the room
+    room_name: "chat",                      # Room name to join
+    room_password: "abc"                    # Room password
+  }
+</rosparam>
 ```
+For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.launch).
 
 # RosDataChannelBridge
 
@@ -64,14 +77,37 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 
 ### Advertises
 
-* webrtc_data : `std_msgs::String`
+* webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
 ## Default Parameters
 
-```yaml
-~signaling:
-  server_url: "http://localhost:8080" # Signaling server URL
-  client_name: "data_bridge" # Peer name as which to join the room
-  room_name: "chat"       # Room name to join
-  room_password: "abc"    # Room password
+```xml
+<rosparam param="is_stand_alone" >true</rosparam>
+<rosparam param="signaling">
+  {
+    server_url: "http://localhost:8080",    # Signaling server URL
+    client_name: "data_bridge",             # Peer name as which to join the room
+    room_name: "chat",                      # Room name to join
+    room_password: "abc"                    # Room password
+  }
+</rosparam>
 ```
+For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_channel_client.launch).
+
+# RosJsonDataHandler
+
+## Decription
+
+Implement a ROS node that dispatch received JSON messages and forward them on the rights topics.
+
+### Subscribes
+
+* webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
+
+### Advertises
+
+* cmd_vel : `geometry_msgs::Twist`
+
+## JSON Format (TODO)
+
+For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
