@@ -44,6 +44,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 ## Default Parameters
 
 ```xml
+<rosparam param="is_stand_alone">true</rosparam>
 <rosparam param="stream">
   {
     can_send_stream: true,        # Does the node can send stream to the signaling server
@@ -61,6 +62,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
   }
 </rosparam>
 ```
+For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.launch).
 
 # RosDataChannelBridge
 
@@ -75,11 +77,12 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 
 ### Advertises
 
-* webrtc_data : `std_msgs::String`
+* webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
 ## Default Parameters
 
 ```xml
+<rosparam param="is_stand_alone" >true</rosparam>
 <rosparam param="signaling">
   {
     server_url: "http://localhost:8080",    # Signaling server URL
@@ -89,3 +92,22 @@ data channel. It also forwards messages received on the WebRTC data channel to R
   }
 </rosparam>
 ```
+For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_channel_client.launch).
+
+# RosJsonDataHandler
+
+## Decription
+
+Implement a ROS node that dispatch received JSON messages and forward them on the rights topics.
+
+### Subscribes
+
+* webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
+
+### Advertises
+
+* cmd_vel : `geometry_msgs::Twist`
+
+## JSON Format (TODO)
+
+For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).

@@ -23,6 +23,16 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
 
     nlohmann::json serializedData = nlohmann::json::parse(msg.data);
 
+    // TODO: Design a JSON interface in order to handle different type of data:
+    // Exemple:
+    // {
+    //      "type": "vector2d",
+    //      "vector2d": {
+    //          "x": 0.5,
+    //          "y": -0.42
+    //      }
+    // }
+
     geometry_msgs::Twist twist;
     // Multiply by 0.15 in order to control the speed of the movement
     // Multiple by -1 for the direction
