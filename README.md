@@ -8,6 +8,7 @@ Based on [opentera-webrtc-teleop](https://github.com/introlab/opentera-webrtc-te
 * Cédric Godin (@godced)
 * Marc-Antoine Maheux (@mamaheux)
 * Dominic Létourneau (@doumdi)
+* Gabriel Lauzier (@G-Lauz)
 
 ## License
 
