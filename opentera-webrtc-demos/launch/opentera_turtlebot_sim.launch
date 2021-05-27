@@ -1,9 +1,9 @@
 <launch>
 
   <!-- Turtlebot base model and position -->
-  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="x_pos" default="-2.0"/>
-  <arg name="y_pos" default="-0.5"/>
+  <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="x_pos" default="1.0"/>
+  <arg name="y_pos" default="0.0"/>
   <arg name="z_pos" default="0.0"/>
 
 
@@ -21,7 +21,7 @@
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find opentera-webrtc-demos)/worlds/MTLhouse.world"/>
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
@@ -57,6 +57,9 @@
       <param unless="$(eval model=='waffle')" name="subscribe_rgbd" type="bool" value="false"/>
       <param name="subscribe_scan"      type="bool"   value="true"/>
       <param name="approx_sync"         type="bool"   value="true"/>
+      <param name="map_always_update"   type="bool"   value="true"/>
+      <param name="map_empty_ray_tracing"   type="bool"   value="true"/>
+      
 
       <!-- use actionlib to send goals to move_base --> 
       <param name="use_action_for_goal" type="bool" value="true"/>
