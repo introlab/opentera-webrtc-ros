@@ -1,0 +1,17 @@
+<launch>
+
+  <!-- Requirements for server must be installed first -->
+  <arg name="signaling_server_path" default="$(find opentera_webrtc_ros)/opentera-webrtc/signaling-server"/>
+  
+  <arg name="signaling_server_port" default="8080"/>
+  <arg name="signaling_server_password" default="abc"/>
+  
+  <!-- The teleop frontend must be installed built first -->
+  <arg name="signaling_server_static_folder" default="/home/dominic/work/opentera-webrtc-teleop-frontend/teleop-vue/dist"/>
+  
+  <node pkg="opentera_webrtc_demos" type="start_signaling_server.sh" 
+        args="$(arg signaling_server_path) $(arg signaling_server_port) $(arg signaling_server_password) $(arg signaling_server_static_folder)" 
+        name="opentera_signaling_server" output="screen">
+  </node>
+  
+</launch>
