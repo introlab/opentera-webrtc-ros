@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(opentera-webrtc-demos)
+project(opentera_webrtc_demos)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,9 +8,9 @@ project(opentera-webrtc-demos)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  opentera-client-ros
-  opentera-webrtc-ros
-  opentera-webrtc-ros-msgs
+  opentera_client_ros
+  opentera_webrtc_ros
+  opentera_webrtc_ros_msgs
   roscpp
   rospy
   std_msgs
