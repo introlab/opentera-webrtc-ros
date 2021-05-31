@@ -7,6 +7,7 @@
   <arg name="z_pos" default="0.0"/>
 
 
+
   <!-- RTAB-Map config -->
   <arg name="open_rviz" default="true"/>
   <arg name="rtabmapviz" default="true"/>
@@ -106,8 +107,4 @@
     <node pkg="rviz" type="rviz" name="rviz" required="true"
           args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
   </group>
-  
-  
-  
 </launch>
-
