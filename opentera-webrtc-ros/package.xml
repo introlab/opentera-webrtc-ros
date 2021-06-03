@@ -13,12 +13,13 @@
   <build_depend>message_generation</build_depend>
   <build_depend>audio_utils</build_depend>
   <build_depend>opentera_webrtc_ros_msgs</build_depend>
+  <build_depend>rospy</build_depend>
   <depend>roscpp</depend>
   <depend>cv_bridge</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>message_runtime</depend>
-
+  <exec_depend>rospy</exec_depend>
   <export>
   </export>
 </package>
