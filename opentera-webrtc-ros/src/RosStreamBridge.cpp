@@ -50,8 +50,8 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
 
     if (m_canReceiveStream) {
 
-        m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 1, false);
-        m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 1, false);
+        m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
+        m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
 
         // Stream event
         m_signalingClient->setOnAddRemoteStream([&](const Client& client) {

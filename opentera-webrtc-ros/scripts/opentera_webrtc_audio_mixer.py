@@ -6,6 +6,7 @@ import pyaudio
 import numpy
 import threading
 from datetime import datetime
+import queue
 
 # ROS
 import rospy
@@ -17,9 +18,7 @@ p = pyaudio.PyAudio()
 class AudioWriter:
     def __init__(self, peer_id: str):
         self._peer_id = peer_id
-        self._mutex = threading.Lock()
-        self._semaphore = threading.Semaphore(value=0)
-        self._audio_fifo = []
+        self._audio_queue = queue.Queue()
         self._running = False
         self._thread = threading.Thread(target=self._run)
         self._lastPushTime = datetime.now()
@@ -27,45 +26,40 @@ class AudioWriter:
     def __del__(self):
         self.stop()
 
-    def push_audio(self, audio: PeerAudio):
-        self._mutex.acquire()
-        # print('PUSH', datetime.now().timestamp(), len(self._audio_fifo))
-        self._audio_fifo.append(audio)
+    def push_audio(self, audio: PeerAudio, timeout=None):
+        # print('PUSH', datetime.now().timestamp())
+        self._audio_queue.put(audio, timeout=timeout)
         self._lastPushTime = datetime.now()
-        self._mutex.release()
-        self._semaphore.release()
 
-    def pull_audio(self):
-        self._semaphore.acquire()
-        self._mutex.acquire()
-        # print('PULL', datetime.now().timestamp(), len(self._audio_fifo))
-        audio = self._audio_fifo.pop(0)
-        self._mutex.release()
+    def pull_audio(self, timeout=None):
+        # print('PULL', datetime.now().timestamp())
+        audio = self._audio_queue.get(timeout=timeout)
         return audio
 
     def _run(self):
         print('thread_run')
         stream = None
         while self._running:
-            audio = self.pull_audio()
+            try:
+                # Write data (should get 10ms frames)
+                audio = self.pull_audio(timeout=0.010)
+                if audio:
+                    if audio.frame.format == 'signed_16':
+                        if stream is None:
+                            stream = p.open(format=pyaudio.paInt16,
+                                            channels=audio.frame.channel_count,
+                                            rate=audio.frame.sampling_frequency,
+                                            output=True)
 
-            if audio.frame.format == 'signed_16':
+                        stream.write(audio.frame.data)
+                    else:
+                        print('unsupported format: ', audio.frame.format)
 
-                if stream is None:
-                    stream = p.open(format=pyaudio.paInt16,
-                                    channels=audio.frame.channel_count,
-                                    rate=audio.frame.sampling_frequency,
-                                    output=True)
-
-                # Write data (should be 10ms)
-                # stream.write(numpy.frombuffer(audio.frame.data, numpy.int16))
-                stream.write(audio.frame.data)
-            else:
-                print('unsupported format: ', audio.frame.format)
+            except queue.Empty as e:
+                pass
 
         if stream:
             stream.close()
-
         print('thread done!')
 
     def start(self):
@@ -79,8 +73,13 @@ class AudioWriter:
 
 class AudioMixerROS:
     def __init__(self):
-        self._subscriber = rospy.Subscriber('/webrtc_audio', PeerAudio, self._on_peer_audio)
+        self._subscriber = rospy.Subscriber('/webrtc_audio', PeerAudio, self._on_peer_audio, queue_size=100)
         self._writers = dict()
+
+    def __del__(self):
+        for writer in self._writers:
+            writer.stop()
+            del writer
 
     def _on_peer_audio(self, audio: PeerAudio):
         peer_id = audio.sender.id
