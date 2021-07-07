@@ -134,6 +134,7 @@ target_link_libraries(${PROJECT_NAME}_data_channel_bridge
 )
 
 target_link_libraries(${PROJECT_NAME}_json_data_handler
+  ${opentera_webrtc_native_client_libs}
   ${catkin_LIBRARIES}
 )
 

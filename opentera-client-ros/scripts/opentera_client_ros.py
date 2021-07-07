@@ -58,8 +58,8 @@ class OpenTeraROSClient:
                 print(ws)
 
                 # Create alive publishing task
-                status_task = asyncio.create_task(
-                    self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
+                status_task = asyncio.get_event_loop().create_task(
+                              self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
 
                 while True:
                     msg = await ws.receive()
@@ -73,9 +73,10 @@ class OpenTeraROSClient:
                         print('websocket error')
                         break
 
-            print('cancel task')
-            status_task.cancel()
-            await status_task
+                status_task.cancel()
+                await status_task
+
+            rospy.logwarn('cancel task')
 
     def run(self):
         loop = asyncio.get_event_loop()
