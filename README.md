@@ -52,8 +52,10 @@ $ source devel/setup.bash
 $ catkin_make
 ```
 
-## 4 - Install the Python requirements for the signaling server
+## 4 - Install the Python requirements
 ```bash
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera-webrtc-ros/
+$ python3 -m pip install -r requirements.txt
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera-webrtc-ros/opentera-webrtc/signaling-server
 $ python3 -m pip install -r requirements.txt
 ```
