@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # PYTHONPATH is set properly when loading a workspace.
-
 # This package needs to be installed first.
 import pyaudio
 import numpy
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 import queue
 
 # ROS
@@ -19,27 +18,28 @@ class AudioWriter:
     def __init__(self, peer_id: str):
         self._peer_id = peer_id
         self._audio_queue = queue.Queue()
-        self._running = False
+        self._quit_event = threading.Event()
         self._thread = threading.Thread(target=self._run)
         self._lastPushTime = datetime.now()
 
-    def __del__(self):
-        self.stop()
+    def get_last_push(self):
+        return self._lastPushTime
 
     def push_audio(self, audio: PeerAudio, timeout=None):
-        # print('PUSH', datetime.now().timestamp())
         self._audio_queue.put(audio, timeout=timeout)
+        # print('PUSH', datetime.now().timestamp(), self._audio_queue.qsize())
         self._lastPushTime = datetime.now()
 
     def pull_audio(self, timeout=None):
-        # print('PULL', datetime.now().timestamp())
         audio = self._audio_queue.get(timeout=timeout)
+        # print('PULL', datetime.now().timestamp(), self._audio_queue.qsize())
         return audio
 
     def _run(self):
-        print('thread_run')
+        print('Thread_run', self._peer_id)
         stream = None
-        while self._running:
+
+        while not self._quit_event.isSet():
             try:
                 # Write data (should get 10ms frames)
                 audio = self.pull_audio(timeout=0.010)
@@ -49,37 +49,60 @@ class AudioWriter:
                             stream = p.open(format=pyaudio.paInt16,
                                             channels=audio.frame.channel_count,
                                             rate=audio.frame.sampling_frequency,
+                                            frames_per_buffer=int(audio.frame.frame_sample_count * 10),
                                             output=True)
+                            # Fill buffer with zeros ?
+                            # for _ in range(5):
+                            #     stream.write(numpy.zeros(audio.frame.frame_sample_count, dtype=numpy.int16))
 
                         stream.write(audio.frame.data)
                     else:
-                        print('unsupported format: ', audio.frame.format)
+                        print('Unsupported format: ', audio.frame.format, self._peer_id)
 
             except queue.Empty as e:
+                # An exception will occur when queue is empty
                 pass
 
         if stream:
             stream.close()
-        print('thread done!')
+
+        print('Thread done!', self._peer_id)
 
     def start(self):
-        self._running = True
+        self._quit_event.clear()
         self._thread.start()
 
     def stop(self):
-        self._running = False
-        self._thread.join()
+        if self._thread.is_alive():
+            self._quit_event.set()
+            print('Waiting for thread', self._peer_id)
+            self._thread.join()
 
 
 class AudioMixerROS:
     def __init__(self):
         self._subscriber = rospy.Subscriber('/webrtc_audio', PeerAudio, self._on_peer_audio, queue_size=100)
         self._writers = dict()
+        # Cleanup timer every second
+        self._timer = rospy.Timer(rospy.Duration(1), self._on_cleanup_timeout)
 
-    def __del__(self):
+    def shutdown(self):
+        self._timer.shutdown()
         for writer in self._writers:
-            writer.stop()
-            del writer
+            print('stopping writer', writer)
+            self._writers[writer].stop()
+
+    def _on_cleanup_timeout(self, event):
+        # Cleanup old threads ...
+        peers_to_delete = []
+        # Store since we cannot remove while iterating
+        for peer_id in self._writers:
+            if self._writers[peer_id].get_last_push() + timedelta(seconds=15) < datetime.now():
+                peers_to_delete.append(peer_id)
+        # Remove old peers
+        for peer in peers_to_delete:
+            self._writers[peer].stop()
+            del self._writers[peer]
 
     def _on_peer_audio(self, audio: PeerAudio):
         peer_id = audio.sender.id
@@ -93,14 +116,11 @@ class AudioMixerROS:
         # Push audio
         self._writers[peer_id].push_audio(audio)
 
-        # TODO cleanup old threads...
-
 
 if __name__ == '__main__':
     # Init ROS
     rospy.init_node('opentera_webrtc_audio_mixer', anonymous=True)
-
     mixer = AudioMixerROS()
-
     rospy.spin()
+    mixer.shutdown()
 

@@ -5,8 +5,8 @@
   <description>Provides Nodes to join a WebRTC call from ROS</description>
 
   <maintainer email="cedric.godin@usherbrooke.ca">Cédric Godin</maintainer>
-  <license>BSD</license>
-  <url type="repository">https://github.com/introlab/opentera-webrtc-teleop</url>
+  <license>Apache-2.0</license>
+  <url type="repository">https://github.com/introlab/opentera-webrtc-ros</url>
   <author email="cedric.godin@usherbrooke.ca">Cédric Godin</author>
 
   <buildtool_depend>catkin</buildtool_depend>
