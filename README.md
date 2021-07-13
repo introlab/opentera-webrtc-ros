@@ -18,6 +18,9 @@ The procedure is written for Ubuntu 20.04 using ROS noetic. We assume ROS is alr
 # opentera-webrtc-ros packages
 sudo apt-get install nodejs ros-noetic-turtlebot3* ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
 
+# python dependencies
+sudo apt-get install python3-pip portaudio19-dev
+
 # audio_utils packages
 sudo apt-get install build-essential gfortran texinfo libasound2-dev
 ```
@@ -54,15 +57,15 @@ $ catkin_make
 
 ## 4 - Install the Python requirements for client and signaling server
 ```bash
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera-client-ros
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
 $ python3 -m pip install -r requirements.txt
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera-webrtc-ros/opentera-webrtc/signaling-server
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
 $ python3 -m pip install -r requirements.txt
 ```
 
 ## 5 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
 ```bash
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera-webrtc-demos/opentera-webrtc-teleop-frontend/teleop-vue
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
 # Run the npm package installer
 $ npm install
 # Build the frontend (this will create a dist directory with all required files)
