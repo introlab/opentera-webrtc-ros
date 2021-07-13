@@ -77,7 +77,7 @@ $ npm run build
 
 # Running the demos
 
-Please see the [opentera-webrtc-demos package.](opentera-webrtc-demos/README.md)
+Please see the [opentera_webrtc_demos package.](opentera_webrtc_demos/README.md)
 
 
 # License
