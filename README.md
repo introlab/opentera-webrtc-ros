@@ -65,6 +65,7 @@ $ python3 -m pip install -r requirements.txt
 
 ## 5 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
 ```bash
+$ sudo apt-get install nodejs npm
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
 # Run the npm package installer
 $ npm install
