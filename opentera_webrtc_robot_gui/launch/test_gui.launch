@@ -1,5 +1,5 @@
 <launch>
-    <arg name="loopback_cam" default="2"/>
+    <arg name="loopback_cam" default="0"/>
 
     <!-- Loopback or webcam camera -->
     <node pkg="cv_camera" type="cv_camera_node" name="camera1">

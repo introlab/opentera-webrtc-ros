@@ -35,11 +35,13 @@ GraphicsViewToolbar::GraphicsViewToolbar(QWidget *parent)
     if (parent && parent->layout())
         parent->layout()->addWidget(this);
 
+    this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 void GraphicsViewToolbar::resizeEvent(QResizeEvent *event)
 {
-    qDebug() << "resizeEvent" << event;
+    //qDebug() << "resizeEvent" << event;
 
     m_scene->setSceneRect(0,0,event->size().width(), this->height());
     //resize(event->size());

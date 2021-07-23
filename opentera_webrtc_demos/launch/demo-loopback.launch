@@ -32,7 +32,7 @@
     </include>
 
     <!-- Robot GUI-->
-    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui.py" name="robot_gui">
+    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui">
     </node>
 
 </launch>   

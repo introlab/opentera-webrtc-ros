@@ -7,7 +7,7 @@
 #include <ros/ros.h>
 #include <signal.h>
 #include <QThread>
-
+#include <QFile>
 
 // SIGINT handler, will quit Qt event loop
 void termination_handler(int signum)
@@ -30,19 +30,23 @@ int main(int argc, char *argv[])
     
 
     QApplication app(argc, argv);
+
+    //Stylesheet
+    QFile file(":/stylesheet.qss");
+    file.open(QFile::ReadOnly);
+    QString stylesheet = QLatin1String(file.readAll());
+    app.setStyleSheet(stylesheet);
+
+
     MainWindow w;
     w.show();
 
 
     //Load test image from QRC
-    QImage testImage(":/Text_640x480.png");
+    QImage testImage(":/Test_640x480.png");
 
     qDebug() << testImage;
     w.setImage(testImage);
-    ROSCameraView* view1 = w.addThumbnailView(testImage, "Camera #1");
-    ROSCameraView* view2 = w.addThumbnailView(testImage, "Camera #2");
-    ROSCameraView* view3 = w.addThumbnailView(testImage, "Camera #3");
-    ROSCameraView* view4 = w.addThumbnailView(testImage, "Camera #4");
 
     //Will start ROS loop in background
     spinner.start();

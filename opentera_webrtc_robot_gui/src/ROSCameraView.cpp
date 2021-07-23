@@ -7,7 +7,7 @@
 GLCameraWidget::GLCameraWidget(QWidget *parent)
     :   QGLWidget(parent)
 {
-    resize(640,480);
+    //resize(640,480);
 }
 
 void GLCameraWidget::setImage(const QImage &image)
@@ -43,6 +43,9 @@ void GLCameraWidget::paintEvent(QPaintEvent *event)
 
         //Paint in current rect
         p.drawImage(drawingRect, m_image);
+        
+        //This will strech the image...
+        //p.drawImage(this->rect(), m_image);
     }
 }
 
