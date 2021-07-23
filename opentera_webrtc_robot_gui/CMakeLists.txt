@@ -18,6 +18,45 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+# We use older version for compatibility with Ubuntu 18.04 stock version
+# Install this version with Qt Maintenance Tool if required
+set(Qt5_DIR $ENV{HOME}/Qt/5.9.9/gcc_64/lib/cmake/Qt5)
+
+set(opentera_webrtc_robot_gui_components Core Widgets Gui MultimediaWidgets OpenGL)
+find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
+
+set(srcs
+  src/main.cpp
+  src/MainWindow.cpp
+  src/ROSCameraView.cpp
+  src/GraphicsViewToolbar.cpp
+)
+
+set(headers
+  src/MainWindow.h
+  src/ROSCameraView.h
+  src/GraphicsViewToolbar.h
+)
+
+set(uis
+  src/ui/MainWindow.ui
+)
+
+set(qrcs
+  src/resources/opentera_webrtc_robot_gui.qrc
+)
+
+#Generate .h files from the .ui files
+QT5_WRAP_UI(project_moc_uis ${uis})
+
+# generate rules for building source files from the resources
+QT5_ADD_RESOURCES(project_qrcs ${qrcs})
+
+#This will generate moc_* for Qt
+qt5_wrap_cpp(project_moc_srcs ${headers})
+
+
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -120,7 +159,13 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+add_executable(${PROJECT_NAME}_node ${srcs} ${uis} ${headers} ${project_moc_uis} ${project_qrcs} ${project_moc_srcs})
+qt5_use_modules(${PROJECT_NAME}_node ${opentera_webrtc_robot_gui_components})
+set_property(TARGET ${PROJECT_NAME}_node PROPERTY CXX_STANDARD 11)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -148,9 +193,10 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}_node
+   ${catkin_LIBRARIES}
+   ${opentera_webrtc_robot_gui_components_link}
+)
 
 #############
 ## Install ##
@@ -168,9 +214,9 @@ catkin_install_python(PROGRAMS
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME}_node
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
