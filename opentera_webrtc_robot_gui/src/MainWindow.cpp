@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Connect signals/slot
     connect(this, &MainWindow::newLocalImage, this, &MainWindow::_onLocalImage, Qt::QueuedConnection);
-    //connect(this, SIGNAL(newLocalImage(QSharedPonter<QImage>), this, SLOT(_onLocalImage(QSharedPointer<QImage>)));
 }
 
 MainWindow::~MainWindow()
