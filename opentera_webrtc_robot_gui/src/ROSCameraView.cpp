@@ -1,5 +1,4 @@
 #include "ROSCameraView.h"
-#include <QVideoSurfaceFormat>
 #include <QSize>
 #include <QBrush>
 #include <QColor>
@@ -13,7 +12,9 @@ GLCameraWidget::GLCameraWidget(QWidget *parent)
 
 void GLCameraWidget::setImage(const QImage &image)
 {
-    m_image = image;
+    //Make sure we copy the image (could be deleted somewhere else)
+    m_image = image.copy();
+    update();
 }
 
 
@@ -44,8 +45,6 @@ void GLCameraWidget::paintEvent(QPaintEvent *event)
         p.drawImage(drawingRect, m_image);
     }
 }
-
-
 
 ROSCameraView::ROSCameraView(QWidget *parent)
     : QWidget(parent), m_layout(nullptr), m_label(nullptr), m_cameraWidget(nullptr)

@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <QGraphicsScene>
+#include <QThread>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,12 +18,52 @@ MainWindow::MainWindow(QWidget *parent)
     m_cameraView = new ROSCameraView("Local", m_ui->centralwidget);
     m_ui->verticalLayout->addWidget(m_cameraView);
 
+    //Setup ROS
+    setupROS();
+
+    //Connect signals/slot
+    connect(this, &MainWindow::newLocalImage, this, &MainWindow::_onLocalImage, Qt::QueuedConnection);
+    //connect(this, SIGNAL(newLocalImage(QSharedPonter<QImage>), this, SLOT(_onLocalImage(QSharedPointer<QImage>)));
 }
 
 MainWindow::~MainWindow()
 {
     delete m_ui;
 }
+
+void MainWindow::setupROS()
+{
+    //Setup subscribers
+    m_localImageSubscriber = m_nodeHandle.subscribe("/camera1/image_raw",
+            10,
+            &MainWindow::localImageCallback,
+            this);
+
+    //m_peerImageSubscriber = 
+
+    //Setup publishers
+}
+
+void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+    //WARNING THIS IS CALLED FROM ANOTHER THREAD (ROS SPINNER)
+    //qDebug() << "localImageCallback thread" << QThread::currentThread();
+    
+    //Step #1 Transform ROS Image to QtImage
+    QImage image(&msg->data[0], msg->width, msg->height, QImage::Format_RGB888);
+    
+    //Step #2 Emit signal (will be handled in Qt main thread)
+    //Image will be automatically deleted when required
+    //Invert R & B here
+    emit newLocalImage(image.rgbSwapped());
+}
+
+void MainWindow::_onLocalImage(const QImage& image)
+{
+    //qDebug() << "_onLocalImage Current Thread " << QThread::currentThread();
+    m_cameraView->setImage(image);
+}
+
 
 void MainWindow::setImage(const QImage &image)
 {
@@ -36,3 +78,8 @@ ROSCameraView* MainWindow::addThumbnailView(QImage &image, const QString &label)
     return camera;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QMainWindow::closeEvent(event);
+    QApplication::quit();
+}

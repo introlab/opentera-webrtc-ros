@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 # Install this version with Qt Maintenance Tool if required
 set(Qt5_DIR $ENV{HOME}/Qt/5.9.9/gcc_64/lib/cmake/Qt5)
 
-set(opentera_webrtc_robot_gui_components Core Widgets Gui MultimediaWidgets OpenGL)
+set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
 find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
 
 set(srcs
