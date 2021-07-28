@@ -66,6 +66,7 @@ add_message_files(
    PeerData.msg
    PeerImage.msg
    PeerAudio.msg
+   PeerStatus.msg
 )
 
 ## Generate services in the 'srv' folder

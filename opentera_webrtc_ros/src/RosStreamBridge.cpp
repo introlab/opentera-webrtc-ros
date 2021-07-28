@@ -4,6 +4,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
 #include <opentera_webrtc_ros_msgs/PeerAudio.h>
+#include <opentera_webrtc_ros_msgs/PeerStatus.h>
 #include <audio_utils/AudioFrame.h>
 #include <RosNodeParameters.h>
 
@@ -52,13 +53,16 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
 
         m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
         m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
+        m_peerStatusPublisher = m_nh.advertise<PeerStatus>("webrtc_peer_status", 10, false);
 
         // Stream event
-        m_signalingClient->setOnAddRemoteStream([&](const Client& client) {
+        m_signalingClient->setOnAddRemoteStream([&, this](const Client& client) {
+            this->publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_ADDED);
             ROS_INFO_STREAM(nodeName << " --> "
                             << "Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
-        m_signalingClient->setOnRemoveRemoteStream([&](const Client& client) {
+        m_signalingClient->setOnRemoveRemoteStream([&, this](const Client& client) {
+            this->publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
             ROS_INFO_STREAM(nodeName << " --> "
                             << "Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
@@ -76,6 +80,15 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
             std::placeholders::_5,
             std::placeholders::_6));
     } 
+}
+
+void RosStreamBridge::publishPeerStatus(const Client &client, int status)
+{
+    PeerStatus msg;
+    msg.sender.id = client.id();
+    msg.sender.name = client.name();
+    msg.status = status;
+    m_peerStatusPublisher.publish(msg);
 }
 
 void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) 

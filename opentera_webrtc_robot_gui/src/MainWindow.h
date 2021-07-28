@@ -57,6 +57,7 @@ private:
     ros::NodeHandle m_nodeHandle;
 	ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;
+    ros::Subscriber m_webrtcEventSubscriber;
 
 };
 

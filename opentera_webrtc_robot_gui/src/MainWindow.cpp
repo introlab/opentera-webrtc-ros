@@ -46,6 +46,8 @@ void MainWindow::setupROS()
             &MainWindow::peerImageCallback,
             this);
 
+  
+
     //Setup publishers
 }
 
