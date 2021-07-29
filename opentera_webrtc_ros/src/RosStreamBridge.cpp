@@ -20,7 +20,8 @@ using namespace opentera_webrtc_ros_msgs;
  */
 RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh): RosWebRTCBridge(nh), m_videoSource(nullptr), m_audioSource(nullptr)
 {
-    if (RosNodeParameters::isStandAlone()) {
+    if (RosNodeParameters::isStandAlone()) 
+    {
         init(RosSignalingServerConfiguration::fromRosParam());
         connect();
     }
@@ -49,20 +50,23 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
 
     m_signalingClient->setTlsVerificationEnabled(false);
 
-    if (m_canReceiveStream) {
+    if (m_canReceiveStream) 
+    {
 
         m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
         m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
-        m_peerStatusPublisher = m_nh.advertise<PeerStatus>("webrtc_peer_status", 10, false);
+        
 
         // Stream event
-        m_signalingClient->setOnAddRemoteStream([&, this](const Client& client) {
-            this->publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_ADDED);
+        m_signalingClient->setOnAddRemoteStream([this](const Client& client) 
+        {
+            publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_ADDED);
             ROS_INFO_STREAM(nodeName << " --> "
                             << "Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
-        m_signalingClient->setOnRemoveRemoteStream([&, this](const Client& client) {
-            this->publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
+        m_signalingClient->setOnRemoveRemoteStream([this](const Client& client) 
+        {
+            publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
             ROS_INFO_STREAM(nodeName << " --> "
                             << "Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
@@ -82,15 +86,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
     } 
 }
 
-void RosStreamBridge::publishPeerStatus(const Client &client, int status)
-{
-    PeerStatus msg;
-    msg.sender.id = client.id();
-    msg.sender.name = client.name();
-    msg.status = status;
-    m_peerStatusPublisher.publish(msg);
-}
-
 void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) 
 {
     // TODO: Handle each item of the vector
@@ -103,12 +98,12 @@ void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_
     disconnect();
 }
 
-
 void RosStreamBridge::onSignalingConnectionOpened() 
 {
     RosWebRTCBridge::onSignalingConnectionOpened();
 
-    if (m_canSendStream) {
+    if (m_canSendStream) 
+    {
         m_imageSubscriber = m_nh.subscribe(
             "ros_image",
             1,
@@ -180,7 +175,6 @@ void RosStreamBridge::onAudioFrameReceived(const Client& client,
 
 RosStreamBridge::~RosStreamBridge()
 {
-
 }
 
 /**

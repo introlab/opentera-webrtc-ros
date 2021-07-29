@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     //Connect signals/slot
     connect(this, &MainWindow::newLocalImage, this, &MainWindow::_onLocalImage, Qt::QueuedConnection);
     connect(this, &MainWindow::newPeerImage, this, &MainWindow::_onPeerImage, Qt::QueuedConnection);
+    connect(this, &MainWindow::newPeerStatus, this, &MainWindow::_onPeerStatus, Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow()
@@ -46,7 +47,10 @@ void MainWindow::setupROS()
             &MainWindow::peerImageCallback,
             this);
 
-  
+    m_peerStatusSubscriber = m_nodeHandle.subscribe("/webrtc_peer_status",
+            10, 
+            &MainWindow::peerStatusCallback,
+            this);
 
     //Setup publishers
 }
@@ -62,8 +66,10 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
     //Step #2 Emit signal (will be handled in Qt main thread)
     //Image will be automatically deleted when required
     //Invert R & B here
-    emit newLocalImage(image.rgbSwapped());
+    emit newLocalImage(std::move(image).rgbSwapped());
 }
+
+
 
 void MainWindow::_onLocalImage(const QImage& image)
 {
@@ -72,7 +78,7 @@ void MainWindow::_onLocalImage(const QImage& image)
 }
 
 
-void MainWindow::_onPeerImage(QString id, QString name, const QImage& image)
+void MainWindow::_onPeerImage(const QString &id, const QString &name, const QImage& image)
 {
     if (!m_remoteViews.contains(id))
     {
@@ -87,6 +93,39 @@ void MainWindow::_onPeerImage(QString id, QString name, const QImage& image)
     {
         m_remoteViews[id]->setImage(image);
         m_remoteViews[id]->setText(name);
+    }
+}
+
+void MainWindow::_onPeerStatus(const QString &id, const QString& name, int status)
+{
+    switch (status)
+    {
+        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_CONNECTED:
+        break;
+
+        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_DISCONNECTED:
+        if (m_remoteViews.contains(id))
+        {
+            m_remoteViews[id]->deleteLater();
+            m_remoteViews.remove(id);
+
+            if (m_remoteViews.empty())
+            {
+                //Put back full size self camera
+                m_cameraView->setMaximumSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+            }
+        }
+        break;
+
+        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_REMOTE_STREAM_ADDED:
+        break;
+
+        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_REMOTE_STREAM_REMOVED:
+        break;
+
+        default:
+            qWarning() << "status not hanelded " << status;
+        break;
     }
 }
 
@@ -110,4 +149,9 @@ void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageCons
     //Image will be automatically deleted when required
     //Invert R & B here
     emit newPeerImage(QString::fromStdString(msg->sender.id), QString::fromStdString(msg->sender.name), image.rgbSwapped());
+}
+
+void MainWindow::peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr &msg)
+{
+    emit newPeerStatus(QString::fromStdString(msg->sender.id), QString::fromStdString(msg->sender.name), msg->status);
 }

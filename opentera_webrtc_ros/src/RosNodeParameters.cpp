@@ -5,7 +5,8 @@ using namespace opentera;
 using namespace ros;
 using namespace std;
 
-bool RosNodeParameters::isStandAlone() {
+bool RosNodeParameters::isStandAlone() 
+{
     NodeHandle pnh("~");
     return pnh.param<bool>("is_stand_alone", true);
 }
@@ -37,7 +38,8 @@ void RosNodeParameters::loadStreamParams(bool &canSendStream, bool &canReceiveSt
  * @param clientName Client's name
  * @param room Room's name
  */
-void RosNodeParameters::loadSignalingParams(std::string &clientName, std::string &room) {
+void RosNodeParameters::loadSignalingParams(std::string &clientName, std::string &room) 
+{
     NodeHandle pnh("~");
 
     std::map<std::string, std::string> dict;

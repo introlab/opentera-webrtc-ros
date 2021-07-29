@@ -6,6 +6,7 @@
 
 namespace opentera
 {
+    
     /**
      * @brief A webrtc audio source that gets images from a ROS topic
      *

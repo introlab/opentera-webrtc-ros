@@ -8,7 +8,8 @@
 
 #include <RosWebRTCBridge.h>
 
-namespace opentera {
+namespace opentera 
+{
 
     /**
      * @brief Implement a ROS node to bridge WebRTC data channel to ROS topics

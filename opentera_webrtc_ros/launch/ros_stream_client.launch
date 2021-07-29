@@ -16,7 +16,7 @@
 
   <arg name="camera_topic" default="ros_image"/>
 
-  <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen" launch-prefix="gdb -ex run --args">
+  <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen">
     <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
     <rosparam param="stream" subst_value="true">
     {

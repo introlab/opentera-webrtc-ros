@@ -5,8 +5,9 @@
 
 #include <opentera_webrtc_ros_msgs/PeerData.h>
 
-namespace opentera {
-
+namespace opentera 
+{
+    
     class RosJsonDataHandler
     {
 

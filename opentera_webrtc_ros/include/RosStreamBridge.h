@@ -10,7 +10,8 @@
 
 #include <RosWebRTCBridge.h>
 
-namespace opentera {
+namespace opentera 
+{
 
     /**
      * @brief A ros node that bridges streams with ROS topics
@@ -25,7 +26,7 @@ namespace opentera {
         ros::Subscriber m_imageSubscriber;
         ros::Publisher m_imagePublisher;
         ros::Publisher m_audioPublisher;
-        ros::Publisher m_peerStatusPublisher;
+
 
         bool m_canSendStream;
         bool m_canReceiveStream;
@@ -37,9 +38,9 @@ namespace opentera {
 
         void onSignalingConnectionOpened() override;
         void onSignalingConnectionClosed() override;
+        
         void onSignalingConnectionError(const std::string& msg) override;
-        void publishPeerStatus(const Client &client, int status);
-
+  
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
             const void* audioData,

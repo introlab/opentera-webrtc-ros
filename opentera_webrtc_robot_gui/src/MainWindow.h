@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
+#include <opentera_webrtc_ros_msgs/PeerStatus.h>
 #include <QImage>
 #include <QSharedPointer>
 #include <QMap>
@@ -27,11 +28,13 @@ public:
 
 signals:
     void newLocalImage(const QImage& image);
-    void newPeerImage(QString id, QString name, const QImage &image);
+    void newPeerImage(const QString &id, const QString &name, const QImage &image);
+    void newPeerStatus(const QString &id, const QString &name, int status);
 
 private slots:
     void _onLocalImage(const QImage& image);
-    void _onPeerImage(QString id, QString name, const QImage& image);
+    void _onPeerImage(const QString& id, const QString& name, const QImage& image);
+    void _onPeerStatus(const QString &id, const QString& name, int status);
 
 
 private:
@@ -40,6 +43,7 @@ private:
 
     void localImageCallback(const sensor_msgs::ImageConstPtr& msg);
     void peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr &msg);
+    void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr &msg);
 
     void closeEvent(QCloseEvent *event) override;
 
@@ -57,7 +61,7 @@ private:
     ros::NodeHandle m_nodeHandle;
 	ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;
-    ros::Subscriber m_webrtcEventSubscriber;
+    ros::Subscriber m_peerStatusSubscriber;
 
 };
 

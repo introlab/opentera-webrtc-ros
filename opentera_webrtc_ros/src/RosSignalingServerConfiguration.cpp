@@ -30,7 +30,8 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam()
  * 
  * @return The signaling server configuration.
  */ 
-SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url) {
+SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url) 
+{
     size_t pos1, pos2;
 
     pos1 = url.find_last_of("/");
@@ -57,7 +58,8 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std:
  * 
  * @return The value of the query
  */ 
-std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& query, const std::string& queries) {
+std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& query, const std::string& queries) 
+{
     size_t pos1, pos2;
 
     pos1 = queries.find(query + "=");
