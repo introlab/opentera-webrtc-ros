@@ -16,7 +16,7 @@ The procedure is written for Ubuntu 20.04 using ROS noetic. We assume ROS is alr
 
 ```bash
 # opentera-webrtc-ros packages
-sudo apt-get install nodejs ros-noetic-turtlebot3* ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
+sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
 
 # python dependencies
 sudo apt-get install python3-pip portaudio19-dev
