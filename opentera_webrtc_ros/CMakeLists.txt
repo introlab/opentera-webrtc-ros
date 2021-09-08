@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   audio_utils
   geometry_msgs
+  opentera_webrtc_ros_msgs
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures

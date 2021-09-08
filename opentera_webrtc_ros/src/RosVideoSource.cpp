@@ -15,7 +15,9 @@ using namespace opentera;
  * @param isScreenCast the transport layer should be configured to stream a screen rather then a camera
  */
 RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast):
-        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast)) { }
+        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast)) 
+{ 
+}
 
 /**
  * @brief Process a frame received from ROS

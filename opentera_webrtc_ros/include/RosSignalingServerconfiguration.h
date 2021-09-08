@@ -3,7 +3,8 @@
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 
-namespace opentera {
+namespace opentera 
+{
 
     /**
      * @brief Utility to build signaling server configuration from ROS parameter server

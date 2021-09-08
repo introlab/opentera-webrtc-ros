@@ -14,7 +14,8 @@ using namespace opentera_webrtc_ros_msgs;
  */
 RosDataChannelBridge::RosDataChannelBridge(const ros::NodeHandle& nh): RosWebRTCBridge(nh)
 {
-    if (RosNodeParameters::isStandAlone()) {
+    if (RosNodeParameters::isStandAlone()) 
+    {
         initSignalingClient(RosSignalingServerConfiguration::fromRosParam());
         initAdvertiseTopics();
         initDataChannelCallback();
@@ -27,7 +28,6 @@ RosDataChannelBridge::RosDataChannelBridge(const ros::NodeHandle& nh): RosWebRTC
  */
 RosDataChannelBridge::~RosDataChannelBridge()
 {
-
 }
 
 /**
@@ -35,7 +35,8 @@ RosDataChannelBridge::~RosDataChannelBridge()
  * 
  * @param signalingServerConfiguration Signaling server configuration
  */
-void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration &signalingServerConfiguration) {
+void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration &signalingServerConfiguration) 
+{
     // Create signaling client
     m_signalingClient = make_unique<DataChannelClient>(
             signalingServerConfiguration,
@@ -48,7 +49,8 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
 /**
  * @brief Initialize the subscriber and publisher
  */
-void RosDataChannelBridge::initAdvertiseTopics() {
+void RosDataChannelBridge::initAdvertiseTopics() 
+{
     m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data", 10);
     m_dataSubscriber = m_nh.subscribe("ros_data", 10, &RosDataChannelBridge::onRosData, this);
 }
@@ -56,9 +58,11 @@ void RosDataChannelBridge::initAdvertiseTopics() {
 /**
  * @brief Initialize the data channel client callback
  */
-void RosDataChannelBridge::initDataChannelCallback() {
+void RosDataChannelBridge::initDataChannelCallback() 
+{
     // Setup data channel callback
-    m_signalingClient->setOnDataChannelMessageString([&](const Client& client, const string& data) {
+    m_signalingClient->setOnDataChannelMessageString([&](const Client& client, const string& data) 
+    {
         PeerData msg;
         //TODO PeerData should have a json string sent by client.data()
         msg.data = data;
@@ -69,14 +73,16 @@ void RosDataChannelBridge::initDataChannelCallback() {
     });
 }
 
-void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) {
+void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events)
+{
     initSignalingClient(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
     initAdvertiseTopics();
     initDataChannelCallback();
     connect();
 }
 
-void RosDataChannelBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) {
+void RosDataChannelBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) 
+{
     disconnect();
 }
 

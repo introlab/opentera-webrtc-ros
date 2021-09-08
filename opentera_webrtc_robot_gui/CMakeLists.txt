@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(opentera_webrtc_ros_msgs)
+project(opentera_webrtc_robot_gui)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,16 +8,65 @@ project(opentera_webrtc_ros_msgs)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  opentera_webrtc_ros_msgs
   roscpp
   rospy
   std_msgs
-  message_generation
   sensor_msgs
-  audio_utils
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+# Find Ubuntu release version
+find_program(LSB_RELEASE_EXEC lsb_release)
+execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+    OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if(NOT LSB_RELEASE_ID_SHORT MATCHES "18.04")
+  set(Qt5_DIR $ENV{HOME}/Qt/5.9.9/gcc_64/lib/cmake/Qt5)
+  # We use older version for compatibility with Ubuntu 18.04 stock version
+  # Install this version with Qt Maintenance Tool / Online installer if required
+  if (NOT EXISTS ${Qt5_DIR})
+    message(FATAL_ERROR "Qt not found in : ${Qt5_DIR}")
+  else()
+    message(STATUS "Using QT from directory : ${Qt5_DIR}")
+  endif()
+endif()
+
+set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
+find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
+
+set(srcs
+  src/main.cpp
+  src/MainWindow.cpp
+  src/ROSCameraView.cpp
+  src/GraphicsViewToolbar.cpp
+)
+
+set(headers
+  src/MainWindow.h
+  src/ROSCameraView.h
+  src/GraphicsViewToolbar.h
+)
+
+set(uis
+  src/ui/MainWindow.ui
+)
+
+set(qrcs
+  src/resources/opentera_webrtc_robot_gui.qrc
+)
+
+#Generate .h files from the .ui files
+QT5_WRAP_UI(project_moc_uis ${uis})
+
+# generate rules for building source files from the resources
+QT5_ADD_RESOURCES(project_qrcs ${qrcs})
+
+#This will generate moc_* for Qt
+qt5_wrap_cpp(project_moc_srcs ${headers})
+
+
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -50,24 +99,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-   FILES
-   DatabaseEvent.msg
-   DeviceEvent.msg
-   JoinSessionEvent.msg
-   JoinSessionReplyEvent.msg
-   LeaveSessionEvent.msg
-   LogEvent.msg
-   ParticipantEvent.msg
-   StopSessionEvent.msg
-   UserEvent.msg
-   OpenTeraEvent.msg
-   Peer.msg
-   PeerData.msg
-   PeerImage.msg
-   PeerAudio.msg
-   PeerStatus.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -84,12 +120,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
-   audio_utils
-)
+# generate_messages(
+#   DEPENDENCIES
+#   opentera_webrtc_ros_msgs#   sdt_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -122,8 +156,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES opentera-webrtc-ros-msgs
-   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+#  LIBRARIES opentera_webrtc_robot_gui
+#  CATKIN_DEPENDS opentera_webrtc_ros_msgs roscpp rospy sdt_msgs
 #  DEPENDS system_lib
 )
 
@@ -136,11 +170,17 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+add_executable(${PROJECT_NAME}_node ${srcs} ${uis} ${headers} ${project_moc_uis} ${project_qrcs} ${project_moc_srcs})
+qt5_use_modules(${PROJECT_NAME}_node ${opentera_webrtc_robot_gui_components})
+set_property(TARGET ${PROJECT_NAME}_node PROPERTY CXX_STANDARD 11)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/opentera-webrtc-ros-msgs.cpp
+#   src/${PROJECT_NAME}/opentera_webrtc_robot_gui.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -151,7 +191,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/opentera-webrtc-ros-msgs_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/opentera_webrtc_robot_gui_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -164,9 +204,10 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}_node
+   ${catkin_LIBRARIES}
+   ${opentera_webrtc_robot_gui_components_link}
+)
 
 #############
 ## Install ##
@@ -177,16 +218,16 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+   scripts/opentera_webrtc_robot_gui.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME}_node
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
@@ -215,7 +256,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_opentera-webrtc-ros-msgs.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_opentera_webrtc_robot_gui.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
