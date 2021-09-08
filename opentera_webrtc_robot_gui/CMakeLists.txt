@@ -15,12 +15,23 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+# Find Ubuntu release version
+find_program(LSB_RELEASE_EXEC lsb_release)
+execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+    OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
-# We use older version for compatibility with Ubuntu 18.04 stock version
-# Install this version with Qt Maintenance Tool if required
-set(Qt5_DIR $ENV{HOME}/Qt/5.9.9/gcc_64/lib/cmake/Qt5)
+if(NOT LSB_RELEASE_ID_SHORT MATCHES "18.04")
+  set(Qt5_DIR $ENV{HOME}/Qt/5.9.9/gcc_64/lib/cmake/Qt5)
+  # We use older version for compatibility with Ubuntu 18.04 stock version
+  # Install this version with Qt Maintenance Tool / Online installer if required
+  if (NOT EXISTS ${Qt5_DIR})
+    message(FATAL_ERROR "Qt not found in : ${Qt5_DIR}")
+  else()
+    message(STATUS "Using QT from directory : ${Qt5_DIR}")
+  endif()
+endif()
 
 set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
 find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
