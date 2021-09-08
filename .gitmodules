@@ -1,6 +1,6 @@
 [submodule "opentera-webrtc-ros/opentera-webrtc"]
 	path = opentera_webrtc_ros/opentera-webrtc
-	url = https://github.com/introlab/opentera-webrtc.git
+	url = ../opentera-webrtc.git
 [submodule "opentera-webrtc-demos/opentera-webrtc-teleop-frontend"]
 	path = opentera_webrtc_demos/opentera-webrtc-teleop-frontend
-	url = https://github.com/introlab/opentera-webrtc-teleop-frontend.git
+	url = ../opentera-webrtc-teleop-frontend.git
