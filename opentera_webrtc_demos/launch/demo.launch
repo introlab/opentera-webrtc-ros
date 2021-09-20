@@ -15,7 +15,7 @@
         <arg name="model" value="$(arg model)" />
     </include>
 
-    <!-- Camera 1 -->
+    <!-- Front camera -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer1"/>
         <arg name="is_stand_alone" value="true"/>
@@ -27,7 +27,22 @@
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/camera/rgb/image_raw"/>
+        <arg name="camera_topic" value="/front_camera/image_raw"/>
+    </include>
+
+    <!-- Bottom camera -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer2"/>
+        <arg name="is_stand_alone" value="true"/>
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="client_name" value="Robot Camera 2"/>
+        <arg name="room_name" value="CameraX"/>
+        <arg name="room_password" value="$(arg signaling_server_password)"/>
+        <arg name="camera_topic" value="/bottom_camera/image_raw"/>
     </include>
 
     <!-- Data Channel  -->

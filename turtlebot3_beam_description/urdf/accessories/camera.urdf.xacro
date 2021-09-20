@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+          
+    <xacro:macro name="camera_sensor" params="name parent hfov image_width image_height *origin">        
+      <link name="${name}_link">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+              <box size="0.02 0.08 0.05"/>
+          </geometry>
+        </collision>
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+              <box size="0.02 0.08 0.05"/>
+          </geometry>
+        </visual>
+        <inertial>
+          <mass value="0.0001" />
+          <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+          <inertia ixx="0.0000001" ixy="0" ixz="0" iyy="0.0000001" iyz="0" izz="0.0000001" />
+        </inertial>
+      </link>
+
+      <joint name="${name}_joint" type="fixed">
+        <axis xyz="0 0 1" />
+          <xacro:insert_block name="origin"/>
+        <parent link="${parent}"/>
+        <child link="${name}_link"/>
+      </joint>     
+      
+      <gazebo reference="${name}_link">
+        <sensor type="camera" name="${name}">
+          <update_rate>30.0</update_rate>
+          <camera name="${name}">
+            <horizontal_fov>${hfov}</horizontal_fov>
+            <image>
+              <width>${image_width}</width>
+              <height>${image_height}</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.02</near>
+              <far>300</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+          </camera>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>0.0</updateRate>
+            <cameraName>${name}</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <frameName>${name}_link</frameName>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
+        </sensor>
+      </gazebo>
+    
+    </xacro:macro>
+    
+</robot>

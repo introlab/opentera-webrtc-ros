@@ -7,6 +7,7 @@
   <arg name="z_pos" default="0.0"/>
 
   <!-- RTAB-Map config -->
+  <arg name="use_rtabmap" default="false" />
   <arg name="open_rviz" default="true"/>
   <arg name="rtabmapviz" default="true"/>
   <arg name="move_forward_only" default="false"/>
@@ -28,15 +29,14 @@
   </include>
 
   <!-- Robot description and urdf-->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_beam_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
 
-  <!-- Turtlebot3 bringup -->
-  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
-    <arg name="model" value="$(arg model)" />
-  </include>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
 
-  <group ns="rtabmap">
+  <group ns="rtabmap" if="$(arg use_rtabmap)">
     <node if="$(eval model=='waffle')" pkg="rtabmap_ros" type="rgbd_sync" name="rgbd_sync" output="screen">
       <remap from="rgb/image"         to="/camera/rgb/image_raw"/>
       <remap from="depth/image"       to="/camera/depth/image_raw"/>
