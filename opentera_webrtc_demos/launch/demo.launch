@@ -62,5 +62,9 @@
         <arg name="input_topic" value="/webrtc_data"/>
     </include>
 
+    <!-- Robot status simulated data -->
+    <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
-</launch>   
+
+</launch>
+ 
