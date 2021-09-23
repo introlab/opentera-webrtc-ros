@@ -6,10 +6,14 @@
 
 using namespace opentera;
 
-RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh): m_nh(nh)
+RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh) : 
+    m_nh(nh),
+    m_p_nh(p_nh)
 {
     m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+    m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
+    m_p_nh.param<float>("angular_multiplier", m_angular_multiplier, 0.15);
 }
 
 RosJsonDataHandler::~RosJsonDataHandler()
@@ -27,8 +31,8 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
     {
         geometry_msgs::Twist twist;
         // Multiply by 0.15 in order to control the speed of the movement
-        twist.linear.x = (double)serializedData["x"] * 0.15;
-        twist.angular.z = (double)serializedData["z"] * 0.15;
+        twist.linear.x = (double)serializedData["x"] * m_linear_multiplier;
+        twist.angular.z = (double)serializedData["z"] * m_angular_multiplier;
         m_cmdVelPublisher.publish(twist);
     }
 }
@@ -52,7 +56,8 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "json_data_handler");
     ros::NodeHandle nh;
+    ros::NodeHandle p_nh("~");
 
-    RosJsonDataHandler node(nh);
+    RosJsonDataHandler node(nh, p_nh);
     node.run();
 }

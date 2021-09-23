@@ -14,14 +14,17 @@ namespace opentera
     private:
         ros::Subscriber m_webrtcDataSubscriber;
         ros::Publisher m_cmdVelPublisher;
+        float m_linear_multiplier;
+        float m_angular_multiplier;
 
     protected:
         ros::NodeHandle m_nh;
+        ros::NodeHandle m_p_nh;
 
         virtual void onWebRTCDataReceived(const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
 
     public:
-        RosJsonDataHandler(ros::NodeHandle nh);
+        RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh);
         virtual ~RosJsonDataHandler();
 
         void run();
