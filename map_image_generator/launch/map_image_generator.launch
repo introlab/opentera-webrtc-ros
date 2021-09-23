@@ -1,0 +1,49 @@
+<launch>
+
+    <arg name="input_occupancy_grid_topic" default="/map"/>
+    <arg name="input_global_path_topic" default="/move_base/GlobalPlanner/plan"/>
+    <arg name="input_goal_topic" default="/move_base_simple/goal"/>
+    <arg name="input_laser_scan_topic" default="/scan"/>
+
+    <arg name="output_map_image_topic" default="/map_image_generator/image"/>
+
+    <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
+    <arg name="output_goal_topic" default="/rtabmap/goal"/>
+
+    <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
+    <arg name="output_map_image_labels_topic" default="/map_image_generator/labels"/>
+    <arg name="rtabmap_list_label_service" default="/rtabmap/list_labels"/>
+
+    <arg name="refresh_rate_param" default="1.0"/>
+    <arg name="resolution_param" default="20"/>
+    <arg name="width_param" default="50"/>
+    <arg name="height_param" default="50"/>
+    <arg name="x_origin_param" default="500"/>
+    <arg name="y_origin_param" default="500"/>
+    <arg name="robot_frame_param" default="base_footprint"/>
+
+    <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" output="screen">
+        <remap from="occupancy_grid" to="$(arg input_occupancy_grid_topic)"/>
+        <remap from="global_path" to="$(arg input_global_path_topic)"/>
+        <remap from="input_goal" to="$(arg input_goal_topic)"/>
+        <remap from="laser_scan" to="$(arg input_laser_scan_topic)"/>
+
+        <remap from="map_image" to="$(arg output_map_image_topic)"/>
+
+        <remap from="map_image_goal" to="$(arg input_map_image_goal_topic)"/>
+        <remap from="output_goal" to="$(arg output_goal_topic)"/>
+
+        <remap from="map_labels" to="$(arg input_map_labels_topic)"/>
+        <remap from="map_image_labels" to="$(arg output_map_image_labels_topic)"/>
+        <remap from="rtabmap_list_label_service" to="$(arg rtabmap_list_label_service)"/>
+
+        <param name="refresh_rate" type="double" value="$(arg refresh_rate_param)"/>
+        <param name="resolution" type="int" value="$(arg resolution_param)"/>
+        <param name="width" type="int" value="$(arg width_param)"/>
+        <param name="height" type="int" value="$(arg height_param)"/>
+        <param name="x_origin" type="int" value="$(arg x_origin_param)"/>
+        <param name="y_origin" type="int" value="$(arg y_origin_param)"/>
+        <param name="robot_frame" type="string" value="$(arg robot_frame_param)"/>
+    </node>
+
+</launch>
