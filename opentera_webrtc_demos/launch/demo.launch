@@ -17,7 +17,8 @@
 
     <!-- Map image generator -->
     <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
-        <arg name="refresh_rate_param" default="15"/>
+        <arg name="refresh_rate_param" value="15"/>
+        <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
     </include>
 
     <!-- Front camera -->
