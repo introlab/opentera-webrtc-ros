@@ -11,6 +11,9 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "map_image_generator/utils.h"
+#include "map_image_generator/ImageGoalToMapGoal.h"
+
 namespace map_image_generator
 {
     class GoalConverter
@@ -18,19 +21,18 @@ namespace map_image_generator
         const Parameters& m_parameters;
         ros::NodeHandle& m_nodeHandle;
 
-        ros::Subscriber m_mapImageGoalSubscriber;
         ros::Publisher m_goalPublisher;
-
-        ros::Subscriber m_moveBaseSimpleImageGoalSub;
         ros::Publisher m_moveBaseSimpleGoalPub;
 
+        ros::ServiceServer image_goal_to_map_goal_service;
+
     public:
-        GoalConverter(const Parameters& parameters, ros::NodeHandle& nodeHandle);
+        GoalConverter(const Parameters &parameters, ros::NodeHandle &nodeHandle);
         virtual ~GoalConverter();
 
     private:
-        void mapImageGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& mapImageGoal);
-        void moveBaseSimpleImageGoalCB(const std_msgs::String::ConstPtr& moveBaseSimpleImageGoal);
+        bool mapImageGoalCallback(ImageGoalToMapGoal::Request &req,
+                                  ImageGoalToMapGoal::Response &res);
     };
 }
 #endif
