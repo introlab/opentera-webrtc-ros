@@ -39,13 +39,13 @@
   </node>
 
   <group ns="rtabmap" if="$(arg use_rtabmap)">
-    <node if="$(eval model=='waffle')" pkg="rtabmap_ros" type="rgbd_sync" name="rgbd_sync" output="screen">
+    <node if="$(eval model=='waffle')" pkg="rtabmap_ros" type="rgbd_sync" name="rgbd_sync">
       <remap from="rgb/image"         to="/r200/rgb/image_raw"/>
       <remap from="depth/image"       to="/r200/depth/image_raw"/>
       <remap from="rgb/camera_info"   to="/r200/rgb/camera_info"/>
     </node>
   
-    <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="$(arg rtabmap_args)">
+    <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" args="$(arg rtabmap_args)">
       <param name="database_path"       type="string" value="$(arg database_path)"/>
       <param name="frame_id"            type="string" value="base_footprint"/>
       <param name="subscribe_rgb"   type="bool" value="false"/>
@@ -80,7 +80,7 @@
     </node>
 
     <!-- visualization with rtabmapviz -->
-    <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz" args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini" output="screen">
+    <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz" args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini">
       <param name="subscribe_scan"   type="bool"   value="true"/>
       <param name="subscribe_odom"   type="bool"   value="true"/>
       <param name="frame_id"         type="string" value="base_footprint"/>
@@ -102,4 +102,9 @@
     <node pkg="rviz" type="rviz" name="rviz" required="true"
           args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
   </group>
+
+  <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="screen">
+    <remap from="map_image_goal" to="/map_image_generator/map_image_goal" />
+    <remap from="map_goal" to="/map_image_generator/map_goal" />
+  </node>
 </launch>
