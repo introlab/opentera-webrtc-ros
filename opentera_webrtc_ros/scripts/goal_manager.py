@@ -36,7 +36,7 @@ class GoalManager():
         pose.header.frame_id = "map"
         pose.pose.position.x = waypoint.x
         pose.pose.position.y = waypoint.y
-        yaw = wrap_angle_pi(waypoint.yaw - pi)
+        yaw = -waypoint.yaw
         quaternion = quaternion_from_euler(0, 0, yaw)
         pose.pose.orientation.x = quaternion[0]
         pose.pose.orientation.y = quaternion[1]
@@ -52,9 +52,6 @@ class GoalManager():
         goal.target_pose = msg
         self.move_base_client.send_goal(goal)
 
-
-def wrap_angle_pi(angle):
-    return (angle + pi) % (2 * pi) - pi
 
 if __name__ == '__main__':
     print("Goal manager ready")
