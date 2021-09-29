@@ -10,11 +10,11 @@ namespace map_image_generator
 {
     class GoalImageDrawer : public ImageDrawer
     {
-        ros::Subscriber m_goalSubscriber;
-        geometry_msgs::PoseStamped::ConstPtr m_lastGoal;
+        geometry_msgs::PoseStamped::Ptr m_activeGoal;
 
     public:
-        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
+        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener,
+                        geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~GoalImageDrawer();
         
         virtual void draw(cv::Mat& image);

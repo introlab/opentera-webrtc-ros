@@ -24,7 +24,8 @@ namespace map_image_generator
         cv_bridge::CvImage m_cvImage;
         
     public:
-        MapImageGenerator(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
+        MapImageGenerator(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener,
+                          geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~MapImageGenerator();
 
        void generate(sensor_msgs::Image& sensorImage);

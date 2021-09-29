@@ -11,7 +11,8 @@ using namespace std;
 
 MapImageGenerator::MapImageGenerator(const Parameters& parameters,
     ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener) :
+    tf::TransformListener& tfListener,
+    geometry_msgs::PoseStamped::Ptr activeGoal) :
     m_parameters(parameters), m_nodeHandle(nodeHandle), m_tfListener(tfListener)
 {
     if (m_parameters.drawOccupancyGrid())
@@ -31,7 +32,7 @@ MapImageGenerator::MapImageGenerator(const Parameters& parameters,
 
     if (m_parameters.drawGoal())
     {
-        m_drawers.push_back(new GoalImageDrawer(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(new GoalImageDrawer(m_parameters, nodeHandle, m_tfListener, activeGoal));
     }
 
     if (m_parameters.drawLaserScan())

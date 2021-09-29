@@ -21,13 +21,12 @@ namespace map_image_generator
         const Parameters& m_parameters;
         ros::NodeHandle& m_nodeHandle;
 
-        ros::Publisher m_goalPublisher;
-        ros::Publisher m_moveBaseSimpleGoalPub;
-
         ros::ServiceServer image_goal_to_map_goal_service;
 
+        geometry_msgs::PoseStamped::Ptr m_activeGoal;
+
     public:
-        GoalConverter(const Parameters &parameters, ros::NodeHandle &nodeHandle);
+        GoalConverter(const Parameters &parameters, ros::NodeHandle &nodeHandle, geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~GoalConverter();
 
     private:

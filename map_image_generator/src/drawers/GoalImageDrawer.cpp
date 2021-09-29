@@ -9,11 +9,11 @@ using namespace std;
 
 GoalImageDrawer::GoalImageDrawer(const Parameters& parameters,
     ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener) :
-    ImageDrawer(parameters, nodeHandle, tfListener)
+    tf::TransformListener& tfListener,
+    geometry_msgs::PoseStamped::Ptr activeGoal) :
+    ImageDrawer(parameters, nodeHandle, tfListener),
+    m_activeGoal(activeGoal)
 {
-    m_goalSubscriber = m_nodeHandle.subscribe("input_goal", 1,
-        &GoalImageDrawer::goalCallback, this);
 }
 
 GoalImageDrawer::~GoalImageDrawer()
@@ -22,12 +22,12 @@ GoalImageDrawer::~GoalImageDrawer()
 
 void GoalImageDrawer::draw(cv::Mat& image)
 {
-    if (!m_lastGoal) { return; }
+    if (m_activeGoal->header.frame_id == "") { return; }
 
     tf::StampedTransform transform;
     try
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_lastGoal->header.frame_id,
+        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_activeGoal->header.frame_id,
             ros::Time(0), transform);
         drawGoal(image, transform);
     }
@@ -37,18 +37,13 @@ void GoalImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GoalImageDrawer::goalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
-{
-    m_lastGoal = goal;
-}
-
 void GoalImageDrawer::drawGoal(cv::Mat& image, tf::StampedTransform& transform)
 {
     const cv::Scalar& color = m_parameters.goalColor();
     int size = m_parameters.goalSize();
 
     tf::Pose goalPose;
-    tf::poseMsgToTF(m_lastGoal->pose, goalPose);
+    tf::poseMsgToTF(m_activeGoal->pose, goalPose);
     goalPose = transform * goalPose;
     double yaw = tf::getYaw(goalPose.getRotation());
 

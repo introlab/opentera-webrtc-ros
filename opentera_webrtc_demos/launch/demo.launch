@@ -17,11 +17,8 @@
 
     <!-- Map image generator -->
     <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
-        <arg name="refresh_rate_param" value="15"/>
+        <arg name="refresh_rate_param" value="5"/>
         <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
-        <arg name="input_map_image_goal_topic" value="/map_image_generator/map_image_goal"/>
-        <arg name="output_goal_topic" value="/map_image_generator/map_goal"/>
-        <arg name="input_goal_topic" value="/map_image_generator/map_goal"/>  <!-- For drawing the goal only -->
     </include>
 
     <!-- Front camera -->
