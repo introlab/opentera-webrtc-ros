@@ -24,12 +24,17 @@ class GoalManager():
         self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
 
+        self.should_stop = False
+
     def waypoints_cb(self, msg):
         self.move_base_client.cancel_all_goals()
+        self.should_stop = False
         self.waypoints = msg
         for waypoint in msg.waypoints:
             pose_goal = self.transform_waypoint_to_pose(waypoint)
             self.send_goal(pose_goal)
+            if self.should_stop:
+                break
 
     def transform_waypoint_to_pose(self, waypoint):
         pose = PoseStamped()
@@ -62,6 +67,7 @@ class GoalManager():
     def stop_cb(self, msg):
         if msg.data == True:
             self.move_base_client.cancel_all_goals()
+            self.should_stop = True
 
 
 if __name__ == '__main__':
