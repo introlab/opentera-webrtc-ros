@@ -5,11 +5,8 @@
 #include <json.hpp>
 #include <ros/ros.h>
 #include <opentera_webrtc_ros_msgs/PeerData.h>
-#include <opentera_webrtc_ros_msgs/Waypoint.h>
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
 #include <std_msgs/Bool.h>
 
 namespace opentera 

@@ -4,10 +4,9 @@ import rospy
 import actionlib
 from math import pi
 from tf.transformations import quaternion_from_euler
-from geometry_msgs.msg import PoseStamped, PoseArray
-from opentera_webrtc_ros_msgs.msg import Waypoint, WaypointArray
+from geometry_msgs.msg import PoseStamped
+from opentera_webrtc_ros_msgs.msg import WaypointArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from actionlib_msgs.msg import GoalStatus
 from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool
 
@@ -27,6 +26,7 @@ class GoalManager():
 
     def waypoints_cb(self, msg):
         self.move_base_client.cancel_all_goals()
+        self.waypoints = msg
         for waypoint in msg.waypoints:
             pose_goal = self.transform_waypoint_to_pose(waypoint)
             self.send_goal(pose_goal)
@@ -57,6 +57,7 @@ class GoalManager():
         goal = MoveBaseGoal()
         goal.target_pose = pose_goal
         self.move_base_client.send_goal(goal)
+        self.move_base_client.wait_for_result()
 
     def stop_cb(self, msg):
         if msg.data == True:

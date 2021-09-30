@@ -39,19 +39,18 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
         twist.angular.z = (double)serializedData["z"] * m_angular_multiplier;
         m_cmdVelPublisher.publish(twist);
     }
-    else if (serializedData["type"] == "waypoint")
+    else if (serializedData["type"] == "waypointArray")
     {
         opentera_webrtc_ros_msgs::WaypointArray wp_array;
-
-        // TODO: handle receiving an array of waypoints
-        // Received waypoints are in pixel coordinates in the image frame
-        opentera_webrtc_ros_msgs::Waypoint wp;
-        wp.x = (double)serializedData["waypoint"]["coordinate"]["x"];
-        wp.y = (double)serializedData["waypoint"]["coordinate"]["y"];
-        wp.yaw = (double)serializedData["waypoint"]["coordinate"]["yaw"] * M_PI/180;
-
-        wp_array.waypoints.push_back(wp);
-
+        for(auto waypoint : serializedData["array"])
+        {
+            // Received waypoints are in pixel coordinates in the image frame
+            opentera_webrtc_ros_msgs::Waypoint wp;
+            wp.x = (double)waypoint["coordinate"]["x"];
+            wp.y = (double)waypoint["coordinate"]["y"];
+            wp.yaw = (double)waypoint["coordinate"]["yaw"] * M_PI/180;
+            wp_array.waypoints.push_back(wp);
+        }
         m_waypointsPub.publish(wp_array);
     }
 }
