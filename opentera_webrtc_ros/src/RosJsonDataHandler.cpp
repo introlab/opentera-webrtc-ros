@@ -7,6 +7,7 @@ RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh)
     m_p_nh(p_nh)
 {
     m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
+    m_stopPub = m_nh.advertise<std_msgs::Bool>("stop", 1);
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     m_waypointsPub = m_nh.advertise<opentera_webrtc_ros_msgs::WaypointArray>("waypoints", 1);
     m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
@@ -23,8 +24,14 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
     const opentera_webrtc_ros_msgs::PeerData msg = *(event.getMessage());
 
     nlohmann::json serializedData = nlohmann::json::parse(msg.data);
-
-    if (serializedData["type"] == "velCmd")
+    if (serializedData["type"] == "stop")
+    {
+        // TODO: should this be a service instead of a topic message?
+        std_msgs::Bool msg;
+        msg.data = serializedData["state"];
+        m_stopPub.publish(msg);
+    }
+    else if (serializedData["type"] == "velCmd")
     {
         geometry_msgs::Twist twist;
         // Multiply by 0.15 in order to control the speed of the movement

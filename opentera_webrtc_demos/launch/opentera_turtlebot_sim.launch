@@ -10,7 +10,8 @@
   <arg name="use_rtabmap" default="true" />
   <arg name="open_rviz" default="false"/>
   <arg name="rtabmapviz" default="false"/>
-  <arg name="move_forward_only" default="false"/>
+  <arg name="move_forward_only" default="true"/>
+  <arg name="gazebo_gui" default="false"/>
 
   <arg name="use_move_base" default="true" />
 
@@ -25,7 +26,7 @@
     <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="false"/>
+    <arg name="gui" value="$(arg gazebo_gui)"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>

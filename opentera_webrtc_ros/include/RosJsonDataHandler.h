@@ -10,6 +10,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
+#include <std_msgs/Bool.h>
 
 namespace opentera 
 {
@@ -19,6 +20,7 @@ namespace opentera
 
     private:
         ros::Subscriber m_webrtcDataSubscriber;
+        ros::Publisher m_stopPub;
         ros::Publisher m_cmdVelPublisher;
         ros::Publisher m_waypointsPub;
         float m_linear_multiplier;
