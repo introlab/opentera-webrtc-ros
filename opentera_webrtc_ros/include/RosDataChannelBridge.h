@@ -16,7 +16,8 @@ namespace opentera
      */
     class RosDataChannelBridge: public RosWebRTCBridge<DataChannelClient>
     {
-        ros::Subscriber m_dataSubscriber;
+        ros::Subscriber m_robotStatusSubscriber;
+        ros::Subscriber m_waypointReachedSubscriber;
         ros::Publisher m_dataPublisher;
 
         void initSignalingClient(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
