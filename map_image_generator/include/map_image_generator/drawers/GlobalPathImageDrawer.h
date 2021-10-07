@@ -5,13 +5,15 @@
 
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
+#include <std_srvs/SetBool.h>
 
 namespace map_image_generator
 {
     class GlobalPathImageDrawer : public ImageDrawer
     {
         ros::Subscriber m_globalPathSubscriber;
-        nav_msgs::Path::ConstPtr m_lastGlobalPath;
+        nav_msgs::Path::Ptr m_lastGlobalPath;
+        ros::ServiceServer m_clearGlobalPathService;
 
     public:
         GlobalPathImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
@@ -20,9 +22,9 @@ namespace map_image_generator
         virtual void draw(cv::Mat& image);
 
     private:
-        void globalPathCallback(const nav_msgs::Path::ConstPtr& globalPath);
-
+        void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
         void drawGlobalPath(cv::Mat& image, tf::StampedTransform& transform);
+        bool clearGlobalPath(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
     };
 }
 #endif

@@ -10,6 +10,7 @@ from opentera_webrtc_ros_msgs.msg import WaypointArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool, String
+from std_srvs.srv import SetBool
 
 class GoalManager():
     def __init__(self):
@@ -40,6 +41,7 @@ class GoalManager():
             else:
                 self.publishWaypointReached(i)
                 i += 1
+        self.clearGlobalPathClient()
 
     def transform_waypoint_to_pose(self, waypoint):
         pose = PoseStamped()
@@ -78,6 +80,14 @@ class GoalManager():
         waypoint_reached_json_message = {"type": "waypointReached", "waypointNumber": i}
         waypoint_reached_msg = json.dumps(waypoint_reached_json_message)
         self.waypoint_reached_pub.publish(waypoint_reached_msg)
+
+    def clearGlobalPathClient(self):
+        rospy.wait_for_service('clear_global_path')
+        try:
+            clear_global_path = rospy.ServiceProxy('clear_global_path', SetBool)
+            clear_global_path(True)
+        except rospy.ServiceException as e:
+            print("Service call failed: %s" % e)
 
 
 if __name__ == '__main__':

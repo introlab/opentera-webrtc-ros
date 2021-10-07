@@ -11,6 +11,7 @@ GlobalPathImageDrawer::GlobalPathImageDrawer(const Parameters& parameters,
 {
     m_globalPathSubscriber = m_nodeHandle.subscribe("global_path", 1,
         &GlobalPathImageDrawer::globalPathCallback, this);
+    m_clearGlobalPathService = m_nodeHandle.advertiseService("clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this);
 }
 
 GlobalPathImageDrawer::~GlobalPathImageDrawer()
@@ -34,7 +35,7 @@ void GlobalPathImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::ConstPtr& globalPath)
+void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& globalPath)
 {
     m_lastGlobalPath = globalPath;
 }
@@ -64,5 +65,15 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::StampedTransform&
             color,
             thickness,
             cv::LINE_AA);
+    }
+}
+
+bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+{
+    if(req.data)
+    {
+        m_lastGlobalPath->poses.clear();
+        res.success = true;
+        return true;
     }
 }

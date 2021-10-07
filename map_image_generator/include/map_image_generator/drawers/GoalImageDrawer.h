@@ -20,8 +20,6 @@ namespace map_image_generator
         virtual void draw(cv::Mat& image);
 
     private:
-        void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
-
         void drawGoal(cv::Mat& image, tf::StampedTransform& transform);
     };
 }
