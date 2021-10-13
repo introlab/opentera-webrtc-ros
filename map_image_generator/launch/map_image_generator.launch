@@ -15,9 +15,9 @@
     <arg name="rtabmap_list_label_service" default="/rtabmap/list_labels"/>
 
     <arg name="refresh_rate_param" default="1.0"/>
-    <arg name="resolution_param" default="20"/>
-    <arg name="width_param" default="50"/>
-    <arg name="height_param" default="50"/>
+    <arg name="resolution_param" default="40"/>
+    <arg name="width_param" default="25"/>
+    <arg name="height_param" default="25"/>
     <arg name="x_origin_param" default="500"/>
     <arg name="y_origin_param" default="500"/>
     <arg name="robot_frame_param" default="base_footprint"/>
@@ -46,6 +46,12 @@
         <param name="y_origin" type="int" value="$(arg y_origin_param)"/>
         <param name="robot_frame" type="string" value="$(arg robot_frame_param)"/>
         <param name="draw_goal" type="bool" value="$(arg draw_goal)" />
+        <param name="wall_color" type="string" value="0 224 225"/>
+        <param name="free_space_color" type="string" value="24 39 52"/>
+        <param name="unknown_space_color" type="string" value="0 0 0"/>
+        <param name="robot_size" type="int" value="20"/>
+        <param name="global_path_thickness" type="int" value="2"/>
+        <param name="laser_scan_size" type="int" value="3"/>
     </node>
 
 </launch>
