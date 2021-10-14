@@ -1,0 +1,3 @@
+geometry_msgs/PoseStamped image_goal
+---
+geometry_msgs/PoseStamped map_goal

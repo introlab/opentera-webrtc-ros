@@ -3,9 +3,13 @@
   <!-- Arguments -->
   <arg name="name" default="json_data_handler"/>
   <arg name="input_topic" default="webrtc_data"/>
+  <arg name="linear_multiplier" default="1"/>
+  <arg name="angular_multiplier" default="1"/>
 
   <node name="$(arg name)" pkg="opentera_webrtc_ros" type="json_data_handler" output="screen">
     <remap from="webrtc_data" to="$(arg input_topic)"/>
+    <param name="linear_multiplier" value="$(arg linear_multiplier)"/>
+    <param name="angular_multiplier" value="$(arg angular_multiplier)"/>
   </node>
   
 </launch>

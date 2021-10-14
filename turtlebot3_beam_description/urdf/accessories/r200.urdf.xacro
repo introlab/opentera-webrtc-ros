@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="r200" params="name parent *origin">
+
+    <xacro:property name="r200_cam_rgb_px" value="0.005"/>
+    <xacro:property name="r200_cam_rgb_py" value="0.018"/>
+    <xacro:property name="r200_cam_rgb_pz" value="0.013"/>
+    <xacro:property name="r200_cam_depth_offset" value="0.01"/>
+
+    <joint name="${name}_joint" type="fixed">
+        <xacro:insert_block name="origin"/>
+        <parent link="${parent}"/>
+        <child link="${name}_link"/>
+    </joint>
+
+    <link name="${name}_link">
+        <visual>
+        <origin xyz="0 0 0" rpy="1.57 0 1.57"/>
+        <geometry>
+        <mesh filename="package://turtlebot3_beam_description/meshes/sensors/r200.dae" />
+        </geometry>
+        </visual>
+        <collision>
+        <origin xyz="0.003 0.065 0.007" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.012 0.132 0.020"/>
+        </geometry>
+        </collision>
+    </link>
+
+    <joint name="${name}_rgb_joint" type="fixed">
+        <origin xyz="${r200_cam_rgb_px} ${r200_cam_rgb_py} ${r200_cam_rgb_pz}" rpy="0 0 0"/>
+        <parent link="${name}_link"/>
+        <child link="${name}_rgb_frame"/>
+    </joint>
+    <link name="${name}_rgb_frame"/>
+
+    <joint name="${name}_rgb_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+        <parent link="${name}_rgb_frame"/>
+        <child link="${name}_rgb_optical_frame"/>
+    </joint>
+    <link name="${name}_rgb_optical_frame"/>
+
+    <joint name="${name}_depth_joint" type="fixed">
+        <origin xyz="${r200_cam_rgb_px} ${r200_cam_rgb_py + r200_cam_depth_offset} ${r200_cam_rgb_pz}" rpy="0 0 0"/>
+        <parent link="${name}_link"/>
+        <child link="${name}_depth_frame"/>
+    </joint>
+    <link name="${name}_depth_frame"/>
+
+    <joint name="${name}_depth_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+        <parent link="${name}_depth_frame"/>
+        <child link="${name}_depth_optical_frame"/>
+    </joint>
+    <link name="${name}_depth_optical_frame"/>
+
+    <gazebo reference="${name}_link">
+        <sensor type="depth" name="realsense_R200">
+        <always_on>true</always_on>
+        <visualize>false</visualize>
+        <camera>
+            <horizontal_fov>1.3439</horizontal_fov>
+            <image>
+                <width>1920</width>
+                <height>1080</height>
+                <format>R8G8B8</format>
+            </image>
+            <depth_camera></depth_camera>
+            <clip>
+                <near>0.03</near>
+                <far>100</far>
+            </clip>
+        </camera>
+        <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
+            <baseline>0.2</baseline>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>30.0</updateRate>
+            <cameraName>${name}</cameraName>
+            <frameName>${name}_rgb_optical_frame</frameName>
+            <imageTopicName>rgb/image_raw</imageTopicName>
+            <depthImageTopicName>depth/image_raw</depthImageTopicName>
+            <pointCloudTopicName>depth/points</pointCloudTopicName>
+            <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+            <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+            <pointCloudCutoff>0.4</pointCloudCutoff>
+                <hackBaseline>0.07</hackBaseline>
+                <distortionK1>0.0</distortionK1>
+                <distortionK2>0.0</distortionK2>
+                <distortionK3>0.0</distortionK3>
+                <distortionT1>0.0</distortionT1>
+                <distortionT2>0.0</distortionT2>
+            <CxPrime>0.0</CxPrime>
+            <Cx>0.0</Cx>
+            <Cy>0.0</Cy>
+            <focalLength>0</focalLength>
+            <hackBaseline>0</hackBaseline>
+        </plugin>
+        </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
