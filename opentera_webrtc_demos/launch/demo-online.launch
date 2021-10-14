@@ -1,0 +1,70 @@
+<launch>
+    <arg name="signalling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+
+    <!-- Signaling server -->
+    <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
+        <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
+        <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
+    </include>
+
+    <!-- Turtlebot simulator -->
+    <include file="$(find opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch">
+        <arg name="model" value="$(arg model)" />
+    </include>
+
+    <!-- Front camera -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer1"/>
+        <arg name="is_stand_alone" value="true"/>
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="client_name" value="Robot Camera 1"/>
+        <arg name="room_name" value="VideoConf"/>
+        <arg name="room_password" value="$(arg signaling_server_password)"/>
+        <arg name="camera_topic" value="/front_camera/image_raw"/>
+    </include>
+
+    <!-- Bottom camera -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer2"/>
+        <arg name="is_stand_alone" value="true"/>
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="client_name" value="Robot Camera 2"/>
+        <arg name="room_name" value="CameraX"/>
+        <arg name="room_password" value="$(arg signaling_server_password)"/>
+        <arg name="camera_topic" value="/bottom_camera/image_raw"/>
+    </include>
+
+    <!-- Data Channel  -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
+        <arg name="name" value="data_streamer"/>
+        <arg name="is_stand_alone" value="true"/>
+
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="client_name" value="Robot Data Channel"/>
+        <arg name="room_name" value="Teleop"/>
+        <arg name="room_password" value="$(arg signaling_server_password)"/>
+    </include>
+
+    <!-- Json Message Handler -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_json_data_handler.launch">
+        <arg name="name" value="json_data_handler"/>
+        <arg name="input_topic" value="/webrtc_data"/>
+    </include>
+
+    <!-- Robot status simulated data -->
+    <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
+
+
+</launch>
+ 

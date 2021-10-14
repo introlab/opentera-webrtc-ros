@@ -1,4 +1,4 @@
-opentera==1.0.5
+opentera==1.0.8
 aiohttp
 asyncio
 protobuf
