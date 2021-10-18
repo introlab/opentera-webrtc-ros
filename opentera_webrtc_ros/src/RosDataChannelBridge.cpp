@@ -52,7 +52,8 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
 void RosDataChannelBridge::initAdvertiseTopics() 
 {
     m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data", 10);
-    m_dataSubscriber = m_nh.subscribe("robot_status", 10, &RosDataChannelBridge::onRosData, this);
+    m_robotStatusSubscriber = m_nh.subscribe("robot_status", 10, &RosDataChannelBridge::onRosData, this);
+    m_waypointReachedSubscriber = m_nh.subscribe("waypoint_reached", 10, &RosDataChannelBridge::onRosData, this);
 }
 
 /**

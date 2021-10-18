@@ -111,3 +111,17 @@ Implement a ROS node that dispatch received JSON messages and forward them on th
 ## JSON Format (TODO)
 
 For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
+
+# goal_manager
+## Description
+Manages multiple waypoints received by the frontend and sends them to move_base one at a time. This node relies a service provided by the `map_image_generator` package to convert the waypoints from image coordinates to map coordinates.
+
+## Subscribed topics
+* waypoints (opentera_webrtc_ros_msgs/Waypoints): Array of image coordinate waypoints received from the frontend.
+* stop (std_msgs/Bool): Signal to cancel all move_base goals.
+
+## Published topics
+* waypoint_reached (std_msgs/String): String of a JSON message containing the ID of the waypoint that has been reached. Used by the frontend to determine when the trajectory has been completed.
+
+
+
