@@ -3,22 +3,35 @@
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="stand_alone" default="false" />
 
-    <!-- Signaling server -->
+    <!-- Signaling server 
     <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
         <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
         <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
     </include>
-
+    -->
+    
+    <!-- OpenTera Client (with default config file) -->
+        <include file="$(find opentera_client_ros)/launch/client.launch">
+    </include>
+    
     <!-- Turtlebot simulator -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch">
         <arg name="model" value="$(arg model)" />
+    </include>
+    
+    <!-- Map image generator -->
+    <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
+        <arg name="refresh_rate_param" value="5"/>
+        <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
+        <arg name="draw_goal" default="false"/>
     </include>
 
     <!-- Front camera -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer1"/>
-        <arg name="is_stand_alone" value="true"/>
+        <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
         <arg name="can_receive_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
@@ -33,7 +46,7 @@
     <!-- Bottom camera -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer2"/>
-        <arg name="is_stand_alone" value="true"/>
+        <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
         <arg name="can_receive_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
@@ -42,13 +55,28 @@
         <arg name="client_name" value="Robot Camera 2"/>
         <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/bottom_camera/image_raw"/>
+        <arg name="camera_topic" value="/r200/rgb/image_raw"/>
+    </include>
+
+    <!-- Map image stream -->
+    <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
+        <arg name="name" value="topic_streamer3"/>
+        <arg name="is_stand_alone" value="$(arg stand_alone)"/>
+        <arg name="can_send_stream" value="true"/>
+        <arg name="can_receive_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="client_name" value="Map image"/>
+        <arg name="room_name" value="Map"/>
+        <arg name="room_password" value="$(arg signaling_server_password)"/>
+        <arg name="camera_topic" value="/map_image_generator/image"/>
     </include>
 
     <!-- Data Channel  -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
         <arg name="name" value="data_streamer"/>
-        <arg name="is_stand_alone" value="true"/>
+        <arg name="is_stand_alone" value="$(arg stand_alone)"/>
 
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Data Channel"/>
@@ -60,11 +88,15 @@
     <include file="$(find opentera_webrtc_ros)/launch/ros_json_data_handler.launch">
         <arg name="name" value="json_data_handler"/>
         <arg name="input_topic" value="/webrtc_data"/>
+        <arg name="linear_multiplier" value="0.5"/>
+        <arg name="angular_multiplier" value="0.35"/>
     </include>
 
     <!-- Robot status simulated data -->
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
-
+    
+    <!-- Robot GUI-->
+    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen"/>
 
 </launch>
  
