@@ -10,6 +10,7 @@ RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh)
     m_stopPub = m_nh.advertise<std_msgs::Bool>("stop", 1);
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     m_waypointsPub = m_nh.advertise<opentera_webrtc_ros_msgs::WaypointArray>("waypoints", 1);
+    m_dockPub = m_nh.advertise<std_msgs::Bool>("dock_action", 1);
     m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
     m_p_nh.param<float>("angular_multiplier", m_angular_multiplier, 0.15);
 }
@@ -52,6 +53,26 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
             wp_array.waypoints.push_back(wp);
         }
         m_waypointsPub.publish(wp_array);
+    }
+    else if (serializedData["type"] == "action")
+    {
+        if(serializedData["action"] == "dock")
+        {
+            std_msgs::Bool msg;
+            if (serializedData["cmd"] == true)
+            {
+                // Start the docking action
+                std::cout << "******* Starting docking" << std::endl;
+                msg.data = true;
+            }
+            else
+            {
+                // Stop the docking action
+                std::cout << "******* Stopping docking" << std::endl;
+                msg.data = false;
+            }
+            m_dockPub.publish(msg);
+        }
     }
 }
 

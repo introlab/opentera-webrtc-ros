@@ -50,7 +50,8 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::StampedTransform& robotTran
         cv::Point(startX, startY),
         static_cast<int>(ceil(size / 5.0)), 
         color,
-        cv::FILLED);
+        cv::FILLED,
+        cv::LINE_8);
     cv::arrowedLine(image,
         cv::Point(startX, startY),
         cv::Point(endX, endY),

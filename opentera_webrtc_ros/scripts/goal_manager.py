@@ -25,9 +25,21 @@ class GoalManager():
         # Subscribers and publishers
         self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
+        self.dock_action_sub = rospy.Subscriber("dock_action", Bool, self.dock_cb)
         self.waypoint_reached_pub = rospy.Publisher("waypoint_reached", String, queue_size=1)
 
         self.should_stop = False
+
+        # Dock pose in map
+        self.dock_pose = PoseStamped()
+        self.dock_pose.header.frame_id = "map"
+        self.dock_pose.pose.position.x = 5
+        self.dock_pose.pose.position.y = 3
+        self.dock_pose.pose.position.z = 0
+        self.dock_pose.pose.orientation.x = 0
+        self.dock_pose.pose.orientation.y = 0
+        self.dock_pose.pose.orientation.z = 0
+        self.dock_pose.pose.orientation.w = 1
 
     def waypoints_cb(self, msg):
         self.move_base_client.cancel_all_goals()
@@ -75,6 +87,14 @@ class GoalManager():
         if msg.data == True:
             self.should_stop = True
             self.move_base_client.cancel_all_goals()
+            self.clearGlobalPathClient()
+
+    def dock_cb(self, msg):
+        if msg.data == True:
+            self.send_goal(self.dock_pose)
+        else:
+            self.move_base_client.cancel_all_goals()
+            self.clearGlobalPathClient()
 
     def publishWaypointReached(self, i):
         waypoint_reached_json_message = {"type": "waypointReached", "waypointNumber": i}
