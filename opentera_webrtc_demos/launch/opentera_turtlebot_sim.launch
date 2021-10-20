@@ -3,7 +3,7 @@
   <!-- Turtlebot base model and position -->
   <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="x_pos" default="1.0"/>
-  <arg name="y_pos" default="0.0"/>
+  <arg name="y_pos" default="0.5"/>
   <arg name="z_pos" default="0.0"/>
 
   <!-- RTAB-Map config -->
@@ -23,7 +23,7 @@
 
   <!-- Gazebo -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
+    <arg name="world_name" value="$(find opentera_webrtc_demos)/worlds/turtlebot3_house.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="$(arg gazebo_gui)"/>

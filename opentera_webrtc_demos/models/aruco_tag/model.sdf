@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="aruco_tag">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://aruco_tag/meshes/aruco_tag.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://aruco_tag/meshes/aruco_tag.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <lighting>false</lighting>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
