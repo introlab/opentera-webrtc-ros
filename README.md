@@ -9,6 +9,7 @@ Based on [opentera-webrtc](https://github.com/introlab/opentera-webrtc). We are 
 * Marc-Antoine Maheux (@mamaheux)
 * Dominic Létourneau (@doumdi)
 * Gabriel Lauzier (@G-Lauz)
+* Jérémie Bourque (@JeremieBourque1)
 
 # Requirements
 
