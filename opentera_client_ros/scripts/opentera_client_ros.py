@@ -5,6 +5,8 @@
 import aiohttp
 import asyncio
 import json
+import os
+from signal import SIGINT, SIGTERM
 
 # ROS
 import rospy
@@ -54,14 +56,14 @@ class OpenTeraROSClient:
             if 'websocket_url' in login_info:
                 websocket_url = login_info['websocket_url']
 
-                ws = await client.ws_connect(url=websocket_url, ssl=False)
+                ws = await client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
                 print(ws)
 
                 # Create alive publishing task
                 status_task = asyncio.get_event_loop().create_task(
                               self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
 
-                while True:
+                while not rospy.is_shutdown():
                     msg = await ws.receive()
 
                     if msg.type == aiohttp.WSMsgType.text:
@@ -79,28 +81,45 @@ class OpenTeraROSClient:
             rospy.logwarn('cancel task')
 
     def run(self):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._opentera_main_loop(self.__base_url, self.__token))
+        try:
+            loop = asyncio.get_event_loop()
+
+            main_task = asyncio.ensure_future(self._opentera_main_loop(self.__base_url, self.__token))
+
+            for signal in [SIGINT, SIGTERM]:
+                loop.add_signal_handler(signal, main_task.cancel)
+
+            loop.run_until_complete(main_task)
+        except asyncio.CancelledError as e:
+            print('Main Task cancelled', e)
+            # Exit ROS loop
+            rospy.signal_shutdown('SIGINT/SIGTERM Detected')
 
     async def _opentera_send_device_status(self, client: aiohttp.ClientSession, url: str, token: str):
-        while True:
-            # Every 10 seconds
-            await asyncio.sleep(10)
-            params = {'token': token}
+        while not rospy.is_shutdown():
+            try:
+                # Every 10 seconds
+                await asyncio.sleep(10)
+                params = {'token': token}
 
-            from datetime import datetime
+                from datetime import datetime
 
-            # This can be anything...
-            status = {
-                'status': {'battery': 10.4, 'flag': False},
-                'timestamp': datetime.now().timestamp()
-            }
+                # This can be anything...
+                status = {
+                    'status': {'battery': 10.4, 'flag': False},
+                    'timestamp': datetime.now().timestamp()
+                }
 
-            async with client.post(url, params=params, json=status, verify_ssl=False) as response:
-                if response.status == 200:
-                    print('Sent status')
-                else:
-                    print('Send status failed')
+                async with client.post(url, params=params, json=status, verify_ssl=False) as response:
+                    if response.status == 200:
+                        print('Sent status')
+                    else:
+                        print('Send status failed')
+                        break
+            except asyncio.CancelledError as e:
+                print('_opentera_send_device_status', e)
+                # Exit loop
+                break
 
     async def _parse_message(self, client: aiohttp.ClientSession, msg_dict: dict):
         try:
@@ -207,7 +226,11 @@ class OpenTeraROSClient:
 if __name__ == '__main__':
     # Init ROS
     rospy.init_node('opentera_client_ros', anonymous=True)
-    config_file_name = rospy.get_param('~config_file', '../config/local_config.json')
+
+    # Guessing config file path
+    base_folder = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(base_folder, '../config/client_config.json')
+    config_file_name = rospy.get_param('~config_file', config_path)
 
     # Read config file
     # Should be a param for this node

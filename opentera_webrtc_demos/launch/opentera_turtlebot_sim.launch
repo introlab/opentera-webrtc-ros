@@ -106,3 +106,4 @@
 
   <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="screen"/>
 </launch>
+
