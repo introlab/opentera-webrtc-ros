@@ -1,7 +1,11 @@
 <launch>
+
     <arg name="signalling_server_hostname" default="localhost"/>
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
+
+    <!-- Launch beam -->
+    <include file="$(find beam_control)/launch/start_beam.launch" />
 
     <!-- Signaling server -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
@@ -104,6 +108,7 @@
         <arg name="input_topic" value="/webrtc_data"/>
         <arg name="linear_multiplier" value="0.5"/>
         <arg name="angular_multiplier" value="0.35"/>
+        <arg name="cmd_vel_topic" value="/output/cmd_vel"/>
     </include>
 
     <!-- Robot status simulated data -->
