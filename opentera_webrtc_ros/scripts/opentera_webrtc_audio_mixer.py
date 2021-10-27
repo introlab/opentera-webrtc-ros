@@ -13,6 +13,7 @@ from opentera_webrtc_ros_msgs.msg import PeerAudio
 
 p = pyaudio.PyAudio()
 
+output_device_index = 0
 
 class AudioWriter:
     def __init__(self, peer_id: str):
@@ -49,11 +50,12 @@ class AudioWriter:
                             stream = p.open(format=pyaudio.paInt16,
                                             channels=audio.frame.channel_count,
                                             rate=audio.frame.sampling_frequency,
-                                            frames_per_buffer=int(audio.frame.frame_sample_count * 10),
+                                            output_device_index=output_device_index,
+                                            frames_per_buffer=int(audio.frame.frame_sample_count * 20),
                                             output=True)
                             # Fill buffer with zeros ?
-                            # for _ in range(5):
-                            #     stream.write(numpy.zeros(audio.frame.frame_sample_count, dtype=numpy.int16))
+                            # for _ in range(10):
+                            #    stream.write(numpy.zeros(audio.frame.frame_sample_count, dtype=numpy.int16))
 
                         stream.write(audio.frame.data)
                     else:
@@ -118,6 +120,12 @@ class AudioMixerROS:
 
 
 if __name__ == '__main__':
+
+    for index in range(p.get_device_count()):
+        info = p.get_device_info_by_index(index)
+        if info['name'] == 'default':
+            output_device_index = info['index']
+
     # Init ROS
     rospy.init_node('opentera_webrtc_audio_mixer', anonymous=True)
     mixer = AudioMixerROS()

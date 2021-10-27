@@ -17,6 +17,6 @@ RosAudioSource::RosAudioSource()
      if(msg->channel_count == 1 && 
         msg->sampling_frequency == 48000 && 
         msg->format == "signed_16")  {
-            sendFrame(&msg->data[0], msg->frame_sample_count);
+            sendFrame(msg->data.data(), msg->frame_sample_count);
      }
  }

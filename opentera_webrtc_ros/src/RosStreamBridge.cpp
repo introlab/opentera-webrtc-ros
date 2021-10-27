@@ -46,7 +46,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
     m_signalingClient = make_unique<StreamClient>(
             signalingServerConfiguration,
             WebrtcConfiguration::create(),
-            m_videoSource);
+            m_videoSource, m_audioSource);
 
     m_signalingClient->setTlsVerificationEnabled(false);
 

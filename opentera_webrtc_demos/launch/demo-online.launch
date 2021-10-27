@@ -48,7 +48,7 @@
         <arg name="name" value="topic_streamer2"/>
         <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
-        <arg name="can_receive_stream" value="false"/>
+        <arg name="can_receive_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
@@ -63,7 +63,7 @@
         <arg name="name" value="topic_streamer3"/>
         <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
-        <arg name="can_receive_stream" value="false"/>
+        <arg name="can_receive_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
@@ -100,22 +100,16 @@
         <param name="format"   type="string"   value="signed_16"/>
         <param name="channel_count"   type="int"   value="1"/>
         <param name="sampling_frequency" type="int" value="48000"/>
-        <!-- We need 10ms frames-->
-        <param name="frame_sample_count" type="int" value="480"/>
-        <param name="merge" type="bool" value="0" />
+        <!-- 40ms frames is enough buffer to avoid skipping -->
+        <param name="frame_sample_count" type="int" value="1920"/>
+        <param name="merge" type="bool" value="false" />
         <param name="merge_gain" type="double" value="1.0" />
     </node>
 
     <!-- Audio playback (mixing)-->
     <node name="audio_mixer" type="opentera_webrtc_audio_mixer.py" pkg="opentera_webrtc_ros" />
-
-    <!-- Robot GUI-->
     
-    <!--
+    <!-- Robot GUI-->
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen"/>
-    -->
-
-
-
 </launch>
  
