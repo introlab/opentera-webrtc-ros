@@ -1,5 +1,5 @@
 #include <RosAudioSource.h>
-
+#include <ros/ros.h>
 
 using namespace opentera;
 
@@ -9,3 +9,14 @@ RosAudioSource::RosAudioSource()
     : AudioSource(AudioSourceConfiguration::create(), 16, 48000, 1) 
 { 
 }
+
+ void RosAudioSource::audioCallback(const audio_utils::AudioFrameConstPtr& msg)
+ {
+     
+     //Checking if frame fits default configuration and send frame
+     if(msg->channel_count == 1 && 
+        msg->sampling_frequency == 48000 && 
+        msg->format == "signed_16")  {
+            sendFrame(&msg->data[0], msg->frame_sample_count);
+     }
+ }

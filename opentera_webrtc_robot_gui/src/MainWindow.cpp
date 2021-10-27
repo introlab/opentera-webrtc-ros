@@ -37,7 +37,7 @@ MainWindow::~MainWindow()
 void MainWindow::setupROS()
 {
     //Setup subscribers
-    m_localImageSubscriber = m_nodeHandle.subscribe("/camera1/image_raw",
+    m_localImageSubscriber = m_nodeHandle.subscribe("/front_camera/image_raw",
             10,
             &MainWindow::localImageCallback,
             this);
@@ -65,6 +65,8 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     //Step #2 Emit signal (will be handled in Qt main thread)
     //Image will be automatically deleted when required
+    
+    //emit newLocalImage(image);
     //Invert R & B here
     emit newLocalImage(std::move(image).rgbSwapped());
 }

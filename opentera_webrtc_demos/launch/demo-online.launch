@@ -13,7 +13,7 @@
     -->
     
     <!-- OpenTera Client (with default config file) -->
-        <include file="$(find opentera_client_ros)/launch/client.launch">
+    <include file="$(find opentera_client_ros)/launch/client.launch">
     </include>
     
     <!-- Turtlebot simulator -->
@@ -37,7 +37,7 @@
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
-        <arg name="client_name" value="Robot Camera 1"/>
+        <arg name="client_name" value="Robot Front Camera"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
         <arg name="camera_topic" value="/front_camera/image_raw"/>
@@ -48,11 +48,11 @@
         <arg name="name" value="topic_streamer2"/>
         <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
-        <arg name="can_receive_stream" value="true"/>
+        <arg name="can_receive_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
-        <arg name="client_name" value="Robot Camera 2"/>
+        <arg name="client_name" value="Robot Bottom Camera"/>
         <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
         <arg name="camera_topic" value="/r200/rgb/image_raw"/>
@@ -63,7 +63,7 @@
         <arg name="name" value="topic_streamer3"/>
         <arg name="is_stand_alone" value="$(arg stand_alone)"/>
         <arg name="can_send_stream" value="true"/>
-        <arg name="can_receive_stream" value="true"/>
+        <arg name="can_receive_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
@@ -77,7 +77,6 @@
     <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
         <arg name="name" value="data_streamer"/>
         <arg name="is_stand_alone" value="$(arg stand_alone)"/>
-
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Data Channel"/>
         <arg name="room_name" value="Teleop"/>
@@ -94,9 +93,29 @@
 
     <!-- Robot status simulated data -->
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
-    
+
+    <!-- Audio Capture -->
+    <node name="audio_capture" type="alsa_capture_node" pkg="audio_utils">
+        <param name="device"   type="string"   value="default"/>
+        <param name="format"   type="string"   value="signed_16"/>
+        <param name="channel_count"   type="int"   value="1"/>
+        <param name="sampling_frequency" type="int" value="48000"/>
+        <!-- We need 10ms frames-->
+        <param name="frame_sample_count" type="int" value="480"/>
+        <param name="merge" type="bool" value="0" />
+        <param name="merge_gain" type="double" value="1.0" />
+    </node>
+
+    <!-- Audio playback (mixing)-->
+    <node name="audio_mixer" type="opentera_webrtc_audio_mixer.py" pkg="opentera_webrtc_ros" />
+
     <!-- Robot GUI-->
+    
+    <!--
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen"/>
+    -->
+
+
 
 </launch>
  

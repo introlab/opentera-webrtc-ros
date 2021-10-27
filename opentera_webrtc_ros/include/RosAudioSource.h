@@ -2,7 +2,7 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_AUDIO_SOURCE_H
 
 #include <OpenteraWebrtcNativeClient/Sources/AudioSource.h>
-
+#include <audio_utils/AudioFrame.h>
 
 namespace opentera
 {
@@ -18,7 +18,7 @@ namespace opentera
 
     public:
         RosAudioSource();
-        //void audioCallback(const sensor_msgs::ImageConstPtr& msg);
+        void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
     };
 }
 

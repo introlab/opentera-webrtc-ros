@@ -104,11 +104,19 @@ void RosStreamBridge::onSignalingConnectionOpened()
 
     if (m_canSendStream) 
     {
+        //Video
         m_imageSubscriber = m_nh.subscribe(
             "ros_image",
             1,
             &RosVideoSource::imageCallback,
             m_videoSource.get());
+
+        //Audio
+        m_audioSubscriber = m_nh.subscribe(
+            "audio_out",
+            1,
+            &RosAudioSource::audioCallback,
+            m_audioSource.get());
     }
 }
 

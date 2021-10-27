@@ -24,6 +24,7 @@ namespace opentera
         std::shared_ptr<RosAudioSource> m_audioSource;
 
         ros::Subscriber m_imageSubscriber;
+        ros::Subscriber m_audioSubscriber;
         ros::Publisher m_imagePublisher;
         ros::Publisher m_audioPublisher;
 
