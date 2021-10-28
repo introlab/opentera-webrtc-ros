@@ -14,20 +14,25 @@ bool RosNodeParameters::isStandAlone()
 /**
  * @brief Load stream parameters from ROS parameter server
  *
- * @param canSendStream whether the node can send stream to the signaling server
- * @param canReceiveStream whether the node can received stream from the signaling server
+ * @param canSendAudioStream whether the node can send audio stream to the signaling server
+ * @param canReceiveAudioStream whether the node can received audio stream from the signaling server
+ * @param canSendVideoStream whether the node can send video stream to the signaling server
+ * @param canReceiveVideoStream whether the node can received video stream from the signaling server
  * @param denoise whether the images require denoising
  * @param screencast whether the images are a screen capture
  */
-void RosNodeParameters::loadStreamParams(bool &canSendStream, bool &canReceiveStream, bool &denoise, bool &screencast)
+void RosNodeParameters::loadStreamParams(bool &canSendAudioStream, bool &canReceiveAudioStream, 
+    bool &canSendVideoStream, bool &canReceiveVideoStream, bool &denoise, bool &screencast)
 {
     NodeHandle pnh("~");
 
     std::map<std::string, bool> dict;
     pnh.getParam("stream", dict);
 
-    canSendStream = isInParams("can_send_stream", dict) ? dict["can_send_stream"] : true;
-    canReceiveStream = isInParams("can_receive_stream", dict) ? dict["can_receive_stream"] : true;
+    canSendAudioStream = isInParams("can_send_audio_stream", dict) ? dict["can_send_audio_stream"] : false;
+    canReceiveAudioStream = isInParams("can_receive_audio_stream", dict) ? dict["can_receive_audio_stream"] : false;
+    canSendVideoStream = isInParams("can_send_video_stream", dict) ? dict["can_send_video_stream"] : false;
+    canReceiveVideoStream = isInParams("can_receive_video_stream", dict) ? dict["can_receive_video_stream"] : false;
     denoise = isInParams("needs_denoising", dict) ? dict["needs_denoising"] : false;
     screencast = isInParams("is_screen_cast", dict) ? dict["is_screen_cast"] : false;
 }

@@ -15,8 +15,10 @@ namespace opentera
         static bool isInParams(const std::string &key, const std::map<std::string, T> &dict);
 
         static bool isStandAlone();
-        static void loadStreamParams(bool &canSendStream,
-            bool &canReceiveStream,
+        static void loadStreamParams(bool &canSendAudioStream,
+            bool &canReceiveAudioStream,
+            bool &canSendVideoStream,
+            bool &canReceiveVideoStream,
             bool &denoise,
             bool &screencast);
 

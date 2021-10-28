@@ -3,9 +3,10 @@
   <!-- Arguments -->
   <arg name="name" default="topic_streamer"/>
   <arg name="is_stand_alone" default="true"/>
-
-  <arg name="can_send_stream" default="true"/>
-  <arg name="can_receive_stream" default="true"/>
+  <arg name="can_send_audio_stream" default="false"/>
+  <arg name="can_receive_audio_stream" default="false"/>
+  <arg name="can_send_video_stream" default="false"/>
+  <arg name="can_receive_video_stream" default="false"/>
   <arg name="is_screen_cast" default="false"/>
   <arg name="needs_denoising" default="false"/>
 
@@ -20,8 +21,10 @@
     <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
     <rosparam param="stream" subst_value="true">
     {
-      can_send_stream: $(arg can_send_stream),        # Is the node can send stream to the signaling server
-      can_receive_stream: $(arg can_receive_stream),  # Is the node can receive stream to the signaling server
+      can_send_audio_stream: $(arg can_send_audio_stream),        # Is the node can send audio stream to the signaling server
+      can_receive_audio_stream: $(arg can_receive_audio_stream),  # Is the node can receive audio stream from the signaling server
+      can_send_video_stream: $(arg can_send_video_stream),        # Is the node can send video stream to the signaling server
+      can_receive_video_stream: $(arg can_receive_video_stream),  # Is the node can receive video stream from the signaling server
       is_screen_cast: $(arg is_screen_cast),          # Is the image source a screen capture?
       needs_denoising: $(arg needs_denoising)         # Does the image source needs denoising?
     }

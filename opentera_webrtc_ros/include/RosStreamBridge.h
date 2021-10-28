@@ -29,8 +29,10 @@ namespace opentera
         ros::Publisher m_audioPublisher;
 
 
-        bool m_canSendStream;
-        bool m_canReceiveStream;
+        bool m_canSendAudioStream;
+        bool m_canSendVideoStream;
+        bool m_canReceiveAudioStream;
+        bool m_canReceiveVideoStream;
 
         void init(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
 

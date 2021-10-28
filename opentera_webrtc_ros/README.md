@@ -47,8 +47,10 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 <rosparam param="is_stand_alone">true</rosparam>
 <rosparam param="stream">
   {
-    can_send_stream: true,        # Does the node can send stream to the signaling server
-    can_receive_stream: true,     # Does the node can receive stream to the signaling server
+    can_send_audio_stream: true,        # Does the node can send audio tream to the signaling server
+    can_receive_audio_stream: true,     # Does the node can receive audio stream from the signaling server
+    can_send_video_stream: true,        # Does the node can send video stream to the signaling server
+    can_receive_video_stream: true,     # Does the node can receive video stream from the signaling server
     is_screen_cast: false,        # Is the image source a screen capture?
     needs_denoising: false        # Does the image source needs denoising?
   }

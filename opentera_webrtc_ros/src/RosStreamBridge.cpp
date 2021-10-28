@@ -37,7 +37,9 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
     bool needsDenoising, isScreencast;
 
     // Load ROS parameters
-    RosNodeParameters::loadStreamParams(m_canSendStream, m_canReceiveStream, needsDenoising, isScreencast);
+    RosNodeParameters::loadStreamParams(m_canSendAudioStream, m_canReceiveAudioStream, 
+                                        m_canSendVideoStream, m_canReceiveVideoStream, 
+                                        needsDenoising, isScreencast);
 
     // WebRTC video stream interfaces
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
@@ -46,17 +48,13 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
     m_signalingClient = make_unique<StreamClient>(
             signalingServerConfiguration,
             WebrtcConfiguration::create(),
-            m_videoSource, m_audioSource);
+            (m_canReceiveVideoStream || m_canSendVideoStream ? m_videoSource : nullptr), 
+            (m_canReceiveAudioStream || m_canSendAudioStream ? m_audioSource : nullptr));
 
     m_signalingClient->setTlsVerificationEnabled(false);
 
-    if (m_canReceiveStream) 
+    if (m_canReceiveAudioStream || m_canReceiveVideoStream) 
     {
-
-        m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
-        m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
-        
-
         // Stream event
         m_signalingClient->setOnAddRemoteStream([this](const Client& client) 
         {
@@ -71,18 +69,28 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
                             << "Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
 
-        // Video and audio frame
-        m_signalingClient->setOnVideoFrameReceived(std::bind(&RosStreamBridge::onVideoFrameReceived, this,
-            std::placeholders::_1,
-            std::placeholders::_2,
-            std::placeholders::_3));
-        m_signalingClient->setOnAudioFrameReceived(std::bind(&RosStreamBridge::onAudioFrameReceived, this,
-            std::placeholders::_1,
-            std::placeholders::_2,
-            std::placeholders::_3,
-            std::placeholders::_4,
-            std::placeholders::_5,
-            std::placeholders::_6));
+        if (m_canReceiveAudioStream)
+        {
+            m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
+            m_signalingClient->setOnAudioFrameReceived(std::bind(&RosStreamBridge::onAudioFrameReceived, this,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3,
+                std::placeholders::_4,
+                std::placeholders::_5,
+                std::placeholders::_6));
+        }
+
+        if (m_canReceiveVideoStream)
+        {
+            m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
+            // Video and audio frame
+            m_signalingClient->setOnVideoFrameReceived(std::bind(&RosStreamBridge::onVideoFrameReceived, this,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3));
+
+        }
     } 
 }
 
@@ -102,7 +110,17 @@ void RosStreamBridge::onSignalingConnectionOpened()
 {
     RosWebRTCBridge::onSignalingConnectionOpened();
 
-    if (m_canSendStream) 
+    if (m_canSendAudioStream)
+    {
+        //Audio
+        m_audioSubscriber = m_nh.subscribe(
+            "audio_out",
+            1,
+            &RosAudioSource::audioCallback,
+            m_audioSource.get());
+    }
+
+    if (m_canSendVideoStream) 
     {
         //Video
         m_imageSubscriber = m_nh.subscribe(
@@ -110,13 +128,6 @@ void RosStreamBridge::onSignalingConnectionOpened()
             1,
             &RosVideoSource::imageCallback,
             m_videoSource.get());
-
-        //Audio
-        m_audioSubscriber = m_nh.subscribe(
-            "audio_out",
-            1,
-            &RosAudioSource::audioCallback,
-            m_audioSource.get());
     }
 }
 
