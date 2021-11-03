@@ -40,6 +40,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 
 * webrtc_image : `opentera_webrtc_ros::PeerImage`
 * webrtc_audio : `opentera_webrtc_ros::PeerAudio`
+* audio_mixed  : `audio_utils::AudioFrame`
 
 ## Default Parameters
 

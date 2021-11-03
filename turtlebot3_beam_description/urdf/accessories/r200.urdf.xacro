@@ -64,8 +64,8 @@
         <camera>
             <horizontal_fov>1.3439</horizontal_fov>
             <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>640</width>
+                <height>360</height>
                 <format>R8G8B8</format>
             </image>
             <depth_camera></depth_camera>
@@ -77,7 +77,7 @@
         <plugin name="camera_controller" filename="libgazebo_ros_openni_kinect.so">
             <baseline>0.2</baseline>
             <alwaysOn>true</alwaysOn>
-            <updateRate>30.0</updateRate>
+            <updateRate>15.0</updateRate>
             <cameraName>${name}</cameraName>
             <frameName>${name}_rgb_optical_frame</frameName>
             <imageTopicName>rgb/image_raw</imageTopicName>

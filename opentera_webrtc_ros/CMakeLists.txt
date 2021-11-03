@@ -139,6 +139,10 @@ target_link_libraries(${PROJECT_NAME}_json_data_handler
   ${catkin_LIBRARIES}
 )
 
+## ROS message dependencies
+add_dependencies(${PROJECT_NAME}_topic_streamer ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_data_channel_bridge ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

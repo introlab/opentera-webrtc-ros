@@ -5,22 +5,22 @@
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="stand_alone" default="false" />
 
-    <!-- Signaling server 
+    <!-- Signaling server
     <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
         <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
         <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
     </include>
     -->
-    
+
     <!-- OpenTera Client (with default config file) -->
     <include file="$(find opentera_client_ros)/launch/client.launch">
     </include>
-    
+
     <!-- Turtlebot simulator -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch">
         <arg name="model" value="$(arg model)" />
     </include>
-    
+
     <!-- Map image generator -->
     <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
         <arg name="refresh_rate_param" value="5"/>
@@ -101,21 +101,38 @@
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
     <!-- Audio Capture -->
-    <node name="audio_capture" type="alsa_capture_node" pkg="audio_utils">
+    <node name="audio_capture" type="alsa_capture_node" pkg="audio_utils" output="screen" launch-prefix="nice -n -20">
         <param name="device"   type="string"   value="default"/>
         <param name="format"   type="string"   value="signed_16"/>
         <param name="channel_count"   type="int"   value="1"/>
         <param name="sampling_frequency" type="int" value="48000"/>
-        <!-- 40ms frames is enough buffer to avoid skipping -->
-        <param name="frame_sample_count" type="int" value="1920"/>
+        <!-- 10ms frames required by WebRTC -->
+        <param name="frame_sample_count" type="int" value="4800"/>
         <param name="merge" type="bool" value="false" />
         <param name="merge_gain" type="double" value="1.0" />
+        <param name="latency_us" type="int" value="40000" />
     </node>
 
     <!-- Audio playback (mixing)-->
-    <node name="audio_mixer" type="opentera_webrtc_audio_mixer.py" pkg="opentera_webrtc_ros" />
-    
+    <node name="audio_playback" type="alsa_playback_node" pkg="audio_utils" output="screen">
+        <param name="device"   type="string"   value="default"/>
+        <param name="format"   type="string"   value="signed_16"/>
+        <param name="channel_count"   type="int"   value="1"/>
+        <param name="sampling_frequency" type="int" value="48000"/>
+        <!--10ms frames coming from WebRTC-->
+        <param name="frame_sample_count" type="int" value="480"/>
+        <param name="latency_us" type="int" value="40000" />
+
+        <remap from="audio_in" to="audio_mixed"/>
+    </node>
+
+    <node name="audio_writer" type="raw_file_writer_node.py" pkg="audio_utils" output="screen">
+        <param name="output_path"   type="string"   value="/home/dominic/Desktop/music.raw"/>
+
+        <remap from="audio_in" to="audio_mixed"/>
+    </node>
+
     <!-- Robot GUI-->
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen"/>
 </launch>
- 
+

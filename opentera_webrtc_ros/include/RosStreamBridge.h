@@ -27,7 +27,7 @@ namespace opentera
         ros::Subscriber m_audioSubscriber;
         ros::Publisher m_imagePublisher;
         ros::Publisher m_audioPublisher;
-
+        ros::Publisher m_mixedAudioPublisher;
 
         bool m_canSendAudioStream;
         bool m_canSendVideoStream;
@@ -47,6 +47,17 @@ namespace opentera
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
             const void* audioData,
+            int bitsPerSample,
+            int sampleRate,
+            size_t numberOfChannels,
+            size_t numberOfFrames);
+        void onMixedAudioFrameReceived(const void* audioData,
+            int bitsPerSample,
+            int sampleRate,
+            size_t numberOfChannels,
+            size_t numberOfFrames);
+
+        audio_utils::AudioFrame createAudioFrame(const void* audioData,
             int bitsPerSample,
             int sampleRate,
             size_t numberOfChannels,

@@ -192,55 +192,55 @@ namespace opentera {
 
         if (!msg.database_events.empty()) 
         {
-            ROS_INFO("DATABASE_EVENTS");
+            //ROS_INFO("DATABASE_EVENTS");
             onDataBaseEvents(msg.database_events);
         }
 
         if (!msg.device_events.empty()) 
         {
-            ROS_INFO("DEVICE_EVENTS");
+            //ROS_INFO("DEVICE_EVENTS");
             onDeviceEvents(msg.device_events);
         }
 
         if (!msg.join_session_events.empty()) 
         {
-            ROS_INFO("JOIN_SESSION_EVENTS");
+            //ROS_INFO("JOIN_SESSION_EVENTS");
             onJoinSessionEvents(msg.join_session_events);
         }
 
         if (!msg.join_session_reply_events.empty()) 
         {
-            ROS_INFO("JOIN_SESSION_REPLY_EVENTS");
+            //ROS_INFO("JOIN_SESSION_REPLY_EVENTS");
             onJoinSessionReplyEvents(msg.join_session_reply_events);
         }
 
         if (!msg.leave_session_events.empty()) 
         {
-            ROS_INFO("LEAVE_SESSION_EVENTS");
+            //ROS_INFO("LEAVE_SESSION_EVENTS");
             onLeaveSessionEvents(msg.leave_session_events);
         }
 
         if (!msg.log_events.empty()) 
         {
-            ROS_INFO("LOG_EVENTS");
+            //ROS_INFO("LOG_EVENTS");
             onLogEvents(msg.log_events);
         }
 
         if (!msg.participant_events.empty()) 
         {
-            ROS_INFO("PARTICIPANT_EVENTS");
+            //ROS_INFO("PARTICIPANT_EVENTS");
             onParticipantEvents(msg.participant_events);
         }
 
         if (!msg.stop_session_events.empty()) 
         {
-            ROS_INFO("STOP_SESSION_EVENTS");
+            //ROS_INFO("STOP_SESSION_EVENTS");
             onStopSessionEvents(msg.stop_session_events);
         }
 
         if (!msg.user_events.empty()) 
         {
-            ROS_INFO("USER_EVENTS");
+            //ROS_INFO("USER_EVENTS");
             onUserEvents(msg.user_events);
         }
     }
@@ -448,7 +448,7 @@ namespace opentera {
     template<typename T>
     void RosWebRTCBridge<T>::onError(const std::string& error) 
     {
-        // TODO
+        ROS_ERROR_STREAM(nodeName << " --> " << error);
     }
 }
 
