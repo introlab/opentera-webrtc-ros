@@ -6,7 +6,7 @@
 
 namespace opentera
 {
-    
+
     /**
      * @brief A webrtc audio source that gets images from a ROS topic
      *
@@ -17,7 +17,16 @@ namespace opentera
     {
 
     public:
-        RosAudioSource();
+        RosAudioSource(unsigned int soundCardTotalDelayMs = 40,
+            bool echoCancellation = true,
+            bool autoGainControl = true,
+            bool noiseSuppression = true,
+            bool highPassFilter = false,
+            bool stereoSwapping = false,
+            bool typingDetection = false,
+            bool residualEchoDetector = true,
+            bool transientSuppression = true);
+
         void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
     };
 }

@@ -7,6 +7,7 @@
 #include <opentera_webrtc_ros_msgs/PeerStatus.h>
 #include <audio_utils/AudioFrame.h>
 #include <RosNodeParameters.h>
+#include <vector>
 
 #include <RosWebRTCBridge.h>
 
@@ -36,19 +37,60 @@ RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh): RosWebRTCBridge(nh)
 void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signalingServerConfiguration)
 {
     bool needsDenoising, isScreencast;
+    unsigned int soundCardTotalDelayMs;
+    bool echoCancellation;
+    bool autoGainControl;
+    bool noiseSuppression;
+    bool highPassFilter;
+    bool stereoSwapping;
+    bool typingDetection;
+    bool residualEchoDetector;
+    bool transientSuppression;
 
     // Load ROS parameters
-    RosNodeParameters::loadStreamParams(m_canSendAudioStream, m_canReceiveAudioStream,
-                                        m_canSendVideoStream, m_canReceiveVideoStream,
-                                        needsDenoising, isScreencast);
+    RosNodeParameters::loadAudioStreamParams(m_canSendAudioStream,
+        m_canReceiveAudioStream,
+        soundCardTotalDelayMs,
+        echoCancellation,
+        autoGainControl,
+        noiseSuppression,
+        highPassFilter,
+        stereoSwapping,
+        typingDetection,
+        residualEchoDetector,
+        transientSuppression);
+
+
+    RosNodeParameters::loadVideoStreamParams( m_canSendVideoStream, m_canReceiveVideoStream, needsDenoising, isScreencast);
 
     // WebRTC video stream interfaces
     m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
-    m_audioSource = make_shared<RosAudioSource>();
+    m_audioSource = make_shared<RosAudioSource>(
+        soundCardTotalDelayMs,
+        echoCancellation,
+        autoGainControl,
+        noiseSuppression,
+        highPassFilter,
+        stereoSwapping,
+        typingDetection,
+        residualEchoDetector,
+        transientSuppression);
+
+    size_t pos1 = 0;
+    pos1 = signalingServerConfiguration.url().find_last_of("/");
+    string iceServersUrl = signalingServerConfiguration.url().substr(0, pos1) + "/iceservers";
+    ROS_INFO("Fetching ice servers from : %s", iceServersUrl.c_str());
+    vector<IceServer> iceServers;
+    if (!IceServer::fetchFromServer(iceServersUrl,
+        signalingServerConfiguration.password(), iceServers))
+    {
+        ROS_ERROR("Error fetching ice servers from %s", iceServersUrl.c_str());
+        iceServers.clear();
+    }
 
     m_signalingClient = make_unique<StreamClient>(
             signalingServerConfiguration,
-            WebrtcConfiguration::create(),
+            WebrtcConfiguration::create(iceServers),
             (m_canReceiveVideoStream || m_canSendVideoStream ? m_videoSource : nullptr),
             (m_canReceiveAudioStream || m_canSendAudioStream ? m_audioSource : nullptr));
 

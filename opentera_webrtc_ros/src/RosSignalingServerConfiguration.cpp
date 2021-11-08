@@ -25,12 +25,12 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam()
 /**
  * @brief Build a signaling server configuration from the given Url.
  * Parameters are retrieved from the queries and from the signaling namespace under the node private namespace.
- * 
+ *
  * @param url An url to parse.
- * 
+ *
  * @return The signaling server configuration.
- */ 
-SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url) 
+ */
+SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url)
 {
     size_t pos1, pos2;
 
@@ -52,13 +52,13 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std:
 /**
  * @brief Get a query value among the queries arguments.
  * Queries format: "?query1=123&query2=abc"
- * 
+ *
  * @param query The parameters that contain de value.
  * @param queries The full queries in which the query argument his.
- * 
+ *
  * @return The value of the query
- */ 
-std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& query, const std::string& queries) 
+ */
+std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& query, const std::string& queries)
 {
     size_t pos1, pos2;
 

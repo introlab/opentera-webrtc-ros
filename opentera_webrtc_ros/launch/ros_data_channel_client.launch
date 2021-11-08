@@ -8,7 +8,7 @@
   <arg name="room_name" default="chat"/>
   <arg name="room_password" default="abc"/>
 
-  <node name="$(arg name)" pkg="opentera_webrtc_ros" type="data_channel_bridge" output="screen">
+  <node name="$(arg name)" pkg="opentera_webrtc_ros" type="data_channel_bridge" output="screen" respawn="true">
     <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
     <rosparam param="signaling" subst_value="true">
     {
