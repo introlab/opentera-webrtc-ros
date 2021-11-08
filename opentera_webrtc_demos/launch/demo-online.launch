@@ -92,13 +92,15 @@
     <!-- Json Message Handler -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_json_data_handler.launch">
         <arg name="name" value="json_data_handler"/>
-        <arg name="input_topic" value="/webrtc_data"/>
+        <arg name="input_topic" value="/webrtc_data_incoming"/>
         <arg name="linear_multiplier" value="0.5"/>
         <arg name="angular_multiplier" value="0.35"/>
     </include>
 
     <!-- Robot status simulated data -->
-    <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
+    <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos">
+        <remap from="robot_status" to="webrtc_data_outgoing"/>
+    </node>
 
     <!-- Audio Capture -->
     <node name="audio_capture" type="alsa_capture_node" pkg="audio_utils" output="screen" respawn="true">

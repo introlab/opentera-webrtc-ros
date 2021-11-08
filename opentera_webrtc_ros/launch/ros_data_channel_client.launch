@@ -4,7 +4,7 @@
   <arg name="is_stand_alone" default="true"/>
 
   <arg name="server_url" default="http://localhost:8080"/>
-  <arg name="client_name" default="streamer"/>
+  <arg name="client_name" default="data_streamer"/>
   <arg name="room_name" default="chat"/>
   <arg name="room_password" default="abc"/>
 

@@ -79,12 +79,12 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
     size_t pos1 = 0;
     pos1 = signalingServerConfiguration.url().find_last_of("/");
     string iceServersUrl = signalingServerConfiguration.url().substr(0, pos1) + "/iceservers";
-    ROS_INFO("Fetching ice servers from : %s", iceServersUrl.c_str());
+    ROS_INFO("RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());
     vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl,
         signalingServerConfiguration.password(), iceServers))
     {
-        ROS_ERROR("Error fetching ice servers from %s", iceServersUrl.c_str());
+        ROS_ERROR("RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
     }
 
@@ -103,13 +103,13 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
         {
             publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_ADDED);
             ROS_INFO_STREAM(nodeName << " --> "
-                            << "Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
+                            << "RosStreamBridge Signaling on add remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
         m_signalingClient->setOnRemoveRemoteStream([this](const Client& client)
         {
             publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
             ROS_INFO_STREAM(nodeName << " --> "
-                            << "Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
+                            << "RosStreamBridge Signaling on remove remote stream: " << "id: " << client.id() << ", name: " << client.name());
         });
 
         if (m_canReceiveAudioStream)
@@ -148,6 +148,12 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
 
 void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events)
 {
+    //Already in a session ?
+    //Should disconnect
+    disconnect();
+
+    ROS_INFO_STREAM(nodeName << " onJoinSessionEvents " << events[0].session_url);
+
     // TODO: Handle each item of the vector
     init(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
     connect();
@@ -186,14 +192,14 @@ void RosStreamBridge::onSignalingConnectionOpened()
 void RosStreamBridge::onSignalingConnectionClosed()
 {
     RosWebRTCBridge::onSignalingConnectionClosed();
-    ROS_WARN_STREAM(nodeName << " --> " << "shutting down...");
+    ROS_ERROR_STREAM(nodeName << " --> " << "RosStreamBridge Signaling connection closed, shutting down...");
     ros::requestShutdown();
 }
 
 void RosStreamBridge::onSignalingConnectionError(const std::string& msg)
 {
     RosWebRTCBridge::onSignalingConnectionError(msg);
-    ROS_ERROR_STREAM(nodeName << " --> " << "shutting down...");
+    ROS_ERROR_STREAM(nodeName << " --> " << "RosStreamBridge Signaling connection error " << msg.c_str() << ", shutting down...");
     ros::requestShutdown();
 }
 
@@ -289,6 +295,8 @@ int main(int argc, char** argv)
     init(argc, argv, "stream_bridge");
     ros::NodeHandle nh;
 
+    ROS_INFO_STREAM(ros::this_node::getName() << " --> " << "starting...");
     RosStreamBridge node(nh);
     node.run();
+    ROS_INFO_STREAM(ros::this_node::getName()<< " --> " << "done...");
 }

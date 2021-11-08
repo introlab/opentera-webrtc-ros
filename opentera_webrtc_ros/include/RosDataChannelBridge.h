@@ -5,10 +5,9 @@
 #include <ros/subscriber.h>
 #include <ros/publisher.h>
 #include <std_msgs/String.h>
-
 #include <RosWebRTCBridge.h>
 
-namespace opentera 
+namespace opentera
 {
 
     /**
@@ -16,13 +15,14 @@ namespace opentera
      */
     class RosDataChannelBridge: public RosWebRTCBridge<DataChannelClient>
     {
-        ros::Subscriber m_robotStatusSubscriber;
-        ros::Subscriber m_waypointReachedSubscriber;
+        ros::Subscriber m_dataSubscriber;
         ros::Publisher m_dataPublisher;
 
         void initSignalingClient(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
         void initAdvertiseTopics();
+        void stopAdvertiseTopics();
         void initDataChannelCallback();
+        void stopDataChannelCallback();
 
         void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
         void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
