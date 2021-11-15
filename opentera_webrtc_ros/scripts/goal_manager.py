@@ -3,32 +3,21 @@
 import rospy
 import actionlib
 import json
+import dynamic_reconfigure.client
 from math import pi, sqrt
-from tf.transformations import quaternion_from_euler, quaternion_multiply, quaternion_conjugate
-from tf import TransformListener, LookupException, ExtrapolationException
-from geometry_msgs.msg import PoseStamped
+from tf.transformations import quaternion_from_euler
+from geometry_msgs.msg import PoseStamped, Twist
 from opentera_webrtc_ros_msgs.msg import WaypointArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool, String
 from std_srvs.srv import SetBool
-from fiducial_msgs.msg import FiducialTransformArray
-
-class Fiducial:
-    def __init__(self, id, pose):
-        self.id = id
-        self.pose = pose
 
 class GoalManager():
     def __init__(self):
-        rospy.init_node("goal_manager") 
+        rospy.init_node("goal_manager")        
 
-        self.tf = TransformListener()
-
-        # TODO: get frames with parameters
-        self.camera_frame = "d455_color_optical_frame"
-        self.map_frame = "map"
-        self.fiducial_distance_tolerance = 0.25  # m
+        self.dr_client = dynamic_reconfigure.client.Client("/move_base/DWAPlannerROS")
 
         # Global action client used to send waypoints to move_base
         self.move_base_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -40,25 +29,11 @@ class GoalManager():
         self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
         self.dock_action_sub = rospy.Subscriber("dock_action", Bool, self.dock_cb)
-        self.fiducial_sub = rospy.Subscriber("fiducial_transforms", FiducialTransformArray, self.fiducial_cb)
+        self.pre_docking_pose_sub = rospy.Subscriber("pre_docking_pose", PoseStamped, self.pre_docking_pose_cb)
         self.waypoint_reached_pub = rospy.Publisher("waypoint_reached", String, queue_size=1)
-        self.dock_fiducial_pose_pub = rospy.Publisher("dock_fiducial_pose", PoseStamped, queue_size=1)  # For debugging
-        self.pre_docking_pose_pub = rospy.Publisher("pre_docking_pose", PoseStamped, queue_size=1)  # For debugging
+        self.cmd_vel_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
 
         self.should_stop = False
-
-        # Dock pose in map
-        self.dock_pose = PoseStamped()
-        self.dock_pose.header.frame_id = "map"
-        self.dock_pose.pose.position.x = 0
-        self.dock_pose.pose.position.y = 0
-        self.dock_pose.pose.position.z = 0
-        self.dock_pose.pose.orientation.x = 0
-        self.dock_pose.pose.orientation.y = 0
-        self.dock_pose.pose.orientation.z = 0
-        self.dock_pose.pose.orientation.w = 1
-
-        self.dock_fiducial = Fiducial(-1, None)
 
     def waypoints_cb(self, msg):
         self.move_base_client.cancel_all_goals()
@@ -127,92 +102,36 @@ class GoalManager():
             clear_global_path(True)
         except rospy.ServiceException as e:
             print("Service call failed: %s" % e)
-
-    def fiducial_cb(self, msg):
-        if len(msg.transforms) == 0:
-            return
-        print("Fiducial found")
-        self.move_base_client.cancel_all_goals()
-        for fiducial in msg.transforms:
-            pose_map_frame = self.transform_to_map_frame(fiducial.transform, msg.header)
-            if pose_map_frame == None:
-                rospy.logwarn("Failed to transform fiducial pose from %s to %s" % (self.camera_frame, self.map_frame))
-                continue
-
-            current_fiducial = Fiducial(fiducial.fiducial_id, pose_map_frame)
-            if self.dock_fiducial.id == -1:
-                # First time seeing the fiducial
-                self.dock_fiducial = current_fiducial
-            else:
-                # Not first time seeing a fiducial, check if it is the same one
-                is_same = self.is_same_fiducial(self.dock_fiducial, current_fiducial)
-                if not is_same:
-                    # TODO: handle this case
-                    rospy.logwarn("Current fiducial is not the same as the first one")
-                else:
-                    print("Same fiducial")
-                    self.dock_fiducial_pose_pub.publish(current_fiducial.pose)
-
-                    pre_docking_pose = self.calculate_pre_docking_pose(current_fiducial.pose)
-                    self.pre_docking_pose_pub.publish(pre_docking_pose)
-                    
-
-    def is_same_fiducial(self, f1, f2):
-        # TODO: compare orientation too
-        dist = sqrt((f1.pose.pose.position.x - f2.pose.pose.position.x) ** 2 + \
-                    (f1.pose.pose.position.y - f2.pose.pose.position.y) ** 2 + \
-                    (f1.pose.pose.position.z - f2.pose.pose.position.z) ** 2)
-        if f1.id == f2.id and dist < self.fiducial_distance_tolerance:
-            return True
-        else:
-            return False
-
-    def transform_to_map_frame(self, transform, header):
-        pose_cam_frame = self.transform_to_pose_stamped(transform, header)
-        try:
-            pose_map_frame = self.tf.transformPose(self.map_frame, pose_cam_frame)
-            return pose_map_frame
-        except (LookupException, ExtrapolationException):
-            return None
-
-    def transform_to_pose_stamped(self, transform, header):
-        pose = PoseStamped()
-        pose.header = header
-        pose.pose.position.x = transform.translation.x
-        pose.pose.position.y = transform.translation.y
-        pose.pose.position.z = transform.translation.z
-        pose.pose.orientation.x = transform.rotation.x
-        pose.pose.orientation.y = transform.rotation.y
-        pose.pose.orientation.z = transform.rotation.z
-        pose.pose.orientation.w = transform.rotation.w
-        return pose
-
-    def calculate_pre_docking_pose(self, dock_fiducial_pose):
-        # Rotate 90 degrees so that the x axis points towards the dock
-        # Translate back by a certain amount before the dock
-        # TODO: backward translation should be a parameter
-        pre_docking_pose = dock_fiducial_pose
-        rotation = quaternion_from_euler(0, 0, pi/2)
-        fiducial_orientation = [dock_fiducial_pose.pose.orientation.x, \
-                                dock_fiducial_pose.pose.orientation.y, \
-                                dock_fiducial_pose.pose.orientation.z, \
-                                dock_fiducial_pose.pose.orientation.w]
-        resulting_orientation = quaternion_multiply(fiducial_orientation, rotation)
-        pre_docking_pose.pose.orientation.x = resulting_orientation[0]
-        pre_docking_pose.pose.orientation.y = resulting_orientation[1]
-        pre_docking_pose.pose.orientation.z = resulting_orientation[2]
-        pre_docking_pose.pose.orientation.w = resulting_orientation[3]
-
-        v1 = [-0.5, 0, 0, 1]
-        v2 = quaternion_multiply(quaternion_multiply(resulting_orientation, v1), \
-                                    quaternion_conjugate(resulting_orientation))
     
-        pre_docking_pose.pose.position.x += v2[0]
-        pre_docking_pose.pose.position.y += v2[1]
-        pre_docking_pose.pose.position.z += v2[2]
+    def pre_docking_pose_cb(self, pose):
+        # Need to change goal tolerances to something small to make sure the docking is precise.
+        print("Got pre-docking pose")
+        prev_dwa_config = self.dr_client.get_configuration()
+        new_dwa_config = prev_dwa_config.copy()
+        new_dwa_config["xy_goal_tolerance"] = 0.05
+        new_dwa_config["yaw_goal_tolerance"] = 0.0349066
+        self.dr_client.update_configuration(new_dwa_config)
+        print("Changed goal tolerances")
+        print("Sending goal to move_base")
+        self.send_goal(pose)
+        # Reset DWA config to what it was previously
+        self.dr_client.update_configuration(prev_dwa_config)
 
-        return pre_docking_pose
-
+        # Go backwards until connected to charger
+        # TODO: refactor. Should this be handled by move_base? If not should it be in docking.py instead?
+        cmd = Twist()
+        cmd.linear.x = -0.1
+        r = rospy.Rate(10)
+        start_time = rospy.Time.now()
+        elapsed_time = 0
+        max_time = 3
+        print("Backing for %.1f seconds" % max_time)
+        # TODO: find better way of knowing when to stop backing up
+        while not rospy.is_shutdown() and elapsed_time < max_time:
+            self.cmd_vel_pub.publish(cmd)
+            elapsed_time = (rospy.Time.now() - start_time).to_sec()
+            r.sleep()
+        
 
 if __name__ == '__main__':
     print("Goal manager ready")
