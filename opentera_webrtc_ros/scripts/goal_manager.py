@@ -4,8 +4,6 @@ import rospy
 import actionlib
 import json
 import dynamic_reconfigure.client
-from math import pi, sqrt
-from collections import deque
 from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import PoseStamped, Twist
 from opentera_webrtc_ros_msgs.msg import WaypointArray
@@ -29,13 +27,8 @@ class GoalManager():
         self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
         self.pre_docking_pose_sub = rospy.Subscriber("pre_docking_pose", PoseStamped, self.pre_docking_pose_cb)
-        self.odom_sub = rospy.Subscriber("odom", Odometry, self.odom_cb)
         self.waypoint_reached_pub = rospy.Publisher("waypoint_reached", String, queue_size=1)
-        self.cmd_vel_pub = rospy.Publisher("cmd_vel", Twist, queue_size=1)
-
-        self.should_stop = False
-        self.current_position = (0, 0)
-        self.lin_vel_x = 0
+        self.pre_docking_pose_reached_pub = rospy.Publisher("pre_docking_pose_reached", Bool, queue_size=1)
 
         rospy.loginfo("Goal manager ready")
 
@@ -100,10 +93,6 @@ class GoalManager():
             clear_global_path(True)
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s" % e)
-
-    def odom_cb(self, msg):
-        self.current_position = (msg.pose.pose.position.x, msg.pose.pose.position.y)
-        self.lin_vel_x = msg.twist.twist.linear.x
     
     def pre_docking_pose_cb(self, pose):
         # Need to change goal tolerances to something small to make sure the docking is precise.
@@ -119,37 +108,9 @@ class GoalManager():
         self.send_goal(pose)
         # Reset DWA config to what it was previously
         self.dr_client.update_configuration(prev_dwa_config)
+        self.pre_docking_pose_reached_pub.publish(Bool(True))
 
-        # Go backwards until connected to charger
-        # TODO: refactor. Should this be handled by move_base? If not should it be in docking.py instead?
-        # TODO: should not use timer for determining when to stop backing up
-        cmd = Twist()
-        cmd.linear.x = -0.1
-        r = rospy.Rate(10)
-        start_position = self.current_position
-        distance_travelled = 0
-        distance_to_goal = 0.6
-        stalled = False
-        vel_queue = deque(maxlen=8)
-        # TODO: find better way of knowing when to stop backing up
-        while not rospy.is_shutdown() and distance_travelled < distance_to_goal and not stalled and not self.should_stop:
-            self.cmd_vel_pub.publish(cmd)
-            distance_travelled = sqrt((start_position[0] - self.current_position[0])**2 + \
-                                (start_position[1] - self.current_position[1])**2)
-            vel_queue.appendleft(self.lin_vel_x)
-            stalled = self.is_stalled(vel_queue)
-            r.sleep()
-
-    def is_stalled(self, vel_queue):
-        if len(vel_queue) != vel_queue.maxlen:
-            return False
-        for vel in vel_queue:
-            if abs(vel) > 0.02:
-                return False
-        rospy.loginfo("Robot is stalled")
-        return True
         
-
 if __name__ == '__main__':
     rospy.init_node("goal_manager")
     try:
