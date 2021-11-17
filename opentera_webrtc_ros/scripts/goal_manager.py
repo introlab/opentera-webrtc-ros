@@ -3,20 +3,16 @@
 import rospy
 import actionlib
 import json
-import dynamic_reconfigure.client
 from tf.transformations import quaternion_from_euler
-from geometry_msgs.msg import PoseStamped, Twist
+from geometry_msgs.msg import PoseStamped
 from opentera_webrtc_ros_msgs.msg import WaypointArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from actionlib_msgs.msg._GoalStatus import GoalStatus
 from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool, String
 from std_srvs.srv import SetBool
-from nav_msgs.msg import Odometry
 
 class GoalManager():
     def __init__(self):  
-        self.dr_client = dynamic_reconfigure.client.Client("/move_base/DWAPlannerROS")
 
         # Global action client used to send waypoints to move_base
         self.move_base_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -29,9 +25,7 @@ class GoalManager():
         # Subscribers and publishers
         self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
-        self.pre_docking_pose_sub = rospy.Subscriber("pre_docking_pose", PoseStamped, self.pre_docking_pose_cb)
         self.waypoint_reached_pub = rospy.Publisher("waypoint_reached", String, queue_size=1)
-        self.pre_docking_pose_reached_pub = rospy.Publisher("pre_docking_pose_reached", Bool, queue_size=1)
 
         rospy.loginfo("Goal manager ready")
 
@@ -97,25 +91,6 @@ class GoalManager():
             clear_global_path(True)
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s" % e)
-    
-    def pre_docking_pose_cb(self, pose):
-        # Need to change goal tolerances to something small to make sure the docking is precise.
-        rospy.loginfo("Got pre-docking pose")
-        prev_dwa_config = self.dr_client.get_configuration()
-        new_dwa_config = prev_dwa_config.copy()
-        new_dwa_config["xy_goal_tolerance"] = 0.1
-        new_dwa_config["yaw_goal_tolerance"] = 0.0349066
-        self.dr_client.update_configuration(new_dwa_config)
-        rospy.loginfo("Changed goal tolerances")
-        rospy.loginfo("Sending goal to move_base")
-        self.should_stop = False
-        state = self.send_goal(pose)
-        # Reset DWA config to what it was previously
-        self.dr_client.update_configuration(prev_dwa_config)
-        if state == GoalStatus.SUCCEEDED:
-            self.pre_docking_pose_reached_pub.publish(Bool(True))
-        else:
-            self.pre_docking_pose_reached_pub.publish(Bool(False))
 
         
 if __name__ == '__main__':
