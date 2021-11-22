@@ -32,19 +32,7 @@ sudo apt-get install build-essential gfortran texinfo libasound2-dev
 
 # Installation
 
-## 1 - Install Qt 5.9.9 with Qt Maintenance Tool (required for newer versions of Ubuntu > 18.04 only)
-
-Get the Online Installer [here](https://www.qt.io/download-thank-you?hsLang=en). You need to register with Qt to use the installer (or Maintenance Tool if you already installed Qt with the installer). Once registered, install Qt 5.9.9 for Linux by selecting :
-* Desktop gcc 64 bits
-* Sources
-* Every Qt Modules (Android modules not needed)
-
->Make sure files are installed in the default location $HOME/Qt/5.9.9/gcc_64.
-
->We use Qt 5.9.9 since it is the version installed on Ubuntu 18.04 on our Jetson development boards.
-
-
-## 2 - Create a catkin workspace (if not already done)
+## 1 - Create a catkin workspace (if not already done)
 
 ```bash
 # Make sure ROS is installed first. 
@@ -55,7 +43,7 @@ $ cd ~/teleop_ws/
 $ catkin_make
 ```
 
-## 3 - Get all the required ROS packages
+## 2 - Get all the required ROS packages
 ```bash
 $ cd ~/teleop_ws/src
 # audio_utils
@@ -64,14 +52,14 @@ $ git clone https://github.com/introlab/audio_utils.git --recurse-submodules
 $ git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
 ```
 
-## 4 - Build all the ROS packages
+## 3 - Build all the ROS packages
 ```bash
 $ cd ~/teleop_ws
 $ source devel/setup.bash
 $ catkin_make
 ```
 
-## 5 - Install the Python requirements for client and signaling server
+## 4 - Install the Python requirements for client and signaling server
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/
 $ python3 -m pip install -r requirements.txt
@@ -81,7 +69,7 @@ $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/sig
 $ python3 -m pip install -r requirements.txt
 ```
 
-## 6 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
+## 5 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
 # Run the npm package installer

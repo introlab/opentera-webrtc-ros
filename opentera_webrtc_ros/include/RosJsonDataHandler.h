@@ -8,6 +8,7 @@
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
+#include <std_srvs/SetBool.h>
 
 namespace opentera 
 {
@@ -22,6 +23,7 @@ namespace opentera
         ros::Publisher m_waypointsPub;
         float m_linear_multiplier;
         float m_angular_multiplier;
+        ros::ServiceClient m_dockingClient;
 
     protected:
         ros::NodeHandle m_nh;

@@ -48,8 +48,8 @@
         <param name="draw_goal" type="bool" value="$(arg draw_goal)" />
         <param name="wall_color" type="string" value="0 224 225"/>
         <param name="free_space_color" type="string" value="24 39 52"/>
-        <param name="unknown_space_color" type="string" value="0 0 0"/>
-        <param name="robot_size" type="int" value="20"/>
+        <param name="unknown_space_color" type="string" value="12 12 12"/>
+        <param name="robot_size" type="int" value="30"/>
         <param name="global_path_thickness" type="int" value="2"/>
         <param name="laser_scan_size" type="int" value="3"/>
     </node>
