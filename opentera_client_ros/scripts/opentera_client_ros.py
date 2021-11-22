@@ -21,6 +21,7 @@ from opentera_webrtc_ros_msgs.msg import LogEvent
 from opentera_webrtc_ros_msgs.msg import ParticipantEvent
 from opentera_webrtc_ros_msgs.msg import StopSessionEvent
 from opentera_webrtc_ros_msgs.msg import UserEvent
+from opentera_webrtc_ros_msgs.msg import RobotStatus
 
 # OpenTera
 import opentera.messages.python as messages
@@ -37,6 +38,34 @@ class OpenTeraROSClient:
         self.__base_url = url
         self.__token = token
         self.__event_publisher = rospy.Publisher('events', OpenTeraEvent, queue_size=10)
+        self.__robot_status_json_webrtc_publisher = rospy.Publisher('webrtc_data_outgoing', String, queue_size=10)
+        self.__robot_status_subscriber = rospy.Subscriber('robot_status', RobotStatus, self.robot_status_callback)
+        self.__robot_status = {}
+
+    def robot_status_callback(self, status: RobotStatus):
+        # Update internal status
+        # Will be sent by _opentera_send_device_status task as json
+        self.__robot_status = {
+            'timestamp': status.header.stamp.secs,
+            'status': {
+                'is_charging': status.is_charging,
+                'battery_voltage': status.battery_voltage,
+                'battery_current': status.battery_current,
+                'cpu_usage': status.cpu_usage,
+                'mem_usage': status.mem_usage,
+                'disk_usage': status.disk_usage,
+                'wifi_network': status.wifi_network,
+                'wifi_strength': status.wifi_strength,
+                'local_ip': status.local_ip
+            }
+        }
+
+        # Status will also be re-published for webrtc data channel
+        json_string = json.dumps({'type': 'robotStatus',
+            'timestamp': self.__robot_status['timestamp'],
+            'status': self.__robot_status['status']})
+        self.__robot_status_json_webrtc_publisher.publish(json_string)
+
 
     async def _fetch(self, client, url, params=None):
         if params is None:
@@ -102,18 +131,8 @@ class OpenTeraROSClient:
                 await asyncio.sleep(10)
                 params = {'token': token}
 
-                from datetime import datetime
-
-                # This can be anything...
-                status = {
-                    'status': {'battery': 10.4, 'flag': False},
-                    'timestamp': datetime.now().timestamp()
-                }
-
-                async with client.post(url, params=params, json=status, verify_ssl=False) as response:
-                    if response.status == 200:
-                        print('Sent status')
-                    else:
+                async with client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
+                    if response.status != 200:
                         print('Send status failed')
                         break
             except asyncio.CancelledError as e:

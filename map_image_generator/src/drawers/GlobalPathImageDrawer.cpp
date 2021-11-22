@@ -76,4 +76,5 @@ bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request &req, std
         res.success = true;
         return true;
     }
+    return false;
 }

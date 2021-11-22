@@ -31,15 +31,15 @@ namespace opentera
         static void loadAudioStreamParams(
             bool &canSendAudioStream,
             bool &canReceiveAudioStream,
-            unsigned int &sound_card_total_delay_ms,
-            bool &echo_cancellation,
-            bool &auto_gain_control,
-            bool &noise_suppression,
-            bool &high_pass_filter,
-            bool &stereo_swapping,
-            bool &typing_detection,
-            bool &residual_echo_detector,
-            bool &transient_suppression);
+            unsigned int &soundCardTotalDelayMs,
+            bool &echoCancellation,
+            bool &autoGainControl,
+            bool &noiseSuppression,
+            bool &highPassFilter,
+            bool &stereoSwapping,
+            bool &typingDetection,
+            bool &residualEchoDetector,
+            bool &transientSuppression);
     };
 
     /**

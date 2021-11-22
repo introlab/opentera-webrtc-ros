@@ -99,7 +99,6 @@
 
     <!-- Robot status simulated data -->
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos">
-        <remap from="robot_status" to="webrtc_data_outgoing"/>
     </node>
 
     <!-- Audio Capture -->

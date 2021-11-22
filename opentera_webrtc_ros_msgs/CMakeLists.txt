@@ -27,6 +27,7 @@ add_message_files(
    PeerImage.msg
    PeerAudio.msg
    PeerStatus.msg
+   RobotStatus.msg
    Waypoint.msg
    WaypointArray.msg
 )
