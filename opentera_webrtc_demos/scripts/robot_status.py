@@ -51,7 +51,7 @@ class RobotStatusPublisher():
 
                 status.wifi_network = network_name
                 status.wifi_strength = 0
-                status.local_ip = self.get_ip_address('wifi0')
+                status.local_ip = self.get_ip_address(status.wifi_network.split()[0])
 
                 # Publish
                 self.status_pub.publish(status)
