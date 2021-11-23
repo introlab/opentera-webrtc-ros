@@ -47,15 +47,15 @@ class OpenTeraROSClient:
         self.__robot_status = {
             'timestamp': status.header.stamp.secs,
             'status': {
-                'is_charging': status.is_charging,
-                'battery_voltage': status.battery_voltage,
-                'battery_current': status.battery_current,
-                'cpu_usage': status.cpu_usage,
-                'mem_usage': status.mem_usage,
-                'disk_usage': status.disk_usage,
-                'wifi_network': status.wifi_network,
-                'wifi_strength': status.wifi_strength,
-                'local_ip': status.local_ip
+                'isCharging': status.is_charging,
+                'batteryVoltage': status.battery_voltage,
+                'batteryCurrent': status.battery_current,
+                'cpuUsage': status.cpu_usage,
+                'memUsage': status.mem_usage,
+                'diskUsage': status.disk_usage,
+                'wifiNetwork': status.wifi_network,
+                'wifiStrength': status.wifi_strength,
+                'localIp': status.local_ip
             }
         }
 
