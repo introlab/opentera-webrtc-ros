@@ -53,17 +53,22 @@ class RobotStatusPublisher():
                 subprocess_output = subprocess_result.communicate()[0],subprocess_result.returncode
                 network_name = subprocess_output[0].decode('utf-8')
                 status.wifi_network = network_name
-                wifi_interface_name = status.wifi_network.split()[0]
+                if status.wifi_network:
+                    wifi_interface_name = status.wifi_network.split()[0]
 
-                command = "iwconfig %s | grep 'Link Quality='" % wifi_interface_name
-                subprocess_result = subprocess.Popen(command, shell=True,stdout=subprocess.PIPE)
-                subprocess_output = subprocess_result.communicate()[0],subprocess_result.returncode
-                decoded_output = subprocess_output[0].decode('utf-8')
-                numerator = int(re.search('=(.+?)/', decoded_output).group(1))
-                denominator = int(re.search('/(.+?) ', decoded_output).group(1))
-                status.wifi_strength = numerator / denominator * 100
+                    command = "iwconfig %s | grep 'Link Quality='" % wifi_interface_name
+                    subprocess_result = subprocess.Popen(command, shell=True,stdout=subprocess.PIPE)
+                    subprocess_output = subprocess_result.communicate()[0],subprocess_result.returncode
+                    decoded_output = subprocess_output[0].decode('utf-8')
+                    numerator = int(re.search('=(.+?)/', decoded_output).group(1))
+                    denominator = int(re.search('/(.+?) ', decoded_output).group(1))
+                    status.wifi_strength = numerator / denominator * 100
+                    status.local_ip = self.get_ip_address(wifi_interface_name)
+                else:
+                    status.wifi_strength = 0
+                    status.local_ip = '127.0.0.1'
 
-                status.local_ip = self.get_ip_address(wifi_interface_name)
+
 
                 # Publish for ROS
                 self.status_pub.publish(status)
