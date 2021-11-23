@@ -32,17 +32,13 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam()
  */
 SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url)
 {
-    size_t pos1, pos2;
+    string address = RosSignalingServerConfiguration::getBaseUrl(url) + "/socket.io";
 
-    pos1 = url.find_last_of("/");
-    string address = url.substr(0, pos1) + "/socket.io";
-
-    pos1 = url.find("?");
+    size_t pos1 = url.find("?");
     string queries = url.substr(pos1);
-
     string password = getQueryFrom("pwd", queries);
-
     string clientName, roomName;
+
     RosNodeParameters::loadSignalingParams(clientName, roomName);
 
     return SignalingServerConfiguration::create(address, clientName, roomName, password);
@@ -67,4 +63,64 @@ std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& que
     pos2 = remaining.find_first_of("&");
 
     return remaining.substr(0, pos2).substr(query.size() + 1);
+}
+
+/**
+ * @brief Get the ice servers url from url
+ *
+ * @param url The full url to extract from.
+ * @return std::string The ice server url.
+ */
+std::string RosSignalingServerConfiguration::getIceServerUrl(const std::string &url)
+{
+    ROS_INFO_STREAM("getIceServerUrl from url:" << url);
+    return RosSignalingServerConfiguration::getBaseUrl(url) + "/iceservers";
+}
+
+/**
+ * @brief Get base url from url
+ *
+ * @param url The full url to extract from.
+ * @return std::string The base url (up to the last / of the path).
+ */
+std::string RosSignalingServerConfiguration::getBaseUrl(const std::string &url)
+{
+    const string prot_end("://");
+    string::const_iterator prot_i = search(url.begin(), url.end(),
+                                           prot_end.begin(), prot_end.end());
+
+    std::string protocol;
+    protocol.reserve(distance(url.begin(), prot_i));
+
+
+    transform(url.begin(), prot_i,
+              back_inserter(protocol),
+              ptr_fun<int,int>(tolower)); // protocol is icase
+
+    if( prot_i == url.end() )
+    {
+        ROS_ERROR_STREAM("No protocol defined in url: " << url);
+        return url;
+    }
+
+    advance(prot_i, prot_end.length());
+
+    string::const_iterator path_i = std::find(prot_i, url.end(), '/');
+
+    auto pos = url.find_last_of('/');
+    string::const_iterator last_i = url.begin();
+    advance(last_i, pos);
+
+    if (path_i < last_i)
+    {
+        path_i = last_i;
+    }
+
+    std::string host;
+    host.reserve(distance(prot_i, path_i));
+    transform(prot_i, path_i,
+              back_inserter(host),
+              ptr_fun<int,int>(tolower)); // host is icase
+
+    return protocol + prot_end + host;
 }

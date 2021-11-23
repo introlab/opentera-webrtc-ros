@@ -3,7 +3,7 @@
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 
-namespace opentera 
+namespace opentera
 {
 
     /**
@@ -17,6 +17,8 @@ namespace opentera
     public:
         static SignalingServerConfiguration fromRosParam();
         static SignalingServerConfiguration fromUrl(const std::string& url);
+        static std::string getIceServerUrl(const std::string &url);
+        static std::string getBaseUrl(const std::string &url);
     };
 }
 

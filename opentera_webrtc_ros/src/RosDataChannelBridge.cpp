@@ -45,10 +45,7 @@ RosDataChannelBridge::~RosDataChannelBridge()
  */
 void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration &signalingServerConfiguration)
 {
-
-    size_t pos1 = 0;
-    pos1 = signalingServerConfiguration.url().find_last_of("/");
-    string iceServersUrl = signalingServerConfiguration.url().substr(0, pos1) + "/iceservers";
+    string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
     ROS_INFO("Fetching ice servers from : %s", iceServersUrl.c_str());
     vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl,
