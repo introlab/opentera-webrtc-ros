@@ -38,7 +38,6 @@ class OpenTeraROSClient:
         self.__base_url = url
         self.__token = token
         self.__event_publisher = rospy.Publisher('events', OpenTeraEvent, queue_size=10)
-        self.__robot_status_json_webrtc_publisher = rospy.Publisher('webrtc_data_outgoing', String, queue_size=10)
         self.__robot_status_subscriber = rospy.Subscriber('robot_status', RobotStatus, self.robot_status_callback)
         self.__robot_status = {}
 
@@ -59,13 +58,6 @@ class OpenTeraROSClient:
                 'local_ip': status.local_ip
             }
         }
-
-        # Status will also be re-published for webrtc data channel
-        json_string = json.dumps({'type': 'robotStatus',
-            'timestamp': self.__robot_status['timestamp'],
-            'status': self.__robot_status['status']})
-        self.__robot_status_json_webrtc_publisher.publish(json_string)
-
 
     async def _fetch(self, client, url, params=None):
         if params is None:

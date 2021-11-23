@@ -5,11 +5,14 @@ import psutil
 import os
 import subprocess
 from opentera_webrtc_ros_msgs.msg import RobotStatus
+from std_msgs.msg import String
+import json
 
 class RobotStatusPublisher():
     def __init__(self):
         rospy.init_node("robot_status_publisher")
         self.status_pub = rospy.Publisher('/robot_status', RobotStatus, queue_size=10)
+        self.status_webrtc_pub = rospy.Publisher('/webrtc_data_outgoing', String, queue_size=10)
         self.pub_rate = 1
 
 
@@ -53,8 +56,26 @@ class RobotStatusPublisher():
                 status.wifi_strength = 0
                 status.local_ip = self.get_ip_address('wifi0')
 
-                # Publish
+                # Publish for ROS
                 self.status_pub.publish(status)
+
+                # Publish for webrtc
+                status_dict = {
+                    'type': 'robotStatus',
+                    'timestamp': status.header.stamp.secs,
+                    'status': {
+                        'is_charging': status.is_charging,
+                        'battery_voltage': status.battery_voltage,
+                        'battery_current': status.battery_current,
+                        'cpu_usage': status.cpu_usage,
+                        'mem_usage': status.mem_usage,
+                        'disk_usage': status.disk_usage,
+                        'wifi_network': status.wifi_network,
+                        'wifi_strength': status.wifi_strength,
+                        'local_ip': status.local_ip
+                        }
+                }
+                self.status_webrtc_pub.publish(json.dumps(status_dict))
                 r.sleep()
 
 
@@ -63,5 +84,6 @@ if __name__ == '__main__':
     try:
         robot_status = RobotStatusPublisher()
         robot_status.run()
-    except rospy.ROSInterruptException:
+    except rospy.ROSInterruptException as e:
+        print(e)
         pass
