@@ -4,6 +4,7 @@ Header header
 bool is_charging
 float32 battery_voltage
 float32 battery_current
+float32 battery_level  # 0 - 100 
 float32 cpu_usage
 float32 mem_usage
 float32 disk_usage
