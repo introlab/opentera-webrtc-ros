@@ -37,7 +37,7 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
         geometry_msgs::Twist twist;
         // Multiply by 0.15 in order to control the speed of the movement
         twist.linear.x = (double)serializedData["x"] * m_linear_multiplier;
-        twist.angular.z = (double)serializedData["z"] * m_angular_multiplier;
+        twist.angular.z = (double)serializedData["yaw"] * m_angular_multiplier;
         m_cmdVelPublisher.publish(twist);
     }
     else if (serializedData["type"] == "waypointArray")
