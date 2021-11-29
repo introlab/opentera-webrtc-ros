@@ -81,6 +81,7 @@ class RobotStatusPublisher():
                         'isCharging': status.is_charging,
                         'batteryVoltage': status.battery_voltage,
                         'batteryCurrent': status.battery_current,
+                        'batteryLevel': status.battery_level,
                         'cpuUsage': status.cpu_usage,
                         'memUsage': status.mem_usage,
                         'diskUsage': status.disk_usage,
