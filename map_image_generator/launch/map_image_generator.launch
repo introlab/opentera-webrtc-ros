@@ -23,7 +23,7 @@
     <arg name="robot_frame_param" default="base_footprint"/>
     <arg name="draw_goal" default="true"/>
 
-    <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" output="screen">
+    <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="screen">
         <remap from="occupancy_grid" to="$(arg input_occupancy_grid_topic)"/>
         <remap from="global_path" to="$(arg input_global_path_topic)"/>
         <remap from="input_goal" to="$(arg input_goal_topic)"/>

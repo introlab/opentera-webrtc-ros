@@ -72,6 +72,8 @@ bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request &req, std
 {
     if(req.data)
     {
+        if(!m_lastGlobalPath)
+            return true;
         m_lastGlobalPath->poses.clear();
         res.success = true;
         return true;
