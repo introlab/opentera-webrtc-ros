@@ -13,6 +13,8 @@ RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh)
     m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
     m_p_nh.param<float>("angular_multiplier", m_angular_multiplier, 0.15);
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
+    m_localizationModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_localization");
+    m_mappingModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_mapping");
 }
 
 RosJsonDataHandler::~RosJsonDataHandler()
@@ -62,7 +64,25 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
             srv.request.data = serializedData["cmd"];            
             if (!m_dockingClient.call(srv))
             {
-                ROS_INFO("Error: %s", srv.response.message.c_str());
+                ROS_ERROR("Docking service call error: %s", srv.response.message.c_str());
+            }
+        }
+        else if(serializedData["action"] == "localizationMode")
+        {
+            std::cout << "Switching to localization mode" << std::endl;
+            std_srvs::Empty srv;
+            if (!m_localizationModeClient.call(srv))
+            {
+                ROS_ERROR("Localization mode service call error");
+            }
+        }
+        else if(serializedData["action"] == "mappingMode")
+        {
+            std::cout << "Switching to mapping mode" << std::endl;
+            std_srvs::Empty srv;
+            if (!m_mappingModeClient.call(srv))
+            {
+                ROS_ERROR("Mapping mode service call error");
             }
         }
     }

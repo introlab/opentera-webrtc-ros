@@ -9,6 +9,7 @@
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/SetBool.h>
+#include <std_srvs/Empty.h>
 
 namespace opentera 
 {
@@ -24,6 +25,8 @@ namespace opentera
         float m_linear_multiplier;
         float m_angular_multiplier;
         ros::ServiceClient m_dockingClient;
+        ros::ServiceClient m_localizationModeClient;
+        ros::ServiceClient m_mappingModeClient;
 
     protected:
         ros::NodeHandle m_nh;
