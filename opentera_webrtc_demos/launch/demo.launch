@@ -95,6 +95,7 @@
     <!-- Robot status simulated data -->
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
-
+    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen" respawn="true"/>
+    
 </launch>
  
