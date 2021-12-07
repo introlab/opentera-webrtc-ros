@@ -172,8 +172,8 @@ void RosStreamBridge::onSignalingConnectionOpened()
         m_audioSubscriber = m_nh.subscribe(
             "audio_out",
             1,
-            &RosAudioSource::audioCallback,
-            m_audioSource.get());
+            &RosStreamBridge::audioCallback,
+            this);
     }
 
     if (m_canSendVideoStream)
@@ -182,8 +182,8 @@ void RosStreamBridge::onSignalingConnectionOpened()
         m_imageSubscriber = m_nh.subscribe(
             "ros_image",
             1,
-            &RosVideoSource::imageCallback,
-            m_videoSource.get());
+            &RosStreamBridge::imageCallback,
+            this);
     }
 }
 
@@ -275,6 +275,22 @@ audio_utils::AudioFrame RosStreamBridge::createAudioFrame(const void* audioData,
     frame.data = vector<uint8_t>(buffer, buffer + bufferSize);
 
     return frame;
+}
+
+void RosStreamBridge::audioCallback(const audio_utils::AudioFrameConstPtr& msg)
+{
+    if (m_audioSource)
+    {
+        m_audioSource->sendFrame(msg);
+    }
+}
+
+void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+    if (m_videoSource)
+    {
+        m_videoSource->sendFrame(msg);
+    }
 }
 
 RosStreamBridge::~RosStreamBridge()

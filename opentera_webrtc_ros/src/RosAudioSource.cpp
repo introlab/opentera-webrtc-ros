@@ -20,13 +20,19 @@ RosAudioSource::RosAudioSource(unsigned int soundCardTotalDelayMs,
 {
 }
 
- void RosAudioSource::audioCallback(const audio_utils::AudioFrameConstPtr& msg)
+ void RosAudioSource::sendFrame(const audio_utils::AudioFrameConstPtr& msg)
  {
-
      //Checking if frame fits default configuration and send frame
      if(msg->channel_count == 1 &&
-        msg->sampling_frequency == 48000 &&
-        msg->format == "signed_16")  {
-            sendFrame(msg->data.data(), msg->frame_sample_count);
-     }
+           msg->sampling_frequency == 48000 &&
+           msg->format == "signed_16")
+    {
+        //ROS_INFO("Frame size %i", msg->frame_sample_count);
+        AudioSource::sendFrame(msg->data.data(), msg->frame_sample_count);
+    }
+    else
+    {
+        ROS_ERROR("Invalid audio frame (channel_count=%i, sampling_frequency=%i, format=%s)",
+                msg->channel_count, msg->sampling_frequency, msg->format.c_str());
+    }
  }

@@ -10,7 +10,7 @@
 
 #include <RosWebRTCBridge.h>
 
-namespace opentera 
+namespace opentera
 {
 
     /**
@@ -41,9 +41,9 @@ namespace opentera
 
         void onSignalingConnectionOpened() override;
         void onSignalingConnectionClosed() override;
-        
+
         void onSignalingConnectionError(const std::string& msg) override;
-  
+
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
         void onAudioFrameReceived(const Client& client,
             const void* audioData,
@@ -62,6 +62,9 @@ namespace opentera
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
+
+        void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
+        void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
     public:
         RosStreamBridge(const ros::NodeHandle& nh);

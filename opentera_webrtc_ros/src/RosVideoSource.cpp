@@ -15,8 +15,8 @@ using namespace opentera;
  * @param isScreenCast the transport layer should be configured to stream a screen rather then a camera
  */
 RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast):
-        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast)) 
-{ 
+        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast))
+{
 }
 
 /**
@@ -27,7 +27,7 @@ RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast):
  *
  * @param msg The ROS image message
  */
-void RosVideoSource::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+void RosVideoSource::sendFrame(const sensor_msgs::ImageConstPtr& msg)
 {
     cv::Mat bgr;
     if (msg->encoding.find("F") != std::string::npos)
@@ -52,5 +52,5 @@ void RosVideoSource::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 
     int64_t camera_time_us = msg->header.stamp.toNSec() / 1000;
-    sendFrame(bgr, camera_time_us);
+    VideoSource::sendFrame(bgr, camera_time_us);
 }

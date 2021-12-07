@@ -11,7 +11,6 @@ namespace opentera
      * @brief A webrtc audio source that gets images from a ROS topic
      *
      * Usage: pass an shared_ptr to an instance of this to the xxxx constructor.
-     * Use the audioCallback as a ROS topic subscriber callback.
      */
     class RosAudioSource : public AudioSource
     {
@@ -27,7 +26,7 @@ namespace opentera
             bool residualEchoDetector = true,
             bool transientSuppression = true);
 
-        void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
+        void sendFrame(const audio_utils::AudioFrameConstPtr& msg);
     };
 }
 
