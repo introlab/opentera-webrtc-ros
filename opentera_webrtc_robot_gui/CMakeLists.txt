@@ -23,6 +23,9 @@ execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
 )
 
 set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
+
+# Uncomment if you want to use another Qt Version
+# set(Qt5_DIR $ENV{HOME}/Qt/5.12.12/gcc_64/lib/cmake/Qt5)
 find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
 
 set(srcs

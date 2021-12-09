@@ -19,6 +19,10 @@ int main(int argc, char *argv[])
 {
 
     ros::init(argc, argv, "opentera_webrtc_robot_gui_node");
+    ros::NodeHandle nh("~");
+    bool fullScreen = false;
+    nh.getParam("fullScreen", fullScreen);
+
 	ros::AsyncSpinner spinner(1);
 
     /* Set up the structure to specify the action */
@@ -27,7 +31,7 @@ int main(int argc, char *argv[])
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0;
 	sigaction(SIGINT, &action, NULL);
-    
+
 
     QApplication app(argc, argv);
 
@@ -39,8 +43,14 @@ int main(int argc, char *argv[])
 
 
     MainWindow w;
-    w.showFullScreen();
-
+    if (fullScreen)
+    {
+        w.showFullScreen();
+    }
+    else
+    {
+        w.show();
+    }
 
     //Load test image from QRC
     QImage testImage(":/Test_640x480.png");

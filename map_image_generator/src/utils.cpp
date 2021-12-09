@@ -89,5 +89,6 @@ namespace map_image_generator
         {
             return -3 * M_PI - yaw;
         }
+        return yaw;
     }
 }

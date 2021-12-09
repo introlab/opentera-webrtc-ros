@@ -48,6 +48,7 @@ void MainWindow::setupROS()
             &MainWindow::localImageCallback,
             this);
 
+
     m_peerImageSubscriber = m_nodeHandle.subscribe("/webrtc_image",
             10,
             &MainWindow::peerImageCallback,
@@ -57,6 +58,7 @@ void MainWindow::setupROS()
             10,
             &MainWindow::peerStatusCallback,
             this);
+
 
     m_openteraEventSubscriber = m_nodeHandle.subscribe("/events",
             10,
@@ -178,11 +180,10 @@ void MainWindow::_onPeerImage(const QString &id, const QString &name, const QIma
 {
     if (!m_remoteViews.contains(id))
     {
-        ROSCameraView *camera = new ROSCameraView(name, m_ui->imageWidget);
+        ROSCameraView *camera = new ROSCameraView(name, nullptr);
         camera->setImage(image);
         m_ui->imageWidgetLayout->addWidget(camera);
         m_remoteViews[id] = camera;
-
         m_cameraView->setMaximumSize(320,240);
     }
     else
