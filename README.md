@@ -1,7 +1,6 @@
 # opentera-webrtc-ros
 
-Based on [opentera-webrtc](https://github.com/introlab/opentera-webrtc). We are now using a pre-built version 0.2.4 of our library to speed-up compilation.
-
+Based on [opentera-webrtc](https://github.com/introlab/opentera-webrtc).
 
 # Authors
 
@@ -35,7 +34,7 @@ sudo apt-get install build-essential gfortran texinfo libasound2-dev
 ## 1 - Create a catkin workspace (if not already done)
 
 ```bash
-# Make sure ROS is installed first. 
+# Make sure ROS is installed first.
 $ source /opt/ros/noetic/setup.bash
 # Create the workspace and initial build files
 $ mkdir -p ~/teleop_ws/src
