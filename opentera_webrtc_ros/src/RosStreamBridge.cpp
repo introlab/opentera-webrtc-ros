@@ -92,7 +92,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
             (m_canReceiveVideoStream || m_canSendVideoStream ? m_videoSource : nullptr),
             (m_canReceiveAudioStream || m_canSendAudioStream ? m_audioSource : nullptr));
 
-    m_signalingClient->setTlsVerificationEnabled(false);
+    m_signalingClient->setTlsVerificationEnabled(true);
 
     if (m_canReceiveAudioStream || m_canReceiveVideoStream)
     {

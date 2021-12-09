@@ -61,7 +61,7 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
             WebrtcConfiguration::create(iceServers),
             DataChannelConfiguration::create());
 
-    m_signalingClient->setTlsVerificationEnabled(false);
+    m_signalingClient->setTlsVerificationEnabled(true);
 }
 
 /**
