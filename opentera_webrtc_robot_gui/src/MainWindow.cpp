@@ -54,14 +54,14 @@ void MainWindow::setupROS()
             this);
 
     m_peerStatusSubscriber = m_nodeHandle.subscribe("/webrtc_peer_status",
-            10, 
+            10,
             &MainWindow::peerStatusCallback,
             this);
 
-    m_openteraEventSubscriber = m_nodeHandle.subscribe("/events", 
+    m_openteraEventSubscriber = m_nodeHandle.subscribe("/events",
             10,
             &MainWindow::openteraEventCallback,
-            this); 
+            this);
 
 
     //Setup publishers
@@ -78,7 +78,7 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
         QImage image(&msg->data[0], msg->width, msg->height, QImage::Format_RGB888);
 
         //Step #2 emit new signal with image
-        emit newLocalImage(std::move(image).copy());
+        emit newLocalImage(image.copy());
     }
     else if (msg->encoding == "brg8") {
         //Step #1 Transform ROS Image to QtImage
@@ -86,10 +86,11 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         //Step #2 emit new signal with image
         //Invert R & B here
-        emit newLocalImage(std::move(image).rgbSwapped());
+        emit newLocalImage(image.rgbSwapped());
     }
     else {
         qDebug() << "Unhandled image encoding: " << QString::fromStdString(msg->encoding);
+        ROS_ERROR("Unhandled image encoding: %s", msg->encoding.c_str());
     }
 
 }
@@ -106,8 +107,8 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
         {
             session_participants.append(QString::fromStdString(msg->join_session_events[i].session_participants[j]));
         }
-        
-        QList<QString> session_users;      
+
+        QList<QString> session_users;
         for (auto j=0; j < msg->join_session_events[i].session_users.size(); j++)
         {
             session_users.append(QString::fromStdString(msg->join_session_events[i].session_users[j]));
@@ -138,8 +139,8 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
         {
             leaving_participants.append(QString::fromStdString(msg->leave_session_events[i].leaving_participants[j]));
         }
-        
-        QList<QString> leaving_users;      
+
+        QList<QString> leaving_users;
         for (auto j=0; j < msg->leave_session_events[i].leaving_users.size(); j++)
         {
             leaving_users.append(QString::fromStdString(msg->leave_session_events[i].leaving_users[j]));
@@ -153,14 +154,14 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
 
         emit eventLeaveSession(QString::fromStdString(msg->leave_session_events[i].session_uuid),
                                 QString::fromStdString(msg->leave_session_events[i].service_uuid),
-                                leaving_participants, 
+                                leaving_participants,
                                 leaving_users,
                                 leaving_devices);
     }
 
     for (auto i=0; i < msg->stop_session_events.size(); i++)
     {
-        emit eventStopSession(QString::fromStdString(msg->stop_session_events[i].session_uuid), 
+        emit eventStopSession(QString::fromStdString(msg->stop_session_events[i].session_uuid),
             QString::fromStdString(msg->stop_session_events[i].service_uuid));
     }
 
@@ -219,7 +220,8 @@ void MainWindow::_onPeerStatus(const QString &id, const QString& name, int statu
         break;
 
         default:
-            qWarning() << "status not hanelded " << status;
+            qWarning() << "Status not handled " << status;
+            ROS_WARN("Status not handled : %i", status);
         break;
     }
 }
@@ -239,7 +241,7 @@ void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageCons
 {
     //Step #1 Transform ROS Image to QtImage
     QImage image(&msg->frame.data[0], msg->frame.width, msg->frame.height, QImage::Format_RGB888);
-    
+
     //Step #2 Emit signal (will be handled in Qt main thread)
     //Image will be automatically deleted when required
     //Invert R & B here
@@ -251,7 +253,7 @@ void MainWindow::peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusCo
     emit newPeerStatus(QString::fromStdString(msg->sender.id), QString::fromStdString(msg->sender.name), msg->status);
 }
 
-void MainWindow::_onJoinSessionEvent(const QString &session_url, 
+void MainWindow::_onJoinSessionEvent(const QString &session_url,
     const QString &session_creator_name,
     const QString &session_uuid,
     QList<QString> session_participants,
@@ -259,7 +261,7 @@ void MainWindow::_onJoinSessionEvent(const QString &session_url,
     QList<QString> session_devices,
     const QString &join_msg,
     const QString &session_parameters,
-    const QString &service_uuid) 
+    const QString &service_uuid)
 {
 
 }
@@ -267,12 +269,14 @@ void MainWindow::_onJoinSessionEvent(const QString &session_url,
 void MainWindow::_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)
 {
     qDebug() << "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)";
+    ROS_DEBUG("_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)");
 
     //Remove all remote views
     foreach (QString key, m_remoteViews.keys()) {
         m_remoteViews[key]->deleteLater();
-        m_remoteViews.remove(key);
     }
+
+    m_remoteViews.clear();
 
     //Put back full size self camera
     m_cameraView->setMaximumSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
@@ -280,10 +284,9 @@ void MainWindow::_onStopSessionEvent(const QString &session_uuid, const QString 
 
 void MainWindow::_onLeaveSessionEvent(const QString &session_uuid,
     const QString &service_uuid,
-    QList<QString> leaving_participants, 
+    QList<QString> leaving_participants,
     QList<QString> leaving_users,
     QList<QString> leaving_devices)
 {
-    
+
 }
-   

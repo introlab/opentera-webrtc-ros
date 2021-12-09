@@ -43,7 +43,7 @@ void GLCameraWidget::paintEvent(QPaintEvent *event)
 
         //Paint in current rect
         p.drawImage(drawingRect, m_image);
-        
+
         //This will strech the image...
         //p.drawImage(this->rect(), m_image);
     }
