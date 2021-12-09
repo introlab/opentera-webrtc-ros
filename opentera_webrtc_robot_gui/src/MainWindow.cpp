@@ -80,7 +80,7 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
         //Step #2 emit new signal with image
         emit newLocalImage(image.copy());
     }
-    else if (msg->encoding == "brg8") {
+    else if (msg->encoding == "bgr8") {
         //Step #1 Transform ROS Image to QtImage
         QImage image(&msg->data[0], msg->width, msg->height, QImage::Format_RGB888);
 

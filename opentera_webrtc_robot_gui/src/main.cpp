@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
 
     MainWindow w;
-    w.show();
+    w.showFullScreen();
 
 
     //Load test image from QRC
