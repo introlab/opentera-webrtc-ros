@@ -37,7 +37,7 @@ jobs:
       working-directory: catkin_ws/src
       run: |
         source /opt/ros/noetic/setup.bash
-        git clone https://github.com/introlab/audio_utils.git
+        git clone https://github.com/introlab/audio_utils.git --recurse-submodules
       
     - name: Clone audio_utils in ROS workspace
       working-directory: catkin_ws
