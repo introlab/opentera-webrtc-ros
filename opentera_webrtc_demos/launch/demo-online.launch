@@ -138,6 +138,6 @@
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node"
         name="robot_gui" output="screen" respawn="true">
         <param name="fullScreen" type="bool" value="false" />
-    </node>n
+    </node>
 </launch>
 
