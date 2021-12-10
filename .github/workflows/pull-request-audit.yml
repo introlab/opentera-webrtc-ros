@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: recursive
-        path: catkin_ws/src
+        path: catkin_ws/src/opentera-webrtc-ros
     - uses: ros-tooling/setup-ros@v0.2
       with:
         required-ros-distributions: noetic
