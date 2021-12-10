@@ -61,7 +61,9 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
             WebrtcConfiguration::create(iceServers),
             DataChannelConfiguration::create());
 
-    m_signalingClient->setTlsVerificationEnabled(true);
+    bool verifySSL;
+    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
+    m_signalingClient->setTlsVerificationEnabled(verifySSL);
 }
 
 /**

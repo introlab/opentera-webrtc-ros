@@ -36,17 +36,32 @@ void RosNodeParameters::loadSignalingParams(std::string &clientName, std::string
  * @param room Room's name
  * @param password Room's password
  */
-void RosNodeParameters::loadSignalingParams(std::string &serverUrl, std::string &clientName, std::string &room, std::string &password)
+void RosNodeParameters::loadSignalingParams(std::string &serverUrl, std::string &clientName,
+    std::string &room, std::string &password)
 {
     NodeHandle pnh("~");
 
-    std::map<std::string, std::string> dict;
-    pnh.getParam("signaling", dict);
+    //String parameters
+    std::map<std::string, std::string> dictString;
+    pnh.getParam("signaling", dictString);
+    serverUrl = isInParams("server_url", dictString) ? dictString["server_url"] : "http://localhost:8080";
+    clientName = isInParams("client_name", dictString) ? dictString["client_name"] : "streamer";
+    room = isInParams("room_name", dictString) ? dictString["room_name"] : "chat";
+    password = isInParams("room_password", dictString) ? dictString["room_password"] : "abc";
+}
 
-    serverUrl = isInParams("server_url", dict) ? dict["server_url"] : "http://localhost:8080";
-    clientName = isInParams("client_name", dict) ? dict["client_name"] : "streamer";
-    room = isInParams("room_name", dict) ? dict["room_name"] : "chat";
-    password = isInParams("room_password", dict) ? dict["room_password"] : "abc";
+/**
+ * @brief Load signaling parameters (verify_ssl) from ROS parameter server
+ *
+ * @param verifySSL Verify SSL peer
+ */
+void RosNodeParameters::loadSignalingParamsVerifySSL(bool &verifySSL)
+{
+    NodeHandle pnh("~");
+    //Bool parameters
+    std::map <std::string, bool> dictBool;
+    pnh.getParam("signaling", dictBool);
+    verifySSL = isInParams("verify_ssl", dictBool) ? dictBool["verify_ssl"] : true;
 }
 
 /**
