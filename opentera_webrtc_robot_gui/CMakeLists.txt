@@ -33,16 +33,19 @@ set(srcs
   src/MainWindow.cpp
   src/ROSCameraView.cpp
   src/GraphicsViewToolbar.cpp
+  src/ConfigDialog.cpp
 )
 
 set(headers
   src/MainWindow.h
   src/ROSCameraView.h
   src/GraphicsViewToolbar.h
+  src/ConfigDialog.h
 )
 
 set(uis
   src/ui/MainWindow.ui
+  src/ui/ConfigDialog.ui
 )
 
 set(qrcs

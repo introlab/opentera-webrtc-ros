@@ -1,5 +1,6 @@
-#include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "MainWindow.h"
+#include "ConfigDialog.h"
 #include <QGraphicsScene>
 #include <QThread>
 #include <QDebug>
@@ -9,6 +10,9 @@ MainWindow::MainWindow(QWidget *parent)
     , m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
+
+    //Buttons
+    setupButtons();
 
     //Toolbar
     m_toolbar = new GraphicsViewToolbar(m_ui->toolboxWidget);
@@ -27,8 +31,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::newLocalImage, this, &MainWindow::_onLocalImage, Qt::QueuedConnection);
     connect(this, &MainWindow::newPeerImage, this, &MainWindow::_onPeerImage, Qt::QueuedConnection);
     connect(this, &MainWindow::newPeerStatus, this, &MainWindow::_onPeerStatus, Qt::QueuedConnection);
+    connect(this, &MainWindow::newRobotStatus, this, &MainWindow::_onRobotStatus, Qt::QueuedConnection);
 
-    // For events
+    //Buttons
+    connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
+
+    // Signaling events
     connect(this, &MainWindow::eventJoinSession, this, &MainWindow::_onJoinSessionEvent, Qt::QueuedConnection);
     connect(this, &MainWindow::eventLeaveSession, this, &MainWindow::_onLeaveSessionEvent, Qt::QueuedConnection);
     connect(this, &MainWindow::eventStopSession, this, &MainWindow::_onStopSessionEvent, Qt::QueuedConnection);
@@ -65,6 +73,10 @@ void MainWindow::setupROS()
             &MainWindow::openteraEventCallback,
             this);
 
+    m_robotStatusSubscriber = m_nodeHandle.subscribe("/robot_status",
+            10,
+            &MainWindow::robotStatusCallback,
+            this);
 
     //Setup publishers
 
@@ -254,6 +266,19 @@ void MainWindow::peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusCo
     emit newPeerStatus(QString::fromStdString(msg->sender.id), QString::fromStdString(msg->sender.name), msg->status);
 }
 
+void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr &msg)
+{
+    /*
+        void newRobotStatus(bool charging, float battery_voltage, float battery_current, float battery_level,
+                        float cpu_usage, float mem_usage, float disk_usage, const QString &wifi_network,
+                        float wifi_strength, const QString &local_ip);
+    */
+    emit newRobotStatus(msg->is_charging, msg->battery_voltage, msg->battery_current, msg->battery_level,
+                        msg->cpu_usage, msg->mem_usage, msg->disk_usage, QString::fromStdString(msg->wifi_network),
+                        msg->wifi_strength, QString::fromStdString(msg->local_ip));
+}
+
+
 void MainWindow::_onJoinSessionEvent(const QString &session_url,
     const QString &session_creator_name,
     const QString &session_uuid,
@@ -290,4 +315,36 @@ void MainWindow::_onLeaveSessionEvent(const QString &session_uuid,
     QList<QString> leaving_devices)
 {
 
+}
+
+void MainWindow::_onRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
+                        float cpu_usage, float mem_usage, float disk_usage, const QString &wifi_network,
+                        float wifi_strength, const QString &local_ip)
+{
+    m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
+}
+
+void MainWindow::setupButtons()
+{
+    m_ui->hangUpButton->setIcon(QIcon(":/phone-call-end.png"));
+    m_ui->hangUpButton->setText("");
+
+    m_ui->configButton->setIcon(QIcon(":/settings-gear.png"));
+    m_ui->configButton->setText("");
+
+    m_ui->cameraButton->setIcon(QIcon(":/webcam.png"));
+    m_ui->cameraButton->setText("");
+
+    m_ui->microphoneButton->setIcon(QIcon(":/mic-on.png"));
+    m_ui->microphoneButton->setText("");
+
+    m_ui->speakerButton->setIcon(QIcon(":/volume.png"));
+    m_ui->speakerButton->setText("");
+
+}
+
+void MainWindow::_onConfigButtonClicked()
+{
+    ConfigDialog dialog(this);
+    dialog.exec();
 }
