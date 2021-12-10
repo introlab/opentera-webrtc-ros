@@ -56,6 +56,8 @@ jobs:
       working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
       run: |
         ls -l
+        npm --version
+        node --version
         npm install
         npm run build  
       
