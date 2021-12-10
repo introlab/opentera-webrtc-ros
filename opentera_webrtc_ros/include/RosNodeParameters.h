@@ -22,6 +22,8 @@ namespace opentera
             std::string &room,
             std::string &password);
 
+        static void loadSignalingParamsVerifySSL(bool &verifySSL);
+
         static void loadVideoStreamParams(
             bool &canSendVideoStream,
             bool &canReceiveVideoStream,
