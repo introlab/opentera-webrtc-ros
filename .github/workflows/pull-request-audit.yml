@@ -24,6 +24,10 @@ jobs:
       with:
         required-ros-distributions: noetic
         
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        
     - name: Install system dependencies
       run: | 
         sudo apt-get update
