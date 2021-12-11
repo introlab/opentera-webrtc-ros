@@ -1,6 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file>Test_640x480.png</file>
+        <file>phone-call-end.png</file>
         <file>stylesheet.qss</file>
+        <file>settings-gear.png</file>
+        <file>mic-on.png</file>
+        <file>mic-off.png</file>
+        <file>volume.png</file>
+        <file>volume-mute.png</file>
+        <file>webcam.png</file>
     </qresource>
 </RCC>

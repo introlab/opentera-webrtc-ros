@@ -12,24 +12,19 @@ GraphicsViewToolbar::GraphicsViewToolbar(QWidget *parent)
     f.setPixelSize(12);
     f.setBold(true);
 
-    m_textItem = new QGraphicsTextItem(nullptr);
-    m_textItem->setPlainText("Hello World!");
-    m_textItem->setFont(f);
-    m_textItem->setPos(0,0);
-    m_textItem->adjustSize();
-    m_textItem->setDefaultTextColor(Qt::red);
-    m_textItem->show();
-    m_textItem->setZValue(1);
+    m_batteryTextItem = new QGraphicsTextItem(nullptr);
+    m_batteryTextItem->setPlainText("Battery");
+    m_batteryTextItem->setFont(f);
+    m_batteryTextItem->setPos(0,0);
+    m_batteryTextItem->adjustSize();
+    m_batteryTextItem->setDefaultTextColor(Qt::red);
+    m_batteryTextItem->show();
+    m_batteryTextItem->setZValue(1);
 
-    m_scene->addItem(m_textItem);
+    m_scene->addItem(m_batteryTextItem);
 
-
-    QGraphicsRectItem *rect = new QGraphicsRectItem(10,10,50,20);
-    rect->show();
-    m_scene->addItem(rect);
     setScene(m_scene);
 
-    m_scene->addRect(10,10,50,50,QPen(Qt::black));
     show();
 
     if (parent && parent->layout())
@@ -47,4 +42,17 @@ void GraphicsViewToolbar::resizeEvent(QResizeEvent *event)
     //resize(event->size());
 
     QGraphicsView::resizeEvent(event);
+}
+
+void GraphicsViewToolbar::setBatteryStatus(bool is_charging, float battery_voltage,
+    float battery_current, float battery_level)
+{
+    m_batteryTextItem->setPlainText(QString("C: %1, %2 V, %3 A L:%4 %")
+        .arg(is_charging)
+        .arg(battery_voltage)
+        .arg(battery_current)
+        .arg(battery_level));
+
+    m_batteryTextItem->adjustSize();
+
 }
