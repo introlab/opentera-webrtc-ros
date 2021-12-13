@@ -15,6 +15,8 @@ RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh)
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
     m_localizationModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_localization");
     m_mappingModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_mapping");
+    m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
+    m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
 }
 
 RosJsonDataHandler::~RosJsonDataHandler()
@@ -84,6 +86,24 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
             {
                 ROS_ERROR("Mapping mode service call error");
             }
+        }
+    }
+    else if(serializedData["type"] == "mute")
+    {
+        std_srvs::SetBool srv;
+        srv.request.data = serializedData["value"];
+        if (!m_muteClient.call(srv))
+        {
+            ROS_ERROR("Mute service call error: %s", srv.response.message.c_str());
+        }
+    }
+    else if(serializedData["type"] == "enableCamera")
+    {
+        std_srvs::SetBool srv;
+        srv.request.data = serializedData["value"];
+        if (!m_enableCameraClient.call(srv))
+        {
+            ROS_ERROR("EnableCamera service call error: %s", srv.response.message.c_str());
         }
     }
 }

@@ -11,3 +11,5 @@ float32 disk_usage
 string wifi_network
 float32 wifi_strength  # 0 - 100
 string local_ip
+bool is_muted
+bool is_camera_on
