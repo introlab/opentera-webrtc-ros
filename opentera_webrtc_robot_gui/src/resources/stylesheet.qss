@@ -26,13 +26,27 @@
 * {
 	background: #191919;
 	color: #DDDDDD;
-	border: 1px solid #5A5A5A;
+	border: 0px solid #5A5A5A;
     padding: 0px 0px 0px 0px;
     margin: 0px 0px 0px 0px;
 }
 
 QDialog {
-	opacity: 0.900;
+	opacity: 1.000;
+}
+
+QPushButton {
+	color: #5A5A5A;
+	background-color: darkgray;
+	min-height: 50px;
+	min-width: 50px;
+	border-radius: 10px;
+	padding: 2px 2px 2px 2px;
+	margin: 2px 2px 2px 2px;
+}
+
+QDialogButtonBox::close-button {
+	min-width: 200px;
 }
 
 QGroupBox {
