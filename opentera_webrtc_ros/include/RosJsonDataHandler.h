@@ -27,6 +27,8 @@ namespace opentera
         ros::ServiceClient m_dockingClient;
         ros::ServiceClient m_localizationModeClient;
         ros::ServiceClient m_mappingModeClient;
+        ros::ServiceClient m_muteClient;
+        ros::ServiceClient m_enableCameraClient;
 
     protected:
         ros::NodeHandle m_nh;

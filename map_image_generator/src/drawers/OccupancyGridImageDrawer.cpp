@@ -102,6 +102,13 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 {
+    // TODO: Make the robot position the center of the map. The following commented code works.
+    // tf::StampedTransform robotTransform;
+    // m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_parameters.robotFrameId(),
+    //         ros::Time(0), robotTransform);
+    // int rowOffset = static_cast<int>((occupancyYOrigin - robotTransform.getOrigin().getY()) * m_parameters.resolution() + m_parameters.yOrigin() );
+    // int colOffset = static_cast<int>((occupancyXOrigin - robotTransform.getOrigin().getX()) * m_parameters.resolution() + m_parameters.xOrigin());
+
     double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
     double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
 

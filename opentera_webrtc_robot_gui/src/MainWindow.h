@@ -34,7 +34,7 @@ signals:
     void newPeerStatus(const QString &id, const QString &name, int status);
     void newRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
                         float cpu_usage, float mem_usage, float disk_usage, const QString &wifi_network,
-                        float wifi_strength, const QString &local_ip);
+                        float wifi_strength, const QString &local_ip, bool is_muted, bool is_camera_on);
     void eventJoinSession(const QString &session_url,
                             const QString &session_creator_name,
                             const QString &session_uuid,
@@ -78,7 +78,7 @@ private slots:
 
     void _onRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
                         float cpu_usage, float mem_usage, float disk_usage, const QString &wif_network,
-                        float wifi_strength, const QString &local_ip);
+                        float wifi_strength, const QString &local_ip, bool is_muted, bool is_camera_on);
 
     void _onConfigButtonClicked();
 

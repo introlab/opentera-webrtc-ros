@@ -275,7 +275,7 @@ void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatus
     */
     emit newRobotStatus(msg->is_charging, msg->battery_voltage, msg->battery_current, msg->battery_level,
                         msg->cpu_usage, msg->mem_usage, msg->disk_usage, QString::fromStdString(msg->wifi_network),
-                        msg->wifi_strength, QString::fromStdString(msg->local_ip));
+                        msg->wifi_strength, QString::fromStdString(msg->local_ip), msg->is_muted, msg->is_camera_on);
 }
 
 
@@ -319,7 +319,7 @@ void MainWindow::_onLeaveSessionEvent(const QString &session_uuid,
 
 void MainWindow::_onRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
                         float cpu_usage, float mem_usage, float disk_usage, const QString &wifi_network,
-                        float wifi_strength, const QString &local_ip)
+                        float wifi_strength, const QString &local_ip, bool is_muted, bool is_camera_on)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
 }
