@@ -24,10 +24,15 @@ void LaserScanImageDrawer::draw(cv::Mat& image)
 {
     if (!m_lastLaserScan) { return; }
 
+    // auto tf = getRefCenteredMap();
+    // if (tf)
+    // {
+    //     drawLaserScan(image, *tf);
+    // }
     tf::StampedTransform transform;
     try
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_lastLaserScan->header.frame_id,
+        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_lastLaserScan->header.frame_id,
             ros::Time(0), transform);
         drawLaserScan(image, transform);
     }
@@ -43,8 +48,8 @@ void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::Const
 }
 
 
-void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::StampedTransform& transform)
-{  
+void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transform)
+{
     typedef sensor_msgs::LaserScan::_ranges_type::const_iterator RangesConstIterator;
 
     float angle = m_lastLaserScan->angle_min;
@@ -60,7 +65,7 @@ void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::StampedTransform& t
     }
 }
 
-void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::StampedTransform& transform, float range, float angle)
+void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle)
 {
     tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
     rangePose = transform * rangePose;

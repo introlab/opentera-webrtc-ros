@@ -22,10 +22,15 @@ void GlobalPathImageDrawer::draw(cv::Mat& image)
 {
     if (!m_lastGlobalPath) { return; }
 
+    // auto tf = getRefCenteredMap();
+    // if (tf)
+    // {
+    //     drawGlobalPath(image, *tf);
+    // }
     tf::StampedTransform transform;
     try
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_lastGlobalPath->header.frame_id,
+        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_lastGlobalPath->header.frame_id,
             ros::Time(0), transform);
         drawGlobalPath(image, transform);
     }
@@ -40,7 +45,7 @@ void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& global
     m_lastGlobalPath = globalPath;
 }
 
-void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::StampedTransform& transform)
+void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.globalPathColor();
     int thickness = m_parameters.globalPathThickness();

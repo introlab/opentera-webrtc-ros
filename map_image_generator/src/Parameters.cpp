@@ -51,6 +51,8 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     nodeHandle.param("robot_size", m_robotSize, 30);
     nodeHandle.param("goal_size", m_goalSize, 20);
     nodeHandle.param("laser_scan_size", m_laserScanSize, 6);
+
+    m_RefFrameId = &m_mapFrameId;
 }
 
 Parameters::~Parameters()

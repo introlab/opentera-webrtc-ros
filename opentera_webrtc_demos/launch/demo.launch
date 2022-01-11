@@ -1,5 +1,5 @@
 <launch>
-    <arg name="signalling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_hostname" default="localhost"/>
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
@@ -96,6 +96,5 @@
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="screen" respawn="true"/>
-    
+
 </launch>
- 

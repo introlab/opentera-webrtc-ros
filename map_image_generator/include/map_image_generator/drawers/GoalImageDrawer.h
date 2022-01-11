@@ -16,11 +16,11 @@ namespace map_image_generator
         GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener,
                         geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~GoalImageDrawer();
-        
+
         virtual void draw(cv::Mat& image);
 
     private:
-        void drawGoal(cv::Mat& image, tf::StampedTransform& transform);
+        void drawGoal(cv::Mat& image, tf::Transform& transform);
     };
 }
 #endif

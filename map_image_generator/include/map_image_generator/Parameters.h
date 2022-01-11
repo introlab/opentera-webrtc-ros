@@ -19,6 +19,7 @@ namespace map_image_generator
 
         std::string m_robotFrameId;
         std::string m_mapFrameId;
+        std::string* m_RefFrameId; // Should never be null and point to one of the above
 
         bool m_drawOccupancyGrid;
         bool m_drawGlobalPath;
@@ -52,6 +53,15 @@ namespace map_image_generator
 
         const std::string& robotFrameId() const;
         const std::string& mapFrameId() const;
+        const std::string& refFrameId() const;
+
+        enum class RefFrameIdType
+        {
+            ROBOT,
+            MAP,
+        };
+
+        bool setRefFrameId(RefFrameIdType refFrameIdType);
 
         bool drawOccupancyGrid() const;
         bool drawGlobalPath() const;
@@ -115,6 +125,28 @@ namespace map_image_generator
     inline const std::string& Parameters::mapFrameId() const
     {
         return m_mapFrameId;
+    }
+
+    inline const std::string& Parameters::refFrameId() const
+    {
+        return *m_RefFrameId;
+    }
+
+    inline bool Parameters::setRefFrameId(RefFrameIdType refFrameIdType)
+    {
+        switch(refFrameIdType)
+        {
+            case RefFrameIdType::ROBOT:
+                m_RefFrameId = &m_robotFrameId;
+                break;
+            case RefFrameIdType::MAP:
+                m_RefFrameId = &m_mapFrameId;
+                break;
+            default:
+                m_RefFrameId = &m_mapFrameId;
+                return false;
+        }
+        return true;
     }
 
     inline bool Parameters::drawOccupancyGrid() const

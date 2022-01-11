@@ -47,7 +47,7 @@ MapImageGenerator::MapImageGenerator(const Parameters& parameters,
     m_cvImage.header.stamp = ros::Time::now();
     m_cvImage.header.frame_id = "map_image";
 
-    m_cvImage.encoding = sensor_msgs::image_encodings::BGR8;        
+    m_cvImage.encoding = sensor_msgs::image_encodings::BGR8;
     m_cvImage.image = cv::Mat(imageHeight, imageWidth, CV_8UC3);
 }
 
@@ -65,9 +65,13 @@ void MapImageGenerator::generate(sensor_msgs::Image& sensorImage)
     m_cvImage.header.stamp = ros::Time::now();
     m_cvImage.image = m_parameters.unknownSpaceColor();
 
-    for (vector<ImageDrawer*>::iterator it = m_drawers.begin(); it != m_drawers.end(); ++it)
+    // for (vector<ImageDrawer*>::iterator it = m_drawers.begin(); it != m_drawers.end(); ++it)
+    // {
+    //     (*it)->draw(m_cvImage.image);
+    // }
+    for (auto& drawer : m_drawers)
     {
-        (*it)->draw(m_cvImage.image);
+        drawer->draw(m_cvImage.image);
     }
 
     cv::flip(m_cvImage.image, m_cvImage.image, 1);

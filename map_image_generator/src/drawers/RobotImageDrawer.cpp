@@ -23,7 +23,7 @@ void RobotImageDrawer::draw(cv::Mat& image)
     tf::StampedTransform robotTransform;
     try
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_parameters.robotFrameId(),
+        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_parameters.robotFrameId(),
             ros::Time(0), robotTransform);
         drawRobot(image, robotTransform);
     }
@@ -46,9 +46,9 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::StampedTransform& robotTran
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, 
+    cv::circle(image,
         cv::Point(startX, startY),
-        static_cast<int>(ceil(size / 5.0)), 
+        static_cast<int>(ceil(size / 5.0)),
         color,
         cv::FILLED,
         cv::LINE_8);
@@ -56,8 +56,8 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::StampedTransform& robotTran
         cv::Point(startX, startY),
         cv::Point(endX, endY),
         color,
-        static_cast<int>(ceil(size / 10.0)), 
+        static_cast<int>(ceil(size / 10.0)),
         cv::LINE_8,
-        0, 
+        0,
         0.3);
 }
