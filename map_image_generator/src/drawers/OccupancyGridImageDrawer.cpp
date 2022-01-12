@@ -106,20 +106,17 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 {
-    double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
-    double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
+    // double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
+    // double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
 
     // TODO: Make the robot position the center of the map. The following commented code
     // works.
     tf::StampedTransform robotTransform;
-    tf::StampedTransform transform;
     try
     {
         m_tfListener.lookupTransform(m_parameters.mapFrameId(),
                                      m_parameters.robotFrameId(), ros::Time(0),
                                      robotTransform);
-        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_parameters.mapFrameId(),
-                                     ros::Time(0), transform);
     }
     catch (tf::TransformException ex)
     {
@@ -127,45 +124,39 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
         return;
     }
 
-    int rowOffset = static_cast<int>(
-        (occupancyYOrigin - robotTransform.getOrigin().getY()) * m_parameters.resolution()
-        + m_parameters.yOrigin());
-    int colOffset = static_cast<int>(
-        (occupancyXOrigin - robotTransform.getOrigin().getX()) * m_parameters.resolution()
-        + m_parameters.xOrigin());
+    int outHeight = image.rows;
+    int outWidth = image.cols;
 
-    // int rowOffset = static_cast<int>(occupancyYOrigin * m_parameters.resolution() +
-    // m_parameters.yOrigin());
-    // int colOffset = static_cast<int>(occupancyXOrigin * m_parameters.resolution() +
-    // m_parameters.xOrigin());
+    int robotX = 0;
+    int robotY = 0;
+    convertTransformToInputMapCoordinates(robotTransform, m_lastOccupancyGrid->info,
+                                          robotX, robotY);
+    int top = 0 + robotY;
+    int bottom = (m_scaledOccupancyGridImage.rows - 1) - robotY;
+    int left = 0 + robotX;
+    int right = (m_scaledOccupancyGridImage.cols - 1) - robotX;
 
-    int maxRowOffset = image.rows - m_scaledOccupancyGridImage.rows - 1;
-    int maxColOffset = image.cols - m_scaledOccupancyGridImage.cols - 1;
+    int topPadding = std::max(0, (outHeight - 1) / 2 - top);
+    int bottomPadding = std::max(0, outHeight / 2 - bottom);
+    int leftPadding = std::max(0, (outWidth - 1) / 2 - left);
+    int rightPadding = std::max(0, outWidth / 2 - right);
 
-    int topPadding = rowOffset < 0 ? -rowOffset : 0;
-    int bottomPadding = rowOffset > maxRowOffset ? rowOffset - maxRowOffset : 0;
-    int leftPadding = colOffset < 0 ? -colOffset : 0;
-    int rightPadding = colOffset > maxColOffset ? colOffset - maxColOffset : 0;
-    // int maxPadding = std::max({topPadding, bottomPadding, leftPadding, rightPadding});
+    cv::Mat paddedImage;
+    cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, topPadding, bottomPadding,
+                       leftPadding, rightPadding, cv::BORDER_CONSTANT,
+                       m_parameters.unknownSpaceColor());
 
-    // cv::Mat paddedOccupancyGridImage;
-    cv::copyMakeBorder(image, image, maxPadding, maxPadding, maxPadding, maxPadding,
-                       cv::BORDER_CONSTANT, m_parameters.unknownSpaceColor());
+    cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
+                           std::max(0, top - (outHeight - 1) / 2)),
+                 cv::Size(outWidth, outHeight));
+    paddedImage(roi).copyTo(image);
+}
 
-    // if (rowOffset >= 0 &&
-    //     rowOffset < image.rows - m_scaledOccupancyGridImage.rows &&
-    //     colOffset >= 0 &&
-    //     colOffset < image.cols - m_scaledOccupancyGridImage.cols)
-    // {
-    cv::Rect roi(
-        cv::Point(colOffset + maxPadding, rowOffset + maxPadding),
-        cv::Size(m_scaledOccupancyGridImage.cols, m_scaledOccupancyGridImage.rows));
-    auto truc = roi.tl();
-    m_scaledOccupancyGridImage.copyTo(image(roi));
-    // }
-    // else
-    // {
-    //     ROS_ERROR_STREAM("Unable to draw the occupancy grid because the map is too
-    //     small"); return;
-    // }
+void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(
+    const nav_msgs::MapMetaData& mapInfo, int& x, int& y)
+{
+    tf::Transform mapInfoTransform;
+    mapInfoTransform.setOrigin(tf::Vector3(
+        mapInfo.origin.position.x, mapInfo.origin.position.y, mapInfo.origin.position.z));
+    convertTransformToMapCoordinates(mapInfoTransform, x, y);
 }

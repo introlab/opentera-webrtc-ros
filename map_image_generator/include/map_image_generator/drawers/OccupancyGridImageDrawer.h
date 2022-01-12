@@ -3,10 +3,9 @@
 
 #include "map_image_generator/drawers/ImageDrawer.h"
 
-#include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
-
 #include <opencv2/opencv.hpp>
+#include <ros/ros.h>
 
 namespace map_image_generator
 {
@@ -19,13 +18,16 @@ namespace map_image_generator
         cv::Mat m_scaledOccupancyGridImage;
 
     public:
-        OccupancyGridImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
+        OccupancyGridImageDrawer(const Parameters& parameters,
+                                 ros::NodeHandle& nodeHandle,
+                                 tf::TransformListener& tfListener);
         virtual ~OccupancyGridImageDrawer();
-        
+
         virtual void draw(cv::Mat& image);
 
     private:
-        void occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid);
+        void
+        occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid);
 
         void drawNotScaledOccupancyGridImage();
         void changeNotScaledOccupancyGridImageIfNeeded();
@@ -34,6 +36,9 @@ namespace map_image_generator
         void changeScaledOccupancyGridImageIfNeeded();
 
         void drawOccupancyGridImage(cv::Mat& image);
+
+        void convertMapInfoToMapCoordinates(const nav_msgs::MapMetaData& mapInfo, int& x,
+                                            int& y);
     };
 }
 #endif

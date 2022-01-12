@@ -1,15 +1,15 @@
-#include "map_image_generator/Parameters.h"
-#include "map_image_generator/MapImageGenerator.h"
 #include "map_image_generator/GoalConverter.h"
+#include "map_image_generator/MapImageGenerator.h"
 #include "map_image_generator/MapLabelsConverter.h"
+#include "map_image_generator/Parameters.h"
 
+#include <image_transport/image_transport.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <image_transport/image_transport.h>
 
 using namespace map_image_generator;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     ros::init(argc, argv, "map_image_generator");
 
@@ -26,7 +26,8 @@ int main(int argc, char **argv)
     MapLabelsConverter mapLabelsConverter(parameters, nodeHandle);
 
     image_transport::ImageTransport imageTransport(nodeHandle);
-    image_transport::Publisher mapImagePublisher = imageTransport.advertise("map_image", 1);
+    image_transport::Publisher mapImagePublisher =
+        imageTransport.advertise("map_image", 1);
     sensor_msgs::Image mapImage;
 
     ROS_INFO("MapImage initialized, starting image generation after first cycle...");
@@ -40,7 +41,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("Skipped first cycle...");
 
-    while(ros::ok())
+    while (ros::ok())
     {
         mapImageGenerator.generate(mapImage);
         mapImagePublisher.publish(mapImage);
