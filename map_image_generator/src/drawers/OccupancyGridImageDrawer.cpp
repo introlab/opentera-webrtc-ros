@@ -114,12 +114,17 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
     }
 }
 
-void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double angle)
+void OccupancyGridImageDrawer::rotateImageAboutPoint(cv::Mat& image, double angle,
+                                                     const cv::Point& point)
 {
-    cv::Point center(image.cols / 2, image.rows / 2);
-    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, angle, 1.0);
+    cv::Mat rotationMatrix = cv::getRotationMatrix2D(point, angle, 1.0);
     cv::warpAffine(image, image, rotationMatrix, image.size(), cv::INTER_LINEAR,
                    cv::BORDER_CONSTANT, m_parameters.unknownSpaceColor());
+}
+void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double angle)
+{
+    cv::Point center{image.cols / 2, image.rows / 2};
+    rotateImageAboutPoint(image, angle, center);
 }
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
@@ -184,17 +189,19 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
                        leftPadding, rightPadding, cv::BORDER_CONSTANT,
                        m_parameters.unknownSpaceColor());
 
+    if (m_parameters.centeredRobot())
+    {
+        using namespace map_image_generator;
+
+        double rotationAngle = rad2deg(tf::getYaw(robotTransform.getRotation()));
+        cv::Point rotationCentre{robotX + leftPadding, robotY + topPadding};
+        rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
+    }
 
     cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
                            std::max(0, top - (outHeight - 1) / 2)),
                  cv::Size(outWidth, outHeight));
     paddedImage(roi).copyTo(image);
-
-    if (m_parameters.centeredRobot())
-    {
-        using namespace map_image_generator;
-        rotateImageAboutCenter(image, rad2deg(tf::getYaw(robotTransform.getRotation())));
-    }
 }
 
 void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(

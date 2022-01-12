@@ -35,6 +35,7 @@ namespace map_image_generator
         void scaleOccupancyGridImage();
         void changeScaledOccupancyGridImageIfNeeded();
 
+        void rotateImageAboutPoint(cv::Mat& image, double angle, const cv::Point& point);
         void rotateImageAboutCenter(cv::Mat& image, double angle);
 
         void drawOccupancyGridImage(cv::Mat& image);
