@@ -8,7 +8,7 @@ ImageDrawer::ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHand
 {
 }
 
-ImageDrawer::~ImageDrawer() {}
+ImageDrawer::~ImageDrawer() = default;
 
 void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transform, int& x,
                                                    int& y)
@@ -23,7 +23,7 @@ void ImageDrawer::convertTransformToInputMapCoordinates(
     const tf::Transform& transform, const nav_msgs::MapMetaData& mapInfo, int& x, int& y)
 {
     x = static_cast<int>((transform.getOrigin().getX() - mapInfo.origin.position.x)
-                         / mapInfo.resolution);
+                         * m_parameters.resolution());
     y = static_cast<int>((transform.getOrigin().getY() - mapInfo.origin.position.y)
-                         / mapInfo.resolution);
+                         * m_parameters.resolution());
 }

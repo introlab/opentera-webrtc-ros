@@ -13,7 +13,7 @@ OccupancyGridImageDrawer::OccupancyGridImageDrawer(const Parameters& parameters,
         "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this);
 }
 
-OccupancyGridImageDrawer::~OccupancyGridImageDrawer() {}
+OccupancyGridImageDrawer::~OccupancyGridImageDrawer() = default;
 
 void OccupancyGridImageDrawer::draw(cv::Mat& image)
 {
@@ -106,11 +106,6 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 {
-    // double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
-    // double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
-
-    // TODO: Make the robot position the center of the map. The following commented code
-    // works.
     tf::StampedTransform robotTransform;
     try
     {
@@ -145,6 +140,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
     cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, topPadding, bottomPadding,
                        leftPadding, rightPadding, cv::BORDER_CONSTANT,
                        m_parameters.unknownSpaceColor());
+
 
     cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
                            std::max(0, top - (outHeight - 1) / 2)),
