@@ -36,6 +36,8 @@ namespace map_image_generator
         void changeScaledOccupancyGridImageIfNeeded();
 
         void drawOccupancyGridImage(cv::Mat& image);
+        void drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image);
+
 
         void convertMapInfoToMapCoordinates(const nav_msgs::MapMetaData& mapInfo, int& x,
                                             int& y);

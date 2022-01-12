@@ -15,6 +15,8 @@ MapImageGenerator::MapImageGenerator(const Parameters& parameters,
                                      geometry_msgs::PoseStamped::Ptr activeGoal)
     : m_parameters(parameters), m_nodeHandle(nodeHandle), m_tfListener(tfListener)
 {
+    // The order of the drawers is important as it determines the layering of the
+    // elements.
     if (m_parameters.drawOccupancyGrid())
     {
         m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(

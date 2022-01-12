@@ -25,7 +25,14 @@ void OccupancyGridImageDrawer::draw(cv::Mat& image)
     drawNotScaledOccupancyGridImage();
     scaleOccupancyGridImage();
 
-    drawOccupancyGridImage(image);
+    if (m_parameters.centeredRobot())
+    {
+        drawOccupancyGridImageCenteredAroundRobot(image);
+    }
+    else
+    {
+        drawOccupancyGridImage(image);
+    }
 }
 
 void OccupancyGridImageDrawer::occupancyGridCallback(
@@ -105,6 +112,30 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 }
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
+{
+    double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
+    double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
+
+    int rowOffset = static_cast<int>(occupancyYOrigin * m_parameters.resolution()
+                                     + m_parameters.yOrigin());
+    int colOffset = static_cast<int>(occupancyXOrigin * m_parameters.resolution()
+                                     + m_parameters.xOrigin());
+
+    if (rowOffset >= 0 && rowOffset < image.rows - m_scaledOccupancyGridImage.rows
+        && colOffset >= 0 && colOffset < image.cols - m_scaledOccupancyGridImage.cols)
+    {
+        cv::Rect roi(
+            cv::Point(colOffset, rowOffset),
+            cv::Size(m_scaledOccupancyGridImage.cols, m_scaledOccupancyGridImage.rows));
+        m_scaledOccupancyGridImage.copyTo(image(roi));
+    }
+    else
+    {
+        ROS_ERROR_STREAM(
+            "Unable to draw the occupancy grid because the map is too small");
+    }
+}
+void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
 {
     tf::StampedTransform robotTransform;
     try

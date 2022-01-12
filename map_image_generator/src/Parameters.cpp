@@ -33,7 +33,8 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
 
     nodeHandle.param("wall_color", wallColorString, string("0 0 0"));
     nodeHandle.param("free_space_color", freeSpaceColorString, string("255 255 255"));
-    nodeHandle.param("unknown_space_color", unknownSpaceColorString, string("175 175 175"));
+    nodeHandle.param("unknown_space_color", unknownSpaceColorString,
+                     string("175 175 175"));
     nodeHandle.param("global_path_color", globalPathColorString, string("0 255 0 255"));
     nodeHandle.param("robot_color", robotColorString, string("0 0 255 255"));
     nodeHandle.param("goal_color", goalColorString, string("0 175 0 255"));
@@ -51,12 +52,19 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     nodeHandle.param("robot_size", m_robotSize, 30);
     nodeHandle.param("goal_size", m_goalSize, 20);
     nodeHandle.param("laser_scan_size", m_laserScanSize, 6);
-
-    m_RefFrameId = &m_mapFrameId;
+    nodeHandle.param("centered_robot", m_centeredRobot, true);
 }
 
-Parameters::~Parameters()
+Parameters::~Parameters() = default;
+
+const std::string& Parameters::refFrameId() const
 {
+    return m_centeredRobot ? m_robotFrameId : m_mapFrameId;
+}
+
+void Parameters::setCenteredRobot(bool centeredRobot)
+{
+    m_centeredRobot = centeredRobot;
 }
 
 cv::Vec3b Parameters::parseColorVec3b(const std::string& color)
