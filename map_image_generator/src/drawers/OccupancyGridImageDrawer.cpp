@@ -1,5 +1,8 @@
 #include "map_image_generator/drawers/OccupancyGridImageDrawer.h"
 
+#include "map_image_generator/utils.h"
+
+#include <queue>
 #include <tf/tf.h>
 
 using namespace map_image_generator;
@@ -111,6 +114,14 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
     }
 }
 
+void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double angle)
+{
+    cv::Point center(image.cols / 2, image.rows / 2);
+    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, angle, 1.0);
+    cv::warpAffine(image, image, rotationMatrix, image.size(), cv::INTER_LINEAR,
+                   cv::BORDER_CONSTANT, m_parameters.unknownSpaceColor());
+}
+
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 {
     double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
@@ -135,6 +146,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
             "Unable to draw the occupancy grid because the map is too small");
     }
 }
+
 void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
 {
     tf::StampedTransform robotTransform;
@@ -177,6 +189,12 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
                            std::max(0, top - (outHeight - 1) / 2)),
                  cv::Size(outWidth, outHeight));
     paddedImage(roi).copyTo(image);
+
+    if (m_parameters.centeredRobot())
+    {
+        using namespace map_image_generator;
+        rotateImageAboutCenter(image, rad2deg(tf::getYaw(robotTransform.getRotation())));
+    }
 }
 
 void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(

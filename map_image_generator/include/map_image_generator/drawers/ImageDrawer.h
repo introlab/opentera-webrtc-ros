@@ -33,19 +33,20 @@ namespace map_image_generator
                                                    const nav_msgs::MapMetaData& mapInfo,
                                                    int& x, int& y);
         // Replace with std::optional in C++17
-        std::unique_ptr<tf::Transform> getRefCenteredMap() const;
+        std::unique_ptr<tf::Transform>
+        getTransformInRef(const std::string& frameId) const;
     };
 
     // Replace with std::optional in C++17
-    inline std::unique_ptr<tf::Transform> ImageDrawer::getRefCenteredMap() const
+    inline std::unique_ptr<tf::Transform>
+    ImageDrawer::getTransformInRef(const std::string& frameId) const
     {
-        tf::StampedTransform refTransform;
+        tf::StampedTransform transform;
 
         try
         {
-            m_tfListener.lookupTransform(m_parameters.refFrameId(),
-                                         m_parameters.mapFrameId(), ros::Time(0),
-                                         refTransform);
+            m_tfListener.lookupTransform(m_parameters.refFrameId(), frameId, ros::Time(0),
+                                         transform);
         }
         catch (tf::TransformException& ex)
         {
@@ -54,10 +55,7 @@ namespace map_image_generator
         }
 
         // Replace with std::optional in C++17
-        auto transform = std::make_unique<tf::Transform>();
-        transform->setIdentity();
-        transform->setOrigin(refTransform.getOrigin());
-        return transform;
+        return std::make_unique<tf::Transform>(transform);
     }
 }
 #endif

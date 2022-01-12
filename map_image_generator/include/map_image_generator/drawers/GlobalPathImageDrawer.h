@@ -3,8 +3,8 @@
 
 #include "map_image_generator/drawers/ImageDrawer.h"
 
-#include <ros/ros.h>
 #include <nav_msgs/Path.h>
+#include <ros/ros.h>
 #include <std_srvs/SetBool.h>
 
 namespace map_image_generator
@@ -16,7 +16,8 @@ namespace map_image_generator
         ros::ServiceServer m_clearGlobalPathService;
 
     public:
-        GlobalPathImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
+        GlobalPathImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
+                              tf::TransformListener& tfListener);
         virtual ~GlobalPathImageDrawer();
 
         virtual void draw(cv::Mat& image);
@@ -24,7 +25,8 @@ namespace map_image_generator
     private:
         void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
         void drawGlobalPath(cv::Mat& image, tf::Transform& transform);
-        bool clearGlobalPath(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
+        bool clearGlobalPath(std_srvs::SetBool::Request& req,
+                             std_srvs::SetBool::Response& res);
     };
 }
 #endif

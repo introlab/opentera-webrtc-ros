@@ -5,39 +5,31 @@
 using namespace map_image_generator;
 
 GlobalPathImageDrawer::GlobalPathImageDrawer(const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener) :
-    ImageDrawer(parameters, nodeHandle, tfListener)
+                                             ros::NodeHandle& nodeHandle,
+                                             tf::TransformListener& tfListener)
+    : ImageDrawer(parameters, nodeHandle, tfListener)
 {
-    m_globalPathSubscriber = m_nodeHandle.subscribe("global_path", 1,
-        &GlobalPathImageDrawer::globalPathCallback, this);
-    m_clearGlobalPathService = m_nodeHandle.advertiseService("clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this);
+    m_globalPathSubscriber = m_nodeHandle.subscribe(
+        "global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this);
+    m_clearGlobalPathService = m_nodeHandle.advertiseService(
+        "clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this);
 }
 
-GlobalPathImageDrawer::~GlobalPathImageDrawer()
-{
-}
+GlobalPathImageDrawer::~GlobalPathImageDrawer() = default;
 
 void GlobalPathImageDrawer::draw(cv::Mat& image)
 {
-    if (!m_lastGlobalPath) { return; }
+    if (!m_lastGlobalPath)
+    {
+        return;
+    }
 
-    // auto tf = getRefCenteredMap();
-    // if (tf)
-    // {
-    //     drawGlobalPath(image, *tf);
-    // }
+    auto tf = getTransformInRef(m_lastGlobalPath->header.frame_id);
+    if (tf)
+    {
+        drawGlobalPath(image, *tf);
+    }
     tf::StampedTransform transform;
-    try
-    {
-        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_lastGlobalPath->header.frame_id,
-            ros::Time(0), transform);
-        drawGlobalPath(image, transform);
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_ERROR("%s",ex.what());
-    }
 }
 
 void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& globalPath)
@@ -50,7 +42,7 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transf
     const cv::Scalar& color = m_parameters.globalPathColor();
     int thickness = m_parameters.globalPathThickness();
 
-    for(int i = 0; i + 1 < m_lastGlobalPath->poses.size(); i++)
+    for (int i = 0; i + 1 < m_lastGlobalPath->poses.size(); i++)
     {
         tf::Pose startPose;
         tf::poseMsgToTF(m_lastGlobalPath->poses[i].pose, startPose);
@@ -64,20 +56,17 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transf
         convertTransformToMapCoordinates(startPose, startX, startY);
         convertTransformToMapCoordinates(endPose, endX, endY);
 
-        cv::line(image,
-            cv::Point(startX, startY),
-            cv::Point(endX, endY),
-            color,
-            thickness,
-            cv::LINE_AA);
+        cv::line(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
+                 thickness, cv::LINE_AA);
     }
 }
 
-bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request& req,
+                                            std_srvs::SetBool::Response& res)
 {
-    if(req.data)
+    if (req.data)
     {
-        if(!m_lastGlobalPath)
+        if (!m_lastGlobalPath)
             return true;
         m_lastGlobalPath->poses.clear();
         res.success = true;

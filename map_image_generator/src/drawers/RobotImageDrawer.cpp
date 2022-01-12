@@ -17,21 +17,14 @@ RobotImageDrawer::~RobotImageDrawer() = default;
 
 void RobotImageDrawer::draw(cv::Mat& image)
 {
-    tf::StampedTransform robotTransform;
-    try
+    auto tf = getTransformInRef(m_parameters.robotFrameId());
+    if (tf)
     {
-        m_tfListener.lookupTransform(m_parameters.refFrameId(),
-                                     m_parameters.robotFrameId(), ros::Time(0),
-                                     robotTransform);
-        drawRobot(image, robotTransform);
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_ERROR("%s", ex.what());
+        drawRobot(image, *tf);
     }
 }
 
-void RobotImageDrawer::drawRobot(cv::Mat& image, tf::StampedTransform& robotTransform)
+void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
 {
     const cv::Scalar& color = m_parameters.robotColor();
     int size = m_parameters.robotSize();

@@ -3,8 +3,8 @@
 
 #include "map_image_generator/drawers/ImageDrawer.h"
 
-#include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <ros/ros.h>
 
 namespace map_image_generator
 {
@@ -13,7 +13,8 @@ namespace map_image_generator
         geometry_msgs::PoseStamped::Ptr m_activeGoal;
 
     public:
-        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener,
+        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
+                        tf::TransformListener& tfListener,
                         geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~GoalImageDrawer();
 

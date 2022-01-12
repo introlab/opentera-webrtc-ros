@@ -18,7 +18,7 @@ namespace map_image_generator
         virtual void draw(cv::Mat& image);
 
     private:
-        void drawRobot(cv::Mat& image, tf::StampedTransform& robotTransform);
+        void drawRobot(cv::Mat& image, tf::Transform& robotTransform);
     };
 }
 #endif

@@ -72,5 +72,6 @@ void MapImageGenerator::generate(sensor_msgs::Image& sensorImage)
     }
 
     cv::flip(m_cvImage.image, m_cvImage.image, 1);
+    cv::rotate(m_cvImage.image, m_cvImage.image, cv::ROTATE_90_CLOCKWISE);
     m_cvImage.toImageMsg(sensorImage);
 }

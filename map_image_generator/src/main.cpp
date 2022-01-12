@@ -19,7 +19,6 @@ int main(int argc, char** argv)
     geometry_msgs::PoseStamped::Ptr activeGoal(new geometry_msgs::PoseStamped);
 
     Parameters parameters(nodeHandleParam);
-    // parameters.setRefFrameId(Parameters::RefFrameIdType::ROBOT);
     tf::TransformListener tfListener;
     MapImageGenerator mapImageGenerator(parameters, nodeHandle, tfListener, activeGoal);
     GoalConverter goalConverter(parameters, nodeHandle, activeGoal);

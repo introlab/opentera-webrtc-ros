@@ -1,18 +1,17 @@
 #ifndef GOAL_TRANSLATOR_H
 #define GOAL_TRANSLATOR_H
 
-#include "map_image_generator/Parameters.h"
-
-#include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_datatypes.h>
-#include <geometry_msgs/PointStamped.h>
-#include <std_msgs/String.h>
-#include <sstream>
-#include <stdexcept>
-
-#include "map_image_generator/utils.h"
 #include "map_image_generator/ImageGoalToMapGoal.h"
+#include "map_image_generator/Parameters.h"
+#include "map_image_generator/utils.h"
+
+#include <geometry_msgs/PointStamped.h>
+#include <ros/ros.h>
+#include <sstream>
+#include <std_msgs/String.h>
+#include <stdexcept>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 
 namespace map_image_generator
 {
@@ -26,12 +25,13 @@ namespace map_image_generator
         geometry_msgs::PoseStamped::Ptr m_activeGoal;
 
     public:
-        GoalConverter(const Parameters &parameters, ros::NodeHandle &nodeHandle, geometry_msgs::PoseStamped::Ptr activeGoal);
+        GoalConverter(const Parameters& parameters, ros::NodeHandle& nodeHandle,
+                      geometry_msgs::PoseStamped::Ptr activeGoal);
         virtual ~GoalConverter();
 
     private:
-        bool mapImageGoalCallback(ImageGoalToMapGoal::Request &req,
-                                  ImageGoalToMapGoal::Response &res);
+        bool mapImageGoalCallback(ImageGoalToMapGoal::Request& req,
+                                  ImageGoalToMapGoal::Response& res);
     };
 }
 #endif

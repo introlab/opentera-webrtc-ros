@@ -1,48 +1,38 @@
 #include "map_image_generator/drawers/LaserScanImageDrawer.h"
 
-#include <tf/tf.h>
-
 #include <cmath>
+#include <tf/tf.h>
 
 using namespace map_image_generator;
 using namespace std;
 
 LaserScanImageDrawer::LaserScanImageDrawer(const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener) :
-    ImageDrawer(parameters, nodeHandle, tfListener)
+                                           ros::NodeHandle& nodeHandle,
+                                           tf::TransformListener& tfListener)
+    : ImageDrawer(parameters, nodeHandle, tfListener)
 {
-    m_laserScanSubscriber = m_nodeHandle.subscribe("laser_scan", 1,
-        &LaserScanImageDrawer::laserScanCallback, this);
+    m_laserScanSubscriber = m_nodeHandle.subscribe(
+        "laser_scan", 1, &LaserScanImageDrawer::laserScanCallback, this);
 }
 
-LaserScanImageDrawer::~LaserScanImageDrawer()
-{
-}
+LaserScanImageDrawer::~LaserScanImageDrawer() = default;
 
 void LaserScanImageDrawer::draw(cv::Mat& image)
 {
-    if (!m_lastLaserScan) { return; }
-
-    // auto tf = getRefCenteredMap();
-    // if (tf)
-    // {
-    //     drawLaserScan(image, *tf);
-    // }
-    tf::StampedTransform transform;
-    try
+    if (!m_lastLaserScan)
     {
-        m_tfListener.lookupTransform(m_parameters.refFrameId(), m_lastLaserScan->header.frame_id,
-            ros::Time(0), transform);
-        drawLaserScan(image, transform);
+        return;
     }
-    catch (tf::TransformException ex)
+
+    auto tf = getTransformInRef(m_lastLaserScan->header.frame_id);
+    if (tf)
     {
-        ROS_ERROR("%s",ex.what());
+        drawLaserScan(image, *tf);
     }
 }
 
-void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan)
+void LaserScanImageDrawer::laserScanCallback(
+    const sensor_msgs::LaserScan::ConstPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }
@@ -50,24 +40,23 @@ void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::Const
 
 void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transform)
 {
-    typedef sensor_msgs::LaserScan::_ranges_type::const_iterator RangesConstIterator;
-
     float angle = m_lastLaserScan->angle_min;
-    for (RangesConstIterator it = m_lastLaserScan->ranges.begin(); it != m_lastLaserScan->ranges.end(); ++it)
+    for (const auto& range : m_lastLaserScan->ranges)
     {
-        if (m_lastLaserScan->range_min <= *it &&
-            *it <= m_lastLaserScan->range_max)
+        if (m_lastLaserScan->range_min <= range && range <= m_lastLaserScan->range_max)
         {
-            drawRange(image, transform, *it, angle);
+            drawRange(image, transform, range, angle);
         }
 
         angle += m_lastLaserScan->angle_increment;
     }
 }
 
-void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle)
+void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform,
+                                     float range, float angle)
 {
-    tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
+    tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0),
+                       tf::Vector3(range * cos(angle), range * sin(angle), 0));
     rangePose = transform * rangePose;
 
     const cv::Scalar& color = m_parameters.laserScanColor();
