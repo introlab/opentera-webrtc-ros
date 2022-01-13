@@ -19,6 +19,7 @@ namespace map_image_generator
     {
         const Parameters& m_parameters;
         ros::NodeHandle& m_nodeHandle;
+        tf::TransformListener& m_tfListener;
 
         ros::ServiceServer image_goal_to_map_goal_service;
 
@@ -26,7 +27,8 @@ namespace map_image_generator
 
     public:
         GoalConverter(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                      geometry_msgs::PoseStamped::Ptr activeGoal);
+                      geometry_msgs::PoseStamped::Ptr activeGoal,
+                      tf::TransformListener& tfListener);
         virtual ~GoalConverter();
 
     private:

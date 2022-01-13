@@ -23,8 +23,7 @@
     <arg name="robot_frame_param" default="base_footprint"/>
     <arg name="draw_goal" default="true"/>
     <arg name="draw_robot" default="true"/>
-    <!-- Disabled by default during development -->
-    <arg name="centered_robot" default="false"/>
+    <arg name="centered_robot" default="true"/>
 
 
     <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="screen">

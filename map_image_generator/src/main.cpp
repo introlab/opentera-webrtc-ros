@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     Parameters parameters(nodeHandleParam);
     tf::TransformListener tfListener;
     MapImageGenerator mapImageGenerator(parameters, nodeHandle, tfListener, activeGoal);
-    GoalConverter goalConverter(parameters, nodeHandle, activeGoal);
+    GoalConverter goalConverter(parameters, nodeHandle, activeGoal, tfListener);
     MapLabelsConverter mapLabelsConverter(parameters, nodeHandle);
 
     image_transport::ImageTransport imageTransport(nodeHandle);

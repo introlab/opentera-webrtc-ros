@@ -11,11 +11,13 @@ from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool, String
 from std_srvs.srv import SetBool
 
+
 class GoalManager():
-    def __init__(self):  
+    def __init__(self):
 
         # Global action client used to send waypoints to move_base
-        self.move_base_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        self.move_base_client = actionlib.SimpleActionClient(
+            'move_base', MoveBaseAction)
         self.move_base_client.wait_for_server()
         # Make sure no goals are active
         self.move_base_client.cancel_all_goals()
@@ -23,9 +25,11 @@ class GoalManager():
         self.should_stop = False
 
         # Subscribers and publishers
-        self.waypoints_sub = rospy.Subscriber("waypoints", WaypointArray, self.waypoints_cb)
+        self.waypoints_sub = rospy.Subscriber(
+            "waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
-        self.waypoint_reached_pub = rospy.Publisher("waypoint_reached", String, queue_size=1)
+        self.waypoint_reached_pub = rospy.Publisher(
+            "waypoint_reached", String, queue_size=1)
 
         rospy.loginfo("Goal manager ready")
 
@@ -58,12 +62,14 @@ class GoalManager():
         return self.image_goal_to_map_goal_client(pose)
 
     def image_goal_to_map_goal_client(self, image_goal):
+        rospy.wait_for_service('image_goal_to_map_goal')
         try:
-            image_goal_to_map_goal = rospy.ServiceProxy('image_goal_to_map_goal', ImageGoalToMapGoal)
+            image_goal_to_map_goal = rospy.ServiceProxy(
+                'image_goal_to_map_goal', ImageGoalToMapGoal)
             res = image_goal_to_map_goal(image_goal)
             return res.map_goal
         except rospy.ServiceException as e:
-            rospy.logwarn("Service call failed: %s"%e)
+            rospy.logwarn("Service call failed: %s" % e)
 
     def send_goal(self, pose_goal):
         goal = MoveBaseGoal()
@@ -80,19 +86,21 @@ class GoalManager():
             self.clearGlobalPathClient()
 
     def publishWaypointReached(self, i):
-        waypoint_reached_json_message = {"type": "waypointReached", "waypointNumber": i}
+        waypoint_reached_json_message = {
+            "type": "waypointReached", "waypointNumber": i}
         waypoint_reached_msg = json.dumps(waypoint_reached_json_message)
         self.waypoint_reached_pub.publish(waypoint_reached_msg)
 
     def clearGlobalPathClient(self):
         rospy.wait_for_service('clear_global_path')
         try:
-            clear_global_path = rospy.ServiceProxy('clear_global_path', SetBool)
+            clear_global_path = rospy.ServiceProxy(
+                'clear_global_path', SetBool)
             clear_global_path(True)
         except rospy.ServiceException as e:
             rospy.logwarn("Service call failed: %s" % e)
 
-        
+
 if __name__ == '__main__':
     rospy.init_node("goal_manager")
     try:

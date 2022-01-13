@@ -14,11 +14,23 @@ namespace map_image_generator
     geometry_msgs::Pose convertMapToMapImage(const Parameters& parameters,
                                              const geometry_msgs::Pose& mapPose);
 
+    geometry_msgs::Pose
+    convertRobotCenteredMapCoordinatesToPose(const Parameters& parameters, int x, int y,
+                                             double yaw);
+
+    geometry_msgs::PoseStamped
+    convertMapImageToRobot(const Parameters& parameters,
+                           const geometry_msgs::PoseStamped& mapImagePose);
+    geometry_msgs::Pose convertMapImageToRobot(const Parameters& parameters,
+                                               const geometry_msgs::Pose& mapImagePose);
+
     geometry_msgs::PoseStamped
     convertMapImageToMap(const Parameters& parameters,
                          const geometry_msgs::PoseStamped& mapImagePose);
     geometry_msgs::Pose convertMapImageToMap(const Parameters& parameters,
                                              const geometry_msgs::Pose& mapImagePose);
+
+    void offsetYawByMinus90Degrees(geometry_msgs::Pose& pose);
 
     void flipYawOnY(geometry_msgs::Pose& pose);
     double flipYawOnY(double yaw);
