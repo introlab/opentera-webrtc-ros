@@ -25,9 +25,6 @@ MapLabelsConverter::~MapLabelsConverter() = default;
 void MapLabelsConverter::mapLabelsCallback(
     const visualization_msgs::MarkerArray::ConstPtr& mapLabels)
 {
-    typedef visualization_msgs::MarkerArray::_markers_type::const_iterator
-        MarkersConstIterator;
-
     std::vector<std::string> desiredLabels = getDesiredLabels();
 
     visualization_msgs::MarkerArray mapImageLabels;
