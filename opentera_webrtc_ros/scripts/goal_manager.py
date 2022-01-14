@@ -23,11 +23,13 @@ class GoalManager():
         self.cancelAllGoalsClient()
 
         self.should_stop = False
+        self.pose_goals = []
 
         # Subscribers and publishers
         self.waypoints_sub = rospy.Subscriber(
             "waypoints", WaypointArray, self.waypoints_cb)
         self.stop_sub = rospy.Subscriber("stop", Bool, self.stop_cb)
+        self.start_sub = rospy.Subscriber("start", Bool, self.start_cb)
         self.waypoint_reached_pub = rospy.Publisher(
             "waypoint_reached", String, queue_size=1)
         self.remove_waypoint_from_image_pub = rospy.Publisher(
@@ -38,24 +40,11 @@ class GoalManager():
         rospy.loginfo("Goal manager ready")
 
     def waypoints_cb(self, msg):
-        self.cancelAllGoalsClient()
-        self.should_stop = False
-
-        pose_goals = []
-        for i, waypoint in enumerate(msg.waypoints):
+        for waypoint in msg.waypoints:
             pose_goal = self.transform_waypoint_to_pose(waypoint)
-            pose_goal.pose.position.z = (i + 1)
+            pose_goal.pose.position.z = 1 + len(self.pose_goals)
             self.add_waypoint_to_image_pub.publish(pose_goal)
-            pose_goals.append(pose_goal)
-
-        for pose_goal in pose_goals:
-            self.send_goal(pose_goal)
-            if self.should_stop:
-                break
-            else:
-                self.publishWaypointReached(
-                    round(pose_goal.pose.position.z), pose_goal)
-        self.clearGlobalPathClient()
+            self.pose_goals.append(pose_goal)
 
     def transform_waypoint_to_pose(self, waypoint):
         pose = PoseStamped()
@@ -94,6 +83,24 @@ class GoalManager():
             self.should_stop = True
             self.cancelAllGoalsClient()
             self.clearGlobalPathClient()
+            self.pose_goals.clear()
+
+    def start_cb(self, msg):
+        rospy.loginfo("Starting")
+        if msg.data == True:
+            self.cancelAllGoalsClient(False)
+            self.clearGlobalPathClient()
+            self.should_stop = False
+
+            for pose_goal in self.pose_goals:
+                self.send_goal(pose_goal)
+                if self.should_stop:
+                    break
+                else:
+                    self.publishWaypointReached(
+                        round(pose_goal.pose.position.z), pose_goal)
+            self.clearGlobalPathClient()
+            self.pose_goals.clear()
 
     def publishWaypointReached(self, i, goal_pose):
         waypoint_reached_json_message = {
@@ -102,15 +109,16 @@ class GoalManager():
         self.waypoint_reached_pub.publish(waypoint_reached_msg)
         self.remove_waypoint_from_image_pub.publish(goal_pose)
 
-    def cancelAllGoalsClient(self):
+    def cancelAllGoalsClient(self, clear_goals=True):
         self.move_base_client.cancel_all_goals()
-        rospy.wait_for_service('map_image_drawer/clear_goals')
-        try:
-            image_goal_clear_waypoints = rospy.ServiceProxy(
-                'map_image_drawer/clear_goals', SetBool)
-            res = image_goal_clear_waypoints(True)
-        except rospy.ServiceException as e:
-            rospy.logwarn("Service call failed: %s" % e)
+        if (clear_goals):
+            rospy.wait_for_service('map_image_drawer/clear_goals')
+            try:
+                image_goal_clear_waypoints = rospy.ServiceProxy(
+                    'map_image_drawer/clear_goals', SetBool)
+                res = image_goal_clear_waypoints(True)
+            except rospy.ServiceException as e:
+                rospy.logwarn("Service call failed: %s" % e)
 
     def clearGlobalPathClient(self):
         rospy.wait_for_service('clear_global_path')

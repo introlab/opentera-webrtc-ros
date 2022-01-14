@@ -2,24 +2,23 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_JSON_DATA_HANDLER_H
 
 #include <cmath>
+#include <geometry_msgs/Twist.h>
 #include <json.hpp>
-#include <ros/ros.h>
 #include <opentera_webrtc_ros_msgs/PeerData.h>
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
-#include <geometry_msgs/Twist.h>
+#include <ros/ros.h>
 #include <std_msgs/Bool.h>
-#include <std_srvs/SetBool.h>
 #include <std_srvs/Empty.h>
+#include <std_srvs/SetBool.h>
 
-namespace opentera 
+namespace opentera
 {
-    
     class RosJsonDataHandler
     {
-
     private:
         ros::Subscriber m_webrtcDataSubscriber;
         ros::Publisher m_stopPub;
+        ros::Publisher m_startPub;
         ros::Publisher m_cmdVelPublisher;
         ros::Publisher m_waypointsPub;
         float m_linear_multiplier;
@@ -34,14 +33,14 @@ namespace opentera
         ros::NodeHandle m_nh;
         ros::NodeHandle m_p_nh;
 
-        virtual void onWebRTCDataReceived(const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
+        virtual void onWebRTCDataReceived(
+            const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
 
     public:
         RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh);
         virtual ~RosJsonDataHandler();
 
         void run();
-
     };
 }
 
