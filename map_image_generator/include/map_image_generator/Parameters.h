@@ -33,6 +33,7 @@ namespace map_image_generator
         cv::Scalar m_robotColor;
         cv::Scalar m_goalColor;
         cv::Scalar m_laserScanColor;
+        cv::Scalar m_textColor;
 
         int m_globalPathThickness; // pixel
         int m_robotSize;           // pixel
@@ -69,6 +70,7 @@ namespace map_image_generator
         const cv::Scalar& robotColor() const;
         const cv::Scalar& goalColor() const;
         const cv::Scalar& laserScanColor() const;
+        const cv::Scalar& textColor() const;
 
         int globalPathThickness() const; // pixel
         int robotSize() const;           // pixel
@@ -133,6 +135,8 @@ namespace map_image_generator
     {
         return m_laserScanColor;
     }
+
+    inline const cv::Scalar& Parameters::textColor() const { return m_textColor; }
 
     inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }
 

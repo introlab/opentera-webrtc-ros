@@ -58,6 +58,7 @@ void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform,
     tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0),
                        tf::Vector3(range * cos(angle), range * sin(angle), 0));
     rangePose = transform * rangePose;
+    adjustTransformForRobotRef(rangePose);
 
     const cv::Scalar& color = m_parameters.laserScanColor();
     int size = m_parameters.laserScanSize();

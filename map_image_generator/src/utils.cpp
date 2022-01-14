@@ -111,7 +111,7 @@ namespace map_image_generator
     void offsetYawByMinus90Degrees(geometry_msgs::Pose& pose)
     {
         double yaw = tf::getYaw(pose.orientation);
-        yaw -= M_PI / 2;
+        yaw -= M_PI_2;
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
     }
 
@@ -120,6 +120,13 @@ namespace map_image_generator
         double yaw = tf::getYaw(pose.orientation);
 
         pose.orientation = tf::createQuaternionMsgFromYaw(flipYawOnY(yaw));
+    }
+
+    void flipYawOnY(tf::Transform& transform)
+    {
+        double yaw = tf::getYaw(transform.getRotation());
+
+        transform.setRotation(tf::createQuaternionFromYaw(flipYawOnY(yaw)));
     }
 
     double flipYawOnY(double yaw)

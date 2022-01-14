@@ -11,8 +11,7 @@ using namespace std;
 
 MapImageGenerator::MapImageGenerator(const Parameters& parameters,
                                      ros::NodeHandle& nodeHandle,
-                                     tf::TransformListener& tfListener,
-                                     geometry_msgs::PoseStamped::Ptr activeGoal)
+                                     tf::TransformListener& tfListener)
     : m_parameters(parameters), m_nodeHandle(nodeHandle), m_tfListener(tfListener)
 {
     // The order of the drawers is important as it determines the layering of the
@@ -37,8 +36,8 @@ MapImageGenerator::MapImageGenerator(const Parameters& parameters,
 
     if (m_parameters.drawGoal())
     {
-        m_drawers.push_back(std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle,
-                                                              m_tfListener, activeGoal));
+        m_drawers.push_back(
+            std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawLaserScan())
@@ -71,10 +70,5 @@ void MapImageGenerator::generate(sensor_msgs::Image& sensorImage)
         drawer->draw(m_cvImage.image);
     }
 
-    cv::flip(m_cvImage.image, m_cvImage.image, 1);
-    if (m_parameters.centeredRobot())
-    {
-        cv::rotate(m_cvImage.image, m_cvImage.image, cv::ROTATE_90_CLOCKWISE);
-    }
     m_cvImage.toImageMsg(sensorImage);
 }

@@ -7,12 +7,12 @@ using namespace map_image_generator;
 GlobalPathImageDrawer::GlobalPathImageDrawer(const Parameters& parameters,
                                              ros::NodeHandle& nodeHandle,
                                              tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener)
+    : ImageDrawer(parameters, nodeHandle, tfListener),
+      m_globalPathSubscriber{nodeHandle.subscribe(
+          "global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this)},
+      m_clearGlobalPathService{m_nodeHandle.advertiseService(
+          "clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this)}
 {
-    m_globalPathSubscriber = m_nodeHandle.subscribe(
-        "global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this);
-    m_clearGlobalPathService = m_nodeHandle.advertiseService(
-        "clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this);
 }
 
 GlobalPathImageDrawer::~GlobalPathImageDrawer() = default;
@@ -29,7 +29,6 @@ void GlobalPathImageDrawer::draw(cv::Mat& image)
     {
         drawGlobalPath(image, *tf);
     }
-    tf::StampedTransform transform;
 }
 
 void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& globalPath)
@@ -51,6 +50,9 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transf
 
         startPose = transform * startPose;
         endPose = transform * endPose;
+
+        adjustTransformForRobotRef(startPose);
+        adjustTransformForRobotRef(endPose);
 
         int startX, startY, endX, endY;
         convertTransformToMapCoordinates(startPose, startX, startY);

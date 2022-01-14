@@ -24,8 +24,7 @@ namespace map_image_generator
 
     public:
         MapImageGenerator(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                          tf::TransformListener& tfListener,
-                          geometry_msgs::PoseStamped::Ptr activeGoal);
+                          tf::TransformListener& tfListener);
         virtual ~MapImageGenerator();
 
         void generate(sensor_msgs::Image& sensorImage);

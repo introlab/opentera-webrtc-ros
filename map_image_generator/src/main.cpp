@@ -16,12 +16,10 @@ int main(int argc, char** argv)
     ros::NodeHandle nodeHandle;
     ros::NodeHandle nodeHandleParam("~");
 
-    geometry_msgs::PoseStamped::Ptr activeGoal(new geometry_msgs::PoseStamped);
-
     Parameters parameters(nodeHandleParam);
     tf::TransformListener tfListener;
-    MapImageGenerator mapImageGenerator(parameters, nodeHandle, tfListener, activeGoal);
-    GoalConverter goalConverter(parameters, nodeHandle, activeGoal, tfListener);
+    MapImageGenerator mapImageGenerator(parameters, nodeHandle, tfListener);
+    GoalConverter goalConverter(parameters, nodeHandle, tfListener);
     MapLabelsConverter mapLabelsConverter(parameters, nodeHandle);
 
     image_transport::ImageTransport imageTransport(nodeHandle);

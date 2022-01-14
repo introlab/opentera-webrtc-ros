@@ -30,6 +30,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     string robotColorString;
     string goalColorString;
     string laserScanColorString;
+    string textColorString;
 
     nodeHandle.param("wall_color", wallColorString, string("0 0 0"));
     nodeHandle.param("free_space_color", freeSpaceColorString, string("255 255 255"));
@@ -39,6 +40,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     nodeHandle.param("robot_color", robotColorString, string("0 0 255 255"));
     nodeHandle.param("goal_color", goalColorString, string("0 175 0 255"));
     nodeHandle.param("laser_scan_color", laserScanColorString, string("255 0 0 255"));
+    nodeHandle.param("text_color", textColorString, string("255 255 255"));
 
     m_wallColor = parseColorVec3b(wallColorString);
     m_freeSpaceColor = parseColorVec3b(freeSpaceColorString);
@@ -47,6 +49,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_robotColor = parseColorScalar(robotColorString);
     m_goalColor = parseColorScalar(goalColorString);
     m_laserScanColor = parseColorScalar(laserScanColorString);
+    m_textColor = parseColorScalar(textColorString);
 
     nodeHandle.param("global_path_thickness", m_globalPathThickness, 3);
     nodeHandle.param("robot_size", m_robotSize, 30);

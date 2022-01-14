@@ -29,6 +29,7 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
     const cv::Scalar& color = m_parameters.robotColor();
     int size = m_parameters.robotSize();
 
+    adjustTransformForRobotRef(robotTransform);
     double yaw = tf::getYaw(robotTransform.getRotation());
 
     int startX, startY;

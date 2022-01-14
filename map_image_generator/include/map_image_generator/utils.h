@@ -5,6 +5,7 @@
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf/tf.h>
 
 namespace map_image_generator
 {
@@ -33,6 +34,7 @@ namespace map_image_generator
     void offsetYawByMinus90Degrees(geometry_msgs::Pose& pose);
 
     void flipYawOnY(geometry_msgs::Pose& pose);
+    void flipYawOnY(tf::Transform& transform);
     double flipYawOnY(double yaw);
 
     template <typename T>

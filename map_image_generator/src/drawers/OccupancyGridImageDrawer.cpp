@@ -10,10 +10,10 @@ using namespace map_image_generator;
 OccupancyGridImageDrawer::OccupancyGridImageDrawer(const Parameters& parameters,
                                                    ros::NodeHandle& nodeHandle,
                                                    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener)
+    : ImageDrawer(parameters, nodeHandle, tfListener),
+      m_occupancyGridSubscriber{m_nodeHandle.subscribe(
+          "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)}
 {
-    m_occupancyGridSubscriber = m_nodeHandle.subscribe(
-        "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this);
 }
 
 OccupancyGridImageDrawer::~OccupancyGridImageDrawer() = default;
@@ -189,19 +189,18 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
                        leftPadding, rightPadding, cv::BORDER_CONSTANT,
                        m_parameters.unknownSpaceColor());
 
-    if (m_parameters.centeredRobot())
-    {
         using namespace map_image_generator;
 
         double rotationAngle = rad2deg(tf::getYaw(robotTransform.getRotation()));
         cv::Point rotationCentre{robotX + leftPadding, robotY + topPadding};
         rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
-    }
 
     cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
                            std::max(0, top - (outHeight - 1) / 2)),
                  cv::Size(outWidth, outHeight));
     paddedImage(roi).copyTo(image);
+    cv::flip(image, image, 1);
+    cv::rotate(image, image, cv::ROTATE_90_CLOCKWISE);
 }
 
 void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(

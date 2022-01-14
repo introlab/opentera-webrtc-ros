@@ -2,12 +2,12 @@
 #define IMAGE_DRAWER_H
 
 #include "map_image_generator/Parameters.h"
+#include "map_image_generator/utils.h"
 
 // Replace with <optional> in C++17
 #include <cv_bridge/cv_bridge.h>
 #include <memory>
 #include <nav_msgs/MapMetaData.h>
-#include <tf/tf.h>
 #include <tf/transform_listener.h>
 
 namespace map_image_generator
@@ -32,30 +32,15 @@ namespace map_image_generator
         void convertTransformToInputMapCoordinates(const tf::Transform& transform,
                                                    const nav_msgs::MapMetaData& mapInfo,
                                                    int& x, int& y);
+
         // Replace with std::optional in C++17
         std::unique_ptr<tf::Transform>
         getTransformInRef(const std::string& frameId) const;
+
+        void adjustTransformForRobotRef(tf::Transform& transform) const;
+
+    private:
+        void adjustTransformAngleForRobotRef(tf::Transform& transform) const;
     };
-
-    // Replace with std::optional in C++17
-    inline std::unique_ptr<tf::Transform>
-    ImageDrawer::getTransformInRef(const std::string& frameId) const
-    {
-        tf::StampedTransform transform;
-
-        try
-        {
-            m_tfListener.lookupTransform(m_parameters.refFrameId(), frameId, ros::Time(0),
-                                         transform);
-        }
-        catch (tf::TransformException& ex)
-        {
-            ROS_ERROR("%s", ex.what());
-            return {};
-        }
-
-        // Replace with std::optional in C++17
-        return std::make_unique<tf::Transform>(transform);
-    }
 }
 #endif
