@@ -16,14 +16,15 @@ namespace map_image_generator
 
         cv::Mat m_notScaledOccupancyGridImage;
         cv::Mat m_scaledOccupancyGridImage;
+        cv::Mat m_zoomedOccupancyGridImage;
 
     public:
         OccupancyGridImageDrawer(const Parameters& parameters,
                                  ros::NodeHandle& nodeHandle,
                                  tf::TransformListener& tfListener);
-        virtual ~OccupancyGridImageDrawer();
+        ~OccupancyGridImageDrawer() override;
 
-        virtual void draw(cv::Mat& image);
+        void draw(cv::Mat& image, double& scaleFactor) override;
 
     private:
         void
@@ -35,11 +36,12 @@ namespace map_image_generator
         void scaleOccupancyGridImage();
         void changeScaledOccupancyGridImageIfNeeded();
 
-        void rotateImageAboutPoint(cv::Mat& image, double angle, const cv::Point& point);
-        void rotateImageAboutCenter(cv::Mat& image, double angle);
+        void rotateImageAboutPoint(cv::Mat& image, double angle,
+                                   const cv::Point& point) const;
+        void rotateImageAboutCenter(cv::Mat& image, double angle) const;
 
-        void drawOccupancyGridImage(cv::Mat& image);
-        void drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image);
+        void drawOccupancyGridImage(cv::Mat& image, double& scaleFactor);
+        void drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image, double& scaleFactor);
 
         // Replace with std::optional in C++17
         std::unique_ptr<tf::Transform> getRobotTransform() const;
@@ -51,12 +53,23 @@ namespace map_image_generator
             int left;
             int right;
         };
+        struct MapCoordinates
+        {
+            int x;
+            int y;
+        };
 
-        DirectionalValues computePadding(const DirectionalValues& robotPosition,
-                                         int height, int width);
-
-        void adjustPaddingForCenteredRobotOffset(DirectionalValues& padding, int width,
+        static DirectionalValues computePadding(const DirectionalValues& position,
+                                                int height, int width);
+        void adjustPaddingForCenteredRobotOffset(DirectionalValues& padding, int height,
                                                  const DirectionalValues& robotPosition);
+
+        const cv::Mat& getZoomedOccupancyImage(double scaleFactor);
+
+        MapCoordinates getMapCoordinatesFromTf(const tf::Transform& transform) const;
+        DirectionalValues
+        getDirectionsFromMapCoordinates(const MapCoordinates& mapCoordinates,
+                                        const cv::Mat& map) const;
     };
 }
 #endif

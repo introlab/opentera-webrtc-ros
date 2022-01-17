@@ -60,6 +60,8 @@ namespace map_image_generator
     {
         return rad * 180 / M_PI;
     }
+
+    inline bool areApproxEqual(double a, double b) { return std::abs(a - b) < 0.00001; }
 }
 
 #endif

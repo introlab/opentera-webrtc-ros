@@ -13,12 +13,13 @@ namespace map_image_generator
     public:
         RobotImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                          tf::TransformListener& tfListener);
-        virtual ~RobotImageDrawer();
+        ~RobotImageDrawer() override;
 
-        virtual void draw(cv::Mat& image);
+        void draw(cv::Mat& image, double& scaleFactor) override;
 
     private:
-        void drawRobot(cv::Mat& image, tf::Transform& robotTransform);
+        void drawRobot(cv::Mat& image, tf::Transform& robotTransform,
+                       double& scaleFactor);
     };
 }
 #endif

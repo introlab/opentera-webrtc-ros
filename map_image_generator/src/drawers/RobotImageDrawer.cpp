@@ -15,16 +15,17 @@ RobotImageDrawer::RobotImageDrawer(const Parameters& parameters,
 
 RobotImageDrawer::~RobotImageDrawer() = default;
 
-void RobotImageDrawer::draw(cv::Mat& image)
+void RobotImageDrawer::draw(cv::Mat& image, double& scaleFactor)
 {
     auto tf = getTransformInRef(m_parameters.robotFrameId());
     if (tf)
     {
-        drawRobot(image, *tf);
+        drawRobot(image, *tf, scaleFactor);
     }
 }
 
-void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
+void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform,
+                                 double& scaleFactor)
 {
     const cv::Scalar& color = m_parameters.robotColor();
     int size = m_parameters.robotSize();

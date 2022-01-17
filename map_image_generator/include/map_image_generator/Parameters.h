@@ -98,7 +98,17 @@ namespace map_image_generator
 
     inline int Parameters::yOrigin() const { return m_yOrigin; }
 
-    inline int Parameters::robotVerticalOffset() const { return m_robotVerticalOffset; }
+    inline int Parameters::robotVerticalOffset() const
+    {
+        if (m_centeredRobot)
+        {
+            return m_robotVerticalOffset;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 
     inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }
 

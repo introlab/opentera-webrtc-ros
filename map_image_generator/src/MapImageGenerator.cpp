@@ -65,9 +65,10 @@ void MapImageGenerator::generate(sensor_msgs::Image& sensorImage)
     m_cvImage.header.stamp = ros::Time::now();
     m_cvImage.image = m_parameters.unknownSpaceColor();
 
+    double scaleFactor = 1.0;
     for (auto& drawer : m_drawers)
     {
-        drawer->draw(m_cvImage.image);
+        drawer->draw(m_cvImage.image, scaleFactor);
     }
 
     m_cvImage.toImageMsg(sensorImage);
