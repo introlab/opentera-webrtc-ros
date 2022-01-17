@@ -52,9 +52,9 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
     const cv::Vec3b& freeSpaceColor = m_parameters.freeSpaceColor();
     const cv::Vec3b& unknownSpaceColor = m_parameters.unknownSpaceColor();
 
-    for (int y = 0; y < m_notScaledOccupancyGridImage.rows; y++)
+    for (auto y = 0; y < m_notScaledOccupancyGridImage.rows; y++)
     {
-        for (int x = 0; x < m_notScaledOccupancyGridImage.cols; x++)
+        for (auto x = 0; x < m_notScaledOccupancyGridImage.cols; x++)
         {
             int dataIndex = y * m_notScaledOccupancyGridImage.cols + x;
             int dataValue = m_lastOccupancyGrid->data[dataIndex];

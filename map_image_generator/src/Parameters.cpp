@@ -62,7 +62,14 @@ Parameters::~Parameters() = default;
 
 const std::string& Parameters::refFrameId() const
 {
-    return m_centeredRobot ? m_robotFrameId : m_mapFrameId;
+    if (m_centeredRobot)
+    {
+        return m_robotFrameId;
+    }
+    else
+    {
+        return m_mapFrameId;
+    }
 }
 
 void Parameters::setCenteredRobot(bool centeredRobot)
