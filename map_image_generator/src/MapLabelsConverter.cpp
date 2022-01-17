@@ -1,50 +1,49 @@
 #include "map_image_generator/MapLabelsConverter.h"
+
 #include "map_image_generator/utils.h"
 
-#include <rtabmap_ros/ListLabels.h>
-
 #include <algorithm>
+#include <rtabmap_ros/ListLabels.h>
 
 using namespace map_image_generator;
 using namespace std;
 
 MapLabelsConverter::MapLabelsConverter(const Parameters& parameters,
-    ros::NodeHandle& nodeHandle) :
-    m_parameters(parameters),
-    m_nodeHandle(nodeHandle)
+                                       ros::NodeHandle& nodeHandle)
+    : m_parameters(parameters), m_nodeHandle(nodeHandle)
 {
-    m_mapLabelsSubscriber = m_nodeHandle.subscribe("map_labels", 1,
-        &MapLabelsConverter::mapLabelsCallback, this);
-    m_mapLabelsPublisher = m_nodeHandle.advertise<visualization_msgs::MarkerArray>("map_image_labels", 1);
-    m_rtabmapListLabelsServiceClient = m_nodeHandle.serviceClient<rtabmap_ros::ListLabels>("rtabmap_list_label_service");
+    m_mapLabelsSubscriber = m_nodeHandle.subscribe(
+        "map_labels", 1, &MapLabelsConverter::mapLabelsCallback, this);
+    m_mapLabelsPublisher =
+        m_nodeHandle.advertise<visualization_msgs::MarkerArray>("map_image_labels", 1);
+    m_rtabmapListLabelsServiceClient =
+        m_nodeHandle.serviceClient<rtabmap_ros::ListLabels>("rtabmap_list_label_service");
 }
 
-MapLabelsConverter::~MapLabelsConverter()
-{    
-}
+MapLabelsConverter::~MapLabelsConverter() = default;
 
-void MapLabelsConverter::mapLabelsCallback(const visualization_msgs::MarkerArray::ConstPtr& mapLabels)
+void MapLabelsConverter::mapLabelsCallback(
+    const visualization_msgs::MarkerArray::ConstPtr& mapLabels)
 {
-    typedef visualization_msgs::MarkerArray::_markers_type::const_iterator MarkersConstIterator;
-
     std::vector<std::string> desiredLabels = getDesiredLabels();
 
-    visualization_msgs::MarkerArray mapImageLabels;    
-    for (MarkersConstIterator it = mapLabels->markers.begin(); it != mapLabels->markers.end(); ++it)
+    visualization_msgs::MarkerArray mapImageLabels;
+    for (const auto& marker : mapLabels->markers)
     {
-        if (find(desiredLabels.begin(), desiredLabels.end(), it->text) == desiredLabels.end())
+        if (find(desiredLabels.begin(), desiredLabels.end(), marker.text)
+            == desiredLabels.end())
         {
             continue;
         }
 
-        visualization_msgs::Marker marker;
-        marker.header.seq = it->header.seq;
-        marker.header.stamp = it->header.stamp;
-        marker.header.frame_id = "map_image";
+        visualization_msgs::Marker imageMarker;
+        imageMarker.header.seq = marker.header.seq;
+        imageMarker.header.stamp = marker.header.stamp;
+        imageMarker.header.frame_id = "map_image";
 
-        marker.pose = convertMapToMapImage(m_parameters, it->pose);
-        marker.text = it->text;
-        mapImageLabels.markers.push_back(marker);
+        imageMarker.pose = convertMapToMapImage(m_parameters, marker.pose);
+        imageMarker.text = marker.text;
+        mapImageLabels.markers.push_back(imageMarker);
     }
     m_mapLabelsPublisher.publish(mapImageLabels);
 }

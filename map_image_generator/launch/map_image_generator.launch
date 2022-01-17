@@ -22,6 +22,9 @@
     <arg name="y_origin_param" default="500"/>
     <arg name="robot_frame_param" default="base_footprint"/>
     <arg name="draw_goal" default="true"/>
+    <arg name="draw_robot" default="true"/>
+    <arg name="centered_robot" default="true"/>
+
 
     <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="screen">
         <remap from="occupancy_grid" to="$(arg input_occupancy_grid_topic)"/>
@@ -46,12 +49,14 @@
         <param name="y_origin" type="int" value="$(arg y_origin_param)"/>
         <param name="robot_frame" type="string" value="$(arg robot_frame_param)"/>
         <param name="draw_goal" type="bool" value="$(arg draw_goal)" />
+        <param name="draw_robot" type="bool" value="$(arg draw_robot)" />
         <param name="wall_color" type="string" value="0 224 225"/>
         <param name="free_space_color" type="string" value="24 39 52"/>
         <param name="unknown_space_color" type="string" value="12 12 12"/>
         <param name="robot_size" type="int" value="30"/>
         <param name="global_path_thickness" type="int" value="2"/>
         <param name="laser_scan_size" type="int" value="3"/>
+        <param name="centered_robot" type="bool" value="$(arg centered_robot)"/>
     </node>
 
 </launch>

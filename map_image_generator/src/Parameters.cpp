@@ -30,14 +30,17 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     string robotColorString;
     string goalColorString;
     string laserScanColorString;
+    string textColorString;
 
     nodeHandle.param("wall_color", wallColorString, string("0 0 0"));
     nodeHandle.param("free_space_color", freeSpaceColorString, string("255 255 255"));
-    nodeHandle.param("unknown_space_color", unknownSpaceColorString, string("175 175 175"));
+    nodeHandle.param("unknown_space_color", unknownSpaceColorString,
+                     string("175 175 175"));
     nodeHandle.param("global_path_color", globalPathColorString, string("0 255 0 255"));
     nodeHandle.param("robot_color", robotColorString, string("0 0 255 255"));
     nodeHandle.param("goal_color", goalColorString, string("0 175 0 255"));
     nodeHandle.param("laser_scan_color", laserScanColorString, string("255 0 0 255"));
+    nodeHandle.param("text_color", textColorString, string("255 255 255"));
 
     m_wallColor = parseColorVec3b(wallColorString);
     m_freeSpaceColor = parseColorVec3b(freeSpaceColorString);
@@ -46,15 +49,32 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_robotColor = parseColorScalar(robotColorString);
     m_goalColor = parseColorScalar(goalColorString);
     m_laserScanColor = parseColorScalar(laserScanColorString);
+    m_textColor = parseColorScalar(textColorString);
 
     nodeHandle.param("global_path_thickness", m_globalPathThickness, 3);
     nodeHandle.param("robot_size", m_robotSize, 30);
     nodeHandle.param("goal_size", m_goalSize, 20);
     nodeHandle.param("laser_scan_size", m_laserScanSize, 6);
+    nodeHandle.param("centered_robot", m_centeredRobot, true);
 }
 
-Parameters::~Parameters()
+Parameters::~Parameters() = default;
+
+const std::string& Parameters::refFrameId() const
 {
+    if (m_centeredRobot)
+    {
+        return m_robotFrameId;
+    }
+    else
+    {
+        return m_mapFrameId;
+    }
+}
+
+void Parameters::setCenteredRobot(bool centeredRobot)
+{
+    m_centeredRobot = centeredRobot;
 }
 
 cv::Vec3b Parameters::parseColorVec3b(const std::string& color)
