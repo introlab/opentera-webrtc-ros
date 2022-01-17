@@ -20,16 +20,16 @@ namespace map_image_generator
     public:
         GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                         tf::TransformListener& tfListener);
-        virtual ~GoalImageDrawer();
+        ~GoalImageDrawer() override;
 
         void addGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
         void removeGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
 
-        virtual void draw(cv::Mat& image);
+        void draw(cv::Mat& image, double& scaleFactor) override;
 
     private:
         void drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image,
-                      tf::Transform& transform);
+                      tf::Transform& transform, double& scaleFactor);
         bool clearGoals(std_srvs::SetBool::Request& req,
                         std_srvs::SetBool::Response& res);
     };

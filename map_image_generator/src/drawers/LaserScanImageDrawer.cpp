@@ -17,7 +17,7 @@ LaserScanImageDrawer::LaserScanImageDrawer(const Parameters& parameters,
 
 LaserScanImageDrawer::~LaserScanImageDrawer() = default;
 
-void LaserScanImageDrawer::draw(cv::Mat& image)
+void LaserScanImageDrawer::draw(cv::Mat& image, double& scaleFactor)
 {
     if (!m_lastLaserScan)
     {
@@ -27,7 +27,7 @@ void LaserScanImageDrawer::draw(cv::Mat& image)
     auto tf = getTransformInRef(m_lastLaserScan->header.frame_id);
     if (tf)
     {
-        drawLaserScan(image, *tf);
+        drawLaserScan(image, *tf, scaleFactor);
     }
 }
 
@@ -38,14 +38,15 @@ void LaserScanImageDrawer::laserScanCallback(
 }
 
 
-void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transform)
+void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transform,
+                                         double& scaleFactor)
 {
     float angle = m_lastLaserScan->angle_min;
     for (const auto& range : m_lastLaserScan->ranges)
     {
         if (m_lastLaserScan->range_min <= range && range <= m_lastLaserScan->range_max)
         {
-            drawRange(image, transform, range, angle);
+            drawRange(image, transform, scaleFactor, range, angle);
         }
 
         angle += m_lastLaserScan->angle_increment;
@@ -53,7 +54,7 @@ void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transfor
 }
 
 void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform,
-                                     float range, float angle)
+                                     double& scaleFactor, float range, float angle)
 {
     tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0),
                        tf::Vector3(range * cos(angle), range * sin(angle), 0));

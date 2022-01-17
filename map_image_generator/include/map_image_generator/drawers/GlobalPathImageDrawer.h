@@ -18,13 +18,14 @@ namespace map_image_generator
     public:
         GlobalPathImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                               tf::TransformListener& tfListener);
-        virtual ~GlobalPathImageDrawer();
+        ~GlobalPathImageDrawer() override;
 
-        virtual void draw(cv::Mat& image);
+        void draw(cv::Mat& image, double& scaleFactor) override;
 
     private:
         void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
-        void drawGlobalPath(cv::Mat& image, tf::Transform& transform);
+        void drawGlobalPath(cv::Mat& image, tf::Transform& transform,
+                            double& scaleFactor);
         bool clearGlobalPath(std_srvs::SetBool::Request& req,
                              std_srvs::SetBool::Response& res);
     };

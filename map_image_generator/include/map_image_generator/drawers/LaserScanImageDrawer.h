@@ -16,16 +16,16 @@ namespace map_image_generator
     public:
         LaserScanImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                              tf::TransformListener& tfListener);
-        virtual ~LaserScanImageDrawer();
+        ~LaserScanImageDrawer() override;
 
-        virtual void draw(cv::Mat& image);
+        void draw(cv::Mat& image, double& scaleFactor) override;
 
     private:
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
-        void drawLaserScan(cv::Mat& image, tf::Transform& transform);
-        void drawRange(cv::Mat& image, tf::Transform& transform, float range,
-                       float angle);
+        void drawLaserScan(cv::Mat& image, tf::Transform& transform, double& scaleFactor);
+        void drawRange(cv::Mat& image, tf::Transform& transform, double& scaleFactor,
+                       float range, float angle);
     };
 }
 #endif

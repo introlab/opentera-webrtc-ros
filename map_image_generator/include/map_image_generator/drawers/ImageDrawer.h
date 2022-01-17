@@ -19,19 +19,28 @@ namespace map_image_generator
         ros::NodeHandle& m_nodeHandle;
         tf::TransformListener& m_tfListener;
 
+        ImageDrawer(const ImageDrawer&) = default;
+        ImageDrawer& operator=(const ImageDrawer&) = default;
+        ImageDrawer(ImageDrawer&&) = default;
+        ImageDrawer& operator=(ImageDrawer&&) = default;
+
+
     public:
         ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                     tf::TransformListener& tfListener);
         virtual ~ImageDrawer();
 
-        virtual void draw(cv::Mat& image) = 0;
+        virtual void draw(cv::Mat& image, double& scaleFactor) = 0;
 
     protected:
         void convertTransformToMapCoordinates(const tf::Transform& transform, int& x,
-                                              int& y);
+                                              int& y) const;
         void convertTransformToInputMapCoordinates(const tf::Transform& transform,
                                                    const nav_msgs::MapMetaData& mapInfo,
-                                                   int& x, int& y);
+                                                   int& x, int& y) const;
+        void convertInputMapCoordinatesToTransform(int x, int y,
+                                                   const nav_msgs::MapMetaData& mapInfo,
+                                                   tf::Transform& transform) const;
 
         // Replace with std::optional in C++17
         std::unique_ptr<tf::Transform>
