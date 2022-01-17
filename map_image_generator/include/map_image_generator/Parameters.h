@@ -10,11 +10,12 @@ namespace map_image_generator
     class Parameters
     {
         double m_refreshRate;
-        int m_resolution; // pixel/m
-        int m_width;      // m
-        int m_height;     // m
-        int m_xOrigin;    // pixel
-        int m_yOrigin;    // pixel
+        int m_resolution;          // pixel/m
+        int m_width;               // m
+        int m_height;              // m
+        int m_xOrigin;             // pixel
+        int m_yOrigin;             // pixel
+        int m_robotVerticalOffset; // pixel
 
         std::string m_robotFrameId;
         std::string m_mapFrameId;
@@ -45,11 +46,12 @@ namespace map_image_generator
         virtual ~Parameters();
 
         double refreshRate() const;
-        int resolution() const; // pixel/m
-        int width() const;      // m
-        int height() const;     // m
-        int xOrigin() const;    // pixel
-        int yOrigin() const;    // pixel
+        int resolution() const;          // pixel/m
+        int width() const;               // m
+        int height() const;              // m
+        int xOrigin() const;             // pixel
+        int yOrigin() const;             // pixel
+        int robotVerticalOffset() const; // pixel
 
         const std::string& robotFrameId() const;
         const std::string& mapFrameId() const;
@@ -80,6 +82,8 @@ namespace map_image_generator
     private:
         cv::Vec3b parseColorVec3b(const std::string& color);
         cv::Scalar parseColorScalar(const std::string& color);
+
+        void validateParameters();
     };
 
     inline double Parameters::refreshRate() const { return m_refreshRate; }
@@ -93,6 +97,8 @@ namespace map_image_generator
     inline int Parameters::xOrigin() const { return m_xOrigin; }
 
     inline int Parameters::yOrigin() const { return m_yOrigin; }
+
+    inline int Parameters::robotVerticalOffset() const { return m_robotVerticalOffset; }
 
     inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }
 

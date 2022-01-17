@@ -41,9 +41,22 @@ namespace map_image_generator
         void drawOccupancyGridImage(cv::Mat& image);
         void drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image);
 
+        // Replace with std::optional in C++17
+        std::unique_ptr<tf::Transform> getRobotTransform() const;
 
-        void convertMapInfoToMapCoordinates(const nav_msgs::MapMetaData& mapInfo, int& x,
-                                            int& y);
+        struct DirectionalValues
+        {
+            int top;
+            int bottom;
+            int left;
+            int right;
+        };
+
+        DirectionalValues computePadding(const DirectionalValues& robotPosition,
+                                         int height, int width);
+
+        void adjustPaddingForCenteredRobotOffset(DirectionalValues& padding, int width,
+                                                 const DirectionalValues& robotPosition);
     };
 }
 #endif

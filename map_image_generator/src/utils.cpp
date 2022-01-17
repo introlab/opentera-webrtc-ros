@@ -47,7 +47,8 @@ namespace map_image_generator
         int cols = parameters.width() * parameters.resolution();
         double centreY = rows / 2.0;
         double centreX = cols / 2.0;
-        pose.position.x = -(y - centreY) / static_cast<double>(parameters.resolution());
+        pose.position.x = -(y - centreY - parameters.robotVerticalOffset())
+                          / static_cast<double>(parameters.resolution());
         pose.position.y = -(x - centreX) / static_cast<double>(parameters.resolution());
         pose.position.z = 0;
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);

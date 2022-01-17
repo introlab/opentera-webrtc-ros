@@ -114,6 +114,27 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
     }
 }
 
+// Replace with std::optional in C++17
+std::unique_ptr<tf::Transform> OccupancyGridImageDrawer::getRobotTransform() const
+{
+    tf::StampedTransform transform;
+
+    try
+    {
+        m_tfListener.lookupTransform(m_parameters.mapFrameId(),
+                                     m_parameters.robotFrameId(), ros::Time(0),
+                                     transform);
+    }
+    catch (tf::TransformException& ex)
+    {
+        ROS_ERROR("%s", ex.what());
+        return {};
+    }
+
+    // Replace with std::optional in C++17
+    return std::make_unique<tf::Transform>(transform);
+}
+
 void OccupancyGridImageDrawer::rotateImageAboutPoint(cv::Mat& image, double angle,
                                                      const cv::Point& point)
 {
@@ -125,6 +146,19 @@ void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double ang
 {
     cv::Point center{image.cols / 2, image.rows / 2};
     rotateImageAboutPoint(image, angle, center);
+}
+
+OccupancyGridImageDrawer::DirectionalValues
+OccupancyGridImageDrawer::computePadding(const DirectionalValues& robotPosition,
+                                         int height, int width)
+{
+    return {
+        .top = restrictToPositive((height - 1) / 2 - robotPosition.top),
+        .bottom = restrictToPositive(height / 2 - robotPosition.bottom),
+
+        .left = restrictToPositive((width - 1) / 2 - robotPosition.left),
+        .right = restrictToPositive(width / 2 - robotPosition.right),
+    };
 }
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
@@ -154,16 +188,9 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 
 void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
 {
-    tf::StampedTransform robotTransform;
-    try
+    auto robotTransform = getRobotTransform();
+    if (!robotTransform)
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(),
-                                     m_parameters.robotFrameId(), ros::Time(0),
-                                     robotTransform);
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_ERROR("%s", ex.what());
         return;
     }
 
@@ -172,42 +199,62 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
 
     int robotX = 0;
     int robotY = 0;
-    convertTransformToInputMapCoordinates(robotTransform, m_lastOccupancyGrid->info,
+    convertTransformToInputMapCoordinates(*robotTransform, m_lastOccupancyGrid->info,
                                           robotX, robotY);
-    int top = 0 + robotY;
-    int bottom = (m_scaledOccupancyGridImage.rows - 1) - robotY;
-    int left = 0 + robotX;
-    int right = (m_scaledOccupancyGridImage.cols - 1) - robotX;
 
-    int topPadding = std::max(0, (outHeight - 1) / 2 - top);
-    int bottomPadding = std::max(0, outHeight / 2 - bottom);
-    int leftPadding = std::max(0, (outWidth - 1) / 2 - left);
-    int rightPadding = std::max(0, outWidth / 2 - right);
+    DirectionalValues robotPosition = {
+        .top = 0 + robotY,
+        .bottom = (m_scaledOccupancyGridImage.rows - 1) - robotY,
+        .left = 0 + robotX,
+        .right = (m_scaledOccupancyGridImage.cols - 1) - robotX,
+    };
+
+    DirectionalValues padding = computePadding(robotPosition, outHeight, outWidth);
+    adjustPaddingForCenteredRobotOffset(padding, outWidth, robotPosition);
 
     cv::Mat paddedImage;
-    cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, topPadding, bottomPadding,
-                       leftPadding, rightPadding, cv::BORDER_CONSTANT,
+    cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, padding.top,
+                       padding.bottom, padding.left, padding.right, cv::BORDER_CONSTANT,
                        m_parameters.unknownSpaceColor());
 
         using namespace map_image_generator;
 
-        double rotationAngle = rad2deg(tf::getYaw(robotTransform.getRotation()));
-        cv::Point rotationCentre{robotX + leftPadding, robotY + topPadding};
+    double rotationAngle = rad2deg(tf::getYaw(robotTransform->getRotation()));
+    cv::Point rotationCentre{robotX + padding.left, robotY + padding.top};
         rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
 
-    cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
-                           std::max(0, top - (outHeight - 1) / 2)),
+    cv::Rect roi(cv::Point(restrictToPositive(robotPosition.left - (outWidth - 1) / 2
+                                              + m_parameters.robotVerticalOffset()),
+                           restrictToPositive(robotPosition.top - (outHeight - 1) / 2)),
                  cv::Size(outWidth, outHeight));
     paddedImage(roi).copyTo(image);
     cv::flip(image, image, 1);
     cv::rotate(image, image, cv::ROTATE_90_CLOCKWISE);
 }
 
-void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(
-    const nav_msgs::MapMetaData& mapInfo, int& x, int& y)
+void OccupancyGridImageDrawer::adjustPaddingForCenteredRobotOffset(
+    DirectionalValues& padding, int width, const DirectionalValues& robotPosition)
 {
-    tf::Transform mapInfoTransform;
-    mapInfoTransform.setOrigin(tf::Vector3(
-        mapInfo.origin.position.x, mapInfo.origin.position.y, mapInfo.origin.position.z));
-    convertTransformToMapCoordinates(mapInfoTransform, x, y);
+    // The vertical axis on which we apply the robot vertical offset is horizontal
+    // currently as we will rotate it later
+    int& topPaddingRotated = padding.right;
+    int& bottomPaddingRotated = padding.left;
+    if (m_parameters.robotVerticalOffset() > 0)
+    {
+        // If the offset is positive, we need to add padding to the top and can
+        // possibly reduce padding to the bottom
+        bottomPaddingRotated -= std::min(
+            bottomPaddingRotated, restrictToPositive(m_parameters.robotVerticalOffset()));
+        topPaddingRotated += restrictToPositive(m_parameters.robotVerticalOffset());
+    }
+    if (m_parameters.robotVerticalOffset() < 0)
+{
+        // If the offset is negative, we need to recompute padding to the bottom and
+        // can possibly reduce padding to the top
+        bottomPaddingRotated = restrictToPositive(
+            (width - 1) / 2 + restrictToPositive(-m_parameters.robotVerticalOffset())
+            - robotPosition.left);
+        topPaddingRotated -= std::min(
+            topPaddingRotated, restrictToPositive(-m_parameters.robotVerticalOffset()));
+    }
 }

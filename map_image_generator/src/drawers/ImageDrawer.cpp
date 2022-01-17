@@ -16,7 +16,7 @@ void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transfor
     x = static_cast<int>(transform.getOrigin().getX() * m_parameters.resolution()
                          + m_parameters.xOrigin());
     y = static_cast<int>(transform.getOrigin().getY() * m_parameters.resolution()
-                         + m_parameters.yOrigin());
+                         + m_parameters.yOrigin() + m_parameters.robotVerticalOffset());
 }
 
 void ImageDrawer::convertTransformToInputMapCoordinates(
