@@ -38,13 +38,25 @@ namespace map_image_generator
     double flipYawOnY(double yaw);
 
     template <typename T>
-    static inline T deg2rad(T deg)
+    inline T sign(T val)
+    {
+        return static_cast<T>(T{0} < val) - static_cast<T>(val < T{0});
+    }
+
+    template <typename T>
+    inline T restrictToPositive(T val)
+    {
+        return std::max(T{0}, val);
+    }
+
+    template <typename T>
+    inline T deg2rad(T deg)
     {
         return deg * M_PI / 180;
     }
 
     template <typename T>
-    static inline T rad2deg(T rad)
+    inline T rad2deg(T rad)
     {
         return rad * 180 / M_PI;
     }

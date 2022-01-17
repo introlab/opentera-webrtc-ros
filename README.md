@@ -4,11 +4,12 @@ Based on [opentera-webrtc](https://github.com/introlab/opentera-webrtc).
 
 # Authors
 
-* Cédric Godin (@godced)
-* Marc-Antoine Maheux (@mamaheux)
-* Dominic Létourneau (@doumdi)
-* Gabriel Lauzier (@G-Lauz)
-* Jérémie Bourque (@JeremieBourque1)
+- Cédric Godin (@godced)
+- Marc-Antoine Maheux (@mamaheux)
+- Dominic Létourneau (@doumdi)
+- Gabriel Lauzier (@G-Lauz)
+- Jérémie Bourque (@JeremieBourque1)
+- Philippe Warren (@philippewarren)
 
 # Requirements
 
@@ -28,7 +29,6 @@ sudo apt-get install nodejs npm
 sudo apt-get install build-essential gfortran texinfo libasound2-dev
 ```
 
-
 # Installation
 
 ## 1 - Create a catkin workspace (if not already done)
@@ -43,6 +43,7 @@ $ catkin_make
 ```
 
 ## 2 - Get all the required ROS packages
+
 ```bash
 $ cd ~/teleop_ws/src
 # audio_utils
@@ -52,6 +53,7 @@ $ git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submod
 ```
 
 ## 3 - Build all the ROS packages
+
 ```bash
 $ cd ~/teleop_ws
 $ source devel/setup.bash
@@ -59,6 +61,7 @@ $ catkin_make
 ```
 
 ## 4 - Install the Python requirements for client and signaling server
+
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
 $ python3 -m pip install -r requirements.txt
@@ -67,6 +70,7 @@ $ python3 -m pip install -r requirements.txt
 ```
 
 ## 5 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
+
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
 # Run the npm package installer
@@ -79,14 +83,12 @@ $ npm run build
 
 Please see the [opentera_webrtc_demos package.](opentera_webrtc_demos/README.md)
 
-
 # License
 
-* [Apache License, Version 2.0](LICENSE)
+- [Apache License, Version 2.0](LICENSE)
 
 # Sponsor
 
 ![IntRoLab](images/IntRoLab.png)
 
 [IntRoLab - Intelligent / Interactive / Integrated / Interdisciplinary Robot Lab](https://introlab.3it.usherbrooke.ca)
-
