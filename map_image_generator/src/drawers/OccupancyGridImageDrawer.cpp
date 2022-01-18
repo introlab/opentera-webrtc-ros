@@ -7,18 +7,20 @@
 
 using namespace map_image_generator;
 
-OccupancyGridImageDrawer::OccupancyGridImageDrawer(const Parameters& parameters,
+OccupancyGridImageDrawer::OccupancyGridImageDrawer(Parameters& parameters,
                                                    ros::NodeHandle& nodeHandle,
                                                    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
+    : ImageDrawer{parameters, nodeHandle, tfListener}, m_mutableParameters{parameters},
       m_occupancyGridSubscriber{m_nodeHandle.subscribe(
-          "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)}
+          "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)},
+      m_mapViewChangerService{m_nodeHandle.advertiseService(
+          "change_map_view", &OccupancyGridImageDrawer::changeMapViewCallback, this)}
 {
 }
 
 OccupancyGridImageDrawer::~OccupancyGridImageDrawer() = default;
 
-void OccupancyGridImageDrawer::draw(cv::Mat& image, double& scaleFactor)
+void OccupancyGridImageDrawer::draw(cv::Mat& image)
 {
     if (!m_lastOccupancyGrid)
     {
@@ -30,11 +32,11 @@ void OccupancyGridImageDrawer::draw(cv::Mat& image, double& scaleFactor)
 
     if (m_parameters.centeredRobot())
     {
-        drawOccupancyGridImageCenteredAroundRobot(image, scaleFactor);
+        drawOccupancyGridImageCenteredAroundRobot(image);
     }
     else
     {
-        drawOccupancyGridImage(image, scaleFactor);
+        drawOccupancyGridImage(image);
     }
 }
 
@@ -42,6 +44,27 @@ void OccupancyGridImageDrawer::occupancyGridCallback(
     const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid)
 {
     m_lastOccupancyGrid = occupancyGrid;
+}
+
+bool OccupancyGridImageDrawer::changeMapViewCallback(ChangeMapView::Request& req,
+                                                     ChangeMapView::Response& res)
+{
+    res.success = true;
+    if (req.view_new == ChangeMapView::Request::VIEW_CENTERED_ROBOT)
+    {
+        m_mutableParameters.setCenteredRobot(true);
+    }
+    else if (req.view_new == ChangeMapView::Request::VIEW_STATIC_MAP)
+    {
+        m_mutableParameters.setCenteredRobot(false);
+    }
+    else
+    {
+        ROS_ERROR("Unknown view type: %s. View was not changed.", req.view_new.c_str());
+        res.success = false;
+        res.message = "unknown view type";
+    }
+    return true;
 }
 
 void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
@@ -57,7 +80,7 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
         for (auto x = 0; x < m_notScaledOccupancyGridImage.cols; x++)
         {
             int dataIndex = y * m_notScaledOccupancyGridImage.cols + x;
-            int dataValue = m_lastOccupancyGrid->data[dataIndex];
+            int dataValue = static_cast<uchar>(m_lastOccupancyGrid->data[dataIndex]);
 
             cv::Point pixelPosition(x, y);
             if (dataValue == -1)
@@ -80,8 +103,8 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
 
 void OccupancyGridImageDrawer::changeNotScaledOccupancyGridImageIfNeeded()
 {
-    int gridHeight = m_lastOccupancyGrid->info.height;
-    int gridWidth = m_lastOccupancyGrid->info.width;
+    int gridHeight = static_cast<int>(m_lastOccupancyGrid->info.height);
+    int gridWidth = static_cast<int>(m_lastOccupancyGrid->info.width);
 
     if (m_notScaledOccupancyGridImage.rows != gridHeight
         || m_notScaledOccupancyGridImage.cols != gridWidth)
@@ -97,29 +120,30 @@ void OccupancyGridImageDrawer::scaleOccupancyGridImage()
                m_scaledOccupancyGridImage.size());
 }
 
-const cv::Mat& OccupancyGridImageDrawer::getZoomedOccupancyImage(double scaleFactor)
+const cv::Mat& OccupancyGridImageDrawer::getZoomedOccupancyImage()
 {
-    if (map_image_generator::areApproxEqual(scaleFactor, 1.0))
+    if (map_image_generator::areApproxEqual(m_parameters.scaleFactor(), 1.0))
     {
         return m_scaledOccupancyGridImage;
     }
     else
     {
         cv::resize(m_scaledOccupancyGridImage, m_zoomedOccupancyGridImage, cv::Size{},
-                   scaleFactor, scaleFactor);
+                   m_parameters.scaleFactor(), m_parameters.scaleFactor());
         return m_zoomedOccupancyGridImage;
     }
 }
 
 void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 {
-    int gridHeight = m_lastOccupancyGrid->info.height;
-    int gridWidth = m_lastOccupancyGrid->info.width;
+    int gridHeight = static_cast<int>(m_lastOccupancyGrid->info.height);
+    int gridWidth = static_cast<int>(m_lastOccupancyGrid->info.width);
     float gridResolution = m_lastOccupancyGrid->info.resolution;
 
-    int height =
-        static_cast<int>(gridHeight * gridResolution * m_parameters.resolution());
-    int width = static_cast<int>(gridWidth * gridResolution * m_parameters.resolution());
+    int height = static_cast<int>(static_cast<double>(gridHeight) * gridResolution
+                                  * m_parameters.resolution());
+    int width = static_cast<int>(static_cast<double>(gridWidth) * gridResolution
+                                 * m_parameters.resolution());
 
     if (m_scaledOccupancyGridImage.rows != height
         || m_scaledOccupancyGridImage.cols != width)
@@ -178,7 +202,7 @@ OccupancyGridImageDrawer::computePadding(const DirectionalValues& position, int 
 OccupancyGridImageDrawer::MapCoordinates
 OccupancyGridImageDrawer::getMapCoordinatesFromTf(const tf::Transform& transform) const
 {
-    MapCoordinates mapCoordinates;
+    MapCoordinates mapCoordinates{};
     convertTransformToInputMapCoordinates(transform, m_lastOccupancyGrid->info,
                                           mapCoordinates.x, mapCoordinates.y);
     return mapCoordinates;
@@ -186,7 +210,7 @@ OccupancyGridImageDrawer::getMapCoordinatesFromTf(const tf::Transform& transform
 
 OccupancyGridImageDrawer::DirectionalValues
 OccupancyGridImageDrawer::getDirectionsFromMapCoordinates(
-    const MapCoordinates& mapCoordinates, const cv::Mat& map) const
+    const MapCoordinates& mapCoordinates, const cv::Mat& map)
 {
     return {
         .top = 0 + mapCoordinates.y,
@@ -196,7 +220,7 @@ OccupancyGridImageDrawer::getDirectionsFromMapCoordinates(
     };
 }
 
-void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image, double& scaleFactor)
+void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 {
     auto robotTransform = getRobotTransform();
     if (!robotTransform)
@@ -230,13 +254,13 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image, double& sc
     double vScaleFactor =
         (0.4 * outHeight) / std::abs(robotPosition.top - mapOriginCoordinates.y);
 
-    scaleFactor = std::min({hScaleFactor, vScaleFactor, 1.0});
+    m_mutableParameters.setScaleFactor(std::min({hScaleFactor, vScaleFactor, 1.0}));
 
-    const auto& zoomedMap = getZoomedOccupancyImage(scaleFactor);
+    const auto& zoomedMap = getZoomedOccupancyImage();
 
     MapCoordinates zoomedMapOriginCoordinates{
-        .x = static_cast<int>(mapOriginCoordinates.x * scaleFactor),
-        .y = static_cast<int>(mapOriginCoordinates.y * scaleFactor),
+        .x = static_cast<int>(mapOriginCoordinates.x * m_parameters.scaleFactor()),
+        .y = static_cast<int>(mapOriginCoordinates.y * m_parameters.scaleFactor()),
     };
     DirectionalValues zoomedMapPosition =
         getDirectionsFromMapCoordinates(zoomedMapOriginCoordinates, zoomedMap);
@@ -258,8 +282,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image, double& sc
     cv::flip(image, image, 1);
 }
 
-void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(
-    cv::Mat& image, double& scaleFactor)
+void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
 {
     auto robotTransform = getRobotTransform();
     if (!robotTransform)

@@ -7,7 +7,7 @@
 using namespace map_image_generator;
 using namespace std;
 
-Parameters::Parameters(ros::NodeHandle& nodeHandle)
+Parameters::Parameters(ros::NodeHandle& nodeHandle) : m_scaleFactor{1.0}
 {
     nodeHandle.param("refresh_rate", m_refreshRate, 1.0);
     nodeHandle.param("resolution", m_resolution, 50);
@@ -97,22 +97,23 @@ const std::string& Parameters::refFrameId() const
 void Parameters::setCenteredRobot(bool centeredRobot)
 {
     m_centeredRobot = centeredRobot;
+    m_scaleFactor = 1.0;
 }
 
 cv::Vec3b Parameters::parseColorVec3b(const std::string& color)
 {
-    int r, g, b;
+    cv::Vec3b::value_type r, g, b;
     stringstream ss(color);
     ss >> r >> g >> b;
 
-    return cv::Vec3b(b, g, r);
+    return {b, g, r};
 }
 
 cv::Scalar Parameters::parseColorScalar(const std::string& color)
 {
-    int r, g, b, a;
+    cv::Scalar::value_type r, g, b, a;
     stringstream ss(color);
     ss >> r >> g >> b >> a;
 
-    return cv::Scalar(b, g, r, a);
+    return {b, g, r, a};
 }

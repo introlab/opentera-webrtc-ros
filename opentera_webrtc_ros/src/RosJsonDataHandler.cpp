@@ -2,28 +2,36 @@
 
 using namespace opentera;
 
-RosJsonDataHandler::RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh)
+RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh,
+                                       const ros::NodeHandle& p_nh)
     : m_nh(nh), m_p_nh(p_nh)
 {
-    m_webrtcDataSubscriber =
-        m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
+    m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
+    m_p_nh.param<float>("angular_multiplier", m_angular_multiplier, 0.15);
+
     m_stopPub = m_nh.advertise<std_msgs::Bool>("stop", 1);
     m_startPub = m_nh.advertise<std_msgs::Bool>("start", 1);
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     m_waypointsPub =
         m_nh.advertise<opentera_webrtc_ros_msgs::WaypointArray>("waypoints", 1);
-    m_p_nh.param<float>("linear_multiplier", m_linear_multiplier, 0.15);
-    m_p_nh.param<float>("angular_multiplier", m_angular_multiplier, 0.15);
+
+    m_webrtcDataSubscriber =
+        m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
+
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
+    m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
+    m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
+
     m_localizationModeClient =
         m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_localization");
     m_mappingModeClient =
         m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_mapping");
-    m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
-    m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
+
+    m_changeMapViewClient =
+        m_nh.serviceClient<map_image_generator::ChangeMapView>("change_map_view");
 }
 
-RosJsonDataHandler::~RosJsonDataHandler() {}
+RosJsonDataHandler::~RosJsonDataHandler() = default;
 
 void RosJsonDataHandler::onWebRTCDataReceived(
     const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event)
@@ -61,9 +69,10 @@ void RosJsonDataHandler::onWebRTCDataReceived(
         {
             // Received waypoints are in pixel coordinates in the image frame
             opentera_webrtc_ros_msgs::Waypoint wp;
-            wp.x = static_cast<double>(waypoint["coordinate"]["x"]);
-            wp.y = static_cast<double>(waypoint["coordinate"]["y"]);
-            wp.yaw = static_cast<double>(waypoint["coordinate"]["yaw"]) * M_PI / 180;
+            wp.x = static_cast<float>(waypoint["coordinate"]["x"]);
+            wp.y = static_cast<float>(waypoint["coordinate"]["y"]);
+            wp.yaw = static_cast<float>(static_cast<double>(waypoint["coordinate"]["yaw"])
+                                        * M_PI / 180);
             wp_array.waypoints.push_back(wp);
         }
         m_waypointsPub.publish(wp_array);
@@ -114,6 +123,17 @@ void RosJsonDataHandler::onWebRTCDataReceived(
         if (!m_enableCameraClient.call(srv))
         {
             ROS_ERROR("EnableCamera service call error: %s",
+                      srv.response.message.c_str());
+        }
+    }
+    else if (serializedData["type"] == "changeMapView")
+    {
+        map_image_generator::ChangeMapView srv;
+        srv.request.view_new = serializedData["new"];
+        srv.request.view_old = serializedData["old"];
+        if (!m_changeMapViewClient.call(srv))
+        {
+            ROS_ERROR("change_map_view service call error: %s",
                       srv.response.message.c_str());
         }
     }

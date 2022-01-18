@@ -18,14 +18,13 @@ namespace map_image_generator
                              tf::TransformListener& tfListener);
         ~LaserScanImageDrawer() override;
 
-        void draw(cv::Mat& image, double& scaleFactor) override;
+        void draw(cv::Mat& image) override;
 
     private:
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
-        void drawLaserScan(cv::Mat& image, tf::Transform& transform, double& scaleFactor);
-        void drawRange(cv::Mat& image, tf::Transform& transform, double& scaleFactor,
-                       float range, float angle);
+        void drawLaserScan(cv::Mat& image, tf::Transform& transform);
+        void drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle);
     };
 }
 #endif

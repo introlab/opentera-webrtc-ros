@@ -1,0 +1,7 @@
+string VIEW_STATIC_MAP=static-map
+string VIEW_CENTERED_ROBOT=centered-robot
+string view_new
+string view_old
+---
+bool success
+string message

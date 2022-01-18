@@ -20,12 +20,11 @@ namespace map_image_generator
                               tf::TransformListener& tfListener);
         ~GlobalPathImageDrawer() override;
 
-        void draw(cv::Mat& image, double& scaleFactor) override;
+        void draw(cv::Mat& image) override;
 
     private:
         void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
-        void drawGlobalPath(cv::Mat& image, tf::Transform& transform,
-                            double& scaleFactor);
+        void drawGlobalPath(cv::Mat& image, tf::Transform& transform);
         bool clearGlobalPath(std_srvs::SetBool::Request& req,
                              std_srvs::SetBool::Response& res);
     };

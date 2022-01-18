@@ -30,7 +30,7 @@ namespace map_image_generator
                     tf::TransformListener& tfListener);
         virtual ~ImageDrawer();
 
-        virtual void draw(cv::Mat& image, double& scaleFactor) = 0;
+        virtual void draw(cv::Mat& image) = 0;
 
     protected:
         void convertTransformToMapCoordinates(const tf::Transform& transform, int& x,

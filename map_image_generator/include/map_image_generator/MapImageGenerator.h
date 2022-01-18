@@ -23,7 +23,7 @@ namespace map_image_generator
         cv_bridge::CvImage m_cvImage;
 
     public:
-        MapImageGenerator(const Parameters& parameters, ros::NodeHandle& nodeHandle,
+        MapImageGenerator(Parameters& parameters, ros::NodeHandle& nodeHandle,
                           tf::TransformListener& tfListener);
         virtual ~MapImageGenerator();
 

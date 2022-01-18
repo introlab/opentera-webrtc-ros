@@ -17,7 +17,7 @@ GlobalPathImageDrawer::GlobalPathImageDrawer(const Parameters& parameters,
 
 GlobalPathImageDrawer::~GlobalPathImageDrawer() = default;
 
-void GlobalPathImageDrawer::draw(cv::Mat& image, double& scaleFactor)
+void GlobalPathImageDrawer::draw(cv::Mat& image)
 {
     if (!m_lastGlobalPath)
     {
@@ -27,7 +27,7 @@ void GlobalPathImageDrawer::draw(cv::Mat& image, double& scaleFactor)
     auto tf = getTransformInRef(m_lastGlobalPath->header.frame_id);
     if (tf)
     {
-        drawGlobalPath(image, *tf, scaleFactor);
+        drawGlobalPath(image, *tf);
     }
 }
 
@@ -36,8 +36,7 @@ void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& global
     m_lastGlobalPath = globalPath;
 }
 
-void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transform,
-                                           double& scaleFactor)
+void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.globalPathColor();
     int thickness = m_parameters.globalPathThickness();

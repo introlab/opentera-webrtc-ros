@@ -53,20 +53,20 @@ bool GoalImageDrawer::clearGoals(std_srvs::SetBool::Request& req,
     return false;
 }
 
-void GoalImageDrawer::draw(cv::Mat& image, double& scaleFactor)
+void GoalImageDrawer::draw(cv::Mat& image)
 {
     for (const auto& goal : m_activeGoals)
     {
         auto tf = getTransformInRef(goal.header.frame_id);
         if (tf)
         {
-            drawGoal(goal, image, *tf, scaleFactor);
+            drawGoal(goal, image, *tf);
         }
     }
 }
 
 void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image,
-                               tf::Transform& transform, double& scaleFactor)
+                               tf::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.goalColor();
     int size = m_parameters.goalSize();
