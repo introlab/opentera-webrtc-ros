@@ -14,13 +14,16 @@ void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transfor
                                                    int& y) const
 {
     x = static_cast<int>(transform.getOrigin().getX() * m_parameters.resolution()
+                             * m_parameters.scaleFactor()
                          + m_parameters.xOrigin());
     y = static_cast<int>(transform.getOrigin().getY() * m_parameters.resolution()
+                             * m_parameters.scaleFactor()
                          + m_parameters.yOrigin() + m_parameters.robotVerticalOffset());
 }
 
 void ImageDrawer::convertTransformToInputMapCoordinates(
-    const tf::Transform& transform, const nav_msgs::MapMetaData& mapInfo, int& x, int& y) const
+    const tf::Transform& transform, const nav_msgs::MapMetaData& mapInfo, int& x,
+    int& y) const
 {
     x = static_cast<int>((transform.getOrigin().getX() - mapInfo.origin.position.x)
                          * m_parameters.resolution());
@@ -28,9 +31,8 @@ void ImageDrawer::convertTransformToInputMapCoordinates(
                          * m_parameters.resolution());
 }
 
-void ImageDrawer::convertInputMapCoordinatesToTransform(int x, int y,
-                                                        const nav_msgs::MapMetaData& mapInfo,
-                                                        tf::Transform& transform) const
+void ImageDrawer::convertInputMapCoordinatesToTransform(
+    int x, int y, const nav_msgs::MapMetaData& mapInfo, tf::Transform& transform) const
 {
     transform.setOrigin(tf::Vector3(
         static_cast<double>(x) / m_parameters.resolution() + mapInfo.origin.position.x,

@@ -17,6 +17,8 @@ namespace map_image_generator
         int m_yOrigin;             // pixel
         int m_robotVerticalOffset; // pixel
 
+        double m_scaleFactor;
+
         std::string m_robotFrameId;
         std::string m_mapFrameId;
         bool m_centeredRobot;
@@ -42,7 +44,7 @@ namespace map_image_generator
         int m_laserScanSize;       // pixel
 
     public:
-        Parameters(ros::NodeHandle& nodeHandle);
+        explicit Parameters(ros::NodeHandle& nodeHandle);
         virtual ~Parameters();
 
         double refreshRate() const;
@@ -52,6 +54,9 @@ namespace map_image_generator
         int xOrigin() const;             // pixel
         int yOrigin() const;             // pixel
         int robotVerticalOffset() const; // pixel
+
+        double scaleFactor() const;
+        void setScaleFactor(double scaleFactor);
 
         const std::string& robotFrameId() const;
         const std::string& mapFrameId() const;
@@ -80,8 +85,8 @@ namespace map_image_generator
         int laserScanSize() const;       // pixel
 
     private:
-        cv::Vec3b parseColorVec3b(const std::string& color);
-        cv::Scalar parseColorScalar(const std::string& color);
+        static cv::Vec3b parseColorVec3b(const std::string& color);
+        static cv::Scalar parseColorScalar(const std::string& color);
 
         void validateParameters();
     };
@@ -108,6 +113,13 @@ namespace map_image_generator
         {
             return 0;
         }
+    }
+
+    inline double Parameters::scaleFactor() const { return m_scaleFactor; }
+
+    inline void Parameters::setScaleFactor(double scaleFactor)
+    {
+        m_scaleFactor = scaleFactor;
     }
 
     inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }

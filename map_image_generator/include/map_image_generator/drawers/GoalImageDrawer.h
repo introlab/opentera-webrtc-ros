@@ -25,11 +25,11 @@ namespace map_image_generator
         void addGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
         void removeGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
 
-        void draw(cv::Mat& image, double& scaleFactor) override;
+        void draw(cv::Mat& image) override;
 
     private:
         void drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image,
-                      tf::Transform& transform, double& scaleFactor);
+                      tf::Transform& transform);
         bool clearGoals(std_srvs::SetBool::Request& req,
                         std_srvs::SetBool::Response& res);
     };

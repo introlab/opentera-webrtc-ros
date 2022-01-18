@@ -15,11 +15,10 @@ namespace map_image_generator
                          tf::TransformListener& tfListener);
         ~RobotImageDrawer() override;
 
-        void draw(cv::Mat& image, double& scaleFactor) override;
+        void draw(cv::Mat& image) override;
 
     private:
-        void drawRobot(cv::Mat& image, tf::Transform& robotTransform,
-                       double& scaleFactor);
+        void drawRobot(cv::Mat& image, tf::Transform& robotTransform);
     };
 }
 #endif
