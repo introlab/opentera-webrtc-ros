@@ -238,7 +238,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
     double heightBorder = 0.1 * outHeight;
     double widthBorder = 0.1 * outWidth;
 
-    // Map centre
+    // Map center
     double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
     double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
 
@@ -309,9 +309,9 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
     using namespace map_image_generator;
 
     double rotationAngle = rad2deg(tf::getYaw(robotTransform->getRotation()));
-    cv::Point rotationCentre{robotCoordinates.x + padding.left,
+    cv::Point rotationCenter{robotCoordinates.x + padding.left,
                              robotCoordinates.y + padding.top};
-    rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
+    rotateImageAboutPoint(paddedImage, rotationAngle, rotationCenter);
 
     cv::Rect roi(cv::Point(restrictToPositive(robotPosition.left - (outWidth - 1) / 2
                                               + m_parameters.robotVerticalOffset()),

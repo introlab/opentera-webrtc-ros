@@ -12,13 +12,13 @@ namespace internal
 {
     // Not defined for T: compilation fails if T is not cv::Scalar or cv::Vec3b
     template <typename T>
-    T parseColour(const std::string& colour);
+    T parseColor(const std::string& color);
 
     template <>
-    cv::Scalar parseColour<cv::Scalar>(const std::string& colour)
+    cv::Scalar parseColor<cv::Scalar>(const std::string& color)
     {
         int r, g, b, a;
-        stringstream ss(colour);
+        stringstream ss(color);
         ss >> r >> g >> b >> a;
 
         return {static_cast<double>(b), static_cast<double>(g), static_cast<double>(r),
@@ -26,23 +26,23 @@ namespace internal
     }
 
     template <>
-    cv::Vec3b parseColour<cv::Vec3b>(const std::string& colour)
+    cv::Vec3b parseColor<cv::Vec3b>(const std::string& color)
     {
         int r, g, b;
-        stringstream ss(colour);
+        stringstream ss(color);
         ss >> r >> g >> b;
 
         return {static_cast<uchar>(b), static_cast<uchar>(g), static_cast<uchar>(r)};
     }
 
-    // Compilation fails if T is not cv::Scalar or cv::Vec3b because of parseColour<T>
+    // Compilation fails if T is not cv::Scalar or cv::Vec3b because of parseColor<T>
     template <typename T>
-    T makeColour(const std::string& name, const std::string& defaultColour)
+    T makeColor(const std::string& name, const std::string& defaultColor)
     {
         ros::NodeHandle nh{"~"};
-        std::string colourString;
-        nh.param<std::string>(name, colourString, defaultColour);
-        return parseColour<T>(colourString);
+        std::string colorString;
+        nh.param<std::string>(name, colorString, defaultColor);
+        return parseColor<T>(colorString);
     }
 
     // Not defined if T is cv::Scalar or cv::Vec3b
@@ -63,7 +63,7 @@ namespace internal
         std::is_same<T, cv::Scalar>::value || std::is_same<T, cv::Vec3b>::value, T>
     getParam(const std::string& name, const std::string& defaultValue)
     {
-        return makeColour<T>(name, defaultValue);
+        return makeColor<T>(name, defaultValue);
     }
 }
 

@@ -45,11 +45,11 @@ namespace map_image_generator
         geometry_msgs::Pose pose;
         int rows = parameters.height() * parameters.resolution();
         int cols = parameters.width() * parameters.resolution();
-        double centreY = rows / 2.0;
-        double centreX = cols / 2.0;
-        pose.position.x = -(y - centreY - parameters.robotVerticalOffset())
+        double centerY = rows / 2.0;
+        double centerX = cols / 2.0;
+        pose.position.x = -(y - centerY - parameters.robotVerticalOffset())
                           / static_cast<double>(parameters.resolution());
-        pose.position.y = -(x - centreX) / static_cast<double>(parameters.resolution());
+        pose.position.y = -(x - centerX) / static_cast<double>(parameters.resolution());
         pose.position.z = 0;
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
         offsetYawByMinus90Degrees(pose);
