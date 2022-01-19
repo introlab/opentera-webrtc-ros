@@ -20,15 +20,15 @@ namespace map_image_generator
         tf::TransformListener& m_tfListener;
 
         ImageDrawer(const ImageDrawer&) = default;
-        ImageDrawer& operator=(const ImageDrawer&) = default;
         ImageDrawer(ImageDrawer&&) = default;
-        ImageDrawer& operator=(ImageDrawer&&) = default;
-
 
     public:
         ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
                     tf::TransformListener& tfListener);
         virtual ~ImageDrawer();
+
+        ImageDrawer& operator=(const ImageDrawer&) = delete;
+        ImageDrawer& operator=(ImageDrawer&&) = delete;
 
         virtual void draw(cv::Mat& image) = 0;
 

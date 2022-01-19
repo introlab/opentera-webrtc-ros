@@ -24,7 +24,8 @@ namespace map_image_generator
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
         void drawLaserScan(cv::Mat& image, tf::Transform& transform);
-        void drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle);
+        void drawRange(cv::Mat& image, tf::Transform& transform, float range,
+                       float angle);
     };
 }
 #endif
