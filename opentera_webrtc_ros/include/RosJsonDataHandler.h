@@ -4,6 +4,7 @@
 #include <cmath>
 #include <geometry_msgs/Twist.h>
 #include <json.hpp>
+#include <map_image_generator/ChangeMapView.h>
 #include <opentera_webrtc_ros_msgs/PeerData.h>
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
 #include <ros/ros.h>
@@ -28,6 +29,7 @@ namespace opentera
         ros::ServiceClient m_mappingModeClient;
         ros::ServiceClient m_muteClient;
         ros::ServiceClient m_enableCameraClient;
+        ros::ServiceClient m_changeMapViewClient;
 
     protected:
         ros::NodeHandle m_nh;
@@ -37,7 +39,7 @@ namespace opentera
             const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
 
     public:
-        RosJsonDataHandler(ros::NodeHandle nh, ros::NodeHandle p_nh);
+        RosJsonDataHandler(const ros::NodeHandle& nh, const ros::NodeHandle& p_nh);
         virtual ~RosJsonDataHandler();
 
         void run();

@@ -11,21 +11,33 @@ ImageDrawer::ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHand
 ImageDrawer::~ImageDrawer() = default;
 
 void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transform, int& x,
-                                                   int& y)
+                                                   int& y) const
 {
     x = static_cast<int>(transform.getOrigin().getX() * m_parameters.resolution()
+                             * m_parameters.scaleFactor()
                          + m_parameters.xOrigin());
     y = static_cast<int>(transform.getOrigin().getY() * m_parameters.resolution()
-                         + m_parameters.yOrigin());
+                             * m_parameters.scaleFactor()
+                         + m_parameters.yOrigin() + m_parameters.robotVerticalOffset());
 }
 
 void ImageDrawer::convertTransformToInputMapCoordinates(
-    const tf::Transform& transform, const nav_msgs::MapMetaData& mapInfo, int& x, int& y)
+    const tf::Transform& transform, const nav_msgs::MapMetaData& mapInfo, int& x,
+    int& y) const
 {
     x = static_cast<int>((transform.getOrigin().getX() - mapInfo.origin.position.x)
                          * m_parameters.resolution());
     y = static_cast<int>((transform.getOrigin().getY() - mapInfo.origin.position.y)
                          * m_parameters.resolution());
+}
+
+void ImageDrawer::convertInputMapCoordinatesToTransform(
+    int x, int y, const nav_msgs::MapMetaData& mapInfo, tf::Transform& transform) const
+{
+    transform.setOrigin(tf::Vector3(
+        static_cast<double>(x) / m_parameters.resolution() + mapInfo.origin.position.x,
+        static_cast<double>(y) / m_parameters.resolution() + mapInfo.origin.position.y,
+        0.0));
 }
 
 // Replace with std::optional in C++17

@@ -7,12 +7,14 @@
 
 using namespace map_image_generator;
 
-OccupancyGridImageDrawer::OccupancyGridImageDrawer(const Parameters& parameters,
+OccupancyGridImageDrawer::OccupancyGridImageDrawer(Parameters& parameters,
                                                    ros::NodeHandle& nodeHandle,
                                                    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
+    : ImageDrawer{parameters, nodeHandle, tfListener}, m_mutableParameters{parameters},
       m_occupancyGridSubscriber{m_nodeHandle.subscribe(
-          "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)}
+          "occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)},
+      m_mapViewChangerService{m_nodeHandle.advertiseService(
+          "change_map_view", &OccupancyGridImageDrawer::changeMapViewCallback, this)}
 {
 }
 
@@ -44,6 +46,27 @@ void OccupancyGridImageDrawer::occupancyGridCallback(
     m_lastOccupancyGrid = occupancyGrid;
 }
 
+bool OccupancyGridImageDrawer::changeMapViewCallback(ChangeMapView::Request& req,
+                                                     ChangeMapView::Response& res)
+{
+    res.success = true;
+    if (req.view_new == ChangeMapView::Request::VIEW_CENTERED_ROBOT)
+    {
+        m_mutableParameters.setCenteredRobot(true);
+    }
+    else if (req.view_new == ChangeMapView::Request::VIEW_STATIC_MAP)
+    {
+        m_mutableParameters.setCenteredRobot(false);
+    }
+    else
+    {
+        ROS_ERROR("Unknown view type: %s. View was not changed.", req.view_new.c_str());
+        res.success = false;
+        res.message = "unknown view type";
+    }
+    return true;
+}
+
 void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
 {
     changeNotScaledOccupancyGridImageIfNeeded();
@@ -57,7 +80,7 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
         for (auto x = 0; x < m_notScaledOccupancyGridImage.cols; x++)
         {
             int dataIndex = y * m_notScaledOccupancyGridImage.cols + x;
-            int dataValue = m_lastOccupancyGrid->data[dataIndex];
+            int dataValue = static_cast<uchar>(m_lastOccupancyGrid->data[dataIndex]);
 
             cv::Point pixelPosition(x, y);
             if (dataValue == -1)
@@ -80,8 +103,8 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
 
 void OccupancyGridImageDrawer::changeNotScaledOccupancyGridImageIfNeeded()
 {
-    int gridHeight = m_lastOccupancyGrid->info.height;
-    int gridWidth = m_lastOccupancyGrid->info.width;
+    int gridHeight = static_cast<int>(m_lastOccupancyGrid->info.height);
+    int gridWidth = static_cast<int>(m_lastOccupancyGrid->info.width);
 
     if (m_notScaledOccupancyGridImage.rows != gridHeight
         || m_notScaledOccupancyGridImage.cols != gridWidth)
@@ -97,15 +120,30 @@ void OccupancyGridImageDrawer::scaleOccupancyGridImage()
                m_scaledOccupancyGridImage.size());
 }
 
+const cv::Mat& OccupancyGridImageDrawer::getZoomedOccupancyImage()
+{
+    if (map_image_generator::areApproxEqual(m_parameters.scaleFactor(), 1.0))
+    {
+        return m_scaledOccupancyGridImage;
+    }
+    else
+    {
+        cv::resize(m_scaledOccupancyGridImage, m_zoomedOccupancyGridImage, cv::Size{},
+                   m_parameters.scaleFactor(), m_parameters.scaleFactor());
+        return m_zoomedOccupancyGridImage;
+    }
+}
+
 void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
 {
-    int gridHeight = m_lastOccupancyGrid->info.height;
-    int gridWidth = m_lastOccupancyGrid->info.width;
+    int gridHeight = static_cast<int>(m_lastOccupancyGrid->info.height);
+    int gridWidth = static_cast<int>(m_lastOccupancyGrid->info.width);
     float gridResolution = m_lastOccupancyGrid->info.resolution;
 
-    int height =
-        static_cast<int>(gridHeight * gridResolution * m_parameters.resolution());
-    int width = static_cast<int>(gridWidth * gridResolution * m_parameters.resolution());
+    int height = static_cast<int>(static_cast<double>(gridHeight) * gridResolution
+                                  * m_parameters.resolution());
+    int width = static_cast<int>(static_cast<double>(gridWidth) * gridResolution
+                                 * m_parameters.resolution());
 
     if (m_scaledOccupancyGridImage.rows != height
         || m_scaledOccupancyGridImage.cols != width)
@@ -114,100 +152,202 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
     }
 }
 
+// Replace with std::optional in C++17
+std::unique_ptr<tf::Transform> OccupancyGridImageDrawer::getRobotTransform() const
+{
+    tf::StampedTransform transform;
+
+    try
+    {
+        m_tfListener.lookupTransform(m_parameters.mapFrameId(),
+                                     m_parameters.robotFrameId(), ros::Time(0),
+                                     transform);
+    }
+    catch (tf::TransformException& ex)
+    {
+        ROS_ERROR("%s", ex.what());
+        return {};
+    }
+
+    // Replace with std::optional in C++17
+    return std::make_unique<tf::Transform>(transform);
+}
+
 void OccupancyGridImageDrawer::rotateImageAboutPoint(cv::Mat& image, double angle,
-                                                     const cv::Point& point)
+                                                     const cv::Point& point) const
 {
     cv::Mat rotationMatrix = cv::getRotationMatrix2D(point, angle, 1.0);
     cv::warpAffine(image, image, rotationMatrix, image.size(), cv::INTER_LINEAR,
                    cv::BORDER_CONSTANT, m_parameters.unknownSpaceColor());
 }
-void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double angle)
+void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double angle) const
 {
     cv::Point center{image.cols / 2, image.rows / 2};
     rotateImageAboutPoint(image, angle, center);
 }
 
-void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
+OccupancyGridImageDrawer::DirectionalValues
+OccupancyGridImageDrawer::computePadding(const DirectionalValues& position, int height,
+                                         int width)
 {
-    double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
-    double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
+    return {
+        .top = restrictToPositive((height - 1) / 2 - position.top),
+        .bottom = restrictToPositive(height / 2 - position.bottom),
 
-    int rowOffset = static_cast<int>(occupancyYOrigin * m_parameters.resolution()
-                                     + m_parameters.yOrigin());
-    int colOffset = static_cast<int>(occupancyXOrigin * m_parameters.resolution()
-                                     + m_parameters.xOrigin());
-
-    if (rowOffset >= 0 && rowOffset < image.rows - m_scaledOccupancyGridImage.rows
-        && colOffset >= 0 && colOffset < image.cols - m_scaledOccupancyGridImage.cols)
-    {
-        cv::Rect roi(
-            cv::Point(colOffset, rowOffset),
-            cv::Size(m_scaledOccupancyGridImage.cols, m_scaledOccupancyGridImage.rows));
-        m_scaledOccupancyGridImage.copyTo(image(roi));
-    }
-    else
-    {
-        ROS_ERROR_STREAM(
-            "Unable to draw the occupancy grid because the map is too small");
-    }
+        .left = restrictToPositive((width - 1) / 2 - position.left),
+        .right = restrictToPositive(width / 2 - position.right),
+    };
 }
 
-void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
+OccupancyGridImageDrawer::MapCoordinates
+OccupancyGridImageDrawer::getMapCoordinatesFromTf(const tf::Transform& transform) const
 {
-    tf::StampedTransform robotTransform;
-    try
+    MapCoordinates mapCoordinates{};
+    convertTransformToInputMapCoordinates(transform, m_lastOccupancyGrid->info,
+                                          mapCoordinates.x, mapCoordinates.y);
+    return mapCoordinates;
+}
+
+OccupancyGridImageDrawer::DirectionalValues
+OccupancyGridImageDrawer::getDirectionsFromMapCoordinates(
+    const MapCoordinates& mapCoordinates, const cv::Mat& map)
+{
+    return {
+        .top = 0 + mapCoordinates.y,
+        .bottom = (map.rows - 1) - mapCoordinates.y,
+        .left = 0 + mapCoordinates.x,
+        .right = (map.cols - 1) - mapCoordinates.x,
+    };
+}
+
+void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
+{
+    auto robotTransform = getRobotTransform();
+    if (!robotTransform)
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(),
-                                     m_parameters.robotFrameId(), ros::Time(0),
-                                     robotTransform);
-    }
-    catch (tf::TransformException ex)
-    {
-        ROS_ERROR("%s", ex.what());
         return;
     }
 
     int outHeight = image.rows;
     int outWidth = image.cols;
 
-    int robotX = 0;
-    int robotY = 0;
-    convertTransformToInputMapCoordinates(robotTransform, m_lastOccupancyGrid->info,
-                                          robotX, robotY);
-    int top = 0 + robotY;
-    int bottom = (m_scaledOccupancyGridImage.rows - 1) - robotY;
-    int left = 0 + robotX;
-    int right = (m_scaledOccupancyGridImage.cols - 1) - robotX;
+    MapCoordinates robotCoordinates = getMapCoordinatesFromTf(*robotTransform);
+    DirectionalValues robotPosition =
+        getDirectionsFromMapCoordinates(robotCoordinates, m_scaledOccupancyGridImage);
 
-    int topPadding = std::max(0, (outHeight - 1) / 2 - top);
-    int bottomPadding = std::max(0, outHeight / 2 - bottom);
-    int leftPadding = std::max(0, (outWidth - 1) / 2 - left);
-    int rightPadding = std::max(0, outWidth / 2 - right);
+    double heightBorder = 0.1 * outHeight;
+    double widthBorder = 0.1 * outWidth;
+
+    // Map centre
+    double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
+    double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
+
+    tf::Pose mapOriginPose;
+    mapOriginPose.setOrigin({0.0, 0.0, 0.0});
+
+    MapCoordinates mapOriginCoordinates = getMapCoordinatesFromTf(mapOriginPose);
+    DirectionalValues mapPosition =
+        getDirectionsFromMapCoordinates(mapOriginCoordinates, m_scaledOccupancyGridImage);
+
+    double hScaleFactor =
+        (0.4 * outWidth) / std::abs(robotPosition.left - mapOriginCoordinates.x);
+    double vScaleFactor =
+        (0.4 * outHeight) / std::abs(robotPosition.top - mapOriginCoordinates.y);
+
+    m_mutableParameters.setScaleFactor(std::min({hScaleFactor, vScaleFactor, 1.0}));
+
+    const auto& zoomedMap = getZoomedOccupancyImage();
+
+    MapCoordinates zoomedMapOriginCoordinates{
+        .x = static_cast<int>(mapOriginCoordinates.x * m_parameters.scaleFactor()),
+        .y = static_cast<int>(mapOriginCoordinates.y * m_parameters.scaleFactor()),
+    };
+    DirectionalValues zoomedMapPosition =
+        getDirectionsFromMapCoordinates(zoomedMapOriginCoordinates, zoomedMap);
+
+    DirectionalValues padding = computePadding(zoomedMapPosition, outHeight, outWidth);
 
     cv::Mat paddedImage;
-    cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, topPadding, bottomPadding,
-                       leftPadding, rightPadding, cv::BORDER_CONSTANT,
+    cv::copyMakeBorder(zoomedMap, paddedImage, padding.top, padding.bottom, padding.left,
+                       padding.right, cv::BORDER_CONSTANT,
                        m_parameters.unknownSpaceColor());
 
-        using namespace map_image_generator;
+    using namespace map_image_generator;
 
-        double rotationAngle = rad2deg(tf::getYaw(robotTransform.getRotation()));
-        cv::Point rotationCentre{robotX + leftPadding, robotY + topPadding};
-        rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
+    cv::Rect roi(
+        cv::Point(restrictToPositive(zoomedMapPosition.left - (outWidth - 1) / 2),
+                  restrictToPositive(zoomedMapPosition.top - (outHeight - 1) / 2)),
+        cv::Size(outWidth, outHeight));
+    paddedImage(roi).copyTo(image);
+    cv::flip(image, image, 1);
+}
 
-    cv::Rect roi(cv::Point(std::max(0, left - (outWidth - 1) / 2),
-                           std::max(0, top - (outHeight - 1) / 2)),
+void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image)
+{
+    auto robotTransform = getRobotTransform();
+    if (!robotTransform)
+    {
+        return;
+    }
+
+    // Relative to scaled occupancy grid image
+    int outHeight = image.cols;
+    int outWidth = image.rows;
+
+    // // Relative to scaled occupancy grid image
+    MapCoordinates robotCoordinates = getMapCoordinatesFromTf(*robotTransform);
+    DirectionalValues robotPosition =
+        getDirectionsFromMapCoordinates(robotCoordinates, m_scaledOccupancyGridImage);
+    DirectionalValues padding = computePadding(robotPosition, outHeight, outWidth);
+    adjustPaddingForCenteredRobotOffset(padding, outWidth, robotPosition);
+
+    cv::Mat paddedImage;
+    cv::copyMakeBorder(m_scaledOccupancyGridImage, paddedImage, padding.top,
+                       padding.bottom, padding.left, padding.right, cv::BORDER_CONSTANT,
+                       m_parameters.unknownSpaceColor());
+
+    using namespace map_image_generator;
+
+    double rotationAngle = rad2deg(tf::getYaw(robotTransform->getRotation()));
+    cv::Point rotationCentre{robotCoordinates.x + padding.left,
+                             robotCoordinates.y + padding.top};
+    rotateImageAboutPoint(paddedImage, rotationAngle, rotationCentre);
+
+    cv::Rect roi(cv::Point(restrictToPositive(robotPosition.left - (outWidth - 1) / 2
+                                              + m_parameters.robotVerticalOffset()),
+                           restrictToPositive(robotPosition.top - (outHeight - 1) / 2)),
                  cv::Size(outWidth, outHeight));
     paddedImage(roi).copyTo(image);
     cv::flip(image, image, 1);
     cv::rotate(image, image, cv::ROTATE_90_CLOCKWISE);
 }
 
-void OccupancyGridImageDrawer::convertMapInfoToMapCoordinates(
-    const nav_msgs::MapMetaData& mapInfo, int& x, int& y)
+void OccupancyGridImageDrawer::adjustPaddingForCenteredRobotOffset(
+    DirectionalValues& padding, int width, const DirectionalValues& robotPosition)
 {
-    tf::Transform mapInfoTransform;
-    mapInfoTransform.setOrigin(tf::Vector3(
-        mapInfo.origin.position.x, mapInfo.origin.position.y, mapInfo.origin.position.z));
-    convertTransformToMapCoordinates(mapInfoTransform, x, y);
+    // The vertical axis on which we apply the robot vertical offset is horizontal
+    // currently as we will rotate it later
+    int& topPaddingRotated = padding.right;
+    int& bottomPaddingRotated = padding.left;
+    const int& heightRotated = width;
+    const int& bottomPositionRotated = robotPosition.left;
+    if (m_parameters.robotVerticalOffset() > 0)
+    {
+        // If the offset is positive, we need to add padding to the top and can
+        // possibly reduce padding to the bottom
+        bottomPaddingRotated -= std::min(
+            bottomPaddingRotated, restrictToPositive(m_parameters.robotVerticalOffset()));
+        topPaddingRotated += restrictToPositive(m_parameters.robotVerticalOffset());
+    }
+    if (m_parameters.robotVerticalOffset() < 0)
+    {
+        // If the offset is negative, we need to recompute padding to the bottom and
+        // can possibly reduce padding to the top
+        bottomPaddingRotated =
+            restrictToPositive((heightRotated - 1) / 2
+                               + restrictToPositive(-m_parameters.robotVerticalOffset())
+                               - bottomPositionRotated);
+        topPaddingRotated -= std::min(
+            topPaddingRotated, restrictToPositive(-m_parameters.robotVerticalOffset()));
+    }
 }

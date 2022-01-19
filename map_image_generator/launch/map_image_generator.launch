@@ -24,6 +24,7 @@
     <arg name="draw_goal" default="true"/>
     <arg name="draw_robot" default="true"/>
     <arg name="centered_robot" default="true"/>
+    <arg name="robot_vertical_offset" default="180"/>
 
 
     <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="screen">
@@ -57,6 +58,7 @@
         <param name="global_path_thickness" type="int" value="2"/>
         <param name="laser_scan_size" type="int" value="3"/>
         <param name="centered_robot" type="bool" value="$(arg centered_robot)"/>
+        <param name="robot_vertical_offset" type="int" value="$(arg robot_vertical_offset)"/>
     </node>
 
 </launch>

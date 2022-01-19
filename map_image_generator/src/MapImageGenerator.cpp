@@ -9,8 +9,7 @@
 using namespace map_image_generator;
 using namespace std;
 
-MapImageGenerator::MapImageGenerator(const Parameters& parameters,
-                                     ros::NodeHandle& nodeHandle,
+MapImageGenerator::MapImageGenerator(Parameters& parameters, ros::NodeHandle& nodeHandle,
                                      tf::TransformListener& tfListener)
     : m_parameters(parameters), m_nodeHandle(nodeHandle), m_tfListener(tfListener)
 {
@@ -19,7 +18,7 @@ MapImageGenerator::MapImageGenerator(const Parameters& parameters,
     if (m_parameters.drawOccupancyGrid())
     {
         m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(
-            m_parameters, nodeHandle, m_tfListener));
+            parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawGlobalPath())

@@ -14,22 +14,22 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "map_image_generator");
 
     ros::NodeHandle nodeHandle;
-    ros::NodeHandle nodeHandleParam("~");
+    ros::NodeHandle nodeHandleParam{"~"};
 
-    Parameters parameters(nodeHandleParam);
+    Parameters parameters{nodeHandleParam};
     tf::TransformListener tfListener;
-    MapImageGenerator mapImageGenerator(parameters, nodeHandle, tfListener);
-    GoalConverter goalConverter(parameters, nodeHandle, tfListener);
-    MapLabelsConverter mapLabelsConverter(parameters, nodeHandle);
+    MapImageGenerator mapImageGenerator{parameters, nodeHandle, tfListener};
+    GoalConverter goalConverter{parameters, nodeHandle, tfListener};
+    MapLabelsConverter mapLabelsConverter{parameters, nodeHandle};
 
-    image_transport::ImageTransport imageTransport(nodeHandle);
+    image_transport::ImageTransport imageTransport{nodeHandle};
     image_transport::Publisher mapImagePublisher =
         imageTransport.advertise("map_image", 1);
     sensor_msgs::Image mapImage;
 
     ROS_INFO("MapImage initialized, starting image generation after first cycle...");
 
-    ros::Rate loop_rate(parameters.refreshRate());
+    ros::Rate loop_rate{parameters.refreshRate()};
     if (ros::ok())
     {
         loop_rate.sleep();

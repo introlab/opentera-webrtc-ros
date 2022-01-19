@@ -47,7 +47,8 @@ namespace map_image_generator
         int cols = parameters.width() * parameters.resolution();
         double centreY = rows / 2.0;
         double centreX = cols / 2.0;
-        pose.position.x = -(y - centreY) / static_cast<double>(parameters.resolution());
+        pose.position.x = -(y - centreY - parameters.robotVerticalOffset())
+                          / static_cast<double>(parameters.resolution());
         pose.position.y = -(x - centreX) / static_cast<double>(parameters.resolution());
         pose.position.z = 0;
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
@@ -73,7 +74,8 @@ namespace map_image_generator
                                                const geometry_msgs::Pose& mapImagePose)
     {
         return convertRobotCenteredMapCoordinatesToPose(
-            parameters, mapImagePose.position.x, mapImagePose.position.y,
+            parameters, static_cast<int>(mapImagePose.position.x),
+            static_cast<int>(mapImagePose.position.y),
             tf::getYaw(mapImagePose.orientation));
     }
 
@@ -97,10 +99,10 @@ namespace map_image_generator
 
         double flippedXOnY =
             parameters.resolution() * parameters.width() - mapImagePose.position.x;
-        mapPose.position.x =
-            (flippedXOnY - parameters.xOrigin()) / parameters.resolution();
-        mapPose.position.y =
-            (mapImagePose.position.y - parameters.yOrigin()) / parameters.resolution();
+        mapPose.position.x = (flippedXOnY - parameters.xOrigin())
+                             / parameters.resolution() / parameters.scaleFactor();
+        mapPose.position.y = (mapImagePose.position.y - parameters.yOrigin())
+                             / parameters.resolution() / parameters.scaleFactor();
         mapPose.position.z = 0;
 
         mapPose.orientation = mapImagePose.orientation;

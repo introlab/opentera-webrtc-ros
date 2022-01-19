@@ -10,11 +10,14 @@ namespace map_image_generator
     class Parameters
     {
         double m_refreshRate;
-        int m_resolution; // pixel/m
-        int m_width;      // m
-        int m_height;     // m
-        int m_xOrigin;    // pixel
-        int m_yOrigin;    // pixel
+        int m_resolution;          // pixel/m
+        int m_width;               // m
+        int m_height;              // m
+        int m_xOrigin;             // pixel
+        int m_yOrigin;             // pixel
+        int m_robotVerticalOffset; // pixel
+
+        double m_scaleFactor;
 
         std::string m_robotFrameId;
         std::string m_mapFrameId;
@@ -41,15 +44,19 @@ namespace map_image_generator
         int m_laserScanSize;       // pixel
 
     public:
-        Parameters(ros::NodeHandle& nodeHandle);
+        explicit Parameters(ros::NodeHandle& nodeHandle);
         virtual ~Parameters();
 
         double refreshRate() const;
-        int resolution() const; // pixel/m
-        int width() const;      // m
-        int height() const;     // m
-        int xOrigin() const;    // pixel
-        int yOrigin() const;    // pixel
+        int resolution() const;          // pixel/m
+        int width() const;               // m
+        int height() const;              // m
+        int xOrigin() const;             // pixel
+        int yOrigin() const;             // pixel
+        int robotVerticalOffset() const; // pixel
+
+        double scaleFactor() const;
+        void setScaleFactor(double scaleFactor);
 
         const std::string& robotFrameId() const;
         const std::string& mapFrameId() const;
@@ -78,8 +85,10 @@ namespace map_image_generator
         int laserScanSize() const;       // pixel
 
     private:
-        cv::Vec3b parseColorVec3b(const std::string& color);
-        cv::Scalar parseColorScalar(const std::string& color);
+        static cv::Vec3b parseColorVec3b(const std::string& color);
+        static cv::Scalar parseColorScalar(const std::string& color);
+
+        void validateParameters();
     };
 
     inline double Parameters::refreshRate() const { return m_refreshRate; }
@@ -93,6 +102,25 @@ namespace map_image_generator
     inline int Parameters::xOrigin() const { return m_xOrigin; }
 
     inline int Parameters::yOrigin() const { return m_yOrigin; }
+
+    inline int Parameters::robotVerticalOffset() const
+    {
+        if (m_centeredRobot)
+        {
+            return m_robotVerticalOffset;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    inline double Parameters::scaleFactor() const { return m_scaleFactor; }
+
+    inline void Parameters::setScaleFactor(double scaleFactor)
+    {
+        m_scaleFactor = scaleFactor;
+    }
 
     inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }
 
