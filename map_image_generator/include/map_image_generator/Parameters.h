@@ -26,7 +26,7 @@ namespace map_image_generator
         bool m_drawOccupancyGrid;
         bool m_drawGlobalPath;
         bool m_drawRobot;
-        bool m_drawGoal;
+        bool m_drawGoals;
         bool m_drawLaserScan;
 
         cv::Vec3b m_wallColor;
@@ -67,7 +67,7 @@ namespace map_image_generator
         bool drawOccupancyGrid() const;
         bool drawGlobalPath() const;
         bool drawRobot() const;
-        bool drawGoal() const;
+        bool drawGoals() const;
         bool drawLaserScan() const;
 
         const cv::Vec3b& wallColor() const;
@@ -85,9 +85,6 @@ namespace map_image_generator
         int laserScanSize() const;       // pixel
 
     private:
-        static cv::Vec3b parseColorVec3b(const std::string& color);
-        static cv::Scalar parseColorScalar(const std::string& color);
-
         void validateParameters();
     };
 
@@ -134,7 +131,7 @@ namespace map_image_generator
 
     inline bool Parameters::drawRobot() const { return m_drawRobot; }
 
-    inline bool Parameters::drawGoal() const { return m_drawGoal; }
+    inline bool Parameters::drawGoals() const { return m_drawGoals; }
 
     inline bool Parameters::drawLaserScan() const { return m_drawLaserScan; }
 
