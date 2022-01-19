@@ -80,7 +80,7 @@ void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
         for (auto x = 0; x < m_notScaledOccupancyGridImage.cols; x++)
         {
             int dataIndex = y * m_notScaledOccupancyGridImage.cols + x;
-            int dataValue = static_cast<uchar>(m_lastOccupancyGrid->data[dataIndex]);
+            int8_t dataValue = m_lastOccupancyGrid->data[dataIndex];
 
             cv::Point pixelPosition(x, y);
             if (dataValue == -1)

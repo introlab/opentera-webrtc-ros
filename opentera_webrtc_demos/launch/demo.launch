@@ -21,7 +21,7 @@
     <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
         <arg name="refresh_rate_param" value="5"/>
         <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
-        <arg name="draw_goal" value="true"/>
+        <arg name="draw_goals" value="true"/>
         <arg name="centered_robot" value="$(arg centered_robot)"/>
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
 

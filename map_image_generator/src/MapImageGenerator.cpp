@@ -33,7 +33,7 @@ MapImageGenerator::MapImageGenerator(Parameters& parameters, ros::NodeHandle& no
             std::make_unique<RobotImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
-    if (m_parameters.drawGoal())
+    if (m_parameters.drawGoals())
     {
         m_drawers.push_back(
             std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle, m_tfListener));

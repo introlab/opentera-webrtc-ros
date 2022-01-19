@@ -3,62 +3,106 @@
 #include "map_image_generator/utils.h"
 
 #include <sstream>
+#include <type_traits>
 
 using namespace map_image_generator;
 using namespace std;
 
+namespace internal
+{
+    // Not defined for T: compilation fails if T is not cv::Scalar or cv::Vec3b
+    template <typename T>
+    T parseColour(const std::string& colour);
+
+    template <>
+    cv::Scalar parseColour<cv::Scalar>(const std::string& colour)
+    {
+        int r, g, b, a;
+        stringstream ss(colour);
+        ss >> r >> g >> b >> a;
+
+        return {static_cast<double>(b), static_cast<double>(g), static_cast<double>(r),
+                static_cast<double>(a)};
+    }
+
+    template <>
+    cv::Vec3b parseColour<cv::Vec3b>(const std::string& colour)
+    {
+        int r, g, b;
+        stringstream ss(colour);
+        ss >> r >> g >> b;
+
+        return {static_cast<uchar>(b), static_cast<uchar>(g), static_cast<uchar>(r)};
+    }
+
+    // Compilation fails if T is not cv::Scalar or cv::Vec3b because of parseColour<T>
+    template <typename T>
+    T makeColour(const std::string& name, const std::string& defaultColour)
+    {
+        ros::NodeHandle nh{"~"};
+        std::string colourString;
+        nh.param<std::string>(name, colourString, defaultColour);
+        return parseColour<T>(colourString);
+    }
+
+    // Not defined if T is cv::Scalar or cv::Vec3b
+    template <typename T>
+    std::enable_if_t<
+        !std::is_same<T, cv::Scalar>::value && !std::is_same<T, cv::Vec3b>::value, T>
+    getParam(const std::string& name, const T& defaultValue)
+    {
+        ros::NodeHandle nh{"~"};
+        T value;
+        nh.param<T>(name, value, defaultValue);
+        return value;
+    }
+
+    // Defined only if T is cv::Scalar or cv::Vec3b
+    template <typename T>
+    std::enable_if_t<
+        std::is_same<T, cv::Scalar>::value || std::is_same<T, cv::Vec3b>::value, T>
+    getParam(const std::string& name, const std::string& defaultValue)
+    {
+        return makeColour<T>(name, defaultValue);
+    }
+}
+
 Parameters::Parameters(ros::NodeHandle& nodeHandle) : m_scaleFactor{1.0}
 {
-    nodeHandle.param("refresh_rate", m_refreshRate, 1.0);
-    nodeHandle.param("resolution", m_resolution, 50);
-    nodeHandle.param("width", m_width, 30);
-    nodeHandle.param("height", m_height, 15);
-    nodeHandle.param("x_origin", m_xOrigin, (m_width * m_resolution) / 2);
-    nodeHandle.param("y_origin", m_yOrigin, (m_height * m_resolution) / 2);
-    nodeHandle.param("robot_vertical_offset", m_robotVerticalOffset, 0);
+    using namespace internal;
 
-    nodeHandle.param("robot_frame_id", m_robotFrameId, string("base_footprint"));
-    nodeHandle.param("map_frame_id", m_mapFrameId, string("map"));
+    m_refreshRate = getParam<double>("refresh_rate", 1.0);
+    m_resolution = getParam<int>("resolution", 50);
+    m_width = getParam<int>("width", 30);
+    m_height = getParam<int>("height", 15);
+    m_xOrigin = getParam<int>("x_origin", (m_width * m_resolution) / 2);
+    m_yOrigin = getParam<int>("y_origin", (m_height * m_resolution) / 2);
+    m_robotVerticalOffset = getParam<int>("robot_vertical_offset", 0);
 
-    nodeHandle.param("draw_occupancy_grid", m_drawOccupancyGrid, true);
-    nodeHandle.param("draw_global_path", m_drawGlobalPath, true);
-    nodeHandle.param("draw_robot", m_drawRobot, true);
-    nodeHandle.param("draw_goal", m_drawGoal, true);
-    nodeHandle.param("draw_laser_scan", m_drawLaserScan, true);
+    m_robotFrameId = getParam<std::string>("robot_frame_id", "base_footprint");
+    m_mapFrameId = getParam<std::string>("map_frame_id", "map");
 
-    string wallColorString;
-    string freeSpaceColorString;
-    string unknownSpaceColorString;
-    string globalPathColorString;
-    string robotColorString;
-    string goalColorString;
-    string laserScanColorString;
-    string textColorString;
+    m_drawOccupancyGrid = getParam<bool>("draw_occupancy_grid", true);
+    m_drawGlobalPath = getParam<bool>("draw_global_path", true);
+    m_drawRobot = getParam<bool>("draw_robot", true);
+    m_drawGoals = getParam<bool>("draw_goals", true);
+    m_drawLaserScan = getParam<bool>("draw_laser_scan", true);
 
-    nodeHandle.param("wall_color", wallColorString, string("0 0 0"));
-    nodeHandle.param("free_space_color", freeSpaceColorString, string("255 255 255"));
-    nodeHandle.param("unknown_space_color", unknownSpaceColorString,
-                     string("175 175 175"));
-    nodeHandle.param("global_path_color", globalPathColorString, string("0 255 0 255"));
-    nodeHandle.param("robot_color", robotColorString, string("0 0 255 255"));
-    nodeHandle.param("goal_color", goalColorString, string("0 175 0 255"));
-    nodeHandle.param("laser_scan_color", laserScanColorString, string("255 0 0 255"));
-    nodeHandle.param("text_color", textColorString, string("255 255 255"));
+    m_wallColor = getParam<cv::Vec3b>("wall_color", "0 0 0");
+    m_freeSpaceColor = getParam<cv::Vec3b>("free_space_color", "255 255 255");
+    m_unknownSpaceColor = getParam<cv::Vec3b>("unknown_space_color", "175 175 175");
+    m_globalPathColor = getParam<cv::Scalar>("global_path_color", "0 255 0 255");
+    m_robotColor = getParam<cv::Scalar>("robot_color", "0 0 255 255");
+    m_goalColor = getParam<cv::Scalar>("goal_color", "0 175 0 255");
+    m_laserScanColor = getParam<cv::Scalar>("laser_scan_color", "255 0 0 255");
+    m_textColor = getParam<cv::Scalar>("text_color", "255 255 255 255");
 
-    m_wallColor = parseColorVec3b(wallColorString);
-    m_freeSpaceColor = parseColorVec3b(freeSpaceColorString);
-    m_unknownSpaceColor = parseColorVec3b(unknownSpaceColorString);
-    m_globalPathColor = parseColorScalar(globalPathColorString);
-    m_robotColor = parseColorScalar(robotColorString);
-    m_goalColor = parseColorScalar(goalColorString);
-    m_laserScanColor = parseColorScalar(laserScanColorString);
-    m_textColor = parseColorScalar(textColorString);
+    m_globalPathThickness = getParam<int>("global_path_thickness", 3);
+    m_robotSize = getParam<int>("robot_size", 30);
+    m_goalSize = getParam<int>("goal_size", 20);
+    m_laserScanSize = getParam<int>("laser_scan_size", 6);
 
-    nodeHandle.param("global_path_thickness", m_globalPathThickness, 3);
-    nodeHandle.param("robot_size", m_robotSize, 30);
-    nodeHandle.param("goal_size", m_goalSize, 20);
-    nodeHandle.param("laser_scan_size", m_laserScanSize, 6);
-    nodeHandle.param("centered_robot", m_centeredRobot, true);
+    m_centeredRobot = getParam<bool>("centered_robot", true);
 
     validateParameters();
 }
@@ -98,22 +142,4 @@ void Parameters::setCenteredRobot(bool centeredRobot)
 {
     m_centeredRobot = centeredRobot;
     m_scaleFactor = 1.0;
-}
-
-cv::Vec3b Parameters::parseColorVec3b(const std::string& color)
-{
-    cv::Vec3b::value_type r, g, b;
-    stringstream ss(color);
-    ss >> r >> g >> b;
-
-    return {b, g, r};
-}
-
-cv::Scalar Parameters::parseColorScalar(const std::string& color)
-{
-    cv::Scalar::value_type r, g, b, a;
-    stringstream ss(color);
-    ss >> r >> g >> b >> a;
-
-    return {b, g, r, a};
 }
