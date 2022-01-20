@@ -7,9 +7,9 @@ from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import PoseStamped
 from opentera_webrtc_ros_msgs.msg import WaypointArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from map_image_generator.srv import ImageGoalToMapGoal
 from std_msgs.msg import Bool, String
 from std_srvs.srv import SetBool
+from libmapimageconverter import convert_waypoint_to_pose
 
 
 class GoalManager():
@@ -41,34 +41,11 @@ class GoalManager():
 
     def waypoints_cb(self, msg):
         for waypoint in msg.waypoints:
-            pose_goal = self.transform_waypoint_to_pose(waypoint)
-            pose_goal.pose.position.z = 1 + len(self.pose_goals)
-            self.add_waypoint_to_image_pub.publish(pose_goal)
-            self.pose_goals.append(pose_goal)
-
-    def transform_waypoint_to_pose(self, waypoint):
-        pose = PoseStamped()
-        pose.header.frame_id = "map"
-        pose.pose.position.x = waypoint.x
-        pose.pose.position.y = waypoint.y
-        yaw = -waypoint.yaw
-        quaternion = quaternion_from_euler(0, 0, yaw)
-        pose.pose.orientation.x = quaternion[0]
-        pose.pose.orientation.y = quaternion[1]
-        pose.pose.orientation.z = quaternion[2]
-        pose.pose.orientation.w = quaternion[3]
-
-        return self.image_goal_to_map_goal_client(pose)
-
-    def image_goal_to_map_goal_client(self, image_goal):
-        rospy.wait_for_service('image_goal_to_map_goal')
-        try:
-            image_goal_to_map_goal = rospy.ServiceProxy(
-                'image_goal_to_map_goal', ImageGoalToMapGoal)
-            res = image_goal_to_map_goal(image_goal)
-            return res.map_goal
-        except rospy.ServiceException as e:
-            rospy.logwarn("Service call failed: %s" % e)
+            pose_goal = convert_waypoint_to_pose(waypoint)
+            if pose_goal is not None:
+                pose_goal.pose.position.z = 1 + len(self.pose_goals)
+                self.add_waypoint_to_image_pub.publish(pose_goal)
+                self.pose_goals.append(pose_goal)
 
     def send_goal(self, pose_goal):
         goal = MoveBaseGoal()
