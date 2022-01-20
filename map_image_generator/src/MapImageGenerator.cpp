@@ -2,6 +2,7 @@
 
 #include "map_image_generator/drawers/GlobalPathImageDrawer.h"
 #include "map_image_generator/drawers/GoalImageDrawer.h"
+#include "map_image_generator/drawers/LabelImageDrawer.h"
 #include "map_image_generator/drawers/LaserScanImageDrawer.h"
 #include "map_image_generator/drawers/OccupancyGridImageDrawer.h"
 #include "map_image_generator/drawers/RobotImageDrawer.h"
@@ -31,6 +32,12 @@ MapImageGenerator::MapImageGenerator(Parameters& parameters, ros::NodeHandle& no
     {
         m_drawers.push_back(
             std::make_unique<RobotImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+    }
+
+    if (m_parameters.drawLabels())
+    {
+        m_drawers.push_back(
+            std::make_unique<LabelImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawGoals())

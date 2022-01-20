@@ -134,6 +134,7 @@ add_executable(map_image_generator
   include/map_image_generator/drawers/GlobalPathImageDrawer.h
   include/map_image_generator/drawers/GoalImageDrawer.h
   include/map_image_generator/drawers/ImageDrawer.h
+  include/map_image_generator/drawers/LabelImageDrawer.h
   include/map_image_generator/drawers/LaserScanImageDrawer.h
   include/map_image_generator/drawers/OccupancyGridImageDrawer.h
   include/map_image_generator/drawers/RobotImageDrawer.h
@@ -145,6 +146,7 @@ add_executable(map_image_generator
   src/drawers/GlobalPathImageDrawer.cpp
   src/drawers/GoalImageDrawer.cpp
   src/drawers/ImageDrawer.cpp
+  src/drawers/LabelImageDrawer.cpp
   src/drawers/LaserScanImageDrawer.cpp
   src/drawers/OccupancyGridImageDrawer.cpp
   src/drawers/RobotImageDrawer.cpp
