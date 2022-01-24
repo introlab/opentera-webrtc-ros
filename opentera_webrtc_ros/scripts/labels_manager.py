@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import rospy
+from pathlib import Path
 from rospy_message_converter.message_converter import convert_ros_message_to_dictionary as ros2dict
 from rospy_message_converter.message_converter import convert_dictionary_to_ros_message as dict2ros
 from opentera_webrtc_ros_msgs.msg import LabelSimple, LabelSimpleArray, LabelSimpleEdit
@@ -12,10 +13,8 @@ from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from libmapimageconverter import convert_waypoint_to_pose as wp2pose
 from libmapimageconverter import convert_pose_to_waypoint as pose2wp
-
 from libyamldatabase import YamlDatabase
-from pathlib import Path
-from typing import cast
+from libnavigation import WaypointNavigationClient
 
 
 class ConversionError(Exception):
@@ -59,6 +58,8 @@ class LabelsManager:
             "remove_label_by_name", String, self.remove_label_by_name_callback, queue_size=1)
         self.edit_label_simple_sub = rospy.Subscriber(
             "edit_label_simple", LabelSimpleEdit, self.edit_label_simple_callback, queue_size=1)
+        self.navigate_to_label_sub = rospy.Subscriber(
+            "navigate_to_label", String, self.navigate_to_label_callback, queue_size=1)
 
         self.stored_labels_pub = rospy.Publisher(
             "stored_labels", LabelArray, queue_size=1)
@@ -70,6 +71,8 @@ class LabelsManager:
 
         self.pub_timer = rospy.Timer(rospy.Duration(
             1), self.publish_stored_labels_simple)
+
+        self.nav_client = WaypointNavigationClient()
 
         rospy.loginfo("Labels manager initialized")
 
@@ -94,13 +97,25 @@ class LabelsManager:
 
     def edit_label_simple_callback(self, msg: LabelSimpleEdit) -> None:
         try:
-            self.db.replace(msg.current_name, LabelData(
-                self.simple2label(msg.updated)))
             if msg.current_name != msg.updated.name:
                 self.db.rename(msg.current_name, msg.updated.name)
+
+            self.db.replace(msg.updated.name, LabelData(
+                self.simple2label(msg.updated)))
+
             self.db.commit()
         except (IndexError, ConversionError) as e:
             rospy.logerr(f"Editing label in database failed: {e}")
+
+    def navigate_to_label_callback(self, msg: String) -> None:
+        if not msg.data in self.db:
+            rospy.logerr(
+                f"Navigation to label failed: Label [{msg.data}] not in database")
+            return
+
+        label = self.db[msg.data].label
+        self.nav_client.add_to_image(label.pose)
+        self.nav_client.navigate_to_goal(label.pose, 1)
 
     @staticmethod
     def label2simple(label: Label) -> LabelSimple:

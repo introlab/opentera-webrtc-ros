@@ -7,23 +7,46 @@ using namespace map_image_generator;
 LabelImageDrawer::LabelImageDrawer(const Parameters& parameters,
                                    ros::NodeHandle& nodeHandle,
                                    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener)
+    : ImageDrawer(parameters, nodeHandle, tfListener),
+      m_labelArraySubscriber{m_nodeHandle.subscribe(
+          "stored_labels", 1, &LabelImageDrawer::labelArrayCallback, this)}
 {
 }
 
 LabelImageDrawer::~LabelImageDrawer() = default;
 
-void LabelImageDrawer::draw(cv::Mat& image) {}
+void LabelImageDrawer::labelArrayCallback(
+    const opentera_webrtc_ros_msgs::LabelArray::ConstPtr& labelArray)
+{
+    m_lastLabelArray = labelArray;
+}
 
-void LabelImageDrawer::drawLabel(const geometry_msgs::PoseStamped& label,
-                                 const std::string& text, cv::Mat& image,
-                                 tf::Transform& transform)
+
+void LabelImageDrawer::draw(cv::Mat& image)
+{
+    if (!m_lastLabelArray)
+    {
+        return;
+    }
+
+    for (const auto& label : m_lastLabelArray->labels)
+    {
+        auto tf = getTransformInRef(label.pose.header.frame_id);
+        if (tf)
+        {
+            drawLabel(label, image, *tf);
+        }
+    }
+}
+
+void LabelImageDrawer::drawLabel(const opentera_webrtc_ros_msgs::Label& label,
+                                 cv::Mat& image, tf::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.labelColor();
     int size = m_parameters.labelSize();
 
     tf::Pose labelPose;
-    tf::poseMsgToTF(label.pose, labelPose);
+    tf::poseMsgToTF(label.pose.pose, labelPose);
     labelPose = transform * labelPose;
     adjustTransformForRobotRef(labelPose);
     double yaw = tf::getYaw(labelPose.getRotation());
@@ -34,8 +57,9 @@ void LabelImageDrawer::drawLabel(const geometry_msgs::PoseStamped& label,
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, cv::Point(startX, startY), static_cast<int>(ceil(size / 5.0)),
-               color, cv::FILLED);
-    cv::putText(image, text, cv::Point(startX, startY), cv::FONT_HERSHEY_DUPLEX, 0.5,
-                m_parameters.textColor(), 1);
+    cv::drawMarker(image, cv::Point(startX, startY), color, cv::MARKER_DIAMOND,
+                   static_cast<int>(ceil(size / 4.0)),
+                   static_cast<int>(ceil(size / 12.0)), cv::FILLED);
+    cv::putText(image, label.name, cv::Point(startX, startY), cv::FONT_HERSHEY_DUPLEX,
+                0.5, m_parameters.textColor(), 1);
 }

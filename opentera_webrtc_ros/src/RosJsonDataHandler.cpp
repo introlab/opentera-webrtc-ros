@@ -14,6 +14,7 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh,
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     m_waypointsPub =
         m_nh.advertise<opentera_webrtc_ros_msgs::WaypointArray>("waypoints", 1);
+    m_navigateToLabelPub = m_nh.advertise<std_msgs::String>("navigate_to_label", 1);
 
     m_webrtcDataSubscriber =
         m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
@@ -136,6 +137,12 @@ void RosJsonDataHandler::onWebRTCDataReceived(
             ROS_ERROR("change_map_view service call error: %s",
                       srv.response.message.c_str());
         }
+    }
+    else if (serializedData["type"] == "goToLabel")
+    {
+        std_msgs::String msg;
+        msg.data = serializedData["label"];
+        m_navigateToLabelPub.publish(msg);
     }
 }
 

@@ -108,5 +108,7 @@
     <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
   </node>
 
-  <node name="labels_manager" type="labels_maneger.py" pkg="opentera_webrtc_ros" output="screen" />
+  <node name="labels_manager" type="labels_manager.py" pkg="opentera_webrtc_ros" output="screen">
+    <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
+  </node>
 </launch>
