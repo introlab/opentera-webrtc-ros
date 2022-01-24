@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import rospy
+import json
 from pathlib import Path
 from rospy_message_converter.message_converter import convert_ros_message_to_dictionary as ros2dict
 from rospy_message_converter.message_converter import convert_dictionary_to_ros_message as dict2ros
@@ -63,20 +64,31 @@ class LabelsManager:
 
         self.stored_labels_pub = rospy.Publisher(
             "stored_labels", LabelArray, queue_size=1)
+        self.stored_labels_names_pub = rospy.Publisher(
+            "stored_labels_names", String, queue_size=1)
 
         self.database_path: str = rospy.get_param(
             "~database_path", "~/.ros/labels.yaml")
         self.db: YamlDatabase[LabelData] = YamlDatabase(
             Path(self.database_path), LabelData)
 
-        self.pub_timer = rospy.Timer(rospy.Duration(
-            1), self.publish_stored_labels_simple)
+        self.pub_timer_stored_labels = rospy.Timer(rospy.Duration(
+            1), self.publish_stored_labels)
+        self.pub_timer_stored_labels_names = rospy.Timer(rospy.Duration(
+            1), self.publish_stored_labels_names)
 
         self.nav_client = WaypointNavigationClient()
 
         rospy.loginfo("Labels manager initialized")
 
-    def publish_stored_labels_simple(self, _: rospy.timer.TimerEvent) -> None:
+    def publish_stored_labels_names(self, _: rospy.timer.TimerEvent) -> None:
+        labels_names = list(e.label.name for e in self.db.values())
+        labels_names_json_message = {
+            "type": "labels", "labels": labels_names}
+        labels_names_msg = json.dumps(labels_names_json_message)
+        self.stored_labels_names_pub.publish(labels_names_msg)
+
+    def publish_stored_labels(self, _: rospy.timer.TimerEvent) -> None:
         labels = tuple(e.label for e in self.db.values())
         self.stored_labels_pub.publish(labels)
 

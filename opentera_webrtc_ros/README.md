@@ -120,6 +120,23 @@ Implement a ROS node that dispatch received JSON messages and forward them on th
 
 For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
 
+# libnavigation
+
+## Description
+
+Shared library for `goal_manager` and `label_manager` to send navigation commands to `move_base` as well as navigation waypoints to `map_image_generator`.
+The library is embedded in both nodes, a single instance is not shared.
+
+## Subscribed topics
+
+- stop (`std_msgs/Bool`): Signal to cancel all move_base goals.
+
+## Published topics
+
+- waypoint_reached (`std_msgs/String`): String of a JSON message containing the ID of the waypoint that has been reached. Used by the frontend to determine when the trajectory has been completed.
+- map_image_drawer/remove_goal: (`geometry_msgs/PoseStamped`): Removes a waypoint from the map image
+- map_image_drawer/add_goal: (`geometry_msgs/PoseStamped`): Adds a waypoint to the map image
+
 # goal_manager
 
 ## Description
@@ -129,11 +146,12 @@ Manages multiple waypoints received by the frontend and sends them to move_base 
 ## Subscribed topics
 
 - waypoints (`opentera_webrtc_ros_msgs/Waypoints`): Array of image coordinate waypoints received from the frontend.
-- stop (`std_msgs/Bool`): Signal to cancel all move_base goals.
+- start (`std_msgs/Bool`): Signal to start navigating sequentially to the previously received waypoints.
+- All subscribed topics of `libnavigation`
 
 ## Published topics
 
-- waypoint_reached (`std_msgs/String`): String of a JSON message containing the ID of the waypoint that has been reached. Used by the frontend to determine when the trajectory has been completed.
+- All published topics of `libnavigation`
 
 # labels_manager
 
@@ -151,8 +169,12 @@ This node relies on a service provided by the `map_image_generator` package to c
 - add_label_simple (`opentera_webrtc_ros_msgs/LabelSimple`): Label received from the frontend.
 - remove_label_by_name (`std_msgs/String`): Remove a label by its name
 - edit_label_simple (`opentera_webrtc_ros_msgs/LabelSimpleEdit`): Rename or move a label using frontend map coordinates
+- navigate_to_label (`std_msgs/String`): Navigate to a label by its name
+- All subscribed topics of `libnavigation`
 
 ## Published topics
 
 - stored_labels (`opentera_webrtc_ros_msgs/LabelArray`): Array of labels currently stored
+- stored_labels_names (`std_msgs/String`): JSON message with an array of string which are the stored labels names. Used by the frontend to display a list of labels.
+- All published topics of `libnavigation`
 <!-- - stored_labels_simple (`openterat_webrtc_ros_msgs/LabelSimpleArray`): Version of `stored_labels` which contains `opentera_webrtc_ros_msgs/Waypoint` instead of `geometry_msgs/PoseStamped` for frontend communication. -->
