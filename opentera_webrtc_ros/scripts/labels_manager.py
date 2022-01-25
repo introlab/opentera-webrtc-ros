@@ -113,8 +113,10 @@ class LabelsManager:
             if msg.current_name != msg.updated.name:
                 self.db.rename(msg.current_name, msg.updated.name)
 
-            self.db.replace(msg.updated.name, LabelData(
-                self.simple2label(msg.updated)))
+            updated = self.simple2label(msg.updated)
+            if msg.ignore_waypoint is True:
+                updated.pose = self.db[msg.updated.name].label.pose
+            self.db.replace(msg.updated.name, LabelData(updated))
 
             self.db.commit()
         except (IndexError, ConversionError) as e:

@@ -28,6 +28,7 @@ class WaypointNavigationClient:
 
         self.stop_cb = stop_cb or WaypointNavigationClient.__noop
         self.stop_token = stop_token or WaypointNavigationClient.__false
+        self.stop = False
 
         self.cancel_all_goals()
 
@@ -45,10 +46,11 @@ class WaypointNavigationClient:
     def navigate_to_goal(self, pose_goal, reached_index):
         goal = MoveBaseGoal()
         goal.target_pose = pose_goal
+        self.stop = False
         self.move_base_client.send_goal(goal)
         self.move_base_client.wait_for_result()
         state = self.move_base_client.get_state()
-        if not self.stop_token(state):
+        if not self.stop and not self.stop_token(state):
             self._publish_waypoint_reached(reached_index, pose_goal)
 
     def cancel_all_goals(self, clear_goals=True):
@@ -80,6 +82,7 @@ class WaypointNavigationClient:
 
     def _stop_callback(self, msg):
         if msg.data == True:
+            self.stop = True
             cb = self.stop_cb(msg)
             next(cb)
             self.cancel_all_goals()

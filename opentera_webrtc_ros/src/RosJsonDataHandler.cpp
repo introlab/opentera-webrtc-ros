@@ -181,7 +181,16 @@ void RosJsonDataHandler::onWebRTCDataReceived(
         labelEdit.current_name = serializedData["currentLabel"];
         labelEdit.updated.name = data["name"];
         labelEdit.updated.description = data["description"];
-        labelEdit.updated.waypoint = getWpFromData(data);
+        if (data["coordinate"].is_null())
+        {
+            labelEdit.ignore_waypoint = true;
+            labelEdit.updated.waypoint = opentera_webrtc_ros_msgs::Waypoint();
+        }
+        else
+        {
+            labelEdit.ignore_waypoint = false;
+            labelEdit.updated.waypoint = getWpFromData(data);
+        }
 
         m_editLabelPub.publish(labelEdit);
     }

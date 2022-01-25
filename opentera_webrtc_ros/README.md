@@ -161,8 +161,7 @@ Manages labels.
 The stored labels are dependent on the `map` transform and the database needs to be cleaned if the map changes.
 A label represents a name grouped with an associated pose and a description.
 This node relies on a service provided by the `map_image_generator` package to convert the labels from image coordinates to map coordinates.
-
-<!-- This node can also send a label as a goal to `move_base` by its name. -->
+This node can also send a label as a goal to `move_base` by its name.
 
 ## Subscribed topics
 
@@ -175,6 +174,5 @@ This node relies on a service provided by the `map_image_generator` package to c
 ## Published topics
 
 - stored_labels (`opentera_webrtc_ros_msgs/LabelArray`): Array of labels currently stored
-- stored_labels_names (`std_msgs/String`): JSON message with an array of string which are the stored labels names. Used by the frontend to display a list of labels.
+- stored_labels_text (`std_msgs/String`): JSON message with an array of maps `{name: string, description: string}` labels names and descriptions. Used by the frontend to display a list of labels.
 - All published topics of `libnavigation`
-<!-- - stored_labels_simple (`openterat_webrtc_ros_msgs/LabelSimpleArray`): Version of `stored_labels` which contains `opentera_webrtc_ros_msgs/Waypoint` instead of `geometry_msgs/PoseStamped` for frontend communication. -->

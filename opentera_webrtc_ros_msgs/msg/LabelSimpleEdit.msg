@@ -1,2 +1,3 @@
 string current_name
 opentera_webrtc_ros_msgs/LabelSimple updated
+bool ignore_waypoint
