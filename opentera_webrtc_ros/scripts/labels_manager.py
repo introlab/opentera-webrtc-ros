@@ -5,8 +5,6 @@ from __future__ import annotations
 import rospy
 import json
 from pathlib import Path
-from rospy_message_converter.message_converter import convert_ros_message_to_dictionary as ros2dict
-from rospy_message_converter.message_converter import convert_dictionary_to_ros_message as dict2ros
 from opentera_webrtc_ros_msgs.msg import LabelSimple, LabelSimpleArray, LabelSimpleEdit
 from opentera_webrtc_ros_msgs.msg import Label, LabelArray, LabelEdit
 from opentera_webrtc_ros_msgs.msg import Waypoint
@@ -26,7 +24,28 @@ class LabelData:
     yaml_tag = "!label"
 
     def __init__(self, label: Label) -> None:
-        self.data = ros2dict(label)
+        self.data = {
+            "name": label.name,
+            "description": label.description,
+            "pose": {
+                "header": {
+                    "frame_id": label.pose.header.frame_id,
+                },
+                "pose": {
+                    "position": {
+                        "x": label.pose.pose.position.x,
+                        "y": label.pose.pose.position.y,
+                        "z": label.pose.pose.position.z,
+                    },
+                    "orientation": {
+                        "x": label.pose.pose.orientation.x,
+                        "y": label.pose.pose.orientation.y,
+                        "z": label.pose.pose.orientation.z,
+                        "w": label.pose.pose.orientation.w,
+                    },
+                },
+            },
+        }
 
     @property
     def label(self) -> Label:
