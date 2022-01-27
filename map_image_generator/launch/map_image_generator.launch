@@ -6,7 +6,7 @@
     <arg name="input_laser_scan_topic" default="/scan"/>
     <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
     <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
-    <arg name="input_sound_sources_topic" default="/odas/sst_poses"/>
+    <arg name="input_sound_sources_topic" default="/odas/sst"/>
 
     <arg name="output_map_image_topic" default="/map_image_generator/image"/>
     <arg name="output_goal_topic" default="/rtabmap/goal"/>

@@ -10,12 +10,14 @@ namespace map_image_generator
     class Parameters
     {
         double m_refreshRate;
-        int m_resolution;          // pixel/m
-        int m_width;               // m
-        int m_height;              // m
-        int m_xOrigin;             // pixel
-        int m_yOrigin;             // pixel
-        int m_robotVerticalOffset; // pixel
+        int m_resolution;            // pixel/m
+        int m_width;                 // m
+        int m_height;                // m
+        int m_xOrigin;               // pixel
+        int m_yOrigin;               // pixel
+        int m_robotVerticalOffset;   // pixel
+        float m_soundSourceRange;    // m
+        float m_soundSourceMaxRange; // m
 
         double m_scaleFactor;
 
@@ -40,7 +42,8 @@ namespace map_image_generator
         cv::Scalar m_laserScanColor;
         cv::Scalar m_textColor;
         cv::Scalar m_labelColor;
-        cv::Scalar m_soundSourceColor;
+        cv::Scalar m_soundSourceColorFull;
+        cv::Scalar m_soundSourceColorDim;
 
         int m_globalPathThickness; // pixel
         int m_robotSize;           // pixel
@@ -54,12 +57,14 @@ namespace map_image_generator
         virtual ~Parameters();
 
         double refreshRate() const;
-        int resolution() const;          // pixel/m
-        int width() const;               // m
-        int height() const;              // m
-        int xOrigin() const;             // pixel
-        int yOrigin() const;             // pixel
-        int robotVerticalOffset() const; // pixel
+        int resolution() const;            // pixel/m
+        int width() const;                 // m
+        int height() const;                // m
+        int xOrigin() const;               // pixel
+        int yOrigin() const;               // pixel
+        int robotVerticalOffset() const;   // pixel
+        float soundSourceRange() const;    // m
+        float soundSourceMaxRange() const; // m
 
         double scaleFactor() const;
         void setScaleFactor(double scaleFactor);
@@ -87,7 +92,8 @@ namespace map_image_generator
         const cv::Scalar& laserScanColor() const;
         const cv::Scalar& textColor() const;
         const cv::Scalar& labelColor() const;
-        const cv::Scalar& soundSourceColor() const;
+        const cv::Scalar& soundSourceColorFull() const;
+        const cv::Scalar& soundSourceColorDim() const;
 
         int globalPathThickness() const; // pixel
         int robotSize() const;           // pixel
@@ -123,6 +129,10 @@ namespace map_image_generator
             return 0;
         }
     }
+
+    inline float Parameters::soundSourceRange() const { return m_soundSourceRange; }
+
+    inline float Parameters::soundSourceMaxRange() const { return m_soundSourceMaxRange; }
 
     inline double Parameters::scaleFactor() const { return m_scaleFactor; }
 
@@ -181,9 +191,14 @@ namespace map_image_generator
 
     inline const cv::Scalar& Parameters::labelColor() const { return m_labelColor; }
 
-    inline const cv::Scalar& Parameters::soundSourceColor() const
+    inline const cv::Scalar& Parameters::soundSourceColorFull() const
     {
-        return m_soundSourceColor;
+        return m_soundSourceColorFull;
+    }
+
+    inline const cv::Scalar& Parameters::soundSourceColorDim() const
+    {
+        return m_soundSourceColorDim;
     }
 
     inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }

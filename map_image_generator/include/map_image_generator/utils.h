@@ -34,6 +34,15 @@ namespace map_image_generator
 
     void offsetYawByMinus90Degrees(geometry_msgs::Pose& pose);
 
+    TFSIMD_FORCE_INLINE tfScalar tfNormalizeAngle0To2Pi(tfScalar angleInRadians)
+    {
+        auto angle = tfNormalizeAngle(angleInRadians);
+        return angle + TFSIMD_PI;
+    }
+
+    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2,
+                                 double ratio);
+
     void flipYawOnY(geometry_msgs::Pose& pose);
     void flipYawOnY(tf::Transform& transform);
     double flipYawOnY(double yaw);
