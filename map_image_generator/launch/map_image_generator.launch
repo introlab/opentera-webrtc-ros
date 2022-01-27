@@ -4,14 +4,14 @@
     <arg name="input_global_path_topic" default="/move_base/GlobalPlanner/plan"/>
     <arg name="input_goal_topic" default="/move_base_simple/goal"/>
     <arg name="input_laser_scan_topic" default="/scan"/>
+    <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
+    <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
+    <arg name="input_sound_sources_topic" default="/odas/sst_poses"/>
 
     <arg name="output_map_image_topic" default="/map_image_generator/image"/>
-
-    <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
     <arg name="output_goal_topic" default="/rtabmap/goal"/>
-
-    <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
     <arg name="output_map_image_labels_topic" default="/map_image_generator/labels"/>
+
     <arg name="rtabmap_list_label_service" default="/rtabmap/list_labels"/>
 
     <arg name="refresh_rate_param" default="1.0"/>
@@ -23,6 +23,7 @@
     <arg name="robot_frame_param" default="base_footprint"/>
     <arg name="draw_goals" default="true"/>
     <arg name="draw_robot" default="true"/>
+    <arg name="draw_sound_sources" default="true"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
 
@@ -32,14 +33,14 @@
         <remap from="global_path" to="$(arg input_global_path_topic)"/>
         <remap from="input_goal" to="$(arg input_goal_topic)"/>
         <remap from="laser_scan" to="$(arg input_laser_scan_topic)"/>
+        <remap from="map_image_goal" to="$(arg input_map_image_goal_topic)"/>
+        <remap from="map_labels" to="$(arg input_map_labels_topic)"/>
+        <remap from="sound_sources" to="$(arg input_sound_sources_topic)"/>
 
         <remap from="map_image" to="$(arg output_map_image_topic)"/>
-
-        <remap from="map_image_goal" to="$(arg input_map_image_goal_topic)"/>
         <remap from="output_goal" to="$(arg output_goal_topic)"/>
-
-        <remap from="map_labels" to="$(arg input_map_labels_topic)"/>
         <remap from="map_image_labels" to="$(arg output_map_image_labels_topic)"/>
+
         <remap from="rtabmap_list_label_service" to="$(arg rtabmap_list_label_service)"/>
 
         <param name="refresh_rate" type="double" value="$(arg refresh_rate_param)"/>
@@ -51,6 +52,7 @@
         <param name="robot_frame" type="string" value="$(arg robot_frame_param)"/>
         <param name="draw_goals" type="bool" value="$(arg draw_goals)" />
         <param name="draw_robot" type="bool" value="$(arg draw_robot)" />
+        <param name="draw_sound_sources" type="bool" value="$(arg draw_sound_sources)" />
         <param name="wall_color" type="string" value="0 224 225"/>
         <param name="free_space_color" type="string" value="24 39 52"/>
         <param name="unknown_space_color" type="string" value="12 12 12"/>

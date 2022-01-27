@@ -84,10 +84,10 @@ void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& 
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, cv::Point(startX, startY), static_cast<int>(ceil(size / 5.0)),
-               color, cv::FILLED);
+    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color,
+               cv::FILLED);
     cv::arrowedLine(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
-                    static_cast<int>(ceil(size / 10.0)), cv::LINE_8, 0, 0.3);
+                    ceilDivision(size, 10.0), cv::LINE_8, 0, 0.3);
     cv::putText(image, std::to_string(index), cv::Point(startX, startY),
                 cv::FONT_HERSHEY_DUPLEX, 0.5, m_parameters.textColor(), 1);
 }

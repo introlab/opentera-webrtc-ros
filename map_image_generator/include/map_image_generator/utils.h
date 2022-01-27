@@ -3,6 +3,7 @@
 
 #include "map_image_generator/Parameters.h"
 
+#include <cmath>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/tf.h>
@@ -62,6 +63,11 @@ namespace map_image_generator
     }
 
     inline bool areApproxEqual(double a, double b) { return std::abs(a - b) < 0.00001; }
+
+    inline int ceilDivision(int dividend, double divisor)
+    {
+        return static_cast<int>(std::ceil(static_cast<double>(dividend) / divisor));
+    }
 }
 
 #endif

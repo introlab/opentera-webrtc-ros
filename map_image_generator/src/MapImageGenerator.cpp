@@ -6,6 +6,7 @@
 #include "map_image_generator/drawers/LaserScanImageDrawer.h"
 #include "map_image_generator/drawers/OccupancyGridImageDrawer.h"
 #include "map_image_generator/drawers/RobotImageDrawer.h"
+#include "map_image_generator/drawers/SoundSourceImageDrawer.h"
 
 using namespace map_image_generator;
 using namespace std;
@@ -49,6 +50,12 @@ MapImageGenerator::MapImageGenerator(Parameters& parameters, ros::NodeHandle& no
     if (m_parameters.drawLaserScan())
     {
         m_drawers.push_back(std::make_unique<LaserScanImageDrawer>(
+            m_parameters, nodeHandle, m_tfListener));
+    }
+
+    if (m_parameters.drawSoundSources())
+    {
+        m_drawers.push_back(std::make_unique<SoundSourceImageDrawer>(
             m_parameters, nodeHandle, m_tfListener));
     }
 

@@ -138,6 +138,7 @@ add_executable(map_image_generator
   include/map_image_generator/drawers/LaserScanImageDrawer.h
   include/map_image_generator/drawers/OccupancyGridImageDrawer.h
   include/map_image_generator/drawers/RobotImageDrawer.h
+  include/map_image_generator/drawers/SoundSourceImageDrawer.h
   include/map_image_generator/GoalConverter.h
   include/map_image_generator/MapImageGenerator.h
   include/map_image_generator/MapLabelsConverter.h
@@ -150,6 +151,7 @@ add_executable(map_image_generator
   src/drawers/LaserScanImageDrawer.cpp
   src/drawers/OccupancyGridImageDrawer.cpp
   src/drawers/RobotImageDrawer.cpp
+  src/drawers/SoundSourceImageDrawer.cpp
   src/GoalConverter.cpp
   src/main.cpp
   src/MapImageGenerator.cpp

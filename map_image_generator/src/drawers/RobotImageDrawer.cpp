@@ -38,8 +38,8 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, cv::Point(startX, startY), static_cast<int>(ceil(size / 5.0)),
-               color, cv::FILLED, cv::LINE_8);
+    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color,
+               cv::FILLED, cv::LINE_8);
     cv::arrowedLine(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
-                    static_cast<int>(ceil(size / 10.0)), cv::LINE_8, 0, 0.3);
+                    ceilDivision(size, 10.0), cv::LINE_8, 0, 0.3);
 }

@@ -88,6 +88,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle) : m_scaleFactor{1.0}
     m_drawGoals = getParam<bool>("draw_goals", true);
     m_drawLaserScan = getParam<bool>("draw_laser_scan", true);
     m_drawLabels = getParam<bool>("draw_labels", true);
+    m_drawSoundSources = getParam<bool>("draw_sound_sources", true);
 
     m_wallColor = getParam<cv::Vec3b>("wall_color", "0 0 0");
     m_freeSpaceColor = getParam<cv::Vec3b>("free_space_color", "255 255 255");
@@ -98,12 +99,14 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle) : m_scaleFactor{1.0}
     m_laserScanColor = getParam<cv::Scalar>("laser_scan_color", "255 0 0 255");
     m_textColor = getParam<cv::Scalar>("text_color", "255 255 255 255");
     m_labelColor = getParam<cv::Scalar>("label_color", "255 0 255 255");
+    m_soundSourceColor = getParam<cv::Scalar>("sound_source_color", "255 255 0 255");
 
     m_globalPathThickness = getParam<int>("global_path_thickness", 3);
     m_robotSize = getParam<int>("robot_size", 30);
     m_goalSize = getParam<int>("goal_size", 20);
     m_laserScanSize = getParam<int>("laser_scan_size", 6);
     m_labelSize = getParam<int>("label_size", 35);
+    m_soundSourceSize = getParam<int>("sound_source_size", 50);
 
     m_centeredRobot = getParam<bool>("centered_robot", true);
 

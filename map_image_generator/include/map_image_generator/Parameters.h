@@ -29,6 +29,7 @@ namespace map_image_generator
         bool m_drawGoals;
         bool m_drawLaserScan;
         bool m_drawLabels;
+        bool m_drawSoundSources;
 
         cv::Vec3b m_wallColor;
         cv::Vec3b m_freeSpaceColor;
@@ -39,12 +40,14 @@ namespace map_image_generator
         cv::Scalar m_laserScanColor;
         cv::Scalar m_textColor;
         cv::Scalar m_labelColor;
+        cv::Scalar m_soundSourceColor;
 
         int m_globalPathThickness; // pixel
         int m_robotSize;           // pixel
         int m_goalSize;            // pixel
         int m_laserScanSize;       // pixel
         int m_labelSize;           // pixel
+        int m_soundSourceSize;     // pixel
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
@@ -73,6 +76,7 @@ namespace map_image_generator
         bool drawGoals() const;
         bool drawLaserScan() const;
         bool drawLabels() const;
+        bool drawSoundSources() const;
 
         const cv::Vec3b& wallColor() const;
         const cv::Vec3b& freeSpaceColor() const;
@@ -83,12 +87,14 @@ namespace map_image_generator
         const cv::Scalar& laserScanColor() const;
         const cv::Scalar& textColor() const;
         const cv::Scalar& labelColor() const;
+        const cv::Scalar& soundSourceColor() const;
 
         int globalPathThickness() const; // pixel
         int robotSize() const;           // pixel
         int goalSize() const;            // pixel
         int laserScanSize() const;       // pixel
         int labelSize() const;           // pixel
+        int soundSourceSize() const;     // pixel
 
     private:
         void validateParameters();
@@ -143,6 +149,8 @@ namespace map_image_generator
 
     inline bool Parameters::drawLabels() const { return m_drawLabels; }
 
+    inline bool Parameters::drawSoundSources() const { return m_drawSoundSources; }
+
     inline const cv::Vec3b& Parameters::wallColor() const { return m_wallColor; }
 
     inline const cv::Vec3b& Parameters::freeSpaceColor() const
@@ -173,6 +181,11 @@ namespace map_image_generator
 
     inline const cv::Scalar& Parameters::labelColor() const { return m_labelColor; }
 
+    inline const cv::Scalar& Parameters::soundSourceColor() const
+    {
+        return m_soundSourceColor;
+    }
+
     inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }
 
     inline int Parameters::robotSize() const { return m_robotSize; }
@@ -182,5 +195,7 @@ namespace map_image_generator
     inline int Parameters::laserScanSize() const { return m_laserScanSize; }
 
     inline int Parameters::labelSize() const { return m_labelSize; }
+
+    inline int Parameters::soundSourceSize() const { return m_soundSourceSize; }
 }
 #endif
