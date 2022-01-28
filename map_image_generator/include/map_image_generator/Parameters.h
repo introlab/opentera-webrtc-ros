@@ -28,6 +28,7 @@ namespace map_image_generator
         bool m_drawRobot;
         bool m_drawGoals;
         bool m_drawLaserScan;
+        bool m_drawLabels;
 
         cv::Vec3b m_wallColor;
         cv::Vec3b m_freeSpaceColor;
@@ -37,11 +38,13 @@ namespace map_image_generator
         cv::Scalar m_goalColor;
         cv::Scalar m_laserScanColor;
         cv::Scalar m_textColor;
+        cv::Scalar m_labelColor;
 
         int m_globalPathThickness; // pixel
         int m_robotSize;           // pixel
         int m_goalSize;            // pixel
         int m_laserScanSize;       // pixel
+        int m_labelSize;           // pixel
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
@@ -69,6 +72,7 @@ namespace map_image_generator
         bool drawRobot() const;
         bool drawGoals() const;
         bool drawLaserScan() const;
+        bool drawLabels() const;
 
         const cv::Vec3b& wallColor() const;
         const cv::Vec3b& freeSpaceColor() const;
@@ -78,11 +82,13 @@ namespace map_image_generator
         const cv::Scalar& goalColor() const;
         const cv::Scalar& laserScanColor() const;
         const cv::Scalar& textColor() const;
+        const cv::Scalar& labelColor() const;
 
         int globalPathThickness() const; // pixel
         int robotSize() const;           // pixel
         int goalSize() const;            // pixel
         int laserScanSize() const;       // pixel
+        int labelSize() const;           // pixel
 
     private:
         void validateParameters();
@@ -135,6 +141,8 @@ namespace map_image_generator
 
     inline bool Parameters::drawLaserScan() const { return m_drawLaserScan; }
 
+    inline bool Parameters::drawLabels() const { return m_drawLabels; }
+
     inline const cv::Vec3b& Parameters::wallColor() const { return m_wallColor; }
 
     inline const cv::Vec3b& Parameters::freeSpaceColor() const
@@ -163,6 +171,8 @@ namespace map_image_generator
 
     inline const cv::Scalar& Parameters::textColor() const { return m_textColor; }
 
+    inline const cv::Scalar& Parameters::labelColor() const { return m_labelColor; }
+
     inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }
 
     inline int Parameters::robotSize() const { return m_robotSize; }
@@ -170,5 +180,7 @@ namespace map_image_generator
     inline int Parameters::goalSize() const { return m_goalSize; }
 
     inline int Parameters::laserScanSize() const { return m_laserScanSize; }
+
+    inline int Parameters::labelSize() const { return m_labelSize; }
 }
 #endif

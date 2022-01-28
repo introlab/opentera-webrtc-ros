@@ -14,6 +14,12 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh,
     m_cmdVelPublisher = m_nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     m_waypointsPub =
         m_nh.advertise<opentera_webrtc_ros_msgs::WaypointArray>("waypoints", 1);
+    m_navigateToLabelPub = m_nh.advertise<std_msgs::String>("navigate_to_label", 1);
+    m_removeLabelPub = m_nh.advertise<std_msgs::String>("remove_label_by_name", 1);
+    m_addLabelPub =
+        m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimple>("add_label_simple", 1);
+    m_editLabelPub =
+        m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimpleEdit>("edit_label_simple", 1);
 
     m_webrtcDataSubscriber =
         m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
@@ -32,6 +38,17 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh,
 }
 
 RosJsonDataHandler::~RosJsonDataHandler() = default;
+
+opentera_webrtc_ros_msgs::Waypoint
+RosJsonDataHandler::getWpFromData(const nlohmann::json& data)
+{
+    opentera_webrtc_ros_msgs::Waypoint wp;
+    wp.x = static_cast<float>(data["coordinate"]["x"]);
+    wp.y = static_cast<float>(data["coordinate"]["y"]);
+    wp.yaw =
+        static_cast<float>(static_cast<double>(data["coordinate"]["yaw"]) * M_PI / 180);
+    return wp;
+}
 
 void RosJsonDataHandler::onWebRTCDataReceived(
     const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event)
@@ -65,15 +82,9 @@ void RosJsonDataHandler::onWebRTCDataReceived(
     else if (serializedData["type"] == "waypointArray")
     {
         opentera_webrtc_ros_msgs::WaypointArray wp_array;
-        for (auto waypoint : serializedData["array"])
+        for (const auto& waypoint : serializedData["array"])
         {
-            // Received waypoints are in pixel coordinates in the image frame
-            opentera_webrtc_ros_msgs::Waypoint wp;
-            wp.x = static_cast<float>(waypoint["coordinate"]["x"]);
-            wp.y = static_cast<float>(waypoint["coordinate"]["y"]);
-            wp.yaw = static_cast<float>(static_cast<double>(waypoint["coordinate"]["yaw"])
-                                        * M_PI / 180);
-            wp_array.waypoints.push_back(wp);
+            wp_array.waypoints.push_back(getWpFromData(waypoint));
         }
         m_waypointsPub.publish(wp_array);
     }
@@ -136,6 +147,52 @@ void RosJsonDataHandler::onWebRTCDataReceived(
             ROS_ERROR("change_map_view service call error: %s",
                       srv.response.message.c_str());
         }
+    }
+    else if (serializedData["type"] == "goToLabel")
+    {
+        std_msgs::String msg;
+        msg.data = serializedData["label"];
+        m_navigateToLabelPub.publish(msg);
+    }
+    else if (serializedData["type"] == "removeLabel")
+    {
+        std_msgs::String msg;
+        msg.data = serializedData["label"];
+        m_removeLabelPub.publish(msg);
+    }
+    else if (serializedData["type"] == "addLabel")
+    {
+        const auto& data = serializedData["label"];
+
+        opentera_webrtc_ros_msgs::LabelSimple label;
+
+        label.name = data["name"];
+        label.description = data["description"];
+        label.waypoint = getWpFromData(data);
+
+        m_addLabelPub.publish(label);
+    }
+    else if (serializedData["type"] == "editLabel")
+    {
+        const auto& data = serializedData["newLabel"];
+
+        opentera_webrtc_ros_msgs::LabelSimpleEdit labelEdit;
+
+        labelEdit.current_name = serializedData["currentLabel"];
+        labelEdit.updated.name = data["name"];
+        labelEdit.updated.description = data["description"];
+        if (data["coordinate"].is_null())
+        {
+            labelEdit.ignore_waypoint = true;
+            labelEdit.updated.waypoint = opentera_webrtc_ros_msgs::Waypoint();
+        }
+        else
+        {
+            labelEdit.ignore_waypoint = false;
+            labelEdit.updated.waypoint = getWpFromData(data);
+        }
+
+        m_editLabelPub.publish(labelEdit);
     }
 }
 

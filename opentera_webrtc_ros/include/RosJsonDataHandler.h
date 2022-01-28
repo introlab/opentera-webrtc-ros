@@ -5,10 +5,13 @@
 #include <geometry_msgs/Twist.h>
 #include <json.hpp>
 #include <map_image_generator/ChangeMapView.h>
+#include <opentera_webrtc_ros_msgs/LabelSimple.h>
+#include <opentera_webrtc_ros_msgs/LabelSimpleEdit.h>
 #include <opentera_webrtc_ros_msgs/PeerData.h>
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
 
@@ -22,6 +25,10 @@ namespace opentera
         ros::Publisher m_startPub;
         ros::Publisher m_cmdVelPublisher;
         ros::Publisher m_waypointsPub;
+        ros::Publisher m_navigateToLabelPub;
+        ros::Publisher m_removeLabelPub;
+        ros::Publisher m_addLabelPub;
+        ros::Publisher m_editLabelPub;
         float m_linear_multiplier;
         float m_angular_multiplier;
         ros::ServiceClient m_dockingClient;
@@ -42,7 +49,11 @@ namespace opentera
         RosJsonDataHandler(const ros::NodeHandle& nh, const ros::NodeHandle& p_nh);
         virtual ~RosJsonDataHandler();
 
-        void run();
+        static void run();
+
+    private:
+        static opentera_webrtc_ros_msgs::Waypoint
+        getWpFromData(const nlohmann::json& data);
     };
 }
 

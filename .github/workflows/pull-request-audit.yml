@@ -2,73 +2,70 @@ name: pull-request-audit
 
 on:
   push:
-    branches: [ main ]
-  
+    branches: [main]
+
   pull_request:
-    branches: [ main ]
-    
+    branches: [main]
+
   workflow_dispatch:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
-  
+
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-        path: catkin_ws/src/opentera-webrtc-ros
-    - uses: ros-tooling/setup-ros@v0.2
-      with:
-        required-ros-distributions: noetic
-        
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-        
-    - name: Install system dependencies
-      run: | 
-        sudo apt-get update
-        sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
-        sudo apt-get install libglib2.0-dev libgtk-3-dev libpulse-dev libasound2-dev
-        sudo apt-get install python3-pip portaudio19-dev
-        sudo apt-get install nodejs npm
-        sudo apt-get install build-essential gfortran texinfo libasound2-dev
-        
-    - name: Clone audio_utils in ROS workspace
-      working-directory: catkin_ws/src
-      run: |
-        source /opt/ros/noetic/setup.bash
-        git clone https://github.com/introlab/audio_utils.git --recurse-submodules
-        ls -l
-      
-    - name: Install Python requirements for OpenTera client
-      working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_client_ros
-      run: |
-        ls -l
-        python3 -m pip install -r requirements.txt 
-        
-    - name: Install Python requirements for Signaling server
-      working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
-      run: |
-        ls -l
-        python3 -m pip install -r requirements.txt    
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          path: catkin_ws/src/opentera-webrtc-ros
+      - uses: ros-tooling/setup-ros@v0.2
+        with:
+          required-ros-distributions: noetic
 
-    - name: Install the VUE.js frontend
-      working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
-      run: |
-        ls -l
-        npm --version
-        node --version
-        npm install
-        npm run build  
-      
-    - name: Compile packages in ROS workspace
-      working-directory: catkin_ws
-      run: |
-        source /opt/ros/noetic/setup.bash
-        catkin_make -j1
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
+          sudo apt-get install libglib2.0-dev libgtk-3-dev libpulse-dev libasound2-dev
+          sudo apt-get install python3-pip portaudio19-dev
+          sudo apt-get install nodejs npm
+          sudo apt-get install build-essential gfortran texinfo libasound2-dev
 
+      - name: Clone audio_utils in ROS workspace
+        working-directory: catkin_ws/src
+        run: |
+          source /opt/ros/noetic/setup.bash
+          git clone https://github.com/introlab/audio_utils.git --recurse-submodules
+          ls -l
+
+      - name: Install Python requirements for OpenTera client
+        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_client_ros
+        run: |
+          ls -l
+          python3 -m pip install -r requirements.txt
+
+      - name: Install Python requirements for Signaling server
+        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
+        run: |
+          ls -l
+          python3 -m pip install -r requirements.txt
+
+      - name: Install the VUE.js frontend
+        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
+        run: |
+          ls -l
+          npm --version
+          node --version
+          npm install
+          npm run build
+
+      - name: Compile packages in ROS workspace
+        working-directory: catkin_ws
+        run: |
+          source /opt/ros/noetic/setup.bash
+          catkin_make -j1
