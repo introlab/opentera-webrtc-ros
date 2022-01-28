@@ -7,65 +7,117 @@ from opentera_webrtc_ros_msgs.msg import LabelSimple, LabelSimpleArray, LabelSim
 from opentera_webrtc_ros_msgs.msg import Label, LabelArray, LabelEdit
 from opentera_webrtc_ros_msgs.msg import Waypoint
 from std_msgs.msg import String
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Pose
 from visualization_msgs.msg import MarkerArray, Marker
 from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose as wp2pose
 from opentera_webrtc_ros.libmapimageconverter import convert_pose_to_waypoint as pose2wp
 from opentera_webrtc_ros.libyamldatabase import YamlDatabase
+from liblabelsdatabase import LabelsDb, LabelData
 from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
+from rtabmap_ros.srv import GetNodesInRadius, GetNodesInRadiusRequest, GetNodesInRadiusResponse
+from rtabmap_ros.srv import GetMap, GetMapRequest, GetMapResponse
+from libposediff import transform_from_pose, pose_from_transform, invert_transform
+from functools import cached_property
+from rtabmap_ros.msg import NodeData
+from typing import Tuple, cast, List
 
 
 class ConversionError(Exception):
     pass
 
 
-class LabelData:
-    yaml_tag = "!label"
+class LabelDataUtil:
+    def __init__(self) -> None:
+        self.get_node_from_pose_service = rospy.ServiceProxy(
+            "/rtabmap/get_nodes_in_radius", GetNodesInRadius)
 
-    def __init__(self, label: Label) -> None:
-        self.data = {
-            "name": label.name,
-            "description": label.description,
-            "pose": {
-                "header": {
-                    "frame_id": label.pose.header.frame_id,
-                },
-                "pose": {
-                    "position": {
-                        "x": label.pose.pose.position.x,
-                        "y": label.pose.pose.position.y,
-                        "z": label.pose.pose.position.z,
-                    },
-                    "orientation": {
-                        "x": label.pose.pose.orientation.x,
-                        "y": label.pose.pose.orientation.y,
-                        "z": label.pose.pose.orientation.z,
-                        "w": label.pose.pose.orientation.w,
-                    },
-                },
-            },
-        }
+    def make_label_data(self, label: Label) -> LabelData:
+        self.get_node_from_pose_service.wait_for_service()
+        req = GetNodesInRadiusRequest()
+        req.node_id = 0
+        req.x = label.pose.pose.position.x
+        req.y = label.pose.pose.position.y
+        req.z = label.pose.pose.position.z
+        req.radius = 0
+        # req.k = 1
 
-    @property
-    def label(self) -> Label:
-        pose = PoseStamped()
-        pose.header.frame_id = str(self.data["pose"]["header"]["frame_id"])
-        pose.pose.position.x = float(
-            self.data["pose"]["pose"]["position"]["x"])
-        pose.pose.position.y = float(
-            self.data["pose"]["pose"]["position"]["y"])
-        pose.pose.position.z = float(
-            self.data["pose"]["pose"]["position"]["z"])
-        pose.pose.orientation.x = float(
-            self.data["pose"]["pose"]["orientation"]["x"])
-        pose.pose.orientation.y = float(
-            self.data["pose"]["pose"]["orientation"]["y"])
-        pose.pose.orientation.z = float(
-            self.data["pose"]["pose"]["orientation"]["z"])
-        pose.pose.orientation.w = float(
-            self.data["pose"]["pose"]["orientation"]["w"])
+        try:
+            rep: GetNodesInRadiusResponse = self.get_node_from_pose_service.call(
+                req)
+            if rep.poses is None or len(rep.poses) == 0 or rep.ids is None or len(rep.ids) == 0:
+                raise ConversionError(f"No node found near label {label.name}")
+        except rospy.ServiceException as e:
+            raise ConversionError(
+                f"Getting nearest node of label {label.name} failed: {e}")
 
-        return Label(name=self.data["name"], description=self.data["description"], pose=pose)
+        pose: Pose = rep.poses[0]
+        posem = transform_from_pose(pose)
+        lposem = transform_from_pose(label.pose.pose)
+        diff_posem = invert_transform(posem) * lposem
+
+        return LabelData(label, rep.ids[0], node_tf=pose_from_transform(diff_posem))
+
+    def update_label_data(self, label_data: LabelData) -> LabelData:
+        del self._node_data  # Regenerate cache
+        for node in self._node_data:
+            pass
+
+    @cached_property
+    def _node_data(self) -> Tuple[NodeData, ...]:
+        service = rospy.ServiceProxy("/rtabmap/get_map_data", GetMap)
+        service.wait_for_service()
+        data: GetMapResponse = service.call(GetMapRequest(True, True, True))
+        assert (
+            data is not None), "No data received from rtabmap, this should not happen"
+        return tuple(cast(List[NodeData], data.data.nodes))
+
+    # class LabelData:
+    #     yaml_tag = "!label"
+
+    #     def __init__(self, label: Label) -> None:
+    #         self.data = {
+    #             "name": label.name,
+    #             "description": label.description,
+    #             "pose": {
+    #                 "header": {
+    #                     "frame_id": label.pose.header.frame_id,
+    #                 },
+    #                 "pose": {
+    #                     "position": {
+    #                         "x": label.pose.pose.position.x,
+    #                         "y": label.pose.pose.position.y,
+    #                         "z": label.pose.pose.position.z,
+    #                     },
+    #                     "orientation": {
+    #                         "x": label.pose.pose.orientation.x,
+    #                         "y": label.pose.pose.orientation.y,
+    #                         "z": label.pose.pose.orientation.z,
+    #                         "w": label.pose.pose.orientation.w,
+    #                     },
+    #                 },
+    #             },
+    #         }
+
+    #     @property
+    #     def label(self) -> Label:
+    #         pose = PoseStamped()
+    #         pose.header.frame_id = str(self.data["pose"]["header"]["frame_id"])
+    #         pose.pose.position.x = float(
+    #             self.data["pose"]["pose"]["position"]["x"])
+    #         pose.pose.position.y = float(
+    #             self.data["pose"]["pose"]["position"]["y"])
+    #         pose.pose.position.z = float(
+    #             self.data["pose"]["pose"]["position"]["z"])
+    #         pose.pose.orientation.x = float(
+    #             self.data["pose"]["pose"]["orientation"]["x"])
+    #         pose.pose.orientation.y = float(
+    #             self.data["pose"]["pose"]["orientation"]["y"])
+    #         pose.pose.orientation.z = float(
+    #             self.data["pose"]["pose"]["orientation"]["z"])
+    #         pose.pose.orientation.w = float(
+    #             self.data["pose"]["pose"]["orientation"]["w"])
+
+    #         return Label(name=self.data["name"], description=self.data["description"], pose=pose)
 
 
 class LabelsManager:
@@ -89,8 +141,9 @@ class LabelsManager:
 
         self.database_path: str = rospy.get_param(
             "~database_path", "~/.ros/labels.yaml")
-        self.db: YamlDatabase[LabelData] = YamlDatabase(
-            Path(self.database_path), LabelData)
+        # self.db: YamlDatabase[LabelData] = YamlDatabase(
+        #     Path(self.database_path), LabelData)
+        self.db = LabelsDb(Path(self.database_path))
 
         self.pub_timer_stored_labels = rospy.Timer(rospy.Duration(
             1), self.publish_stored_labels)
@@ -100,6 +153,8 @@ class LabelsManager:
             1), self.publish_stored_labels_marker)
 
         self.nav_client = WaypointNavigationClient()
+
+        self.label_data_utils = LabelDataUtil()
 
         rospy.loginfo("Labels manager initialized")
 
@@ -123,7 +178,8 @@ class LabelsManager:
 
     def add_label_simple_callback(self, msg: LabelSimple) -> None:
         try:
-            label = LabelData(self.simple2label(msg))
+            label = self.label_data_utils.make_label_data(
+                self.simple2label(msg))
             self.db.add(msg.name, label)
             self.db.commit()
         except (IndexError, ConversionError) as e:
@@ -144,7 +200,8 @@ class LabelsManager:
             updated = self.simple2label(msg.updated)
             if msg.ignore_waypoint is True:
                 updated.pose = self.db[msg.updated.name].label.pose
-            self.db.replace(msg.updated.name, LabelData(updated))
+            self.db.replace(msg.updated.name,
+                            self.label_data_utils.make_label_data(updated))
 
             self.db.commit()
         except (IndexError, ConversionError) as e:
@@ -160,7 +217,7 @@ class LabelsManager:
         self.nav_client.add_to_image(label.pose)
         self.nav_client.navigate_to_goal(label.pose, 1)
 
-    @staticmethod
+    @ staticmethod
     def label2simple(label: Label) -> LabelSimple:
         waypoint = pose2wp(label.pose)
         if waypoint is None:
@@ -168,7 +225,7 @@ class LabelsManager:
                 f"Conversion of pose to waypoint for label {label.name} failed")
         return LabelSimple(name=label.name, description=label.description, waypoint=waypoint)
 
-    @staticmethod
+    @ staticmethod
     def simple2label(label_simple: LabelSimple) -> Label:
         pose = wp2pose(label_simple.waypoint)
         if pose is None:
