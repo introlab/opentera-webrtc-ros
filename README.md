@@ -27,6 +27,9 @@ sudo apt-get install nodejs npm
 
 # audio_utils packages
 sudo apt-get install build-essential gfortran texinfo libasound2-dev
+
+# odas_ros packages
+sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio
 ```
 
 # Installation
