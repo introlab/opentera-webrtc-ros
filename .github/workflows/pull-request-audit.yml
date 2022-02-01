@@ -43,6 +43,13 @@ jobs:
           git clone https://github.com/introlab/audio_utils.git --recurse-submodules
           ls -l
 
+      - name: Clone odas_ros in ROS workspace
+        working-directory: catkin_ws/src
+        run: |
+          source /opt/ros/noetic/setup.bash
+          git clone https://github.com/introlab/odas_ros.git --recurse-submodules
+          ls -l
+
       - name: Install Python requirements for OpenTera client
         working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_client_ros
         run: |

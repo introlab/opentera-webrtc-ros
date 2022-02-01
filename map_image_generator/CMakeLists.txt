@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   rtabmap_ros
   message_generation
   std_srvs
+  odas_ros
+  opentera_webrtc_ros_msgs
 )
 
 ## System dependencies are found with CMake's conventions

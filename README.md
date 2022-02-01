@@ -48,6 +48,8 @@ $ catkin_make
 $ cd ~/teleop_ws/src
 # audio_utils
 $ git clone https://github.com/introlab/audio_utils.git --recurse-submodules
+# odas_ros
+$ git clone https://github.com/introlab/odas_ros.git --recurse-submodules
 # opentera-webrtc-ros
 $ git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
 ```
