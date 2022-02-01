@@ -40,8 +40,7 @@ void ImageDrawer::convertInputMapCoordinatesToTransform(
         0.0));
 }
 
-// Replace with std::optional in C++17
-std::unique_ptr<tf::Transform>
+std::optional<tf::Transform>
 ImageDrawer::getTransformInRef(const std::string& frameId) const
 {
     tf::StampedTransform transform;
@@ -57,8 +56,7 @@ ImageDrawer::getTransformInRef(const std::string& frameId) const
         return {};
     }
 
-    // Replace with std::optional in C++17
-    return std::make_unique<tf::Transform>(transform);
+    return transform;
 }
 
 void ImageDrawer::adjustTransformForRobotRef(tf::Transform& transform) const

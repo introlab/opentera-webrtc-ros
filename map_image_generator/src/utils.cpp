@@ -117,6 +117,17 @@ namespace map_image_generator
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
     }
 
+    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2,
+                                 double ratio)
+    {
+        cv::Scalar color;
+        color[0] = (color2[0] - color1[0]) * ratio + color1[0];
+        color[1] = (color2[1] - color1[1]) * ratio + color1[1];
+        color[2] = (color2[2] - color1[2]) * ratio + color1[2];
+        color[3] = (color2[3] - color1[3]) * ratio + color1[3];
+        return color;
+    }
+
     void flipYawOnY(geometry_msgs::Pose& pose)
     {
         double yaw = tf::getYaw(pose.orientation);

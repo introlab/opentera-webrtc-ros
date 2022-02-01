@@ -35,12 +35,20 @@ jobs:
           sudo apt-get install python3-pip portaudio19-dev
           sudo apt-get install nodejs npm
           sudo apt-get install build-essential gfortran texinfo libasound2-dev
+          sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio
 
       - name: Clone audio_utils in ROS workspace
         working-directory: catkin_ws/src
         run: |
           source /opt/ros/noetic/setup.bash
           git clone https://github.com/introlab/audio_utils.git --recurse-submodules
+          ls -l
+
+      - name: Clone odas_ros in ROS workspace
+        working-directory: catkin_ws/src
+        run: |
+          source /opt/ros/noetic/setup.bash
+          git clone https://github.com/introlab/odas_ros.git --recurse-submodules
           ls -l
 
       - name: Install Python requirements for OpenTera client

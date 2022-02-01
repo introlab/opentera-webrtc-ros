@@ -4,6 +4,7 @@
 #include "map_image_generator/Parameters.h"
 #include "map_image_generator/drawers/ImageDrawer.h"
 
+#include <cv_bridge/cv_bridge.h>
 #include <memory>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>

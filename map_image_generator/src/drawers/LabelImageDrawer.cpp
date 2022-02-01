@@ -58,8 +58,7 @@ void LabelImageDrawer::drawLabel(const opentera_webrtc_ros_msgs::Label& label,
     int endY = static_cast<int>(startY + size * sin(yaw));
 
     cv::drawMarker(image, cv::Point(startX, startY), color, cv::MARKER_DIAMOND,
-                   static_cast<int>(ceil(size / 4.0)),
-                   static_cast<int>(ceil(size / 12.0)), cv::FILLED);
+                   ceilDivision(size, 4.0), ceilDivision(size, 12.0), cv::FILLED);
     cv::putText(image, label.name, cv::Point(startX, startY), cv::FONT_HERSHEY_DUPLEX,
                 0.5, m_parameters.textColor(), 1);
 }

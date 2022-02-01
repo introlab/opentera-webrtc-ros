@@ -4,11 +4,14 @@
 #include "map_image_generator/Parameters.h"
 #include "map_image_generator/utils.h"
 
-// Replace with <optional> in C++17
-#include <cv_bridge/cv_bridge.h>
-#include <memory>
+#include <experimental/optional> // Replace with <optional> in C++17
 #include <nav_msgs/MapMetaData.h>
 #include <tf/transform_listener.h>
+
+namespace std // Replace with <optional> onlu here in C++17
+{
+    using std::experimental::optional;
+}
 
 namespace map_image_generator
 {
@@ -42,9 +45,7 @@ namespace map_image_generator
                                                    const nav_msgs::MapMetaData& mapInfo,
                                                    tf::Transform& transform) const;
 
-        // Replace with std::optional in C++17
-        std::unique_ptr<tf::Transform>
-        getTransformInRef(const std::string& frameId) const;
+        std::optional<tf::Transform> getTransformInRef(const std::string& frameId) const;
 
         void adjustTransformForRobotRef(tf::Transform& transform) const;
 
