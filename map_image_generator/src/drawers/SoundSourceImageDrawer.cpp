@@ -51,11 +51,23 @@ tf::Pose SoundSourceImageDrawer::getPoseFromSst(const odas_ros::OdasSst& sst)
 
 void SoundSourceImageDrawer::draw(cv::Mat& image)
 {
-    if (!m_lastLaserScan || !m_lastSoundSourcesArray)
+    if (!m_lastSoundSourcesArray)
     {
         return;
     }
 
+    if (m_lastLaserScan)
+    {
+        drawWithLidar(image);
+    }
+    else
+    {
+        drawWithoutLidar(image);
+    }
+}
+
+void SoundSourceImageDrawer::drawWithLidar(cv::Mat& image)
+{
     tf::StampedTransform sourceToLidarTf;
 
     try
@@ -73,38 +85,57 @@ void SoundSourceImageDrawer::draw(cv::Mat& image)
     auto lidarToRefTf = getTransformInRef(m_lastLaserScan->header.frame_id);
     if (lidarToRefTf)
     {
-        drawSoundSources(image, sourceToLidarTf, *lidarToRefTf);
+        drawSoundSourcesWithLidar(image, sourceToLidarTf, *lidarToRefTf);
     }
 }
 
-void SoundSourceImageDrawer::drawSoundSources(cv::Mat& image,
-                                              const tf::Transform& sourceToLidarTf,
-                                              const tf::Transform& lidarToRefTf)
+void SoundSourceImageDrawer::drawWithoutLidar(cv::Mat& image)
+{
+    auto sourceToRefTf = getTransformInRef(m_lastSoundSourcesArray->header.frame_id);
+    if (sourceToRefTf)
+    {
+        drawSoundSourcesWithoutLidar(image, *sourceToRefTf);
+    }
+}
+
+void SoundSourceImageDrawer::drawSoundSourcesWithLidar(
+    cv::Mat& image, const tf::Transform& sourceToLidarTf,
+    const tf::Transform& lidarToRefTf)
 {
     for (const auto& source : m_lastSoundSourcesArray->sources)
     {
-        drawSoundSource(image, source, sourceToLidarTf, lidarToRefTf);
+        tf::Pose poseSource = getPoseFromSst(source);
+        tf::Pose poseLidar = sourceToLidarTf * poseSource;
+
+        tf::Pose poseRef = getRangePose(poseLidar);
+        poseRef = lidarToRefTf * poseRef;
+
+        drawSoundSource(image, source, poseRef);
+    }
+}
+
+void SoundSourceImageDrawer::drawSoundSourcesWithoutLidar(
+    cv::Mat& image, const tf::Transform& sourceToRefTf)
+{
+    for (const auto& source : m_lastSoundSourcesArray->sources)
+    {
+        tf::Pose poseSource = getPoseFromSst(source);
+        tf::Pose poseRef = sourceToRefTf * poseSource;
+
+        drawSoundSource(image, source, getRefEndPose(poseRef));
     }
 }
 
 void SoundSourceImageDrawer::drawSoundSource(cv::Mat& image,
                                              const odas_ros::OdasSst& source,
-                                             const tf::Transform& sourceToLidarTf,
-                                             const tf::Transform& lidarToRefTf)
+                                             tf::Pose poseInRef)
 {
     int size = m_parameters.soundSourceSize();
 
-    tf::Pose poseSource = getPoseFromSst(source);
-    tf::Pose poseLidar = sourceToLidarTf * poseSource;
-
-
-    tf::Pose poseRef = getRangePose(poseLidar);
-    poseRef = lidarToRefTf * poseRef;
-
-    adjustTransformForRobotRef(poseRef);
+    adjustTransformForRobotRef(poseInRef);
 
     int centerX, centerY;
-    convertTransformToMapCoordinates(poseRef, centerX, centerY);
+    convertTransformToMapCoordinates(poseInRef, centerX, centerY);
 
     drawConcentricCircles(image, centerX, centerY, size, source.activity);
 }
@@ -166,6 +197,15 @@ tf::Pose SoundSourceImageDrawer::getRangePose(const tf::Pose& lidarPose)
     {
         range = m_parameters.soundSourceMaxRange();
     }
+
+    return tf::Pose(tf::Quaternion(0, 0, 0, 0),
+                    tf::Vector3(range * cos(angle), range * sin(angle), 0));
+}
+
+tf::Pose SoundSourceImageDrawer::getRefEndPose(const tf::Pose& refPose)
+{
+    double angle = tf::getYaw(refPose.getRotation());
+    float range = m_parameters.soundSourceRange();
 
     return tf::Pose(tf::Quaternion(0, 0, 0, 0),
                     tf::Vector3(range * cos(angle), range * sin(angle), 0));
