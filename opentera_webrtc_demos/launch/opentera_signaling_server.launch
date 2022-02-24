@@ -2,16 +2,19 @@
 
   <!-- Requirements for server must be installed first -->
   <arg name="signaling_server_path" default="$(find opentera_webrtc_ros)/opentera-webrtc/signaling-server"/>
-  
+
   <arg name="signaling_server_port" default="8080"/>
   <arg name="signaling_server_password" default="abc"/>
-  
+  <arg name="signaling_server_robot_type" default="demo"/>
+
+  <arg name="python_executable" default="python3"/>
+
   <!-- The teleop frontend must be installed built first -->
   <arg name="signaling_server_static_folder" default="$(find opentera_webrtc_demos)/opentera-webrtc-teleop-frontend/teleop-vue/dist"/>
-  
-  <node pkg="opentera_webrtc_demos" type="start_signaling_server.sh" 
-        args="$(arg signaling_server_path) $(arg signaling_server_port) $(arg signaling_server_password) $(arg signaling_server_static_folder)" 
+
+  <node pkg="opentera_webrtc_demos" type="start_signaling_server.sh"
+        args="$(arg signaling_server_path) $(arg signaling_server_port) $(arg signaling_server_password) $(arg signaling_server_static_folder) $(arg signaling_server_robot_type) $(arg python_executable)"
         name="opentera_signaling_server" output="screen">
   </node>
-  
+
 </launch>
