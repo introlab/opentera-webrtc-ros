@@ -3,8 +3,8 @@
 import rospy
 from opentera_webrtc_ros_msgs.msg import WaypointArray
 from std_msgs.msg import Bool
-from libmapimageconverter import convert_waypoint_to_pose
-from libnavigation import WaypointNavigationClient
+from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose
+from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
 
 
 class GoalManager():

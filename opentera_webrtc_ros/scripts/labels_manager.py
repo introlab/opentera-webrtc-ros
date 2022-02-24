@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import annotations
-
 import rospy
 import json
 from pathlib import Path
@@ -10,10 +8,10 @@ from opentera_webrtc_ros_msgs.msg import Label, LabelArray, LabelEdit
 from opentera_webrtc_ros_msgs.msg import Waypoint
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
-from libmapimageconverter import convert_waypoint_to_pose as wp2pose
-from libmapimageconverter import convert_pose_to_waypoint as pose2wp
-from libyamldatabase import YamlDatabase
-from libnavigation import WaypointNavigationClient
+from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose as wp2pose
+from opentera_webrtc_ros.libmapimageconverter import convert_pose_to_waypoint as pose2wp
+from opentera_webrtc_ros.libyamldatabase import YamlDatabase
+from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
 
 
 class ConversionError(Exception):
