@@ -60,24 +60,24 @@ include_directories(
 )
 
 link_directories(
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}    
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm  
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
 )
 
 set (opentera_webrtc_native_client_libs
-  opencv_core 
+  opencv_core
   opencv_imgproc
   OpenteraWebrtcNativeClient
   boringssl
   webrtc
-  dl 
-  X11 
+  dl
+  X11
   expat
 )
 
 # Actually generate the language-specific message and service files
 generate_messages(
-  DEPENDENCIES 
+  DEPENDENCIES
   opentera_webrtc_ros_msgs
 )
 
@@ -107,12 +107,14 @@ add_executable(${PROJECT_NAME}_topic_streamer
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
   src/RosNodeParameters.cpp
+  src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
   src/RosNodeParameters.cpp
+  src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_json_data_handler
@@ -163,4 +165,3 @@ install(
     ${PROJECT_NAME}_json_data_handler
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-

@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <RosNodeParameters.h>
+#include <RosParamUtils.h>
 
 using namespace opentera;
 using namespace ros;
@@ -22,7 +23,7 @@ void RosNodeParameters::loadSignalingParams(std::string &clientName, std::string
     NodeHandle pnh("~");
 
     std::map<std::string, std::string> dict;
-    pnh.getParam("signaling", dict);
+    opentera::param::getParam(pnh, "signaling", dict);
 
     clientName = isInParams("client_name", dict) ? dict["client_name"] : "streamer";
     room = isInParams("room_name", dict) ? dict["room_name"] : "chat";
@@ -43,7 +44,7 @@ void RosNodeParameters::loadSignalingParams(std::string &serverUrl, std::string 
 
     //String parameters
     std::map<std::string, std::string> dictString;
-    pnh.getParam("signaling", dictString);
+    opentera::param::getParam(pnh, "signaling", dictString);
     serverUrl = isInParams("server_url", dictString) ? dictString["server_url"] : "http://localhost:8080";
     clientName = isInParams("client_name", dictString) ? dictString["client_name"] : "streamer";
     room = isInParams("room_name", dictString) ? dictString["room_name"] : "chat";
@@ -60,7 +61,7 @@ void RosNodeParameters::loadSignalingParamsVerifySSL(bool &verifySSL)
     NodeHandle pnh("~");
     //Bool parameters
     std::map <std::string, bool> dictBool;
-    pnh.getParam("signaling", dictBool);
+    opentera::param::getParam(pnh, "signaling", dictBool);
     verifySSL = isInParams("verify_ssl", dictBool) ? dictBool["verify_ssl"] : true;
 }
 
@@ -81,7 +82,7 @@ void RosNodeParameters::loadVideoStreamParams(
     NodeHandle pnh("~");
 
     std::map<std::string, bool> dict;
-    pnh.getParam("videoStream", dict);
+    opentera::param::getParam(pnh, "videoStream", dict);
 
     canSendVideoStream = isInParams("can_send_video_stream", dict) ? dict["can_send_video_stream"] : false;
     canReceiveVideoStream = isInParams("can_receive_video_stream", dict) ? dict["can_receive_video_stream"] : false;
@@ -111,10 +112,10 @@ void RosNodeParameters::loadAudioStreamParams(
     NodeHandle pnh("~");
 
     std::map<std::string, bool> dict;
-    pnh.getParam("audioStream", dict);
+    opentera::param::getParam(pnh, "audioStream", dict);
 
     std::map<std::string, int> dictInt;
-    pnh.getParam("audioStream", dictInt);
+    opentera::param::getParam(pnh, "audioStream", dictInt);
 
 
     canSendAudioStream = isInParams("can_send_audio_stream", dict) ? dict["can_send_audio_stream"] : false;
