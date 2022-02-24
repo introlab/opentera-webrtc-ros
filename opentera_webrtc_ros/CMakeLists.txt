@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "-fPIC")
 
+
 if(NOT CMAKE_BUILD_TYPE )
   MESSAGE(STATUS "not define build type, set to release" )
   set(CMAKE_BUILD_TYPE Release )
@@ -42,8 +43,10 @@ add_definitions(-DWEBRTC_POSIX)
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
-# Disable generation of Python doc, this is causing problems with catkin otherwise
-set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC OFF)
+# Explicitely enable generation of Python doc
+set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC ON)
+# Enable install on build for python package, which is required for using it in ROS if using devel space
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
 add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -147,6 +150,7 @@ target_link_libraries(${PROJECT_NAME}_json_data_handler
 add_dependencies(${PROJECT_NAME}_topic_streamer ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_data_channel_bridge ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
+
 
 #############
 ## Install ##

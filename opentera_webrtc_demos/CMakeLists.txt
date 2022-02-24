@@ -209,36 +209,36 @@ include_directories(
 # catkin_add_nosetests(test)
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/package.json
-    COMMAND /usr/bin/env npm install
-    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/node_modules 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
-    )
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/package.json
+  COMMAND /usr/bin/env npm install
+  COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/node_modules 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+)
 
 add_custom_target(
   opentera_werbrtc_teleop_frontend-install ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
-  )
+)
 
 file(
-    GLOB_RECURSE
-    FRONTEND_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.ts
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.js
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.vue
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.scss
+  GLOB_RECURSE
+  FRONTEND_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.ts
+  ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.vue
+  ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.scss
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
-    DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
-    COMMAND /usr/bin/env npm run build
-    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/dist 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+  DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+  COMMAND /usr/bin/env npm run build
+  COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/dist 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
 )
 
 add_custom_target(
-    opentera_werbrtc_teleop_frontend-build ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+  opentera_werbrtc_teleop_frontend-build ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
 )
