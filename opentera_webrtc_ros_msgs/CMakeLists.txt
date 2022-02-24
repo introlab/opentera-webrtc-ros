@@ -39,6 +39,11 @@ add_message_files(
    WaypointArray.msg
 )
 
+add_service_files(
+   FILES
+   SetString.srv
+)
+
 generate_messages(
    DEPENDENCIES
    std_msgs
