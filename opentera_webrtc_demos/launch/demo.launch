@@ -41,7 +41,7 @@
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/front_camera/image_raw"/>
+        <arg name="input_camera_topic" value="/front_camera/image_raw"/>
     </include>
 
     <!-- Bottom camera -->
@@ -58,7 +58,7 @@
         <arg name="client_name" value="Robot Camera 2"/>
         <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/r200/rgb/image_raw"/>
+        <arg name="input_camera_topic" value="/r200/rgb/image_raw"/>
     </include>
 
     <!-- Map image stream -->
@@ -75,7 +75,7 @@
         <arg name="client_name" value="Map image"/>
         <arg name="room_name" value="Map"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/map_image_generator/image"/>
+        <arg name="input_camera_topic" value="/map_image_generator/image"/>
     </include>
 
     <!-- Data Channel  -->

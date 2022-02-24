@@ -118,31 +118,40 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration &signali
             m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
             m_mixedAudioPublisher = m_nh.advertise<AudioFrame>("audio_mixed", 100, false);
 
-            m_signalingClient->setOnAudioFrameReceived(std::bind(&RosStreamBridge::onAudioFrameReceived, this,
-                std::placeholders::_1,
-                std::placeholders::_2,
-                std::placeholders::_3,
-                std::placeholders::_4,
-                std::placeholders::_5,
-                std::placeholders::_6));
+            m_signalingClient->setOnAudioFrameReceived(
+                [this](auto&& PH1, auto&& PH2, auto&& PH3, auto&& PH4, auto&& PH5,
+                       auto&& PH6)
+                {
+                    onAudioFrameReceived(std::forward<decltype(PH1)>(PH1),
+                                         std::forward<decltype(PH2)>(PH2),
+                                         std::forward<decltype(PH3)>(PH3),
+                                         std::forward<decltype(PH4)>(PH4),
+                                         std::forward<decltype(PH5)>(PH5),
+                                         std::forward<decltype(PH6)>(PH6));
+                });
 
-            m_signalingClient->setOnMixedAudioFrameReceived(std::bind(&RosStreamBridge::onMixedAudioFrameReceived, this,
-                std::placeholders::_1,
-                std::placeholders::_2,
-                std::placeholders::_3,
-                std::placeholders::_4,
-                std::placeholders::_5));
+            m_signalingClient->setOnMixedAudioFrameReceived(
+                [this](auto&& PH1, auto&& PH2, auto&& PH3, auto&& PH4, auto&& PH5)
+                {
+                    onMixedAudioFrameReceived(std::forward<decltype(PH1)>(PH1),
+                                              std::forward<decltype(PH2)>(PH2),
+                                              std::forward<decltype(PH3)>(PH3),
+                                              std::forward<decltype(PH4)>(PH4),
+                                              std::forward<decltype(PH5)>(PH5));
+                });
         }
 
         if (m_canReceiveVideoStream)
         {
             m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
             // Video and audio frame
-            m_signalingClient->setOnVideoFrameReceived(std::bind(&RosStreamBridge::onVideoFrameReceived, this,
-                std::placeholders::_1,
-                std::placeholders::_2,
-                std::placeholders::_3));
-
+            m_signalingClient->setOnVideoFrameReceived(
+                [this](auto&& PH1, auto&& PH2, auto&& PH3)
+                {
+                    onVideoFrameReceived(std::forward<decltype(PH1)>(PH1),
+                                         std::forward<decltype(PH2)>(PH2),
+                                         std::forward<decltype(PH3)>(PH3));
+                });
         }
     }
 }
@@ -173,7 +182,7 @@ void RosStreamBridge::onSignalingConnectionOpened()
     {
         //Audio
         m_audioSubscriber = m_nh.subscribe(
-            "audio_out",
+            "audio_in",
             1,
             &RosStreamBridge::audioCallback,
             this);
@@ -273,7 +282,7 @@ audio_utils::AudioFrame RosStreamBridge::createAudioFrame(const void* audioData,
     frame.sampling_frequency = sampleRate;
     frame.frame_sample_count = numberOfFrames;
 
-    const uint8_t* buffer = reinterpret_cast<const uint8_t*>(audioData);
+    const auto* buffer = reinterpret_cast<const uint8_t*>(audioData);
     size_t bufferSize = numberOfChannels * numberOfFrames * bitsPerSample / 8;
     frame.data = vector<uint8_t>(buffer, buffer + bufferSize);
 
@@ -296,9 +305,7 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
-RosStreamBridge::~RosStreamBridge()
-{
-}
+RosStreamBridge::~RosStreamBridge() = default;
 
 /**
  * @brief runs a ROS topic streamer Node

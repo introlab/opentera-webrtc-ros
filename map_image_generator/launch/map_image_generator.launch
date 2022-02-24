@@ -21,9 +21,11 @@
     <arg name="x_origin_param" default="500"/>
     <arg name="y_origin_param" default="500"/>
     <arg name="robot_frame_param" default="base_footprint"/>
+    <arg name="map_frame_param" default="map"/>
     <arg name="draw_goals" default="true"/>
     <arg name="draw_robot" default="true"/>
     <arg name="draw_sound_sources" default="true"/>
+    <arg name="draw_global_path" default="true"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
 
@@ -49,10 +51,12 @@
         <param name="height" type="int" value="$(arg height_param)"/>
         <param name="x_origin" type="int" value="$(arg x_origin_param)"/>
         <param name="y_origin" type="int" value="$(arg y_origin_param)"/>
-        <param name="robot_frame" type="string" value="$(arg robot_frame_param)"/>
+        <param name="robot_frame_id" type="string" value="$(arg robot_frame_param)"/>
+        <param name="map_frame_id" type="string" value="$(arg map_frame_param)"/>
         <param name="draw_goals" type="bool" value="$(arg draw_goals)" />
         <param name="draw_robot" type="bool" value="$(arg draw_robot)" />
         <param name="draw_sound_sources" type="bool" value="$(arg draw_sound_sources)" />
+        <param name="draw_global_path" type="bool" value="$(arg draw_global_path)" />
         <param name="wall_color" type="string" value="0 224 225"/>
         <param name="free_space_color" type="string" value="24 39 52"/>
         <param name="unknown_space_color" type="string" value="12 12 12"/>

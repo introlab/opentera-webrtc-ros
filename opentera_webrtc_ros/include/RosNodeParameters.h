@@ -1,9 +1,10 @@
 #ifndef OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_NODE_PARAMETERS_H
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_NODE_PARAMETERS_H
 
+#include <ros/ros.h>
+
 namespace opentera
 {
-
     /**
      * @brief Utility to load ROS parameter
      */
