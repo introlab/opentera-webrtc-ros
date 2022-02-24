@@ -91,6 +91,10 @@ class RobotStatusPublisher():
                     }
                 }
                 self.status_webrtc_pub.publish(json.dumps(status_dict))
+
+                if rospy.is_shutdown():
+                    break
+                
                 r.sleep()
 
 
