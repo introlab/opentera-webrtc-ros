@@ -36,7 +36,14 @@ tf::Pose SoundSourceImageDrawer::getPoseFromSst(const odas_ros::OdasSst& sst)
 {
     tf::Pose pose;
     pose.setOrigin({0, 0, 0});
-    pose.setRotation(tf::Quaternion(sst.x, sst.y, sst.z, 0).normalized());
+
+    double yaw = std::atan2(sst.y, sst.x);
+    double pitch = -std::atan2(sst.z, std::sqrt(sst.x * sst.x + sst.y * sst.y));
+    double roll = 0;
+
+    tf::Quaternion quaternion;
+    quaternion.setRPY(roll, pitch, yaw);
+    pose.setRotation(quaternion.normalized());
 
     return pose;
 }

@@ -37,7 +37,7 @@ namespace map_image_generator
     TFSIMD_FORCE_INLINE tfScalar tfNormalizeAngle0To2Pi(tfScalar angleInRadians)
     {
         auto angle = tfNormalizeAngle(angleInRadians);
-        return angle + TFSIMD_PI;
+        return angle >= 0 ? angle : angle + TFSIMD_2_PI;
     }
 
     cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2,
