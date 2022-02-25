@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "-fPIC")
 
-
 if(NOT CMAKE_BUILD_TYPE )
   MESSAGE(STATUS "not define build type, set to release" )
   set(CMAKE_BUILD_TYPE Release )
@@ -39,16 +38,6 @@ catkin_python_setup()
 # This is required for WebRTC
 add_definitions(-DWEBRTC_POSIX)
 
-# Disable tests because of conflicts with gtest with catkin
-set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
-# Use system opencv that is shared with ROS
-set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
-# Explicitely enable generation of Python doc
-set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC ON)
-# Enable install on build for python package, which is required for using it in ROS if using devel space
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
-add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
-
 find_package(OpenCV REQUIRED core imgproc)
 
 
@@ -68,17 +57,6 @@ link_directories(
     ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
 )
 
-set (opentera_webrtc_native_client_libs
-  opencv_core
-  opencv_imgproc
-  OpenteraWebrtcNativeClient
-  boringssl
-  webrtc
-  dl
-  X11
-  expat
-)
-
 # Actually generate the language-specific message and service files
 generate_messages(
   DEPENDENCIES
@@ -91,6 +69,35 @@ generate_messages(
 ###################################
 catkin_package(CATKIN_DEPENDS message_runtime)
 
+
+# Disable tests because of conflicts with gtest with catkin
+set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
+# Use system opencv that is shared with ROS
+set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
+# Explicitely enable generation of Python doc
+set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC ON)
+# Enable install on build for python package, which is required for using it in ROS if using devel space
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
+
+## !! Needs to be after catkin_package !!
+# CATKIN_PACKAGE_PYTHON_DESTINATION and CATKIN_PACKAGE_BIN_DESTINATION are set by catkin_package
+# Install to develspace on build
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_OPTIONS "--target=${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/..")
+# Install to installspace on install
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_OPTIONS "--target=${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/..")
+
+add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
+
+set (opentera_webrtc_native_client_libs
+  opencv_core
+  opencv_imgproc
+  OpenteraWebrtcNativeClient
+  boringssl
+  webrtc
+  dl
+  X11
+  expat
+)
 
 ###########
 ## Build ##
