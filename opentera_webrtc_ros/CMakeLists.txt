@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1)
 include(ExternalProject)
 project(opentera_webrtc_ros)
 
@@ -58,10 +58,10 @@ link_directories(
 )
 
 # Actually generate the language-specific message and service files
-generate_messages(
-  DEPENDENCIES
-  opentera_webrtc_ros_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   opentera_webrtc_ros_msgs
+# )
 
 
 ###################################
@@ -82,11 +82,13 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
 ## !! Needs to be after catkin_package !!
 # CATKIN_PACKAGE_PYTHON_DESTINATION and CATKIN_PACKAGE_BIN_DESTINATION are set by catkin_package
 # Install to develspace on build
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_OPTIONS "--target=${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/..")
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX})
 # Install to installspace on install
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_OPTIONS "--target=${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/..")
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
 
 add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
+add_subdirectory(opentera-webrtc/signaling-server)
 
 set (opentera_webrtc_native_client_libs
   opencv_core

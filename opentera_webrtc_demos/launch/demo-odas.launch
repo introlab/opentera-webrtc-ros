@@ -16,8 +16,8 @@
   <arg name="use_echo_cancellation" default="true"/>
   <arg name="echo_cancellation_source" default="alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.multichannel-input" />
   <arg name="echo_cancellation_dest" default="odas_echo_cancelled" />
-  <arg if="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/configuration_demo_ec.cfg"/>
-  <arg unless="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/configuration_demo.cfg"/>
+  <arg if="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array_ec.cfg"/>
+  <arg unless="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array.cfg"/>
 
   <!-- Demo -->
   <include file="$(find opentera_webrtc_demos)/launch/demo.launch">

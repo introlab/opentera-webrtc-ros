@@ -70,6 +70,10 @@ $ catkin_make
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
 $ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
+$ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
+$ python3 -m pip install -r requirements.txt
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
 $ python3 -m pip install -r requirements.txt
 ```
