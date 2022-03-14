@@ -40,23 +40,6 @@ add_definitions(-DWEBRTC_POSIX)
 
 find_package(OpenCV REQUIRED core imgproc)
 
-
-# TODO Fixme. Version is hard coded for now
-set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include)
-set(OPENTERA_WEBRTC_NATIVE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib)
-
-include_directories(
-    ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/socket.io-client-cpp/src
-)
-
-link_directories(
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
-)
-
 # Actually generate the language-specific message and service files
 # generate_messages(
 #   DEPENDENCIES
@@ -87,8 +70,24 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX}
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
 
-add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
-add_subdirectory(opentera-webrtc/signaling-server)
+add_subdirectory(opentera-webrtc)
+
+# TODO Fixme. Version is hard coded for now
+# Needs to be after "add_subdirectory(opentera-webrtc)" for "webrtc_native_build_version" to be set
+set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include")
+set(OPENTERA_WEBRTC_NATIVE_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib")
+
+include_directories(
+    ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/socket.io-client-cpp/src
+)
+
+link_directories(
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
+)
 
 set (opentera_webrtc_native_client_libs
   opencv_core
