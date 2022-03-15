@@ -30,11 +30,17 @@ namespace map_image_generator
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
     private:
-        void drawSoundSources(cv::Mat& image, const tf::Transform& sourceToLidarTf,
-                              const tf::Transform& lidarToRefTf);
+        void drawWithLidar(cv::Mat& image);
+        void drawSoundSourcesWithLidar(cv::Mat& image,
+                                       const tf::Transform& sourceToLidarTf,
+                                       const tf::Transform& lidarToRefTf);
+
+        void drawWithoutLidar(cv::Mat& image);
+        void drawSoundSourcesWithoutLidar(cv::Mat& image,
+                                          const tf::Transform& sourceToRefTf);
+
         void drawSoundSource(cv::Mat& image, const odas_ros::OdasSst& source,
-                             const tf::Transform& sourceToLidarTf,
-                             const tf::Transform& lidarToRefTf);
+                             tf::Pose poseInRef);
         void drawConcentricCircles(cv::Mat& image, int x, int y, int radius,
                                    double colorRatio);
 
@@ -42,6 +48,7 @@ namespace map_image_generator
 
         float getRangeForAngle(double angle);
         tf::Pose getRangePose(const tf::Pose& lidarPose);
+        tf::Pose getRefEndPose(const tf::Pose& refPose);
     };
 }
 #endif

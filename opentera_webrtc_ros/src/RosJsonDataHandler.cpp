@@ -27,6 +27,8 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh,
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
     m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
     m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
+    m_setMovementModeClient =
+        m_nh.serviceClient<opentera_webrtc_ros_msgs::SetString>("set_movement_mode");
 
     m_localizationModeClient =
         m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_localization");
@@ -115,6 +117,16 @@ void RosJsonDataHandler::onWebRTCDataReceived(
             if (!m_mappingModeClient.call(srv))
             {
                 ROS_ERROR("Mapping mode service call error");
+            }
+        }
+        else if (serializedData["action"] == "setMovementMode")
+        {
+            opentera_webrtc_ros_msgs::SetString srv;
+            srv.request.data = serializedData["cmd"];
+            if (!m_setMovementModeClient.call(srv))
+            {
+                ROS_ERROR("Set movement mode service call error: %s",
+                          srv.response.message.c_str());
             }
         }
     }

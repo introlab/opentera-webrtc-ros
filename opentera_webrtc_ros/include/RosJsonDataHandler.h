@@ -8,6 +8,7 @@
 #include <opentera_webrtc_ros_msgs/LabelSimple.h>
 #include <opentera_webrtc_ros_msgs/LabelSimpleEdit.h>
 #include <opentera_webrtc_ros_msgs/PeerData.h>
+#include <opentera_webrtc_ros_msgs/SetString.h>
 #include <opentera_webrtc_ros_msgs/WaypointArray.h>
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
@@ -37,6 +38,7 @@ namespace opentera
         ros::ServiceClient m_muteClient;
         ros::ServiceClient m_enableCameraClient;
         ros::ServiceClient m_changeMapViewClient;
+        ros::ServiceClient m_setMovementModeClient;
 
     protected:
         ros::NodeHandle m_nh;

@@ -30,11 +30,11 @@
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="camera_topic" value="/camera1/image_raw"/>
+        <arg name="input_camera_topic" value="/camera1/image_raw"/>
     </include>
 
     <!-- Robot GUI-->
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui">
     </node>
 
-</launch>   
+</launch>

@@ -8,12 +8,12 @@ project(opentera_webrtc_demos)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  opentera_client_ros
-  opentera_webrtc_ros
-  opentera_webrtc_ros_msgs
-  roscpp
-  rospy
-  std_msgs
+    opentera_client_ros
+    opentera_webrtc_ros
+    opentera_webrtc_ros_msgs
+    roscpp
+    rospy
+    std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -120,7 +120,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -207,3 +207,52 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/package.json
+    COMMAND /usr/bin/env npm install
+    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/node_modules 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+)
+
+add_custom_target(
+    opentera_werbrtc_teleop_frontend-install ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+)
+
+file(
+    GLOB_RECURSE
+    FRONTEND_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.vue
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/src/*.scss
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+    DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5 opentera_werbrtc_teleop_frontend-install
+    COMMAND /usr/bin/env npm run build
+    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/dist 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+)
+
+add_custom_target(
+    opentera_werbrtc_teleop_frontend-build ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+)
+
+#######################
+## Required programs ##
+#######################
+function(assert_program_installed PROGRAM)
+    find_program(prog-${PROGRAM} ${PROGRAM})
+    if(${prog-${PROGRAM}} STREQUAL "prog-${PROGRAM}-NOTFOUND")
+        message(FATAL_ERROR "'${PROGRAM}' needs to be installed")
+    endif()
+endfunction()
+
+assert_program_installed("npm")
+assert_program_installed("tar")
+assert_program_installed("md5sum")

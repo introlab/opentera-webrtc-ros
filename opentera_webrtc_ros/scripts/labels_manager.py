@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import annotations
-
 import rospy
 import json
 from pathlib import Path
@@ -10,10 +8,11 @@ from opentera_webrtc_ros_msgs.msg import Label, LabelArray, LabelEdit
 from opentera_webrtc_ros_msgs.msg import Waypoint
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
-from libmapimageconverter import convert_waypoint_to_pose as wp2pose
-from libmapimageconverter import convert_pose_to_waypoint as pose2wp
-from libyamldatabase import YamlDatabase
-from libnavigation import WaypointNavigationClient
+from visualization_msgs.msg import MarkerArray, Marker
+from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose as wp2pose
+from opentera_webrtc_ros.libmapimageconverter import convert_pose_to_waypoint as pose2wp
+from opentera_webrtc_ros.libyamldatabase import YamlDatabase
+from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
 
 
 class ConversionError(Exception):
@@ -85,6 +84,8 @@ class LabelsManager:
             "stored_labels", LabelArray, queue_size=1)
         self.stored_labels_text_pub = rospy.Publisher(
             "stored_labels_text", String, queue_size=1)
+        self.stored_labels_marker_pub = rospy.Publisher(
+            "stored_labels_marker", MarkerArray, queue_size=1)
 
         self.database_path: str = rospy.get_param(
             "~database_path", "~/.ros/labels.yaml")
@@ -95,6 +96,8 @@ class LabelsManager:
             1), self.publish_stored_labels)
         self.pub_timer_stored_labels_text = rospy.Timer(rospy.Duration(
             1), self.publish_stored_labels_text)
+        self.pub_timer_stored_labels_marker = rospy.Timer(rospy.Duration(
+            1), self.publish_stored_labels_marker)
 
         self.nav_client = WaypointNavigationClient()
 
@@ -107,6 +110,12 @@ class LabelsManager:
             "type": "labels", "labels": labels_text}
         labels_text_msg = json.dumps(labels_text_json_message)
         self.stored_labels_text_pub.publish(labels_text_msg)
+
+    def publish_stored_labels_marker(self, _: rospy.timer.TimerEvent) -> None:
+        markers = MarkerArray()
+        markers.markers = [self._get_marker_from_label(e.label, i)
+                           for i, e in enumerate(self.db.values())]
+        self.stored_labels_marker_pub.publish(markers)
 
     def publish_stored_labels(self, _: rospy.timer.TimerEvent) -> None:
         labels = tuple(e.label for e in self.db.values())
@@ -166,6 +175,23 @@ class LabelsManager:
             raise ConversionError(
                 f"Conversion of waypoint to pose for label {label_simple.name} failed")
         return Label(name=label_simple.name, description=label_simple.description, pose=pose)
+
+    def _get_marker_from_label(self, label: Label, id: int) -> Marker:
+        marker = Marker()
+        marker.header = label.pose.header
+        marker.ns = "labels"
+        marker.id = id
+        marker.type = Marker.ARROW
+        marker.action = Marker.ADD
+        marker.pose = label.pose.pose
+        marker.scale.x = 0.1
+        marker.scale.y = 0.1
+        marker.scale.z = 0.1
+        marker.color.a = 255.0
+        marker.color.r = 255.0
+        marker.color.g = 0.0
+        marker.color.b = 255.0
+        return marker
 
 
 rospy.loginfo("Labels manager ready")

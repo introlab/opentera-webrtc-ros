@@ -30,7 +30,12 @@
   <arg name="room_password" default="abc"/>
   <arg name="verify_ssl" default="true"/>
 
-  <arg name="camera_topic" default="ros_image"/>
+  <!-- Topics -->
+  <arg name="input_camera_topic" default="ros_image"/>
+  <arg name="output_webrtc_image_topic" default="webrtc_image"/>
+  <arg name="input_audio_topic" default="audio_in"/>
+  <arg name="output_audio_mixed_topic" default="audio_mixed"/>
+  <arg name="output_webrtc_audio_topic" default="webrtc_audio"/>
 
   <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen" respawn="true">
     <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
@@ -67,7 +72,12 @@
       verify_ssl: $(arg verify_ssl)         # SSL peer verification
     }
     </rosparam>
-    <remap from="ros_image" to="$(arg camera_topic)"/>
+
+    <remap from="ros_image" to="$(arg input_camera_topic)"/>
+    <remap from="webrtc_image" to="$(arg output_webrtc_image_topic)"/>
+    <remap from="audio_in" to="$(arg input_audio_topic)"/>
+    <remap from="audio_mixed" to="$(arg output_audio_mixed_topic)"/>
+    <remap from="webrtc_audio" to="$(arg output_webrtc_audio_topic)"/>
   </node>
 
 </launch>

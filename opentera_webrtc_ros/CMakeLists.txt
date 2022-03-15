@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1)
 include(ExternalProject)
 project(opentera_webrtc_ros)
 
@@ -27,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   opentera_webrtc_ros_msgs
   std_srvs
+  visualization_msgs
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -37,20 +38,45 @@ catkin_python_setup()
 # This is required for WebRTC
 add_definitions(-DWEBRTC_POSIX)
 
+find_package(OpenCV REQUIRED core imgproc)
+
+# Actually generate the language-specific message and service files
+# generate_messages(
+#   DEPENDENCIES
+#   opentera_webrtc_ros_msgs
+# )
+
+
+###################################
+## catkin specific configuration ##
+###################################
+catkin_package(CATKIN_DEPENDS message_runtime)
+
+
 # Disable tests because of conflicts with gtest with catkin
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
-# Disable generation of Python doc, this is causing problems with catkin otherwise
-set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC OFF)
+# Explicitely enable generation of Python doc
+set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC ON)
+# Enable install on build for python package, which is required for using it in ROS if using devel space
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
+
+## !! Needs to be after catkin_package !!
+# CATKIN_PACKAGE_PYTHON_DESTINATION and CATKIN_PACKAGE_BIN_DESTINATION are set by catkin_package
+# Install to develspace on build
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX})
+# Install to installspace on install
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
+
 add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
-
-find_package(OpenCV REQUIRED core imgproc)
-
+add_subdirectory(opentera-webrtc/signaling-server)
 
 # TODO Fixme. Version is hard coded for now
-set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include)
-set(OPENTERA_WEBRTC_NATIVE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib)
+# Needs to be after "add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)" for "webrtc_native_build_version" to be set
+set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include")
+set(OPENTERA_WEBRTC_NATIVE_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib")
 
 include_directories(
     ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
@@ -60,33 +86,20 @@ include_directories(
 )
 
 link_directories(
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}    
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm  
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}
+    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
 )
 
 set (opentera_webrtc_native_client_libs
-  opencv_core 
+  opencv_core
   opencv_imgproc
   OpenteraWebrtcNativeClient
   boringssl
   webrtc
-  dl 
-  X11 
+  dl
+  X11
   expat
 )
-
-# Actually generate the language-specific message and service files
-generate_messages(
-  DEPENDENCIES 
-  opentera_webrtc_ros_msgs
-)
-
-
-###################################
-## catkin specific configuration ##
-###################################
-catkin_package(CATKIN_DEPENDS message_runtime)
-
 
 ###########
 ## Build ##
@@ -107,12 +120,14 @@ add_executable(${PROJECT_NAME}_topic_streamer
   src/RosSignalingServerConfiguration.cpp
   src/RosStreamBridge.cpp
   src/RosNodeParameters.cpp
+  src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
   src/RosSignalingServerConfiguration.cpp
   src/RosDataChannelBridge.cpp
   src/RosNodeParameters.cpp
+  src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_json_data_handler
@@ -145,6 +160,7 @@ add_dependencies(${PROJECT_NAME}_topic_streamer ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_data_channel_bridge ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
 
+
 #############
 ## Install ##
 #############
@@ -163,4 +179,3 @@ install(
     ${PROJECT_NAME}_json_data_handler
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-

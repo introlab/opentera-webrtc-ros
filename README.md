@@ -29,7 +29,7 @@ sudo apt-get install nodejs npm
 sudo apt-get install build-essential gfortran texinfo libasound2-dev
 
 # odas_ros packages
-sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio
+sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio libpulse-dev
 ```
 
 # Installation
@@ -69,6 +69,10 @@ $ catkin_make
 
 ```bash
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
+$ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
+$ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
 $ python3 -m pip install -r requirements.txt
 $ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
 $ python3 -m pip install -r requirements.txt
