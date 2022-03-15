@@ -209,16 +209,18 @@ include_directories(
 # catkin_add_nosetests(test)
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/package.json
     COMMAND /usr/bin/env npm install
-    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/node_modules 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+    VERBATIM
 )
 
 add_custom_target(
     opentera_werbrtc_teleop_frontend-install ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp
+    VERBATIM
 )
 
 file(
@@ -231,16 +233,18 @@ file(
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
-    DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.md5 opentera_werbrtc_teleop_frontend-install
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.stamp
+    DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp opentera_werbrtc_teleop_frontend-install
     COMMAND /usr/bin/env npm run build
-    COMMAND tar c ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/dist 2> /dev/null | md5sum > ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/dist.stamp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
+    VERBATIM
 )
 
 add_custom_target(
     opentera_werbrtc_teleop_frontend-build ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist.md5
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist.stamp
+    VERBATIM
 )
 
 #######################
@@ -255,4 +259,3 @@ endfunction()
 
 assert_program_installed("npm")
 assert_program_installed("tar")
-assert_program_installed("md5sum")
