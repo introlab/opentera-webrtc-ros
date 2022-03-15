@@ -70,10 +70,11 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX}
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
 
-add_subdirectory(opentera-webrtc)
+add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
+add_subdirectory(opentera-webrtc/signaling-server)
 
 # TODO Fixme. Version is hard coded for now
-# Needs to be after "add_subdirectory(opentera-webrtc)" for "webrtc_native_build_version" to be set
+# Needs to be after "add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)" for "webrtc_native_build_version" to be set
 set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include")
 set(OPENTERA_WEBRTC_NATIVE_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib")
 
