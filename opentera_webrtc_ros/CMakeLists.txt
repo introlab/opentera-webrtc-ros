@@ -57,8 +57,6 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
-# Explicitely enable generation of Python doc
-set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC ON)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
 
