@@ -1,34 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
-# include(ExternalProject)
 project(opentera_webrtc_rosbridge_server)
-
-## Set compile options
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS "-fPIC")
-
-
-if(NOT CMAKE_BUILD_TYPE )
-  MESSAGE(STATUS "not define build type, set to release" )
-  set(CMAKE_BUILD_TYPE Release )
-elseif(NOT (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Debug" ))
-  message(FATAL_ERROR "CMAKE_BUILD_TYPE must be either Release or Debug")
-endif()
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  # roscpp
   rospy
-  # cv_bridge
-  message_generation
   std_msgs
-  sensor_msgs
-  # audio_utils
-  geometry_msgs
-  opentera_webrtc_ros_msgs
-  std_srvs
-  visualization_msgs
+  rosbridge_library
+  rosbridge_msgs
+  rosapi
+  rosauth
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -89,106 +69,22 @@ catkin_python_setup()
 ###################################
 catkin_package(CATKIN_DEPENDS message_runtime)
 
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-# include_directories(
-#   include
-#   ${catkin_INCLUDE_DIRS}
-#   lib
-# )
-
-
-## Declare a C++ executable
-# add_executable(${PROJECT_NAME}_topic_streamer
-#   src/RosVideoSource.cpp
-#   src/RosAudioSource.cpp
-#   src/RosSignalingServerConfiguration.cpp
-#   src/RosStreamBridge.cpp
-#   src/RosNodeParameters.cpp
-#   src/RosParamUtils.cpp
-# )
-
-# add_executable(${PROJECT_NAME}_data_channel_bridge
-#   src/RosSignalingServerConfiguration.cpp
-#   src/RosDataChannelBridge.cpp
-#   src/RosNodeParameters.cpp
-#   src/RosParamUtils.cpp
-# )
-
-# add_executable(${PROJECT_NAME}_json_data_handler
-#   src/RosJsonDataHandler.cpp
-# )
-
-## Rename C++ executable without prefix
-# set_target_properties(${PROJECT_NAME}_topic_streamer PROPERTIES OUTPUT_NAME topic_streamer PREFIX "")
-# set_target_properties(${PROJECT_NAME}_data_channel_bridge PROPERTIES OUTPUT_NAME data_channel_bridge PREFIX "")
-# set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_topic_streamer
-#   ${opentera_webrtc_native_client_libs}
-#   ${catkin_LIBRARIES}
-#   samplerate
-# )
-
-# target_link_libraries(${PROJECT_NAME}_data_channel_bridge
-#   ${opentera_webrtc_native_client_libs}
-#   ${catkin_LIBRARIES}
-# )
-
-# target_link_libraries(${PROJECT_NAME}_json_data_handler
-#   ${opentera_webrtc_native_client_libs}
-#   ${catkin_LIBRARIES}
-# )
-
-## ROS message dependencies
-# add_dependencies(${PROJECT_NAME}_topic_streamer ${catkin_EXPORTED_TARGETS})
-# add_dependencies(${PROJECT_NAME}_data_channel_bridge ${catkin_EXPORTED_TARGETS})
-# add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
-
-# set(PYTHON_THINGY_DIRECTORY ${PROJECT_BINARY_DIR}/python-thingy)
-
-# add_custom_target(python-opentera-webrtc-native-client-so
-#   ALL
-#   DEPENDS _opentera_webrtc_native_client
-#   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:_opentera_webrtc_native_client> ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/python/package/opentera_webrtc_native_client/$<TARGET_FILE_NAME:_opentera_webrtc_native_client>
-# )
-
-# add_custom_target(python-opentera-webrtc-native-client-wheel
-#   ALL
-#   DEPENDS python-opentera-webrtc-native-client-so
-#   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/python/package/opentera_webrtc_native_client ${PYTHON_THINGY_DIRECTORY}/
-#   COMMAND /usr/bin/env python3.8 setup.py bdist bdist_wheel sdist
-#   WORKING_DIRECTORY ${PYTHON_THINGY_DIRECTORY}
-# )
-
-# add_custom_target(python-opentera-webrtc-native-client
-#   ALL
-#   DEPENDS python-opentera-webrtc-native-client-wheel
-#   COMMAND /usr/bin/env python3.8 -m pip install --upgrade --force-reinstall --no-deps --no-cache-dir --no-index --find-links=${PYTHON_THINGY_DIRECTORY}/dist opentera-webrtc-native-client
-#   WORKING_DIRECTORY ${PYTHON_THINGY_DIRECTORY}
-# )
-
-
 #############
 ## Install ##
 #############
 
-# install(PROGRAMS
-#    scripts/opentera_webrtc_audio_mixer.py
-#       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 # all install targets should use catkin DESTINATION variables
+# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-## Mark executables for installation
-# install(
-#   TARGETS
-#     ${PROJECT_NAME}_topic_streamer
-#     ${PROJECT_NAME}_data_channel_bridge
-#     ${PROJECT_NAME}_json_data_handler
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+# Mark executable scripts (Python etc.) for installation
+# in contrast to setup.py, you can choose the destination
+catkin_install_python(PROGRAMS
+  scripts/rosbridge_webrtc.py
+  scripts/rosbridge_webrtc
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(FILES
+  launch/rosbridge_webrtc.launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)

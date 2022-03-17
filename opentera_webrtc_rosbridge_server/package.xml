@@ -10,19 +10,16 @@
   <author email="philippe.warren@usherbrooke.ca">Philippe Warren</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>message_generation</build_depend>
-  <!-- <build_depend>audio_utils</build_depend> -->
-  <build_depend>opentera_webrtc_ros_msgs</build_depend>
-  <!-- <build_depend>map_image_generator</build_depend> -->
+
+  <!-- <build_depend>message_generation</build_depend> -->
+  <!-- <build_depend>opentera_webrtc_ros_msgs</build_depend> -->
   <build_depend>rospy</build_depend>
-  <depend>roscpp</depend>
-  <depend>cv_bridge</depend>
-  <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>message_runtime</depend>
-  <depend>std_srvs</depend>
   <exec_depend>rospy</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>rosbridge_library</exec_depend>
+  <exec_depend>rosbridge_msgs</exec_depend>
+  <exec_depend>rosapi</exec_depend>
+  <exec_depend>rosauth</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
   <export>
   </export>
 </package>
