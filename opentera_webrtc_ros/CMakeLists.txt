@@ -55,6 +55,8 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 
 # Disable tests because of conflicts with gtest with catkin
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
+# Disable examples
+set(OPENTERA_WEBRTC_ENABLE_EXAMPLES OFF)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
@@ -68,8 +70,7 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX}
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
 
-add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)
-add_subdirectory(opentera-webrtc/signaling-server)
+add_subdirectory(opentera-webrtc)
 
 # TODO Fixme. Version is hard coded for now
 # Needs to be after "add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)" for "webrtc_native_build_version" to be set
