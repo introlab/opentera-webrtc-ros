@@ -8,19 +8,19 @@ project(map_image_generator)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  geometry_msgs
-  image_transport
-  nav_msgs
-  roscpp
-  sensor_msgs
-  std_msgs
-  tf
-  rtabmap_ros
-  message_generation
-  std_srvs
-  odas_ros
-  opentera_webrtc_ros_msgs
+    cv_bridge
+    geometry_msgs
+    image_transport
+    nav_msgs
+    roscpp
+    sensor_msgs
+    std_msgs
+    tf
+    rtabmap_ros
+    message_generation
+    std_srvs
+    odas_ros
+    opentera_webrtc_ros_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -66,9 +66,9 @@ find_package(OpenCV REQUIRED)
 
 ## Generate services in the 'srv' folder
 add_service_files(
-  FILES
-  ImageGoalToMapGoal.srv
-  ChangeMapView.srv
+    FILES
+        ImageGoalToMapGoal.srv
+        ChangeMapView.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -80,9 +80,9 @@ add_service_files(
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
-  DEPENDENCIES
-  geometry_msgs
-  std_msgs
+    DEPENDENCIES
+        geometry_msgs
+        std_msgs
 )
 
 ################################################
@@ -128,38 +128,39 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
+    include
+    ${catkin_INCLUDE_DIRS}
 )
 
 add_executable(map_image_generator
-  include/map_image_generator/drawers/GlobalPathImageDrawer.h
-  include/map_image_generator/drawers/GoalImageDrawer.h
-  include/map_image_generator/drawers/ImageDrawer.h
-  include/map_image_generator/drawers/LabelImageDrawer.h
-  include/map_image_generator/drawers/LaserScanImageDrawer.h
-  include/map_image_generator/drawers/OccupancyGridImageDrawer.h
-  include/map_image_generator/drawers/RobotImageDrawer.h
-  include/map_image_generator/drawers/SoundSourceImageDrawer.h
-  include/map_image_generator/GoalConverter.h
-  include/map_image_generator/MapImageGenerator.h
-  include/map_image_generator/MapLabelsConverter.h
-  include/map_image_generator/Parameters.h
-  include/map_image_generator/utils.h
-  src/drawers/GlobalPathImageDrawer.cpp
-  src/drawers/GoalImageDrawer.cpp
-  src/drawers/ImageDrawer.cpp
-  src/drawers/LabelImageDrawer.cpp
-  src/drawers/LaserScanImageDrawer.cpp
-  src/drawers/OccupancyGridImageDrawer.cpp
-  src/drawers/RobotImageDrawer.cpp
-  src/drawers/SoundSourceImageDrawer.cpp
-  src/GoalConverter.cpp
-  src/main.cpp
-  src/MapImageGenerator.cpp
-  src/MapLabelsConverter.cpp
-  src/Parameters.cpp
-  src/utils.cpp)
+    include/map_image_generator/drawers/GlobalPathImageDrawer.h
+    include/map_image_generator/drawers/GoalImageDrawer.h
+    include/map_image_generator/drawers/ImageDrawer.h
+    include/map_image_generator/drawers/LabelImageDrawer.h
+    include/map_image_generator/drawers/LaserScanImageDrawer.h
+    include/map_image_generator/drawers/OccupancyGridImageDrawer.h
+    include/map_image_generator/drawers/RobotImageDrawer.h
+    include/map_image_generator/drawers/SoundSourceImageDrawer.h
+    include/map_image_generator/GoalConverter.h
+    include/map_image_generator/MapImageGenerator.h
+    include/map_image_generator/MapLabelsConverter.h
+    include/map_image_generator/Parameters.h
+    include/map_image_generator/utils.h
+    src/drawers/GlobalPathImageDrawer.cpp
+    src/drawers/GoalImageDrawer.cpp
+    src/drawers/ImageDrawer.cpp
+    src/drawers/LabelImageDrawer.cpp
+    src/drawers/LaserScanImageDrawer.cpp
+    src/drawers/OccupancyGridImageDrawer.cpp
+    src/drawers/RobotImageDrawer.cpp
+    src/drawers/SoundSourceImageDrawer.cpp
+    src/GoalConverter.cpp
+    src/main.cpp
+    src/MapImageGenerator.cpp
+    src/MapLabelsConverter.cpp
+    src/Parameters.cpp
+    src/utils.cpp
+)
 
 target_link_libraries(map_image_generator
     ${catkin_LIBRARIES}

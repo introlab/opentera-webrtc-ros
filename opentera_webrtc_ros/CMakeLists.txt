@@ -9,25 +9,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-fPIC")
 
 if(NOT CMAKE_BUILD_TYPE )
-  MESSAGE(STATUS "not define build type, set to release" )
-  set(CMAKE_BUILD_TYPE Release )
+    MESSAGE(STATUS "not define build type, set to release" )
+    set(CMAKE_BUILD_TYPE Release )
 elseif(NOT (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Debug" ))
-  message(FATAL_ERROR "CMAKE_BUILD_TYPE must be either Release or Debug")
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE must be either Release or Debug")
 endif()
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  cv_bridge
-  message_generation
-  std_msgs
-  sensor_msgs
-  audio_utils
-  geometry_msgs
-  opentera_webrtc_ros_msgs
-  std_srvs
-  visualization_msgs
+    roscpp
+    rospy
+    cv_bridge
+    message_generation
+    std_msgs
+    sensor_msgs
+    audio_utils
+    geometry_msgs
+    opentera_webrtc_ros_msgs
+    std_srvs
+    visualization_msgs
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -89,15 +89,15 @@ link_directories(
     ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
 )
 
-set (opentera_webrtc_native_client_libs
-  opencv_core
-  opencv_imgproc
-  OpenteraWebrtcNativeClient
-  boringssl
-  webrtc
-  dl
-  X11
-  expat
+set(opentera_webrtc_native_client_libs
+    opencv_core
+    opencv_imgproc
+    OpenteraWebrtcNativeClient
+    boringssl
+    webrtc
+    dl
+    X11
+    expat
 )
 
 ###########
@@ -106,31 +106,31 @@ set (opentera_webrtc_native_client_libs
 
 ## Specify additional locations of header files
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  lib
+    include
+    ${catkin_INCLUDE_DIRS}
+    lib
 )
 
 
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_topic_streamer
-  src/RosVideoSource.cpp
-  src/RosAudioSource.cpp
-  src/RosSignalingServerConfiguration.cpp
-  src/RosStreamBridge.cpp
-  src/RosNodeParameters.cpp
-  src/RosParamUtils.cpp
+    src/RosVideoSource.cpp
+    src/RosAudioSource.cpp
+    src/RosSignalingServerConfiguration.cpp
+    src/RosStreamBridge.cpp
+    src/RosNodeParameters.cpp
+    src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
-  src/RosSignalingServerConfiguration.cpp
-  src/RosDataChannelBridge.cpp
-  src/RosNodeParameters.cpp
-  src/RosParamUtils.cpp
+    src/RosSignalingServerConfiguration.cpp
+    src/RosDataChannelBridge.cpp
+    src/RosNodeParameters.cpp
+    src/RosParamUtils.cpp
 )
 
 add_executable(${PROJECT_NAME}_json_data_handler
-  src/RosJsonDataHandler.cpp
+    src/RosJsonDataHandler.cpp
 )
 
 ## Rename C++ executable without prefix
@@ -140,18 +140,18 @@ set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME j
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_topic_streamer
-  ${opentera_webrtc_native_client_libs}
-  ${catkin_LIBRARIES}
+    ${opentera_webrtc_native_client_libs}
+    ${catkin_LIBRARIES}
 )
 
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
-  ${opentera_webrtc_native_client_libs}
-  ${catkin_LIBRARIES}
+    ${opentera_webrtc_native_client_libs}
+    ${catkin_LIBRARIES}
 )
 
 target_link_libraries(${PROJECT_NAME}_json_data_handler
-  ${opentera_webrtc_native_client_libs}
-  ${catkin_LIBRARIES}
+    ${opentera_webrtc_native_client_libs}
+    ${catkin_LIBRARIES}
 )
 
 ## ROS message dependencies
@@ -164,17 +164,19 @@ add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
 ## Install ##
 #############
 
-install(PROGRAMS
-   scripts/opentera_webrtc_audio_mixer.py
-      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(
+    PROGRAMS
+        scripts/opentera_webrtc_audio_mixer.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # all install targets should use catkin DESTINATION variables
 
 ## Mark executables for installation
 install(
-  TARGETS
-    ${PROJECT_NAME}_topic_streamer
-    ${PROJECT_NAME}_data_channel_bridge
-    ${PROJECT_NAME}_json_data_handler
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    TARGETS
+        ${PROJECT_NAME}_topic_streamer
+        ${PROJECT_NAME}_data_channel_bridge
+        ${PROJECT_NAME}_json_data_handler
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

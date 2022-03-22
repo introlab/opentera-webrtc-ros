@@ -8,11 +8,11 @@ project(opentera_webrtc_robot_gui)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  opentera_webrtc_ros_msgs
-  roscpp
-  rospy
-  std_msgs
-  sensor_msgs
+    opentera_webrtc_ros_msgs
+    roscpp
+    rospy
+    std_msgs
+    sensor_msgs
 )
 
 # Find Ubuntu release version
@@ -29,27 +29,27 @@ set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
 find_package(Qt5 COMPONENTS ${opentera_webrtc_robot_gui_components} REQUIRED)
 
 set(srcs
-  src/main.cpp
-  src/MainWindow.cpp
-  src/ROSCameraView.cpp
-  src/GraphicsViewToolbar.cpp
-  src/ConfigDialog.cpp
+    src/main.cpp
+    src/MainWindow.cpp
+    src/ROSCameraView.cpp
+    src/GraphicsViewToolbar.cpp
+    src/ConfigDialog.cpp
 )
 
 set(headers
-  src/MainWindow.h
-  src/ROSCameraView.h
-  src/GraphicsViewToolbar.h
-  src/ConfigDialog.h
+    src/MainWindow.h
+    src/ROSCameraView.h
+    src/GraphicsViewToolbar.h
+    src/ConfigDialog.h
 )
 
 set(uis
-  src/ui/MainWindow.ui
-  src/ui/ConfigDialog.ui
+    src/ui/MainWindow.ui
+    src/ui/ConfigDialog.ui
 )
 
 set(qrcs
-  src/resources/opentera_webrtc_robot_gui.qrc
+    src/resources/opentera_webrtc_robot_gui.qrc
 )
 
 #Generate .h files from the .ui files
@@ -164,9 +164,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_BINARY_DIR}
+    ${catkin_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_executable(${PROJECT_NAME}_node ${srcs} ${uis} ${headers} ${project_moc_uis} ${project_qrcs} ${project_moc_srcs})
@@ -200,8 +200,8 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
-   ${opentera_webrtc_robot_gui_components_link}
+    ${catkin_LIBRARIES}
+    ${opentera_webrtc_robot_gui_components_link}
 )
 
 #############
@@ -213,15 +213,16 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-   scripts/opentera_webrtc_robot_gui.py
-   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+catkin_install_python(
+    PROGRAMS
+        scripts/opentera_webrtc_robot_gui.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 install(TARGETS ${PROJECT_NAME}_node
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark libraries for installation
