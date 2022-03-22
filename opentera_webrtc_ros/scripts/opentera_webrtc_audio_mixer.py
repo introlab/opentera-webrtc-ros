@@ -15,6 +15,7 @@ p = pyaudio.PyAudio()
 
 output_device_index = 0
 
+
 class AudioWriter:
     def __init__(self, peer_id: str):
         self._peer_id = peer_id
@@ -51,7 +52,8 @@ class AudioWriter:
                                             channels=audio.frame.channel_count,
                                             rate=audio.frame.sampling_frequency,
                                             output_device_index=output_device_index,
-                                            frames_per_buffer=int(audio.frame.frame_sample_count * 20),
+                                            frames_per_buffer=int(
+                                                audio.frame.frame_sample_count * 20),
                                             output=True)
                             # Fill buffer with zeros ?
                             # for _ in range(10):
@@ -59,7 +61,8 @@ class AudioWriter:
 
                         stream.write(audio.frame.data)
                     else:
-                        print('Unsupported format: ', audio.frame.format, self._peer_id)
+                        print('Unsupported format: ',
+                              audio.frame.format, self._peer_id)
 
             except queue.Empty as e:
                 # An exception will occur when queue is empty
@@ -83,7 +86,8 @@ class AudioWriter:
 
 class AudioMixerROS:
     def __init__(self):
-        self._subscriber = rospy.Subscriber('/webrtc_audio', PeerAudio, self._on_peer_audio, queue_size=100)
+        self._subscriber = rospy.Subscriber(
+            '/webrtc_audio', PeerAudio, self._on_peer_audio, queue_size=100)
         self._writers = dict()
         # Cleanup timer every second
         self._timer = rospy.Timer(rospy.Duration(1), self._on_cleanup_timeout)
@@ -131,4 +135,3 @@ if __name__ == '__main__':
     mixer = AudioMixerROS()
     rospy.spin()
     mixer.shutdown()
-

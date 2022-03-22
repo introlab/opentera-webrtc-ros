@@ -9,28 +9,30 @@ from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String
 import json
 
+
 class RobotStatusPublisher():
     def __init__(self):
         rospy.init_node("robot_status_publisher")
-        self.status_pub = rospy.Publisher('/robot_status', RobotStatus, queue_size=10)
-        self.status_webrtc_pub = rospy.Publisher('/webrtc_data_outgoing', String, queue_size=10)
+        self.status_pub = rospy.Publisher(
+            '/robot_status', RobotStatus, queue_size=10)
+        self.status_webrtc_pub = rospy.Publisher(
+            '/webrtc_data_outgoing', String, queue_size=10)
         self.pub_rate = 1
-
 
     def get_ip_address(self, ifname: str):
         try:
-            address = os.popen('ip addr show ' + ifname).read().split("inet ")[1].split("/")[0]
+            address = os.popen('ip addr show ' +
+                               ifname).read().split("inet ")[1].split("/")[0]
         except Exception as e:
             address = '127.0.0.1'
         finally:
             return address
 
-
     def get_disk_usage(self, mount_point='/'):
-        result=os.statvfs(mount_point)
-        block_size=result.f_frsize
-        total_blocks=result.f_blocks
-        free_blocks=result.f_bfree
+        result = os.statvfs(mount_point)
+        block_size = result.f_frsize
+        total_blocks = result.f_blocks
+        free_blocks = result.f_bfree
         return 100 - (free_blocks * 100 / total_blocks)
 
     def run(self):
@@ -45,30 +47,35 @@ class RobotStatusPublisher():
                 status.battery_voltage = float(i)
                 status.battery_current = 1.0
                 status.cpu_usage = psutil.cpu_percent()
-                status.mem_usage = 100 - (psutil.virtual_memory().available * 100 / psutil.virtual_memory().total)
+                status.mem_usage = 100 - \
+                    (psutil.virtual_memory().available *
+                     100 / psutil.virtual_memory().total)
                 status.disk_usage = self.get_disk_usage()
 
-
-                subprocess_result = subprocess.Popen('iwgetid',shell=True,stdout=subprocess.PIPE)
-                subprocess_output = subprocess_result.communicate()[0],subprocess_result.returncode
+                subprocess_result = subprocess.Popen(
+                    'iwgetid', shell=True, stdout=subprocess.PIPE)
+                subprocess_output = subprocess_result.communicate()[
+                    0], subprocess_result.returncode
                 network_name = subprocess_output[0].decode('utf-8')
                 status.wifi_network = network_name
                 if status.wifi_network:
                     wifi_interface_name = status.wifi_network.split()[0]
 
                     command = "iwconfig %s | grep 'Link Quality='" % wifi_interface_name
-                    subprocess_result = subprocess.Popen(command, shell=True,stdout=subprocess.PIPE)
-                    subprocess_output = subprocess_result.communicate()[0],subprocess_result.returncode
+                    subprocess_result = subprocess.Popen(
+                        command, shell=True, stdout=subprocess.PIPE)
+                    subprocess_output = subprocess_result.communicate()[
+                        0], subprocess_result.returncode
                     decoded_output = subprocess_output[0].decode('utf-8')
-                    numerator = int(re.search('=(.+?)/', decoded_output).group(1))
-                    denominator = int(re.search('/(.+?) ', decoded_output).group(1))
+                    numerator = int(
+                        re.search('=(.+?)/', decoded_output).group(1))
+                    denominator = int(
+                        re.search('/(.+?) ', decoded_output).group(1))
                     status.wifi_strength = numerator / denominator * 100
                     status.local_ip = self.get_ip_address(wifi_interface_name)
                 else:
                     status.wifi_strength = 0
                     status.local_ip = '127.0.0.1'
-
-
 
                 # Publish for ROS
                 self.status_pub.publish(status)
@@ -94,7 +101,7 @@ class RobotStatusPublisher():
 
                 if rospy.is_shutdown():
                     break
-                
+
                 r.sleep()
 
 
