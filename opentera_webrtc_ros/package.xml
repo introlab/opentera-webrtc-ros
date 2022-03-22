@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>opentera_webrtc_ros</name>
-  <version>0.1.0</version>
-  <description>Provides Nodes to join a WebRTC call from ROS</description>
+    <name>opentera_webrtc_ros</name>
+    <version>0.1.0</version>
+    <description>Provides Nodes to join a WebRTC call from ROS</description>
 
-  <maintainer email="cedric.godin@usherbrooke.ca">Cédric Godin</maintainer>
-  <license>Apache-2.0</license>
-  <url type="repository">https://github.com/introlab/opentera-webrtc-ros</url>
-  <author email="cedric.godin@usherbrooke.ca">Cédric Godin</author>
+    <maintainer email="cedric.godin@usherbrooke.ca">Cédric Godin</maintainer>
+    <license>Apache-2.0</license>
+    <url type="repository">https://github.com/introlab/opentera-webrtc-ros</url>
+    <author email="cedric.godin@usherbrooke.ca">Cédric Godin</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>audio_utils</build_depend>
-  <build_depend>opentera_webrtc_ros_msgs</build_depend>
-  <build_depend>map_image_generator</build_depend>
-  <build_depend>rospy</build_depend>
-  <depend>roscpp</depend>
-  <depend>cv_bridge</depend>
-  <depend>std_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>message_runtime</depend>
-  <depend>std_srvs</depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
-  <export>
-  </export>
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>message_generation</build_depend>
+    <build_depend>audio_utils</build_depend>
+    <build_depend>opentera_webrtc_ros_msgs</build_depend>
+    <build_depend>map_image_generator</build_depend>
+    <build_depend>rospy</build_depend>
+    <depend>roscpp</depend>
+    <depend>cv_bridge</depend>
+    <depend>std_msgs</depend>
+    <depend>sensor_msgs</depend>
+    <depend>message_runtime</depend>
+    <depend>std_srvs</depend>
+    <exec_depend>rospy</exec_depend>
+    <exec_depend>visualization_msgs</exec_depend>
+    <export>
+    </export>
 </package>

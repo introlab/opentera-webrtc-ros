@@ -1,115 +1,115 @@
 <launch>
 
-  <!-- Turtlebot base model and position -->
-  <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="x_pos" default="1.0"/>
-  <arg name="y_pos" default="0.5"/>
-  <arg name="z_pos" default="0.0"/>
+    <!-- Turtlebot base model and position -->
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="x_pos" default="1.0"/>
+    <arg name="y_pos" default="0.5"/>
+    <arg name="z_pos" default="0.0"/>
 
-  <!-- RTAB-Map config -->
-  <arg name="use_rtabmap" default="true" />
-  <arg name="open_rviz" default="false"/>
-  <arg name="rtabmapviz" default="false"/>
-  <arg name="move_forward_only" default="true"/>
-  <arg name="gazebo_gui" default="false"/>
+    <!-- RTAB-Map config -->
+    <arg name="use_rtabmap" default="true" />
+    <arg name="open_rviz" default="false"/>
+    <arg name="rtabmapviz" default="false"/>
+    <arg name="move_forward_only" default="true"/>
+    <arg name="gazebo_gui" default="false"/>
 
-  <arg name="use_move_base" default="true" />
+    <arg name="use_move_base" default="true" />
 
-  <arg name="with_camera" default="true"/>
-  <arg name="localization" default="false"/>
-  <arg name="database_path" default="~/.ros/rtabmap.db"/>
-  <arg     if="$(arg localization)" name="rtabmap_args" default=""/>
-  <arg unless="$(arg localization)" name="rtabmap_args" default="-d"/>
+    <arg name="with_camera" default="true"/>
+    <arg name="localization" default="false"/>
+    <arg name="database_path" default="~/.ros/rtabmap.db"/>
+    <arg if="$(arg localization)" name="rtabmap_args" default=""/>
+    <arg unless="$(arg localization)" name="rtabmap_args" default="-d"/>
 
-  <!-- Gazebo -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find opentera_webrtc_demos)/worlds/turtlebot3_house.world"/>
-    <arg name="paused" value="false"/>
-    <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="$(arg gazebo_gui)"/>
-    <arg name="headless" value="false"/>
-    <arg name="debug" value="false"/>
-  </include>
+    <!-- Gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find opentera_webrtc_demos)/worlds/turtlebot3_house.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="$(arg gazebo_gui)"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
 
-  <!-- Robot description and urdf-->
-  <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_beam_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
-  <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+    <!-- Robot description and urdf-->
+    <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_beam_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
 
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
-    <param name="publish_frequency" type="double" value="50.0" />
-  </node>
-
-  <group ns="rtabmap" if="$(arg use_rtabmap)">
-    <node if="$(eval model=='waffle')" pkg="rtabmap_ros" type="rgbd_sync" name="rgbd_sync">
-      <remap from="rgb/image"         to="/r200/rgb/image_raw"/>
-      <remap from="depth/image"       to="/r200/depth/image_raw"/>
-      <remap from="rgb/camera_info"   to="/r200/rgb/camera_info"/>
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0" />
     </node>
 
-    <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" args="$(arg rtabmap_args)">
-      <param name="database_path"       type="string" value="$(arg database_path)"/>
-      <param name="frame_id"            type="string" value="base_footprint"/>
-      <param name="subscribe_rgb"   type="bool" value="false"/>
-      <param name="subscribe_depth" type="bool" value="false"/>
-      <param     if="$(eval model=='waffle')" name="subscribe_rgbd" type="bool" value="true"/>
-      <param unless="$(eval model=='waffle')" name="subscribe_rgbd" type="bool" value="false"/>
-      <param name="subscribe_scan"      type="bool"   value="true"/>
-      <param name="approx_sync"         type="bool"   value="true"/>
-      <param name="map_always_update"   type="bool"   value="true"/>
-      <param name="map_empty_ray_tracing"   type="bool"   value="true"/>
+    <group ns="rtabmap" if="$(arg use_rtabmap)">
+        <node if="$(eval model=='waffle')" pkg="rtabmap_ros" type="rgbd_sync" name="rgbd_sync">
+            <remap from="rgb/image"         to="/r200/rgb/image_raw"/>
+            <remap from="depth/image"       to="/r200/depth/image_raw"/>
+            <remap from="rgb/camera_info"   to="/r200/rgb/camera_info"/>
+        </node>
 
-      <!-- use actionlib to send goals to move_base -->
-      <param name="use_action_for_goal" type="bool" value="true"/>
-      <remap from="move_base"            to="/move_base"/>
+        <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" args="$(arg rtabmap_args)">
+            <param name="database_path"       type="string" value="$(arg database_path)"/>
+            <param name="frame_id"            type="string" value="base_footprint"/>
+            <param name="subscribe_rgb"   type="bool" value="false"/>
+            <param name="subscribe_depth" type="bool" value="false"/>
+            <param     if="$(eval model=='waffle')" name="subscribe_rgbd" type="bool" value="true"/>
+            <param unless="$(eval model=='waffle')" name="subscribe_rgbd" type="bool" value="false"/>
+            <param name="subscribe_scan"      type="bool"   value="true"/>
+            <param name="approx_sync"         type="bool"   value="true"/>
+            <param name="map_always_update"   type="bool"   value="true"/>
+            <param name="map_empty_ray_tracing"   type="bool"   value="true"/>
 
-      <!-- inputs -->
-      <remap from="scan"            to="/scan"/>
-      <remap from="odom"            to="/odom"/>
-      <remap from="rgbd_image"       to="rgbd_image"/>
+            <!-- use actionlib to send goals to move_base -->
+            <param name="use_action_for_goal" type="bool" value="true"/>
+            <remap from="move_base"            to="/move_base"/>
 
-      <!-- output -->
-      <remap from="grid_map" to="/map"/>
+            <!-- inputs -->
+            <remap from="scan"            to="/scan"/>
+            <remap from="odom"            to="/odom"/>
+            <remap from="rgbd_image"       to="rgbd_image"/>
 
-      <!-- RTAB-Map's parameters -->
-      <param name="Reg/Strategy"                 type="string" value="1"/>
-      <param name="Reg/Force3DoF"                type="string" value="true"/>
-      <param name="GridGlobal/MinSize"           type="string" value="20"/>
+            <!-- output -->
+            <remap from="grid_map" to="/map"/>
 
-      <!-- localization mode -->
-      <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
-      <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+            <!-- RTAB-Map's parameters -->
+            <param name="Reg/Strategy"                 type="string" value="1"/>
+            <param name="Reg/Force3DoF"                type="string" value="true"/>
+            <param name="GridGlobal/MinSize"           type="string" value="20"/>
+
+            <!-- localization mode -->
+            <param     if="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="false"/>
+            <param unless="$(arg localization)" name="Mem/IncrementalMemory" type="string" value="true"/>
+        </node>
+
+        <!-- visualization with rtabmapviz -->
+        <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz" args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini">
+            <param name="subscribe_scan"   type="bool"   value="true"/>
+            <param name="subscribe_odom"   type="bool"   value="true"/>
+            <param name="frame_id"         type="string" value="base_footprint"/>
+            <param name="approx_sync"      type="bool"   value="true"/>
+
+            <remap from="odom"            to="/odom"/>
+            <remap from="scan"            to="/scan"/>
+        </node>
+    </group>
+
+    <!-- move_base -->
+    <include if="$(arg use_move_base)" file="$(find turtlebot3_navigation)/launch/move_base.launch">
+        <arg name="model" value="$(arg model)" />
+        <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    </include>
+
+    <!-- rviz -->
+    <group if="$(arg open_rviz)">
+        <node pkg="rviz" type="rviz" name="rviz" required="true"
+            args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
+    </group>
+
+    <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="screen">
+        <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
     </node>
 
-    <!-- visualization with rtabmapviz -->
-    <node if="$(arg rtabmapviz)" pkg="rtabmap_ros" type="rtabmapviz" name="rtabmapviz" args="-d $(find rtabmap_ros)/launch/config/rgbd_gui.ini">
-      <param name="subscribe_scan"   type="bool"   value="true"/>
-      <param name="subscribe_odom"   type="bool"   value="true"/>
-      <param name="frame_id"         type="string" value="base_footprint"/>
-      <param name="approx_sync"      type="bool"   value="true"/>
-
-      <remap from="odom"            to="/odom"/>
-      <remap from="scan"            to="/scan"/>
+    <node name="labels_manager" type="labels_manager.py" pkg="opentera_webrtc_ros" output="screen">
+        <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
+        <remap from="stored_labels_text" to="webrtc_data_outgoing"/>
     </node>
-  </group>
-
-  <!-- move_base -->
-  <include if="$(arg use_move_base)" file="$(find turtlebot3_navigation)/launch/move_base.launch">
-    <arg name="model" value="$(arg model)" />
-    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
-  </include>
-
-  <!-- rviz -->
-  <group if="$(arg open_rviz)">
-    <node pkg="rviz" type="rviz" name="rviz" required="true"
-          args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
-  </group>
-
-  <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="screen">
-    <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
-  </node>
-
-  <node name="labels_manager" type="labels_manager.py" pkg="opentera_webrtc_ros" output="screen">
-    <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
-    <remap from="stored_labels_text" to="webrtc_data_outgoing"/>
-  </node>
 </launch>
