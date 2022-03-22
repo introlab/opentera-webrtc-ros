@@ -7,7 +7,7 @@ int32 LOGLEVEL_WARNING=4
 int32 LOGLEVEL_CRITICAL=3
 int32 LOGLEVEL_ERROR=2
 int32 LOGLEVEL_FATAL=1
-    
+
 int32 level
 float64 timestamp
 string sender
