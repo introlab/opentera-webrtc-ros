@@ -23,8 +23,7 @@ int main(int argc, char** argv)
     MapLabelsConverter mapLabelsConverter{parameters, nodeHandle};
 
     image_transport::ImageTransport imageTransport{nodeHandle};
-    image_transport::Publisher mapImagePublisher =
-        imageTransport.advertise("map_image", 1);
+    image_transport::Publisher mapImagePublisher = imageTransport.advertise("map_image", 1);
     sensor_msgs::Image mapImage;
 
     ROS_INFO("MapImage initialized, starting image generation after first cycle...");

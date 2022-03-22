@@ -18,8 +18,7 @@ namespace map_image_generator
         ros::ServiceServer m_clearGoalsService;
 
     public:
-        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                        tf::TransformListener& tfListener);
+        GoalImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
         ~GoalImageDrawer() override;
 
         void addGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
@@ -28,10 +27,8 @@ namespace map_image_generator
         void draw(cv::Mat& image) override;
 
     private:
-        void drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image,
-                      tf::Transform& transform);
-        bool clearGoals(std_srvs::SetBool::Request& req,
-                        std_srvs::SetBool::Response& res);
+        void drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image, tf::Transform& transform);
+        bool clearGoals(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
     };
 }
 #endif

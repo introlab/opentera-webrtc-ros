@@ -8,8 +8,7 @@ using namespace std;
 namespace map_image_generator
 {
     geometry_msgs::PoseStamped
-    convertMapToMapImage(const Parameters& parameters,
-                         const geometry_msgs::PoseStamped& mapPose)
+        convertMapToMapImage(const Parameters& parameters, const geometry_msgs::PoseStamped& mapPose)
     {
         geometry_msgs::PoseStamped mapImagePose;
         mapImagePose.header.seq = mapPose.header.seq;
@@ -20,17 +19,13 @@ namespace map_image_generator
         return mapImagePose;
     }
 
-    geometry_msgs::Pose convertMapToMapImage(const Parameters& parameters,
-                                             const geometry_msgs::Pose& mapPose)
+    geometry_msgs::Pose convertMapToMapImage(const Parameters& parameters, const geometry_msgs::Pose& mapPose)
     {
         geometry_msgs::Pose mapImagePose;
 
         double mapImageWidth = parameters.resolution() * parameters.width();
-        mapImagePose.position.x =
-            mapImageWidth
-            - (mapPose.position.x * parameters.resolution() + parameters.xOrigin());
-        mapImagePose.position.y =
-            mapPose.position.y * parameters.resolution() + parameters.yOrigin();
+        mapImagePose.position.x = mapImageWidth - (mapPose.position.x * parameters.resolution() + parameters.xOrigin());
+        mapImagePose.position.y = mapPose.position.y * parameters.resolution() + parameters.yOrigin();
         mapImagePose.position.z = 0;
 
         mapImagePose.orientation = mapPose.orientation;
@@ -38,17 +33,15 @@ namespace map_image_generator
         return mapImagePose;
     }
 
-    geometry_msgs::Pose
-    convertRobotCenteredMapCoordinatesToPose(const Parameters& parameters, int x, int y,
-                                             double yaw)
+    geometry_msgs::Pose convertRobotCenteredMapCoordinatesToPose(const Parameters& parameters, int x, int y, double yaw)
     {
         geometry_msgs::Pose pose;
         int rows = parameters.height() * parameters.resolution();
         int cols = parameters.width() * parameters.resolution();
         double centerY = rows / 2.0;
         double centerX = cols / 2.0;
-        pose.position.x = -(y - centerY - parameters.robotVerticalOffset())
-                          / static_cast<double>(parameters.resolution());
+        pose.position.x =
+            -(y - centerY - parameters.robotVerticalOffset()) / static_cast<double>(parameters.resolution());
         pose.position.y = -(x - centerX) / static_cast<double>(parameters.resolution());
         pose.position.z = 0;
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
@@ -58,8 +51,7 @@ namespace map_image_generator
     }
 
     geometry_msgs::PoseStamped
-    convertMapImageToRobot(const Parameters& parameters,
-                           const geometry_msgs::PoseStamped& mapImagePose)
+        convertMapImageToRobot(const Parameters& parameters, const geometry_msgs::PoseStamped& mapImagePose)
     {
         geometry_msgs::PoseStamped robotPose;
         robotPose.header.seq = mapImagePose.header.seq;
@@ -70,18 +62,17 @@ namespace map_image_generator
         return robotPose;
     }
 
-    geometry_msgs::Pose convertMapImageToRobot(const Parameters& parameters,
-                                               const geometry_msgs::Pose& mapImagePose)
+    geometry_msgs::Pose convertMapImageToRobot(const Parameters& parameters, const geometry_msgs::Pose& mapImagePose)
     {
         return convertRobotCenteredMapCoordinatesToPose(
-            parameters, static_cast<int>(mapImagePose.position.x),
+            parameters,
+            static_cast<int>(mapImagePose.position.x),
             static_cast<int>(mapImagePose.position.y),
             tf::getYaw(mapImagePose.orientation));
     }
 
     geometry_msgs::PoseStamped
-    convertMapImageToMap(const Parameters& parameters,
-                         const geometry_msgs::PoseStamped& mapImagePose)
+        convertMapImageToMap(const Parameters& parameters, const geometry_msgs::PoseStamped& mapImagePose)
     {
         geometry_msgs::PoseStamped mapPose;
         mapPose.header.seq = mapImagePose.header.seq;
@@ -92,17 +83,14 @@ namespace map_image_generator
         return mapPose;
     }
 
-    geometry_msgs::Pose convertMapImageToMap(const Parameters& parameters,
-                                             const geometry_msgs::Pose& mapImagePose)
+    geometry_msgs::Pose convertMapImageToMap(const Parameters& parameters, const geometry_msgs::Pose& mapImagePose)
     {
         geometry_msgs::Pose mapPose;
 
-        double flippedXOnY =
-            parameters.resolution() * parameters.width() - mapImagePose.position.x;
-        mapPose.position.x = (flippedXOnY - parameters.xOrigin())
-                             / parameters.resolution() / parameters.scaleFactor();
-        mapPose.position.y = (mapImagePose.position.y - parameters.yOrigin())
-                             / parameters.resolution() / parameters.scaleFactor();
+        double flippedXOnY = parameters.resolution() * parameters.width() - mapImagePose.position.x;
+        mapPose.position.x = (flippedXOnY - parameters.xOrigin()) / parameters.resolution() / parameters.scaleFactor();
+        mapPose.position.y =
+            (mapImagePose.position.y - parameters.yOrigin()) / parameters.resolution() / parameters.scaleFactor();
         mapPose.position.z = 0;
 
         mapPose.orientation = mapImagePose.orientation;
@@ -117,8 +105,7 @@ namespace map_image_generator
         pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
     }
 
-    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2,
-                                 double ratio)
+    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2, double ratio)
     {
         cv::Scalar color;
         color[0] = (color2[0] - color1[0]) * ratio + color1[0];

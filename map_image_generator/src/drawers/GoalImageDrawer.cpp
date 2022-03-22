@@ -7,16 +7,16 @@
 using namespace map_image_generator;
 using namespace std;
 
-GoalImageDrawer::GoalImageDrawer(const Parameters& parameters,
-                                 ros::NodeHandle& nodeHandle,
-                                 tf::TransformListener& tfListener)
+GoalImageDrawer::GoalImageDrawer(
+    const Parameters& parameters,
+    ros::NodeHandle& nodeHandle,
+    tf::TransformListener& tfListener)
     : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_add_goal_sub{nodeHandle.subscribe("map_image_drawer/add_goal", 10,
-                                          &GoalImageDrawer::addGoalCallback, this)},
-      m_remove_goal_sub{nodeHandle.subscribe("map_image_drawer/remove_goal", 10,
-                                             &GoalImageDrawer::removeGoalCallback, this)},
-      m_clearGoalsService{nodeHandle.advertiseService("map_image_drawer/clear_goals",
-                                                      &GoalImageDrawer::clearGoals, this)}
+      m_add_goal_sub{nodeHandle.subscribe("map_image_drawer/add_goal", 10, &GoalImageDrawer::addGoalCallback, this)},
+      m_remove_goal_sub{
+          nodeHandle.subscribe("map_image_drawer/remove_goal", 10, &GoalImageDrawer::removeGoalCallback, this)},
+      m_clearGoalsService{
+          nodeHandle.advertiseService("map_image_drawer/clear_goals", &GoalImageDrawer::clearGoals, this)}
 {
 }
 
@@ -29,9 +29,8 @@ void GoalImageDrawer::addGoalCallback(const geometry_msgs::PoseStamped::ConstPtr
 
 void GoalImageDrawer::removeGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
 {
-    if (!m_activeGoals.empty()
-        && std::round(m_activeGoals.front().pose.position.z)
-               == std::round(goal->pose.position.z))
+    if (!m_activeGoals.empty() &&
+        std::round(m_activeGoals.front().pose.position.z) == std::round(goal->pose.position.z))
     {
         m_activeGoals.pop_front();
     }
@@ -41,8 +40,7 @@ void GoalImageDrawer::removeGoalCallback(const geometry_msgs::PoseStamped::Const
     }
 }
 
-bool GoalImageDrawer::clearGoals(std_srvs::SetBool::Request& req,
-                                 std_srvs::SetBool::Response& res)
+bool GoalImageDrawer::clearGoals(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)
 {
     if (req.data)
     {
@@ -65,8 +63,7 @@ void GoalImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image,
-                               tf::Transform& transform)
+void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image, tf::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.goalColor();
     int size = m_parameters.goalSize();
@@ -84,10 +81,22 @@ void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& 
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color,
-               cv::FILLED);
-    cv::arrowedLine(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
-                    ceilDivision(size, 10.0), cv::LINE_8, 0, 0.3);
-    cv::putText(image, std::to_string(index), cv::Point(startX, startY),
-                cv::FONT_HERSHEY_DUPLEX, 0.5, m_parameters.textColor(), 1);
+    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color, cv::FILLED);
+    cv::arrowedLine(
+        image,
+        cv::Point(startX, startY),
+        cv::Point(endX, endY),
+        color,
+        ceilDivision(size, 10.0),
+        cv::LINE_8,
+        0,
+        0.3);
+    cv::putText(
+        image,
+        std::to_string(index),
+        cv::Point(startX, startY),
+        cv::FONT_HERSHEY_DUPLEX,
+        0.5,
+        m_parameters.textColor(),
+        1);
 }

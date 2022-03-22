@@ -4,14 +4,14 @@
 
 using namespace map_image_generator;
 
-GlobalPathImageDrawer::GlobalPathImageDrawer(const Parameters& parameters,
-                                             ros::NodeHandle& nodeHandle,
-                                             tf::TransformListener& tfListener)
+GlobalPathImageDrawer::GlobalPathImageDrawer(
+    const Parameters& parameters,
+    ros::NodeHandle& nodeHandle,
+    tf::TransformListener& tfListener)
     : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_globalPathSubscriber{nodeHandle.subscribe(
-          "global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this)},
-      m_clearGlobalPathService{m_nodeHandle.advertiseService(
-          "clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this)}
+      m_globalPathSubscriber{nodeHandle.subscribe("global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this)},
+      m_clearGlobalPathService{
+          m_nodeHandle.advertiseService("clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this)}
 {
 }
 
@@ -58,13 +58,11 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transf
         convertTransformToMapCoordinates(startPose, startX, startY);
         convertTransformToMapCoordinates(endPose, endX, endY);
 
-        cv::line(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
-                 thickness, cv::LINE_AA);
+        cv::line(image, cv::Point(startX, startY), cv::Point(endX, endY), color, thickness, cv::LINE_AA);
     }
 }
 
-bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request& req,
-                                            std_srvs::SetBool::Response& res)
+bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)
 {
     if (req.data)
     {

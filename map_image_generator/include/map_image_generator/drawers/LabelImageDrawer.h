@@ -15,18 +15,15 @@ namespace map_image_generator
         opentera_webrtc_ros_msgs::LabelArray::ConstPtr m_lastLabelArray;
 
     public:
-        LabelImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                         tf::TransformListener& tfListener);
+        LabelImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
         ~LabelImageDrawer() override;
 
         void draw(cv::Mat& image) override;
 
     private:
-        void drawLabel(const opentera_webrtc_ros_msgs::Label& label, cv::Mat& image,
-                       tf::Transform& transform);
+        void drawLabel(const opentera_webrtc_ros_msgs::Label& label, cv::Mat& image, tf::Transform& transform);
 
-        void labelArrayCallback(
-            const opentera_webrtc_ros_msgs::LabelArray::ConstPtr& labelArray);
+        void labelArrayCallback(const opentera_webrtc_ros_msgs::LabelArray::ConstPtr& labelArray);
     };
 }
 #endif

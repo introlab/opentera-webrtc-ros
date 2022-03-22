@@ -6,9 +6,10 @@
 using namespace map_image_generator;
 using namespace std;
 
-RobotImageDrawer::RobotImageDrawer(const Parameters& parameters,
-                                   ros::NodeHandle& nodeHandle,
-                                   tf::TransformListener& tfListener)
+RobotImageDrawer::RobotImageDrawer(
+    const Parameters& parameters,
+    ros::NodeHandle& nodeHandle,
+    tf::TransformListener& tfListener)
     : ImageDrawer(parameters, nodeHandle, tfListener)
 {
 }
@@ -38,8 +39,14 @@ void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
     int endX = static_cast<int>(startX + size * cos(yaw));
     int endY = static_cast<int>(startY + size * sin(yaw));
 
-    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color,
-               cv::FILLED, cv::LINE_8);
-    cv::arrowedLine(image, cv::Point(startX, startY), cv::Point(endX, endY), color,
-                    ceilDivision(size, 10.0), cv::LINE_8, 0, 0.3);
+    cv::circle(image, cv::Point(startX, startY), ceilDivision(size, 5.0), color, cv::FILLED, cv::LINE_8);
+    cv::arrowedLine(
+        image,
+        cv::Point(startX, startY),
+        cv::Point(endX, endY),
+        color,
+        ceilDivision(size, 10.0),
+        cv::LINE_8,
+        0,
+        0.3);
 }

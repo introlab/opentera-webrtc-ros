@@ -3,8 +3,7 @@
 #include <QDebug>
 #include <QLayout>
 
-GraphicsViewToolbar::GraphicsViewToolbar(QWidget *parent)
-  :  QGraphicsView(parent)
+GraphicsViewToolbar::GraphicsViewToolbar(QWidget* parent) : QGraphicsView(parent)
 {
     m_scene = new QGraphicsScene(this);
 
@@ -15,7 +14,7 @@ GraphicsViewToolbar::GraphicsViewToolbar(QWidget *parent)
     m_batteryTextItem = new QGraphicsTextItem(nullptr);
     m_batteryTextItem->setPlainText("Battery");
     m_batteryTextItem->setFont(f);
-    m_batteryTextItem->setPos(0,0);
+    m_batteryTextItem->setPos(0, 0);
     m_batteryTextItem->adjustSize();
     m_batteryTextItem->setDefaultTextColor(Qt::red);
     m_batteryTextItem->show();
@@ -34,25 +33,27 @@ GraphicsViewToolbar::GraphicsViewToolbar(QWidget *parent)
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
-void GraphicsViewToolbar::resizeEvent(QResizeEvent *event)
+void GraphicsViewToolbar::resizeEvent(QResizeEvent* event)
 {
-    //qDebug() << "resizeEvent" << event;
+    // qDebug() << "resizeEvent" << event;
 
-    m_scene->setSceneRect(0,0,event->size().width(), this->height());
-    //resize(event->size());
+    m_scene->setSceneRect(0, 0, event->size().width(), this->height());
+    // resize(event->size());
 
     QGraphicsView::resizeEvent(event);
 }
 
-void GraphicsViewToolbar::setBatteryStatus(bool is_charging, float battery_voltage,
-    float battery_current, float battery_level)
+void GraphicsViewToolbar::setBatteryStatus(
+    bool is_charging,
+    float battery_voltage,
+    float battery_current,
+    float battery_level)
 {
     m_batteryTextItem->setPlainText(QString("C: %1, %2 V, %3 A L:%4 %")
-        .arg(is_charging)
-        .arg(battery_voltage)
-        .arg(battery_current)
-        .arg(battery_level));
+                                        .arg(is_charging)
+                                        .arg(battery_voltage)
+                                        .arg(battery_current)
+                                        .arg(battery_level));
 
     m_batteryTextItem->adjustSize();
-
 }

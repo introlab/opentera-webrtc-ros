@@ -14,8 +14,10 @@ namespace map_image_generator
         sensor_msgs::LaserScan::ConstPtr m_lastLaserScan;
 
     public:
-        LaserScanImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                             tf::TransformListener& tfListener);
+        LaserScanImageDrawer(
+            const Parameters& parameters,
+            ros::NodeHandle& nodeHandle,
+            tf::TransformListener& tfListener);
         ~LaserScanImageDrawer() override;
 
         void draw(cv::Mat& image) override;
@@ -24,8 +26,7 @@ namespace map_image_generator
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
         void drawLaserScan(cv::Mat& image, tf::Transform& transform);
-        void drawRange(cv::Mat& image, tf::Transform& transform, float range,
-                       float angle);
+        void drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle);
     };
 }
 #endif

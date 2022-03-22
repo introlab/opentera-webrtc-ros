@@ -14,9 +14,9 @@ namespace opentera
      */
     class RosAudioSource : public AudioSource
     {
-
     public:
-        RosAudioSource(unsigned int soundCardTotalDelayMs = 40,
+        RosAudioSource(
+            unsigned int soundCardTotalDelayMs = 40,
             bool echoCancellation = true,
             bool autoGainControl = true,
             bool noiseSuppression = true,

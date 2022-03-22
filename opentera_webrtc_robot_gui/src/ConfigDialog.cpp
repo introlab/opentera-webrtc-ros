@@ -2,14 +2,10 @@
 
 #include "ui_ConfigDialog.h"
 
-ConfigDialog::ConfigDialog(QWidget *parent)
-  :  m_ui(new Ui::ConfigDialog())
+ConfigDialog::ConfigDialog(QWidget* parent) : m_ui(new Ui::ConfigDialog())
 {
     m_ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
 }
 
-ConfigDialog::~ConfigDialog()
-{
-
-}
+ConfigDialog::~ConfigDialog() {}
