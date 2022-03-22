@@ -165,16 +165,11 @@ Visualization Manager:
         odom:
           base_footprint:
             base_link:
-              base_scan:
-                {}
-              caster_back_link:
-                {}
-              imu_link:
-                {}
-              wheel_left_link:
-                {}
-              wheel_right_link:
-                {}
+              base_scan: {}
+              caster_back_link: {}
+              imu_link: {}
+              wheel_left_link: {}
+              wheel_right_link: {}
       Update Interval: 0
       Value: true
   Enabled: true

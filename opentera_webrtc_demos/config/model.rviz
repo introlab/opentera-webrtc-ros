@@ -175,27 +175,18 @@ Visualization Manager:
       Tree:
         base_footprint:
           base_link:
-            base_scan:
-              {}
-            caster_back_left_link:
-              {}
-            caster_back_right_link:
-              {}
-            front_camera_link:
-              {}
-            imu_link:
-              {}
+            base_scan: {}
+            caster_back_left_link: {}
+            caster_back_right_link: {}
+            front_camera_link: {}
+            imu_link: {}
             r200_link:
               r200_depth_frame:
-                r200_depth_optical_frame:
-                  {}
+                r200_depth_optical_frame: {}
               r200_rgb_frame:
-                r200_rgb_optical_frame:
-                  {}
-            wheel_left_link:
-              {}
-            wheel_right_link:
-              {}
+                r200_rgb_optical_frame: {}
+            wheel_left_link: {}
+            wheel_right_link: {}
       Update Interval: 0
       Value: true
   Enabled: true
