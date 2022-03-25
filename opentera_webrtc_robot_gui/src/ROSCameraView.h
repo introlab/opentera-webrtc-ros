@@ -13,18 +13,16 @@ class GLCameraWidget : public QGLWidget
     Q_OBJECT
 
 public:
-    GLCameraWidget(QWidget *parent = nullptr);
+    GLCameraWidget(QWidget* parent = nullptr);
 
-    void setImage(const QImage &image);
+    void setImage(const QImage& image);
 
 
 protected:
-
     void paintEvent(QPaintEvent* event) override;
 
 private:
     QImage m_image;
-
 };
 
 
@@ -33,19 +31,18 @@ class ROSCameraView : public QWidget
     Q_OBJECT
 
 public:
-    ROSCameraView(QWidget *parent = nullptr);
-    ROSCameraView(const QString &label, QWidget *parent = nullptr);
+    ROSCameraView(QWidget* parent = nullptr);
+    ROSCameraView(const QString& label, QWidget* parent = nullptr);
 
 public slots:
-    void setText(const QString &text);
-    void setImage(const QImage &image);
+    void setText(const QString& text);
+    void setImage(const QImage& image);
 
 private:
-    QVBoxLayout *m_layout;
-    GLCameraWidget *m_cameraWidget;
-    QLabel *m_label;
+    QVBoxLayout* m_layout;
+    GLCameraWidget* m_cameraWidget;
+    QLabel* m_label;
 };
-
 
 
 #endif

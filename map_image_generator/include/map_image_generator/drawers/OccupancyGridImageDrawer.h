@@ -23,18 +23,18 @@ namespace map_image_generator
         cv::Mat m_zoomedOccupancyGridImage;
 
     public:
-        OccupancyGridImageDrawer(Parameters& parameters, ros::NodeHandle& nodeHandle,
-                                 tf::TransformListener& tfListener);
+        OccupancyGridImageDrawer(
+            Parameters& parameters,
+            ros::NodeHandle& nodeHandle,
+            tf::TransformListener& tfListener);
         ~OccupancyGridImageDrawer() override;
 
         void draw(cv::Mat& image) override;
 
     private:
-        void
-        occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid);
+        void occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid);
 
-        bool changeMapViewCallback(ChangeMapView::Request& req,
-                                   ChangeMapView::Response& res);
+        bool changeMapViewCallback(ChangeMapView::Request& req, ChangeMapView::Response& res);
 
         void drawNotScaledOccupancyGridImage();
         void changeNotScaledOccupancyGridImageIfNeeded();
@@ -42,8 +42,7 @@ namespace map_image_generator
         void scaleOccupancyGridImage();
         void changeScaledOccupancyGridImageIfNeeded();
 
-        void rotateImageAboutPoint(cv::Mat& image, double angle,
-                                   const cv::Point& point) const;
+        void rotateImageAboutPoint(cv::Mat& image, double angle, const cv::Point& point) const;
         void rotateImageAboutCenter(cv::Mat& image, double angle) const;
 
         void drawOccupancyGridImage(cv::Mat& image);
@@ -65,17 +64,17 @@ namespace map_image_generator
             int y;
         };
 
-        static DirectionalValues computePadding(const DirectionalValues& position,
-                                                int height, int width);
-        void adjustPaddingForCenteredRobotOffset(DirectionalValues& padding, int width,
-                                                 const DirectionalValues& robotPosition);
+        static DirectionalValues computePadding(const DirectionalValues& position, int height, int width);
+        void adjustPaddingForCenteredRobotOffset(
+            DirectionalValues& padding,
+            int width,
+            const DirectionalValues& robotPosition);
 
         const cv::Mat& getZoomedOccupancyImage();
 
         MapCoordinates getMapCoordinatesFromTf(const tf::Transform& transform) const;
         static DirectionalValues
-        getDirectionsFromMapCoordinates(const MapCoordinates& mapCoordinates,
-                                        const cv::Mat& map);
+            getDirectionsFromMapCoordinates(const MapCoordinates& mapCoordinates, const cv::Mat& map);
     };
 }
 #endif

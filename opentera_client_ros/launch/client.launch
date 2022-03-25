@@ -5,4 +5,4 @@
     <node pkg="opentera_client_ros" type="opentera_client_ros.py" name="opentera_client" respawn="true">
         <param name="config_file" type="string" value="$(arg opentera_client_config_file)"/>
     </node>
-</launch>   
+</launch>

@@ -7,7 +7,7 @@ int32 DEVICE_ADDED=4
 int32 DEVICE_JOINED_SESSION=5
 int32 DEVICE_LEFT_SESSION=6
 int32 DEVICE_STATUS_CHANGED=7
-    
+
 string device_uuid
 int32 type
 string device_name

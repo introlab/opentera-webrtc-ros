@@ -58,7 +58,7 @@ Changelog for package turtlebot3_description
 0.2.0 (2018-03-12)
 ------------------
 * added waffle pi model (urdf and gazebo)
-* modified topic of gazebo plugin 
+* modified topic of gazebo plugin
 * refactoring for release
 * modified r200 tf tree
 * modified gazebo imu link

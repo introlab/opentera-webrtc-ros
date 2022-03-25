@@ -15,7 +15,10 @@
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+    namespace Ui
+    {
+        class MainWindow;
+    }
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -23,101 +26,121 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
-    void setImage(const QImage &image);
+    void setImage(const QImage& image);
 
 
 signals:
     void newLocalImage(const QImage& image);
-    void newPeerImage(const QString &id, const QString &name, const QImage &image);
-    void newPeerStatus(const QString &id, const QString &name, int status);
-    void newRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
-                        float cpu_usage, float mem_usage, float disk_usage, const QString &wifi_network,
-                        float wifi_strength, const QString &local_ip, bool is_muted, bool is_camera_on);
-    void eventJoinSession(const QString &session_url,
-                            const QString &session_creator_name,
-                            const QString &session_uuid,
-                            QList<QString> session_participants,
-                            QList<QString> session_users,
-                            QList<QString> session_devices,
-                            const QString &join_msg,
-                            const QString &session_parameters,
-                            const QString &service_uuid);
+    void newPeerImage(const QString& id, const QString& name, const QImage& image);
+    void newPeerStatus(const QString& id, const QString& name, int status);
+    void newRobotStatus(
+        bool is_charging,
+        float battery_voltage,
+        float battery_current,
+        float battery_level,
+        float cpu_usage,
+        float mem_usage,
+        float disk_usage,
+        const QString& wifi_network,
+        float wifi_strength,
+        const QString& local_ip,
+        bool is_muted,
+        bool is_camera_on);
+    void eventJoinSession(
+        const QString& session_url,
+        const QString& session_creator_name,
+        const QString& session_uuid,
+        QList<QString> session_participants,
+        QList<QString> session_users,
+        QList<QString> session_devices,
+        const QString& join_msg,
+        const QString& session_parameters,
+        const QString& service_uuid);
 
-    void eventStopSession(const QString &session_uuid, const QString &service_uuid);
+    void eventStopSession(const QString& session_uuid, const QString& service_uuid);
 
-    void eventLeaveSession(const QString &session_uuid,
-                            const QString &service_uuid,
-                            QList<QString> leaving_participants,
-                            QList<QString> leaving_users,
-                            QList<QString> leaving_devices);
+    void eventLeaveSession(
+        const QString& session_uuid,
+        const QString& service_uuid,
+        QList<QString> leaving_participants,
+        QList<QString> leaving_users,
+        QList<QString> leaving_devices);
 
 private slots:
     void _onLocalImage(const QImage& image);
     void _onPeerImage(const QString& id, const QString& name, const QImage& image);
-    void _onPeerStatus(const QString &id, const QString& name, int status);
+    void _onPeerStatus(const QString& id, const QString& name, int status);
 
-    void _onJoinSessionEvent(const QString &session_url,
-                            const QString &session_creator_name,
-                            const QString &session_uuid,
-                            QList<QString> session_participants,
-                            QList<QString> session_users,
-                            QList<QString> session_devices,
-                            const QString &join_msg,
-                            const QString &session_parameters,
-                            const QString &service_uuid);
+    void _onJoinSessionEvent(
+        const QString& session_url,
+        const QString& session_creator_name,
+        const QString& session_uuid,
+        QList<QString> session_participants,
+        QList<QString> session_users,
+        QList<QString> session_devices,
+        const QString& join_msg,
+        const QString& session_parameters,
+        const QString& service_uuid);
 
-    void _onStopSessionEvent(const QString &session_uuid, const QString &service_uuid);
+    void _onStopSessionEvent(const QString& session_uuid, const QString& service_uuid);
 
-    void _onLeaveSessionEvent(const QString &session_uuid,
-                            const QString &service_uuid,
-                            QList<QString> leaving_participants,
-                            QList<QString> leaving_users,
-                            QList<QString> leaving_devices);
+    void _onLeaveSessionEvent(
+        const QString& session_uuid,
+        const QString& service_uuid,
+        QList<QString> leaving_participants,
+        QList<QString> leaving_users,
+        QList<QString> leaving_devices);
 
-    void _onRobotStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level,
-                        float cpu_usage, float mem_usage, float disk_usage, const QString &wif_network,
-                        float wifi_strength, const QString &local_ip, bool is_muted, bool is_camera_on);
+    void _onRobotStatus(
+        bool is_charging,
+        float battery_voltage,
+        float battery_current,
+        float battery_level,
+        float cpu_usage,
+        float mem_usage,
+        float disk_usage,
+        const QString& wif_network,
+        float wifi_strength,
+        const QString& local_ip,
+        bool is_muted,
+        bool is_camera_on);
 
     void _onConfigButtonClicked();
 
 private:
-
     void setupROS();
     void setupButtons();
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent* event) override;
 
-    Ui::MainWindow *m_ui;
+    Ui::MainWindow* m_ui;
 
-    //Toolbar
-    GraphicsViewToolbar *m_toolbar;
+    // Toolbar
+    GraphicsViewToolbar* m_toolbar;
 
-    //Remote views
+    // Remote views
     QMap<QString, ROSCameraView*> m_remoteViews;
 
-    //Main View
-    ROSCameraView *m_cameraView;
+    // Main View
+    ROSCameraView* m_cameraView;
 
-    //ROS
+    // ROS
 
-    //ROS Callbacks
+    // ROS Callbacks
     void localImageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr &msg);
-    void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr &msg);
-    void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr &msg);
-    void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr &msg);
+    void peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg);
+    void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg);
+    void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
+    void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg);
 
     ros::NodeHandle m_nodeHandle;
-	ros::Subscriber m_peerImageSubscriber;
+    ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;
     ros::Subscriber m_peerStatusSubscriber;
     ros::Subscriber m_openteraEventSubscriber;
     ros::Subscriber m_robotStatusSubscriber;
-
-
-
 };
 
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

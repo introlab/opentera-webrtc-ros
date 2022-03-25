@@ -10,10 +10,10 @@ project(opentera_client_ros)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  std_msgs
-  message_runtime
-  opentera_webrtc_ros_msgs
+    rospy
+    std_msgs
+    message_runtime
+    opentera_webrtc_ros_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -120,7 +120,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -158,9 +158,11 @@ include_directories(
 #############
 
 #Install executables
-install(PROGRAMS
-   scripts/opentera_client_ros.py
-      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(
+    PROGRAMS
+        scripts/opentera_client_ros.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 
 # all install targets should use catkin DESTINATION variables

@@ -8,8 +8,8 @@ project(turtlebot3_beam_description)
 # Find catkin packages and libraries for catkin and system dependencies
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
-  urdf
-  xacro
+    urdf
+    xacro
 )
 
 ################################################################################
@@ -28,21 +28,21 @@ find_package(catkin REQUIRED COMPONENTS
 # Declare catkin specific configuration to be passed to dependent projects
 ################################################################################
 catkin_package(
-  CATKIN_DEPENDS urdf xacro
+    CATKIN_DEPENDS urdf xacro
 )
 
 ################################################################################
 # Build
 ################################################################################
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
 ################################################################################
 # Install
 ################################################################################
 install(DIRECTORY meshes rviz urdf
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 ################################################################################

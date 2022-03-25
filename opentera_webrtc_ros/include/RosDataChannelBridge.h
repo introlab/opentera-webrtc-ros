@@ -13,24 +13,24 @@ namespace opentera
     /**
      * @brief Implement a ROS node to bridge WebRTC data channel to ROS topics
      */
-    class RosDataChannelBridge: public RosWebRTCBridge<DataChannelClient>
+    class RosDataChannelBridge : public RosWebRTCBridge<DataChannelClient>
     {
         ros::Subscriber m_dataSubscriber;
         ros::Publisher m_dataPublisher;
 
-        void initSignalingClient(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+        void initSignalingClient(const opentera::SignalingServerConfiguration& signalingServerConfiguration);
         void initAdvertiseTopics();
         void stopAdvertiseTopics();
         void initDataChannelCallback();
         void stopDataChannelCallback();
 
-        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
-        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
+        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events) override;
+        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events) override;
 
         void onSignalingConnectionClosed() override;
         void onSignalingConnectionError(const std::string& msg) override;
 
-        void onRosData(const std_msgs::StringConstPtr & msg);
+        void onRosData(const std_msgs::StringConstPtr& msg);
 
     public:
         RosDataChannelBridge(const ros::NodeHandle& nh);

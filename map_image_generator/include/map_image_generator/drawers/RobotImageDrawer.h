@@ -11,8 +11,7 @@ namespace map_image_generator
     class RobotImageDrawer : public ImageDrawer
     {
     public:
-        RobotImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                         tf::TransformListener& tfListener);
+        RobotImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
         ~RobotImageDrawer() override;
 
         void draw(cv::Mat& image) override;

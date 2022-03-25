@@ -14,8 +14,8 @@ using namespace opentera;
  * @param needsDenoising denoising should be applied to the video stream by the image transport layer
  * @param isScreenCast the transport layer should be configured to stream a screen rather then a camera
  */
-RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast):
-        VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast))
+RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast)
+    : VideoSource(VideoSourceConfiguration::create(needsDenoising, isScreenCast))
 {
 }
 

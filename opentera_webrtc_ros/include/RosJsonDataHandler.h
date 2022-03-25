@@ -44,8 +44,7 @@ namespace opentera
         ros::NodeHandle m_nh;
         ros::NodeHandle m_p_nh;
 
-        virtual void onWebRTCDataReceived(
-            const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
+        virtual void onWebRTCDataReceived(const ros::MessageEvent<opentera_webrtc_ros_msgs::PeerData const>& event);
 
     public:
         RosJsonDataHandler(const ros::NodeHandle& nh, const ros::NodeHandle& p_nh);
@@ -54,8 +53,7 @@ namespace opentera
         static void run();
 
     private:
-        static opentera_webrtc_ros_msgs::Waypoint
-        getWpFromData(const nlohmann::json& data);
+        static opentera_webrtc_ros_msgs::Waypoint getWpFromData(const nlohmann::json& data);
     };
 }
 

@@ -18,31 +18,30 @@ namespace map_image_generator
         sensor_msgs::LaserScan::ConstPtr m_lastLaserScan;
 
     public:
-        SoundSourceImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                               tf::TransformListener& tfListener);
+        SoundSourceImageDrawer(
+            const Parameters& parameters,
+            ros::NodeHandle& nodeHandle,
+            tf::TransformListener& tfListener);
         ~SoundSourceImageDrawer() override;
 
         void draw(cv::Mat& image) override;
 
     protected:
-        void
-        soundSourcesCallback(const odas_ros::OdasSstArrayStamped::ConstPtr& soundSources);
+        void soundSourcesCallback(const odas_ros::OdasSstArrayStamped::ConstPtr& soundSources);
         void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan);
 
     private:
         void drawWithLidar(cv::Mat& image);
-        void drawSoundSourcesWithLidar(cv::Mat& image,
-                                       const tf::Transform& sourceToLidarTf,
-                                       const tf::Transform& lidarToRefTf);
+        void drawSoundSourcesWithLidar(
+            cv::Mat& image,
+            const tf::Transform& sourceToLidarTf,
+            const tf::Transform& lidarToRefTf);
 
         void drawWithoutLidar(cv::Mat& image);
-        void drawSoundSourcesWithoutLidar(cv::Mat& image,
-                                          const tf::Transform& sourceToRefTf);
+        void drawSoundSourcesWithoutLidar(cv::Mat& image, const tf::Transform& sourceToRefTf);
 
-        void drawSoundSource(cv::Mat& image, const odas_ros::OdasSst& source,
-                             tf::Pose poseInRef);
-        void drawConcentricCircles(cv::Mat& image, int x, int y, int radius,
-                                   double colorRatio);
+        void drawSoundSource(cv::Mat& image, const odas_ros::OdasSst& source, tf::Pose poseInRef);
+        void drawConcentricCircles(cv::Mat& image, int x, int y, int radius, double colorRatio);
 
         static tf::Pose getPoseFromSst(const odas_ros::OdasSst& sst);
 

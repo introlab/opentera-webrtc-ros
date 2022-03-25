@@ -4,7 +4,7 @@ int32 REPLY_ACCEPTED=1
 int32 REPLY_DENIED=2
 int32 REPLY_BUSY=3
 int32 REPLY_TIMEOUT=4
-  
+
 string session_uuid
 string user_uuid
 string participant_uuid

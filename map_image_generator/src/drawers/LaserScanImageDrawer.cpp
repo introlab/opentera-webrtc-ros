@@ -6,13 +6,13 @@
 using namespace map_image_generator;
 using namespace std;
 
-LaserScanImageDrawer::LaserScanImageDrawer(const Parameters& parameters,
-                                           ros::NodeHandle& nodeHandle,
-                                           tf::TransformListener& tfListener)
+LaserScanImageDrawer::LaserScanImageDrawer(
+    const Parameters& parameters,
+    ros::NodeHandle& nodeHandle,
+    tf::TransformListener& tfListener)
     : ImageDrawer(parameters, nodeHandle, tfListener)
 {
-    m_laserScanSubscriber = m_nodeHandle.subscribe(
-        "laser_scan", 1, &LaserScanImageDrawer::laserScanCallback, this);
+    m_laserScanSubscriber = m_nodeHandle.subscribe("laser_scan", 1, &LaserScanImageDrawer::laserScanCallback, this);
 }
 
 LaserScanImageDrawer::~LaserScanImageDrawer() = default;
@@ -31,8 +31,7 @@ void LaserScanImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void LaserScanImageDrawer::laserScanCallback(
-    const sensor_msgs::LaserScan::ConstPtr& laserScan)
+void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }
@@ -52,11 +51,9 @@ void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transfor
     }
 }
 
-void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform,
-                                     float range, float angle)
+void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle)
 {
-    tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0),
-                       tf::Vector3(range * cos(angle), range * sin(angle), 0));
+    tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
     rangePose = transform * rangePose;
     adjustTransformForRobotRef(rangePose);
 

@@ -71,7 +71,7 @@ std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& que
  * @param url The full url to extract from.
  * @return std::string The ice server url.
  */
-std::string RosSignalingServerConfiguration::getIceServerUrl(const std::string &url)
+std::string RosSignalingServerConfiguration::getIceServerUrl(const std::string& url)
 {
     ROS_INFO_STREAM("getIceServerUrl from url:" << url);
     return RosSignalingServerConfiguration::getBaseUrl(url) + "/iceservers";
@@ -83,21 +83,18 @@ std::string RosSignalingServerConfiguration::getIceServerUrl(const std::string &
  * @param url The full url to extract from.
  * @return std::string The base url (up to the last / of the path).
  */
-std::string RosSignalingServerConfiguration::getBaseUrl(const std::string &url)
+std::string RosSignalingServerConfiguration::getBaseUrl(const std::string& url)
 {
     const string prot_end("://");
-    string::const_iterator prot_i = search(url.begin(), url.end(),
-                                           prot_end.begin(), prot_end.end());
+    string::const_iterator prot_i = search(url.begin(), url.end(), prot_end.begin(), prot_end.end());
 
     std::string protocol;
     protocol.reserve(distance(url.begin(), prot_i));
 
 
-    transform(url.begin(), prot_i,
-              back_inserter(protocol),
-              ptr_fun<int,int>(tolower)); // protocol is icase
+    transform(url.begin(), prot_i, back_inserter(protocol), ptr_fun<int, int>(tolower));  // protocol is icase
 
-    if( prot_i == url.end() )
+    if (prot_i == url.end())
     {
         ROS_ERROR_STREAM("No protocol defined in url: " << url);
         return url;
@@ -118,9 +115,7 @@ std::string RosSignalingServerConfiguration::getBaseUrl(const std::string &url)
 
     std::string host;
     host.reserve(distance(prot_i, path_i));
-    transform(prot_i, path_i,
-              back_inserter(host),
-              ptr_fun<int,int>(tolower)); // host is icase
+    transform(prot_i, path_i, back_inserter(host), ptr_fun<int, int>(tolower));  // host is icase
 
     return protocol + prot_end + host;
 }

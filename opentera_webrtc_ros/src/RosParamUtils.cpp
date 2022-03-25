@@ -39,57 +39,57 @@ namespace opentera
          */
         namespace impl
         {
-            template <class T>
+            template<class T>
             T xml_cast(const XmlRpc::XmlRpcValue& xml_value)
             {
                 return static_cast<T>(xml_value);
             }
 
-            template <class T>
+            template<class T>
             bool xml_castable(int XmlType)
             {
                 return false;
             }
 
-            template <>
+            template<>
             bool xml_castable<std::string>(int XmlType)
             {
                 return XmlType == XmlRpc::XmlRpcValue::TypeString;
             }
 
-            template <>
+            template<>
             bool xml_castable<double>(int XmlType)
             {
-                return (XmlType == XmlRpc::XmlRpcValue::TypeDouble
-                        || XmlType == XmlRpc::XmlRpcValue::TypeInt
-                        || XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
+                return (
+                    XmlType == XmlRpc::XmlRpcValue::TypeDouble || XmlType == XmlRpc::XmlRpcValue::TypeInt ||
+                    XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
             }
 
-            template <>
+            template<>
             bool xml_castable<float>(int XmlType)
             {
-                return (XmlType == XmlRpc::XmlRpcValue::TypeDouble
-                        || XmlType == XmlRpc::XmlRpcValue::TypeInt
-                        || XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
+                return (
+                    XmlType == XmlRpc::XmlRpcValue::TypeDouble || XmlType == XmlRpc::XmlRpcValue::TypeInt ||
+                    XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
             }
 
-            template <>
+            template<>
             bool xml_castable<int>(int XmlType)
             {
-                return (XmlType == XmlRpc::XmlRpcValue::TypeDouble
-                        || XmlType == XmlRpc::XmlRpcValue::TypeInt
-                        || XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
+                return (
+                    XmlType == XmlRpc::XmlRpcValue::TypeDouble || XmlType == XmlRpc::XmlRpcValue::TypeInt ||
+                    XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
             }
 
-            template <>
+            template<>
             bool xml_castable<bool>(int XmlType)
             {
-                return (XmlType == XmlRpc::XmlRpcValue::TypeDouble
-                        || XmlType == XmlRpc::XmlRpcValue::TypeInt
-                        || XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
+                return (
+                    XmlType == XmlRpc::XmlRpcValue::TypeDouble || XmlType == XmlRpc::XmlRpcValue::TypeInt ||
+                    XmlType == XmlRpc::XmlRpcValue::TypeBoolean);
             }
 
-            template <>
+            template<>
             double xml_cast(const XmlRpc::XmlRpcValue& xml_value)
             {
                 using namespace XmlRpc;
@@ -106,7 +106,7 @@ namespace opentera
                 };
             }
 
-            template <>
+            template<>
             float xml_cast(const XmlRpc::XmlRpcValue& xml_value)
             {
                 using namespace XmlRpc;
@@ -123,7 +123,7 @@ namespace opentera
                 };
             }
 
-            template <>
+            template<>
             int xml_cast(const XmlRpc::XmlRpcValue& xml_value)
             {
                 using namespace XmlRpc;
@@ -140,7 +140,7 @@ namespace opentera
                 };
             }
 
-            template <>
+            template<>
             bool xml_cast(const XmlRpc::XmlRpcValue& xml_value)
             {
                 using namespace XmlRpc;
@@ -157,9 +157,12 @@ namespace opentera
                 };
             }
 
-            template <class T>
-            bool getImpl(const NodeHandle& nh, const std::string& key,
-                         std::map<std::string, T>& map, bool cached = false)
+            template<class T>
+            bool getImpl(
+                const NodeHandle& nh,
+                const std::string& key,
+                std::map<std::string, T>& map,
+                bool cached = false)
             {
                 XmlRpc::XmlRpcValue xml_value;
                 if (cached)
@@ -197,9 +200,8 @@ namespace opentera
                 return true;
             }
 
-            template <class T>
-            bool getImpl(const NodeHandle& nh, const std::string& key,
-                         std::vector<T>& vec, bool cached = false)
+            template<class T>
+            bool getImpl(const NodeHandle& nh, const std::string& key, std::vector<T>& vec, bool cached = false)
             {
                 XmlRpc::XmlRpcValue xml_array;
                 if (cached)
@@ -224,13 +226,12 @@ namespace opentera
                 }
 
                 // Resize the target vector (destructive)
-                std::size_t count =
-                    std::accumulate(std::begin(xml_array), std::end(xml_array), 0,
-                                    [](const auto& a, const auto& b) {
-                                        return a
-                                               + static_cast<std::size_t>(
-                                                   xml_castable<T>(b.second.getType()));
-                                    });
+                std::size_t count = std::accumulate(
+                    std::begin(xml_array),
+                    std::end(xml_array),
+                    0,
+                    [](const auto& a, const auto& b)
+                    { return a + static_cast<std::size_t>(xml_castable<T>(b.second.getType())); });
                 vec.reserve(count);
 
                 // Fill the vector with stuff
@@ -248,65 +249,53 @@ namespace opentera
             }
         }
 
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::map<std::string, double>& map)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::map<std::string, double>& map)
         {
             return impl::getImpl<double>(nh, key, map, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::map<std::string, float>& map)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::map<std::string, float>& map)
         {
             return impl::getImpl<float>(nh, key, map, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::map<std::string, int>& map)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::map<std::string, int>& map)
         {
             return impl::getImpl<int>(nh, key, map, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::map<std::string, bool>& map)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::map<std::string, bool>& map)
         {
             return impl::getImpl<bool>(nh, key, map, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::map<std::string, std::string>& map)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::map<std::string, std::string>& map)
         {
             return impl::getImpl<std::string>(nh, key, map, false);
         }
 
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::map<std::string, double>& map)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::map<std::string, double>& map)
         {
             return impl::getImpl<double>(nh, key, map, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::map<std::string, float>& map)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::map<std::string, float>& map)
         {
             return impl::getImpl<float>(nh, key, map, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::map<std::string, int>& map)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::map<std::string, int>& map)
         {
             return impl::getImpl<int>(nh, key, map, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::map<std::string, bool>& map)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::map<std::string, bool>& map)
         {
             return impl::getImpl<bool>(nh, key, map, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::map<std::string, std::string>& map)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::map<std::string, std::string>& map)
         {
             return impl::getImpl<std::string>(nh, key, map, true);
         }
 
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::vector<double>& vec)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::vector<double>& vec)
         {
             return impl::getImpl<double>(nh, key, vec, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::vector<float>& vec)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::vector<float>& vec)
         {
             return impl::getImpl<float>(nh, key, vec, false);
         }
@@ -314,39 +303,32 @@ namespace opentera
         {
             return impl::getImpl<int>(nh, key, vec, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::vector<bool>& vec)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::vector<bool>& vec)
         {
             return impl::getImpl<bool>(nh, key, vec, false);
         }
-        bool getParam(const NodeHandle& nh, const std::string& key,
-                      std::vector<std::string>& vec)
+        bool getParam(const NodeHandle& nh, const std::string& key, std::vector<std::string>& vec)
         {
             return impl::getImpl<std::string>(nh, key, vec, false);
         }
 
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::vector<double>& vec)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::vector<double>& vec)
         {
             return impl::getImpl<double>(nh, key, vec, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::vector<float>& vec)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::vector<float>& vec)
         {
             return impl::getImpl<float>(nh, key, vec, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::vector<int>& vec)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::vector<int>& vec)
         {
             return impl::getImpl<int>(nh, key, vec, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::vector<bool>& vec)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::vector<bool>& vec)
         {
             return impl::getImpl<bool>(nh, key, vec, true);
         }
-        bool getParamCached(const NodeHandle& nh, const std::string& key,
-                            std::vector<std::string>& vec)
+        bool getParamCached(const NodeHandle& nh, const std::string& key, std::vector<std::string>& vec)
         {
             return impl::getImpl<std::string>(nh, key, vec, true);
         }

@@ -37,8 +37,10 @@ class OpenTeraROSClient:
     def __init__(self, url: str, token: str):
         self.__base_url = url
         self.__token = token
-        self.__event_publisher = rospy.Publisher('events', OpenTeraEvent, queue_size=10)
-        self.__robot_status_subscriber = rospy.Subscriber('robot_status', RobotStatus, self.robot_status_callback)
+        self.__event_publisher = rospy.Publisher(
+            'events', OpenTeraEvent, queue_size=10)
+        self.__robot_status_subscriber = rospy.Subscriber(
+            'robot_status', RobotStatus, self.robot_status_callback)
         self.__robot_status = {}
 
     def robot_status_callback(self, status: RobotStatus):
@@ -83,7 +85,7 @@ class OpenTeraROSClient:
 
                 # Create alive publishing task
                 status_task = asyncio.get_event_loop().create_task(
-                              self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
+                    self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
 
                 while not rospy.is_shutdown():
                     msg = await ws.receive()
@@ -106,7 +108,8 @@ class OpenTeraROSClient:
         try:
             loop = asyncio.get_event_loop()
 
-            main_task = asyncio.ensure_future(self._opentera_main_loop(self.__base_url, self.__token))
+            main_task = asyncio.ensure_future(
+                self._opentera_main_loop(self.__base_url, self.__token))
 
             for signal in [SIGINT, SIGTERM]:
                 loop.add_signal_handler(signal, main_task.cancel)
@@ -136,7 +139,8 @@ class OpenTeraROSClient:
     async def _parse_message(self, client: aiohttp.ClientSession, msg_dict: dict):
         try:
             if 'message' in msg_dict:
-                message = ParseDict(msg_dict['message'], messages.TeraEvent(), ignore_unknown_fields=True)
+                message = ParseDict(
+                    msg_dict['message'], messages.TeraEvent(), ignore_unknown_fields=True)
 
                 # All events in same message
                 opentera_events = OpenTeraEvent()
@@ -256,4 +260,3 @@ if __name__ == '__main__':
 
         client = OpenTeraROSClient(url=url, token=token)
         client.run()
-

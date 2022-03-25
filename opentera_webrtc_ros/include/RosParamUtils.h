@@ -19,16 +19,11 @@ namespace opentera
          * \throws InvalidNameException If the parameter key begins with a tilde, or is an
          * otherwise invalid graph resource name
          */
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::map<std::string, double>& map);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::map<std::string, float>& map);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::map<std::string, int>& map);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::map<std::string, bool>& map);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::map<std::string, std::string>& map);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, double>& map);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, float>& map);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, int>& map);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, bool>& map);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, std::string>& map);
 
         /** \brief Get a {double, float, int, bool, string} map value from the parameter
          * server using the cache.
@@ -42,16 +37,11 @@ namespace opentera
          * \throws InvalidNameException If the parameter key begins with a tilde, or is an
          * otherwise invalid graph resource name
          */
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::map<std::string, double>& map);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::map<std::string, float>& map);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::map<std::string, int>& map);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::map<std::string, bool>& map);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::map<std::string, std::string>& map);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, double>& map);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, float>& map);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, int>& map);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, bool>& map);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::map<std::string, std::string>& map);
 
         /** \brief Get a {double, float, int, bool, string} vector value from the
          * parameter server.
@@ -65,16 +55,11 @@ namespace opentera
          * \throws InvalidNameException If the parameter key begins with a tilde, or is an
          * otherwise invalid graph resource name
          */
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::vector<double>& vec);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::vector<float>& vec);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::vector<int>& vec);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::vector<bool>& vec);
-        bool getParam(const ros::NodeHandle& nh, const std::string& key,
-                      std::vector<std::string>& vec);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::vector<double>& vec);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::vector<float>& vec);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::vector<int>& vec);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::vector<bool>& vec);
+        bool getParam(const ros::NodeHandle& nh, const std::string& key, std::vector<std::string>& vec);
 
         /** \brief Get a {double, float, int, bool, string} vector value from the
          * parameter server using the cache.
@@ -88,16 +73,11 @@ namespace opentera
          * \throws InvalidNameException If the parameter key begins with a tilde, or is an
          * otherwise invalid graph resource name
          */
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::vector<double>& vec);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::vector<float>& vec);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::vector<int>& vec);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::vector<bool>& vec);
-        bool getParamCached(const ros::NodeHandle& nh, const std::string& key,
-                            std::vector<std::string>& vec);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::vector<double>& vec);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::vector<float>& vec);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::vector<int>& vec);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::vector<bool>& vec);
+        bool getParamCached(const ros::NodeHandle& nh, const std::string& key, std::vector<std::string>& vec);
     }
 }
 

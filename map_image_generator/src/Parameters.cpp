@@ -11,21 +11,20 @@ using namespace std;
 namespace internal
 {
     // Not defined for T: compilation fails if T is not cv::Scalar or cv::Vec3b
-    template <typename T>
+    template<typename T>
     T parseColor(const std::string& color);
 
-    template <>
+    template<>
     cv::Scalar parseColor<cv::Scalar>(const std::string& color)
     {
         int r, g, b, a;
         stringstream ss(color);
         ss >> r >> g >> b >> a;
 
-        return {static_cast<double>(b), static_cast<double>(g), static_cast<double>(r),
-                static_cast<double>(a)};
+        return {static_cast<double>(b), static_cast<double>(g), static_cast<double>(r), static_cast<double>(a)};
     }
 
-    template <>
+    template<>
     cv::Vec3b parseColor<cv::Vec3b>(const std::string& color)
     {
         int r, g, b;
@@ -36,7 +35,7 @@ namespace internal
     }
 
     // Compilation fails if T is not cv::Scalar or cv::Vec3b because of parseColor<T>
-    template <typename T>
+    template<typename T>
     T makeColor(const std::string& name, const std::string& defaultColor)
     {
         ros::NodeHandle nh{"~"};
@@ -46,10 +45,9 @@ namespace internal
     }
 
     // Not defined if T is cv::Scalar or cv::Vec3b
-    template <typename T>
-    std::enable_if_t<
-        !std::is_same<T, cv::Scalar>::value && !std::is_same<T, cv::Vec3b>::value, T>
-    getParam(const std::string& name, const T& defaultValue)
+    template<typename T>
+    std::enable_if_t<!std::is_same<T, cv::Scalar>::value && !std::is_same<T, cv::Vec3b>::value, T>
+        getParam(const std::string& name, const T& defaultValue)
     {
         ros::NodeHandle nh{"~"};
         T value;
@@ -58,10 +56,9 @@ namespace internal
     }
 
     // Defined only if T is cv::Scalar or cv::Vec3b
-    template <typename T>
-    std::enable_if_t<
-        std::is_same<T, cv::Scalar>::value || std::is_same<T, cv::Vec3b>::value, T>
-    getParam(const std::string& name, const std::string& defaultValue)
+    template<typename T>
+    std::enable_if_t<std::is_same<T, cv::Scalar>::value || std::is_same<T, cv::Vec3b>::value, T>
+        getParam(const std::string& name, const std::string& defaultValue)
     {
         return makeColor<T>(name, defaultValue);
     }
@@ -101,8 +98,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle) : m_scaleFactor{1.0}
     m_laserScanColor = getParam<cv::Scalar>("laser_scan_color", "255 0 0 255");
     m_textColor = getParam<cv::Scalar>("text_color", "255 255 255 255");
     m_labelColor = getParam<cv::Scalar>("label_color", "255 0 255 255");
-    m_soundSourceColorFull =
-        getParam<cv::Scalar>("sound_source_color_full", "255 0 0 255");
+    m_soundSourceColorFull = getParam<cv::Scalar>("sound_source_color_full", "255 0 0 255");
     m_soundSourceColorDim = getParam<cv::Scalar>("sound_source_color_dim", "0 255 0 255");
 
 
@@ -124,16 +120,18 @@ void Parameters::validateParameters()
 {
     int maxOffset = static_cast<int>(std::floor((m_height * m_resolution - 1) / 2.0));
     int minOffset = static_cast<int>(std::floor(-(m_height * m_resolution - 1) / 2.0));
-    if (m_centeredRobot
-        && (m_robotVerticalOffset > maxOffset || m_robotVerticalOffset < minOffset))
+    if (m_centeredRobot && (m_robotVerticalOffset > maxOffset || m_robotVerticalOffset < minOffset))
     {
         int oldOffset = m_robotVerticalOffset;
-        m_robotVerticalOffset = static_cast<int>(std::floor(
-            sign(m_robotVerticalOffset) * (m_height * m_resolution - 1) / 2.0));
+        m_robotVerticalOffset =
+            static_cast<int>(std::floor(sign(m_robotVerticalOffset) * (m_height * m_resolution - 1) / 2.0));
         ROS_WARN(
             "Robot vertical offset is [%d], which is out of inclusive range [%d, %d]. "
             "It will be set to [%d], which is the maximum value based on the sign.",
-            oldOffset, minOffset, maxOffset, m_robotVerticalOffset);
+            oldOffset,
+            minOffset,
+            maxOffset,
+            m_robotVerticalOffset);
     }
 }
 

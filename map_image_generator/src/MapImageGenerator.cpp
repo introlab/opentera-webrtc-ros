@@ -11,52 +11,49 @@
 using namespace map_image_generator;
 using namespace std;
 
-MapImageGenerator::MapImageGenerator(Parameters& parameters, ros::NodeHandle& nodeHandle,
-                                     tf::TransformListener& tfListener)
-    : m_parameters(parameters), m_nodeHandle(nodeHandle), m_tfListener(tfListener)
+MapImageGenerator::MapImageGenerator(
+    Parameters& parameters,
+    ros::NodeHandle& nodeHandle,
+    tf::TransformListener& tfListener)
+    : m_parameters(parameters),
+      m_nodeHandle(nodeHandle),
+      m_tfListener(tfListener)
 {
     // The order of the drawers is important as it determines the layering of the
     // elements.
     if (m_parameters.drawOccupancyGrid())
     {
-        m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(
-            parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawGlobalPath())
     {
-        m_drawers.push_back(std::make_unique<GlobalPathImageDrawer>(
-            m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<GlobalPathImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawRobot())
     {
-        m_drawers.push_back(
-            std::make_unique<RobotImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<RobotImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawLabels())
     {
-        m_drawers.push_back(
-            std::make_unique<LabelImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<LabelImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawGoals())
     {
-        m_drawers.push_back(
-            std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawLaserScan())
     {
-        m_drawers.push_back(std::make_unique<LaserScanImageDrawer>(
-            m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<LaserScanImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     if (m_parameters.drawSoundSources())
     {
-        m_drawers.push_back(std::make_unique<SoundSourceImageDrawer>(
-            m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<SoundSourceImageDrawer>(m_parameters, nodeHandle, m_tfListener));
     }
 
     int imageWidth = parameters.resolution() * parameters.width();

@@ -18,7 +18,7 @@ namespace opentera
      *
      * View README.md for more details
      */
-    class RosStreamBridge: public RosWebRTCBridge<StreamClient>
+    class RosStreamBridge : public RosWebRTCBridge<StreamClient>
     {
         std::shared_ptr<RosVideoSource> m_videoSource;
         std::shared_ptr<RosAudioSource> m_audioSource;
@@ -34,10 +34,10 @@ namespace opentera
         bool m_canReceiveAudioStream;
         bool m_canReceiveVideoStream;
 
-        void init(const opentera::SignalingServerConfiguration &signalingServerConfiguration);
+        void init(const opentera::SignalingServerConfiguration& signalingServerConfiguration);
 
-        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent> &events) override;
-        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent> &events) override;
+        void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events) override;
+        void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events) override;
 
         void onSignalingConnectionOpened() override;
         void onSignalingConnectionClosed() override;
@@ -45,19 +45,22 @@ namespace opentera
         void onSignalingConnectionError(const std::string& msg) override;
 
         void onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs);
-        void onAudioFrameReceived(const Client& client,
+        void onAudioFrameReceived(
+            const Client& client,
             const void* audioData,
             int bitsPerSample,
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
-        void onMixedAudioFrameReceived(const void* audioData,
+        void onMixedAudioFrameReceived(
+            const void* audioData,
             int bitsPerSample,
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
 
-        audio_utils::AudioFrame createAudioFrame(const void* audioData,
+        audio_utils::AudioFrame createAudioFrame(
+            const void* audioData,
             int bitsPerSample,
             int sampleRate,
             size_t numberOfChannels,

@@ -11,18 +11,16 @@ class GraphicsViewToolbar : public QGraphicsView
 {
     Q_OBJECT
 public:
-    GraphicsViewToolbar(QWidget *parent=nullptr);
+    GraphicsViewToolbar(QWidget* parent = nullptr);
 
 public slots:
     void setBatteryStatus(bool is_charging, float battery_voltage, float battery_current, float battery_level);
 
 private:
+    QGraphicsScene* m_scene;
+    QGraphicsTextItem* m_batteryTextItem;
 
-    QGraphicsScene *m_scene;
-    QGraphicsTextItem *m_batteryTextItem;
-
-    virtual void resizeEvent(QResizeEvent *event) override;
-
+    virtual void resizeEvent(QResizeEvent* event) override;
 };
 
 

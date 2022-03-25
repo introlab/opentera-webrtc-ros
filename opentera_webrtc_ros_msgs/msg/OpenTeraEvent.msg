@@ -8,4 +8,3 @@ opentera_webrtc_ros_msgs/LogEvent[] log_events
 opentera_webrtc_ros_msgs/ParticipantEvent[] participant_events
 opentera_webrtc_ros_msgs/StopSessionEvent[] stop_session_events
 opentera_webrtc_ros_msgs/UserEvent[] user_events
-

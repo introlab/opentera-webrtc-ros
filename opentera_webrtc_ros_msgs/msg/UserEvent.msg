@@ -7,7 +7,7 @@ int32 USER_ADDED=4
 int32 USER_UPDATED=5
 int32 USER_JOINED_SESSION=6
 int32 USER_LEFT_SESSION=7
-    
+
 string user_uuid
 int32 type
 string user_fullname

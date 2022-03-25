@@ -11,26 +11,19 @@
 namespace map_image_generator
 {
     geometry_msgs::PoseStamped
-    convertMapToMapImage(const Parameters& parameters,
-                         const geometry_msgs::PoseStamped& mapPose);
-    geometry_msgs::Pose convertMapToMapImage(const Parameters& parameters,
-                                             const geometry_msgs::Pose& mapPose);
+        convertMapToMapImage(const Parameters& parameters, const geometry_msgs::PoseStamped& mapPose);
+    geometry_msgs::Pose convertMapToMapImage(const Parameters& parameters, const geometry_msgs::Pose& mapPose);
 
     geometry_msgs::Pose
-    convertRobotCenteredMapCoordinatesToPose(const Parameters& parameters, int x, int y,
-                                             double yaw);
+        convertRobotCenteredMapCoordinatesToPose(const Parameters& parameters, int x, int y, double yaw);
 
     geometry_msgs::PoseStamped
-    convertMapImageToRobot(const Parameters& parameters,
-                           const geometry_msgs::PoseStamped& mapImagePose);
-    geometry_msgs::Pose convertMapImageToRobot(const Parameters& parameters,
-                                               const geometry_msgs::Pose& mapImagePose);
+        convertMapImageToRobot(const Parameters& parameters, const geometry_msgs::PoseStamped& mapImagePose);
+    geometry_msgs::Pose convertMapImageToRobot(const Parameters& parameters, const geometry_msgs::Pose& mapImagePose);
 
     geometry_msgs::PoseStamped
-    convertMapImageToMap(const Parameters& parameters,
-                         const geometry_msgs::PoseStamped& mapImagePose);
-    geometry_msgs::Pose convertMapImageToMap(const Parameters& parameters,
-                                             const geometry_msgs::Pose& mapImagePose);
+        convertMapImageToMap(const Parameters& parameters, const geometry_msgs::PoseStamped& mapImagePose);
+    geometry_msgs::Pose convertMapImageToMap(const Parameters& parameters, const geometry_msgs::Pose& mapImagePose);
 
     void offsetYawByMinus90Degrees(geometry_msgs::Pose& pose);
 
@@ -40,32 +33,31 @@ namespace map_image_generator
         return angle >= 0 ? angle : angle + TFSIMD_2_PI;
     }
 
-    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2,
-                                 double ratio);
+    cv::Scalar interpolateColors(const cv::Scalar& color1, const cv::Scalar& color2, double ratio);
 
     void flipYawOnY(geometry_msgs::Pose& pose);
     void flipYawOnY(tf::Transform& transform);
     double flipYawOnY(double yaw);
 
-    template <typename T>
+    template<typename T>
     inline T sign(T val)
     {
         return static_cast<T>(T{0} < val) - static_cast<T>(val < T{0});
     }
 
-    template <typename T>
+    template<typename T>
     inline T restrictToPositive(T val)
     {
         return std::max(T{0}, val);
     }
 
-    template <typename T>
+    template<typename T>
     inline T deg2rad(T deg)
     {
         return deg * M_PI / 180;
     }
 
-    template <typename T>
+    template<typename T>
     inline T rad2deg(T rad)
     {
         return rad * 180 / M_PI;

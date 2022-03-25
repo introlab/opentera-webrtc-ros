@@ -13,7 +13,6 @@ namespace opentera
      */
     class RosVideoSource : public VideoSource
     {
-
     public:
         RosVideoSource(bool needsDenoising, bool isScreenCast);
         void sendFrame(const sensor_msgs::ImageConstPtr& msg);

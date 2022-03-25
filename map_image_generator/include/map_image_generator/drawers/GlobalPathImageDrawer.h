@@ -16,8 +16,10 @@ namespace map_image_generator
         ros::ServiceServer m_clearGlobalPathService;
 
     public:
-        GlobalPathImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle,
-                              tf::TransformListener& tfListener);
+        GlobalPathImageDrawer(
+            const Parameters& parameters,
+            ros::NodeHandle& nodeHandle,
+            tf::TransformListener& tfListener);
         ~GlobalPathImageDrawer() override;
 
         void draw(cv::Mat& image) override;
@@ -25,8 +27,7 @@ namespace map_image_generator
     private:
         void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
         void drawGlobalPath(cv::Mat& image, tf::Transform& transform);
-        bool clearGlobalPath(std_srvs::SetBool::Request& req,
-                             std_srvs::SetBool::Response& res);
+        bool clearGlobalPath(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
     };
 }
 #endif

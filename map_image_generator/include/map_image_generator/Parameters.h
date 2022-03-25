@@ -10,14 +10,14 @@ namespace map_image_generator
     class Parameters
     {
         double m_refreshRate;
-        int m_resolution;            // pixel/m
-        int m_width;                 // m
-        int m_height;                // m
-        int m_xOrigin;               // pixel
-        int m_yOrigin;               // pixel
-        int m_robotVerticalOffset;   // pixel
-        float m_soundSourceRange;    // m
-        float m_soundSourceMaxRange; // m
+        int m_resolution;  // pixel/m
+        int m_width;  // m
+        int m_height;  // m
+        int m_xOrigin;  // pixel
+        int m_yOrigin;  // pixel
+        int m_robotVerticalOffset;  // pixel
+        float m_soundSourceRange;  // m
+        float m_soundSourceMaxRange;  // m
 
         double m_scaleFactor;
 
@@ -45,26 +45,26 @@ namespace map_image_generator
         cv::Scalar m_soundSourceColorFull;
         cv::Scalar m_soundSourceColorDim;
 
-        int m_globalPathThickness; // pixel
-        int m_robotSize;           // pixel
-        int m_goalSize;            // pixel
-        int m_laserScanSize;       // pixel
-        int m_labelSize;           // pixel
-        int m_soundSourceSize;     // pixel
+        int m_globalPathThickness;  // pixel
+        int m_robotSize;  // pixel
+        int m_goalSize;  // pixel
+        int m_laserScanSize;  // pixel
+        int m_labelSize;  // pixel
+        int m_soundSourceSize;  // pixel
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
         virtual ~Parameters();
 
         double refreshRate() const;
-        int resolution() const;            // pixel/m
-        int width() const;                 // m
-        int height() const;                // m
-        int xOrigin() const;               // pixel
-        int yOrigin() const;               // pixel
-        int robotVerticalOffset() const;   // pixel
-        float soundSourceRange() const;    // m
-        float soundSourceMaxRange() const; // m
+        int resolution() const;  // pixel/m
+        int width() const;  // m
+        int height() const;  // m
+        int xOrigin() const;  // pixel
+        int yOrigin() const;  // pixel
+        int robotVerticalOffset() const;  // pixel
+        float soundSourceRange() const;  // m
+        float soundSourceMaxRange() const;  // m
 
         double scaleFactor() const;
         void setScaleFactor(double scaleFactor);
@@ -95,12 +95,12 @@ namespace map_image_generator
         const cv::Scalar& soundSourceColorFull() const;
         const cv::Scalar& soundSourceColorDim() const;
 
-        int globalPathThickness() const; // pixel
-        int robotSize() const;           // pixel
-        int goalSize() const;            // pixel
-        int laserScanSize() const;       // pixel
-        int labelSize() const;           // pixel
-        int soundSourceSize() const;     // pixel
+        int globalPathThickness() const;  // pixel
+        int robotSize() const;  // pixel
+        int goalSize() const;  // pixel
+        int laserScanSize() const;  // pixel
+        int labelSize() const;  // pixel
+        int soundSourceSize() const;  // pixel
 
     private:
         void validateParameters();
@@ -136,10 +136,7 @@ namespace map_image_generator
 
     inline double Parameters::scaleFactor() const { return m_scaleFactor; }
 
-    inline void Parameters::setScaleFactor(double scaleFactor)
-    {
-        m_scaleFactor = scaleFactor;
-    }
+    inline void Parameters::setScaleFactor(double scaleFactor) { m_scaleFactor = scaleFactor; }
 
     inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }
 
@@ -163,43 +160,25 @@ namespace map_image_generator
 
     inline const cv::Vec3b& Parameters::wallColor() const { return m_wallColor; }
 
-    inline const cv::Vec3b& Parameters::freeSpaceColor() const
-    {
-        return m_freeSpaceColor;
-    }
+    inline const cv::Vec3b& Parameters::freeSpaceColor() const { return m_freeSpaceColor; }
 
-    inline const cv::Vec3b& Parameters::unknownSpaceColor() const
-    {
-        return m_unknownSpaceColor;
-    }
+    inline const cv::Vec3b& Parameters::unknownSpaceColor() const { return m_unknownSpaceColor; }
 
-    inline const cv::Scalar& Parameters::globalPathColor() const
-    {
-        return m_globalPathColor;
-    }
+    inline const cv::Scalar& Parameters::globalPathColor() const { return m_globalPathColor; }
 
     inline const cv::Scalar& Parameters::robotColor() const { return m_robotColor; }
 
     inline const cv::Scalar& Parameters::goalColor() const { return m_goalColor; }
 
-    inline const cv::Scalar& Parameters::laserScanColor() const
-    {
-        return m_laserScanColor;
-    }
+    inline const cv::Scalar& Parameters::laserScanColor() const { return m_laserScanColor; }
 
     inline const cv::Scalar& Parameters::textColor() const { return m_textColor; }
 
     inline const cv::Scalar& Parameters::labelColor() const { return m_labelColor; }
 
-    inline const cv::Scalar& Parameters::soundSourceColorFull() const
-    {
-        return m_soundSourceColorFull;
-    }
+    inline const cv::Scalar& Parameters::soundSourceColorFull() const { return m_soundSourceColorFull; }
 
-    inline const cv::Scalar& Parameters::soundSourceColorDim() const
-    {
-        return m_soundSourceColorDim;
-    }
+    inline const cv::Scalar& Parameters::soundSourceColorDim() const { return m_soundSourceColorDim; }
 
     inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }
 
