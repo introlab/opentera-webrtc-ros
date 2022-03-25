@@ -21,7 +21,6 @@
     <arg name="stereo_swapping" default="false"/>
     <arg name="typing_detection" default="false"/>
     <arg name="residual_echo_detector" default="true"/>
-    <arg name="transient_suppression" default="true"/>
 
     <!-- Signaling -->
     <arg name="server_url" default="http://localhost:8080"/>
@@ -58,8 +57,7 @@
                 high_pass_filter: $(arg high_pass_filter),
                 stereo_swapping: $(arg stereo_swapping),
                 typing_detection: $(arg typing_detection),
-                residual_echo_detector: $(arg residual_echo_detector),
-                transient_suppression: $(arg transient_suppression)
+                residual_echo_detector: $(arg residual_echo_detector)
             }
         </rosparam>
 

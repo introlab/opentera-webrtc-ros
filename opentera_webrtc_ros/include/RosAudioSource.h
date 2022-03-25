@@ -23,8 +23,7 @@ namespace opentera
             bool highPassFilter = false,
             bool stereoSwapping = false,
             bool typingDetection = false,
-            bool residualEchoDetector = true,
-            bool transientSuppression = true);
+            bool residualEchoDetector = true);
 
         void sendFrame(const audio_utils::AudioFrameConstPtr& msg);
     };

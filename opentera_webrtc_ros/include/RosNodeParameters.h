@@ -41,8 +41,7 @@ namespace opentera
             bool& highPassFilter,
             bool& stereoSwapping,
             bool& typingDetection,
-            bool& residualEchoDetector,
-            bool& transientSuppression);
+            bool& residualEchoDetector);
     };
 
     /**

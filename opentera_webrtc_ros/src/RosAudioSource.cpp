@@ -12,8 +12,7 @@ RosAudioSource::RosAudioSource(
     bool highPassFilter,
     bool stereoSwapping,
     bool typingDetection,
-    bool residualEchoDetector,
-    bool transientSuppression)
+    bool residualEchoDetector)
     // Creating a default configuration for now, int bitsPerSample, int sampleRate, size_t numberOfChannels);
     : AudioSource(
           AudioSourceConfiguration::create(
@@ -24,8 +23,7 @@ RosAudioSource::RosAudioSource(
               highPassFilter,
               stereoSwapping,
               typingDetection,
-              residualEchoDetector,
-              transientSuppression),
+              residualEchoDetector),
           16,
           48000,
           1)
