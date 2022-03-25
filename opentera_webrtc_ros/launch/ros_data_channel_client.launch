@@ -13,7 +13,7 @@
         <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
         <rosparam param="signaling" subst_value="true">
             {
-                server_url: $(arg server_url),        # Signaling server URL
+                server_url: "$(arg server_url)",      # Signaling server URL
                 client_name: $(arg client_name),      # Peer name as which to join the room
                 room_name: $(arg room_name),          # Room name to join
                 room_password: $(arg room_password),  # Room password
