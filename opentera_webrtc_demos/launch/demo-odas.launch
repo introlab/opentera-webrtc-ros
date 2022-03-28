@@ -15,7 +15,9 @@
     <arg name="local" default="true" />
     <arg name="use_echo_cancellation" default="true"/>
     <arg name="echo_cancellation_source" default="alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.multichannel-input" />
+    <arg name="echo_cancellation_sink" default="__default" />
     <arg name="echo_cancellation_dest" default="odas_echo_cancelled" />
+    <arg name="ec_volume_percent" default="100" />
     <arg if="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array_ec.cfg"/>
     <arg unless="$(arg use_echo_cancellation)" name="configuration_path" default="$(find opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array.cfg"/>
 
@@ -29,8 +31,8 @@
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
     </include>
 
-    <!-- Sound interface echo cancellation -->
-    <node if="$(arg use_echo_cancellation)" pkg="odas_ros" type="echocancel.sh" name="echocancel" args="$(arg echo_cancellation_source) $(arg echo_cancellation_dest)" />
+  <!-- Sound interface echo cancellation -->
+    <node if="$(arg use_echo_cancellation)" pkg="odas_ros" type="echocancel.sh" name="echocancel" args="$(arg echo_cancellation_source) $(arg echo_cancellation_sink) $(arg echo_cancellation_dest) $(arg ec_volume_percent)" />
 
     <!-- ODAS -->
     <include file="$(find odas_ros)/launch/odas.launch">
