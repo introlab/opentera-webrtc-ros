@@ -7,6 +7,7 @@ import asyncio
 import json
 import os
 from signal import SIGINT, SIGTERM
+from pathlib import Path
 
 # ROS
 import rospy
@@ -246,11 +247,12 @@ if __name__ == '__main__':
     # Guessing config file path
     base_folder = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(base_folder, '../config/client_config.json')
-    config_file_name = rospy.get_param('~config_file', config_path)
+    config_file_name = Path(rospy.get_param(
+        '~config_file', config_path)).expanduser().resolve()
 
     # Read config file
     # Should be a param for this node
-    with open(config_file_name) as json_file:
+    with config_file_name.open() as json_file:
         data = json.load(json_file)
         if 'url' in data and 'client_token' in data:
             url = data['url']
