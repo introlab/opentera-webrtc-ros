@@ -48,6 +48,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
     bool stereoSwapping;
     bool typingDetection;
     bool residualEchoDetector;
+    bool transientSuppression;
 
     // Load ROS parameters
     RosNodeParameters::loadAudioStreamParams(
@@ -60,7 +61,8 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         highPassFilter,
         stereoSwapping,
         typingDetection,
-        residualEchoDetector);
+        residualEchoDetector,
+        transientSuppression);
 
 
     RosNodeParameters::loadVideoStreamParams(
@@ -79,7 +81,8 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         highPassFilter,
         stereoSwapping,
         typingDetection,
-        residualEchoDetector);
+        residualEchoDetector,
+        transientSuppression);
 
     string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
     ROS_INFO("RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());

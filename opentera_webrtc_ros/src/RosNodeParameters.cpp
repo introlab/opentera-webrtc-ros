@@ -109,7 +109,8 @@ void RosNodeParameters::loadAudioStreamParams(
     bool& highPassFilter,
     bool& stereoSwapping,
     bool& typingDetection,
-    bool& residualEchoDetector)
+    bool& residualEchoDetector,
+    bool& transientSuppression)
 {
     NodeHandle pnh("~");
 
@@ -131,4 +132,5 @@ void RosNodeParameters::loadAudioStreamParams(
     stereoSwapping = isInParams("stereo_swapping", dict) ? dict["stereo_swapping"] : false;
     typingDetection = isInParams("typing_detection", dict) ? dict["typing_detection"] : false;
     residualEchoDetector = isInParams("residual_echo_detector", dict) ? dict["residual_echo_detector"] : true;
+    transientSuppression = isInParams("transient_suppression", dict) ? dict["transient_suppression"] : true;
 }
