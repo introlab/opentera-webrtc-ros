@@ -24,11 +24,11 @@ file(COPY
     DESTINATION ${PROTOBUF_OUTPUT_PATH}
 )
 
-FILE(GLOB_RECURSE protofiles RELATIVE "${PROTOBUF_INPUT_PATH}" "${PROTOBUF_INPUT_PATH}/*.proto")
+FILE(GLOB_RECURSE protofiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${PROTOBUF_INPUT_PATH}/*.proto")
 foreach(file ${protofiles})
     message(STATUS "Protobuf: processing ${file}")
     execute_process(
-        COMMAND ${PROTOC_EXECUTABLE} ${file} -I=${PROTOBUF_INPUT_PATH} -I${GOOGLE_PROTO_PATH} --python_out ${PROTOBUF_OUTPUT_PATH}
+        COMMAND ${PROTOC_EXECUTABLE} ${file} -I=opentera_messages/proto -I${GOOGLE_PROTO_PATH} --python_out ${PROTOBUF_OUTPUT_PATH}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 endforeach()
