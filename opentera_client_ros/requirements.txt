@@ -1,3 +1,2 @@
-opentera==1.1.1
 aiohttp
 asyncio
