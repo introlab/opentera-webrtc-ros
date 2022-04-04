@@ -25,7 +25,7 @@ from opentera_webrtc_ros_msgs.msg import UserEvent
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 
 # OpenTera
-import opentera.messages.python as messages
+import opentera_protobuf_messages as messages
 from google.protobuf.json_format import ParseDict, ParseError
 from google.protobuf.json_format import MessageToJson
 

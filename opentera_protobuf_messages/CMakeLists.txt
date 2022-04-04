@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.0.2)
-
-project(opentera_client_ros)
-
+cmake_minimum_required(VERSION 3.16)
+project(opentera_protobuf_messages)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,22 +7,36 @@ project(opentera_client_ros)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-    rospy
-    std_msgs
-    message_runtime
-    opentera_webrtc_ros_msgs
-    opentera_protobuf_messages
-)
+find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+find_package(Protobuf REQUIRED COMPONENTS protobuf_messages protoc)
+
+set(PROTOBUF_INPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opentera_messages/proto)
+set(PROTOBUF_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/opentera_protobuf_messages)
+set(GOOGLE_PROTO_PATH ${Protobuf_INCLUDE_DIR}/google/protobuf)
+set(PROTOC_EXECUTABLE ${Protobuf_PROTOC_EXECUTABLE})
+
+file(COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera_messages/python/__init__.py
+    DESTINATION ${PROTOBUF_OUTPUT_PATH}
+)
+
+FILE(GLOB_RECURSE protofiles RELATIVE "${PROTOBUF_INPUT_PATH}" "${PROTOBUF_INPUT_PATH}/*.proto")
+foreach(file ${protofiles})
+    message(STATUS "Protobuf: processing ${file}")
+    execute_process(
+        COMMAND ${PROTOC_EXECUTABLE} ${file} -I=${PROTOBUF_INPUT_PATH} -I${GOOGLE_PROTO_PATH} --python_out ${PROTOBUF_OUTPUT_PATH}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endforeach()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -74,7 +86,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   geometry_msgs#   nav_msgs#   sensor_msgs#   std_msgs
 # )
 
 ################################################
@@ -107,10 +119,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES opentera-client-ros
-#  CATKIN_DEPENDS rospy std_msgs
-#  DEPENDS system_lib
+        # INCLUDE_DIRS include
+        # LIBRARIES t_top
+        #  CATKIN_DEPENDS geometry_msgs nav_msgs rospy sensor_msgs std_msgs tf
+        #  DEPENDS system_lib
 )
 
 ###########
@@ -120,13 +132,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-    ${catkin_INCLUDE_DIRS}
+        # include
+        ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/opentera-client-ros.cpp
+#   src/${PROJECT_NAME}/t_top.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -137,7 +149,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/opentera-client-ros_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/t_top_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,22 +170,13 @@ include_directories(
 ## Install ##
 #############
 
-#Install executables
-install(
-    PROGRAMS
-        scripts/opentera_client_ros.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 # catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
 ## Mark executables for installation
@@ -209,7 +212,7 @@ install(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_opentera-client-ros.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_t_top.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
