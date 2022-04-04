@@ -19,19 +19,11 @@ set(PROTOBUF_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/opentera_protobuf_messa
 set(GOOGLE_PROTO_PATH ${Protobuf_INCLUDE_DIR}/google/protobuf)
 set(PROTOC_EXECUTABLE ${Protobuf_PROTOC_EXECUTABLE})
 
+# Need to be done before the call to catkin_python_setup
 file(COPY
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera_messages/python/__init__.py
     DESTINATION ${PROTOBUF_OUTPUT_PATH}
 )
-
-FILE(GLOB_RECURSE protofiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${PROTOBUF_INPUT_PATH}/*.proto")
-foreach(file ${protofiles})
-    message(STATUS "Protobuf: processing ${file}")
-    execute_process(
-        COMMAND ${PROTOC_EXECUTABLE} ${file} -I=opentera_messages/proto -I${GOOGLE_PROTO_PATH} --python_out ${PROTOBUF_OUTPUT_PATH}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-endforeach()
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -165,6 +157,34 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+FILE(GLOB_RECURSE protofiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${PROTOBUF_INPUT_PATH}/*.proto")
+
+set(protobuf_python_targets)
+
+foreach(file ${protofiles})
+    message(STATUS "Protobuf: processing ${file}")
+    get_filename_component (name_without_extension ${file} NAME_WE)
+    #Add command to generate target
+    set(outfile ${PROTOBUF_OUTPUT_PATH}/${name_without_extension}_pb2.py)
+    add_custom_command(
+        OUTPUT ${outfile}
+        DEPENDS ${file}
+        COMMAND ${PROTOC_EXECUTABLE} ${file} -I=opentera_messages/proto -I${GOOGLE_PROTO_PATH} --python_out ${PROTOBUF_OUTPUT_PATH}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        VERBATIM
+    )
+    #Add target
+    set(output_target opentera_messages_${name_without_extension}.proto.target)
+    list(APPEND protobuf_python_targets ${output_target})
+    add_custom_target(
+        ${output_target}
+        DEPENDS ${outfile}
+        VERBATIM
+    )
+endforeach(file)
+
+add_custom_target(python-messages ALL DEPENDS ${protobuf_python_targets})
 
 #############
 ## Install ##
