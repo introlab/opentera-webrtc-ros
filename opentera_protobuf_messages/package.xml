@@ -48,7 +48,7 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>protobuf</build_depend>
+  <build_depend>python3-protobuf</build_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
