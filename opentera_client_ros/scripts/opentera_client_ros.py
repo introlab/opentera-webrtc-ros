@@ -157,6 +157,7 @@ class OpenTeraROSClient:
                         event.device_name = device_event.device_name
                         event.device_status = device_event.device_status
                         opentera_events.device_events.append(event)
+                        continue
 
                     # Test for JoinSessionEvent
                     join_session_event = messages.JoinSessionEvent()
@@ -173,6 +174,7 @@ class OpenTeraROSClient:
                         event.session_parameters = join_session_event.session_parameters
                         event.service_uuid = join_session_event.service_uuid
                         opentera_events.join_session_events.append(event)
+                        continue
 
                     # Test for ParticipantEvent
                     participant_event = messages.ParticipantEvent()
@@ -185,6 +187,7 @@ class OpenTeraROSClient:
                         event.participant_project_name = participant_event.participant_project_name
                         event.participant_site_name = participant_event.participant_site_name
                         opentera_events.participant_events.append(event)
+                        continue
 
                     # Test for StopSessionEvent
                     stop_session_event = messages.StopSessionEvent()
@@ -194,6 +197,7 @@ class OpenTeraROSClient:
                         event.session_uuid = stop_session_event.session_uuid
                         event.service_uuid = stop_session_event.service_uuid
                         opentera_events.stop_session_events.append(event)
+                        continue
 
                     # Test for UserEvent
                     user_event = messages.UserEvent()
@@ -204,6 +208,7 @@ class OpenTeraROSClient:
                         event.type = user_event.type
                         event.user_fullname = user_event.user_fullname
                         opentera_events.user_events.append(event)
+                        continue
 
                     # Test for LeaveSessionEvent
                     leave_session_event = messages.LeaveSessionEvent()
@@ -216,6 +221,7 @@ class OpenTeraROSClient:
                         event.leaving_users = leave_session_event.leaving_users
                         event.leaving_devices = leave_session_event.leaving_devices
                         opentera_events.leave_session_events.append(event)
+                        continue
 
                     # Test for JoinSessionReply
                     join_session_reply = messages.JoinSessionReplyEvent()
@@ -229,8 +235,10 @@ class OpenTeraROSClient:
                         event.join_reply = join_session_reply.join_reply
                         event.reply_msg = join_session_reply.reply_msg
                         opentera_events.join_session_reply_events.append(event)
+                        continue
 
                     # TODO Handle other events if required.
+                    rospy.logerr(f"Unknown message type: {any_msg}")
 
                 self.__event_publisher.publish(opentera_events)
 
