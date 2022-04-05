@@ -50,7 +50,7 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
     vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers))
     {
-        ROS_ERROR("Error fetching ice servers from %s", iceServersUrl.c_str());
+        ROS_WARN("Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
     }
 

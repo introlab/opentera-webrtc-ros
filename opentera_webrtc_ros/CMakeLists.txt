@@ -65,39 +65,38 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
 ## !! Needs to be after catkin_package !!
 # CATKIN_PACKAGE_PYTHON_DESTINATION and CATKIN_PACKAGE_BIN_DESTINATION are set by catkin_package
 # Install to develspace on build
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX})
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX} CACHE STRING "")
 # Install to installspace on install
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages")
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE STRING "")
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages" CACHE STRING "")
+
+execute_process(
+    COMMAND python3 --version
+    COMMAND bash -c "cut -f2 -d' '"
+    OUTPUT_VARIABLE OPENTERA_WEBRTC_ROS_PYTHON_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if (${OPENTERA_WEBRTC_ROS_PYTHON_VERSION} VERSION_LESS "3.8.0")
+    set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PYTHON_EXECUTABLE_SIGNALING_SERVER "python3.8" CACHE STRING "")
+endif ()
 
 add_subdirectory(opentera-webrtc)
 
-# TODO Fixme. Version is hard coded for now
-# Needs to be after "add_subdirectory(opentera-webrtc/opentera-webrtc-native-client)" for "webrtc_native_build_version" to be set
-set(OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/include")
-set(OPENTERA_WEBRTC_NATIVE_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/webrtc_native/webrtc-native-build-${webrtc_native_build_version}/lib")
-
 include_directories(
-    ${OPENTERA_WEBRTC_NATIVE_INCLUDE_DIR}
+    ${webrtc_native_INCLUDE}
+    ${boringssl_INCLUDE}
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/socket.io-client-cpp/src
-)
-
-link_directories(
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}
-    ${OPENTERA_WEBRTC_NATIVE_LIB_DIR}/boringssl_asm
 )
 
 set(opentera_webrtc_native_client_libs
     opencv_core
     opencv_imgproc
     OpenteraWebrtcNativeClient
-    boringssl
-    webrtc
-    dl
-    X11
-    expat
+    ${webrtc_native_LIBRARY}
+    ${boringssl_LIBRARY}
 )
 
 ###########
