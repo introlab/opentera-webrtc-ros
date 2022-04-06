@@ -5,6 +5,7 @@
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
+    <arg name="rviz" default="false"/>
 
 
     <!-- OpenTera Client (with default config file) -->
@@ -14,6 +15,7 @@
     <!-- Turtlebot simulator -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch">
         <arg name="model" value="$(arg model)" />
+        <arg name="open_rviz" value="$(arg rviz)" />
     </include>
 
     <!-- Map image generator -->
