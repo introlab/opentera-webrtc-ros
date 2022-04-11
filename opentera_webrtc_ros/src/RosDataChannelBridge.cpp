@@ -108,7 +108,10 @@ void RosDataChannelBridge::initDataChannelCallback()
 void RosDataChannelBridge::stopDataChannelCallback()
 {
     // Setup data channel callback
-    m_signalingClient->setOnDataChannelMessageString(nullptr);
+    if (m_signalingClient)
+    {
+        m_signalingClient->setOnDataChannelMessageString(nullptr);
+    }
 }
 
 void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)

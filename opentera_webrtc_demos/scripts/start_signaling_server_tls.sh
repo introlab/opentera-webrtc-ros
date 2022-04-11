@@ -19,4 +19,4 @@ echo "key:" $key
 echo "Client interface will be available at http://localhost:$port/index.html#/user?pwd=$password&robot=$robot_type"
 
 
-(cd $1; $python_exec -m pip install -r requirements.txt; exec $python_exec opentera-signaling-server --port $port --password $password --static_folder $static_folder --certificate $certificate --key $key)
+(cd $1; exec $python_exec opentera-signaling-server --port $port --password $password --static_folder $static_folder --certificate $certificate --key $key)

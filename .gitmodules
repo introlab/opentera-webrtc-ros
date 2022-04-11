@@ -4,3 +4,6 @@
 [submodule "opentera-webrtc-demos/opentera-webrtc-teleop-frontend"]
 	path = opentera_webrtc_demos/opentera-webrtc-teleop-frontend
 	url = ../opentera-webrtc-teleop-frontend.git
+[submodule "opentera_protobuf_messages/opentera_messages"]
+	path = opentera_protobuf_messages/opentera_messages
+	url = https://github.com/introlab/opentera_messages.git
