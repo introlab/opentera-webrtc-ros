@@ -5,6 +5,7 @@
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
+    <arg name="map_refresh_rate" default="5.0"/>
     <arg name="rviz" default="false"/>
     <arg name="is_stand_alone" default="false"/>
 
@@ -26,9 +27,8 @@
 
     <!-- Map image generator -->
     <include file="$(find map_image_generator)/launch/map_image_generator.launch" >
-        <arg name="refresh_rate_param" value="5"/>
+        <arg name="refresh_rate_param" value="$(arg map_refresh_rate)"/>
         <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
-        <arg name="draw_goals" value="true"/>
         <arg name="centered_robot" value="$(arg centered_robot)"/>
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
         <arg name="output" value="$(arg output)"/>
