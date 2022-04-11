@@ -37,7 +37,7 @@
     </include>
 
     <!-- Sound interface echo cancellation -->
-    <node if="$(arg use_echo_cancellation)" pkg="odas_ros" type="echocancel.sh" name="echocancel" args="$(arg echo_cancellation_source) $(arg echo_cancellation_dest)" />
+    <node if="$(arg use_echo_cancellation)" pkg="odas_ros" type="echocancel.sh" name="echocancel" args="$(arg echo_cancellation_source) __default $(arg echo_cancellation_dest) 100" />
 
     <!-- ODAS -->
     <include file="$(find odas_ros)/launch/odas.launch">
