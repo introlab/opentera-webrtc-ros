@@ -33,6 +33,9 @@ sudo apt-get install build-essential gfortran texinfo libasound2-dev
 
 # odas_ros packages
 sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio libpulse-dev
+
+# opentera-webrtc Python packages
+python3 -m pip install -r opentera_webrtc_ros/opentera-webrtc/requirements.txt
 ```
 
 # Installation
