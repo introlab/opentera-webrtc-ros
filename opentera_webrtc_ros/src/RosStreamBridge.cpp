@@ -89,7 +89,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
     vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers))
     {
-        ROS_WARN("RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
+        ROS_ERROR("RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
     }
 
