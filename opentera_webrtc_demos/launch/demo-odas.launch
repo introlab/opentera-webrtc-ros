@@ -7,6 +7,9 @@
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
     <arg name="rviz" default="false"/>
+    <arg name="is_stand_alone" default="true"/>
+
+    <arg name="output" value="screen"/>
 
     <!-- Arguments ODAS-->
     <arg name="frame_id" default="odas"/>
@@ -29,6 +32,8 @@
         <arg name="centered_robot" value="$(arg centered_robot)"/>
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
         <arg name="rviz" value="$(arg rviz)"/>
+        <arg name="is_stand_alone" value="$(arg is_stand_alone)"/>
+        <arg name="output" value="$(arg output)"/>
     </include>
 
     <!-- Sound interface echo cancellation -->
@@ -45,6 +50,7 @@
         <arg name="force_publish_tf" value="true"/>
         <arg name="use_echo_cancellation" value="$(arg use_echo_cancellation)"/>
         <arg name="echo_cancelled_signal_topic" value="/odas/sss"/>
+        <arg name="output" value="$(arg output)"/>
     </include>
 
 </launch>

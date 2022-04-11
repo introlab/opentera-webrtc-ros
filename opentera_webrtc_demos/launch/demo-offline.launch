@@ -9,13 +9,14 @@
 
     <arg name="output" default="screen"/>
 
-    <!-- OpenTera Client (with default config file) -->
-    <include file="$(find opentera_client_ros)/launch/client.launch">
-        <arg name="opentera_client_config_file" default="~/.ros/opentera/client_config.json"/>
-        <arg name="output" default="$(arg output)"/>
+    <!-- Signaling server -->
+    <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
+        <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
+        <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
+        <arg name="output" value="$(arg output)"/>
     </include>
 
-        <!-- OpenTera Demo -->
+    <!-- OpenTera Demo -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_demo.launch">
         <arg name="signaling_server_hostname" value="$(arg signaling_server_hostname)"/>
         <arg name="signaling_server_port" value="$(arg signaling_server_port)"/>
@@ -25,7 +26,7 @@
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
         <arg name="rviz" value="$(arg rviz)"/>
         <arg name="output" value="$(arg output)"/>
-        <arg name="is_stand_alone" value="false"/>
+        <arg name="is_stand_alone" value="true"/>
     </include>
 
 </launch>

@@ -4,6 +4,8 @@
     <arg name="name" default="topic_streamer"/>
     <arg name="is_stand_alone" default="true"/>
 
+    <arg name="output" default="log"/>
+
     <!-- Video -->
     <arg name="can_send_video_stream" default="false"/>
     <arg name="can_receive_video_stream" default="false"/>
@@ -37,7 +39,7 @@
     <arg name="output_audio_mixed_topic" default="audio_mixed"/>
     <arg name="output_webrtc_audio_topic" default="webrtc_audio"/>
 
-    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="screen" respawn="true">
+    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="$(arg output)" respawn="true">
         <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
         <rosparam param="videoStream" subst_value="true">
             {

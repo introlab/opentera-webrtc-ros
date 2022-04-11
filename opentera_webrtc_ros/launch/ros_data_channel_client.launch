@@ -9,7 +9,9 @@
     <arg name="room_password" default="abc"/>
     <arg name="verify_ssl" default="true"/>
 
-    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="data_channel_bridge" output="screen" respawn="true">
+    <arg name="output" default="log"/>
+
+    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="data_channel_bridge" output="$(arg output)" respawn="true">
         <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
         <rosparam param="signaling" subst_value="true">
             {

@@ -4,10 +4,13 @@
     <arg name="signaling_server_password" default="abc"/>
     <arg name="loopback_cam" default="1"/>
 
+    <arg name="output" default="screen"/>
+
     <!-- Signaling server -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
         <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
         <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
+        <arg name="output" value="$(arg output)" />
     </include>
 
     <!-- Loopback or webcam camera -->
@@ -19,6 +22,7 @@
     <!-- Camera 1 -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer1"/>
+        <arg name="output" value="$(arg output)"/>
         <arg name="is_stand_alone" value="true"/>
         <arg name="can_send_audio_stream" value="true"/>
         <arg name="can_receive_audio_stream" value="true"/>

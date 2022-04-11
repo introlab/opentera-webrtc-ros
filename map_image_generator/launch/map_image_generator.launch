@@ -13,6 +13,7 @@
     <arg name="output_map_image_labels_topic" default="/map_image_generator/labels"/>
 
     <arg name="rtabmap_list_label_service" default="/rtabmap/list_labels"/>
+    <arg name="output" default="log"/>
 
     <arg name="refresh_rate_param" default="1.0"/>
     <arg name="resolution_param" default="40"/>
@@ -30,7 +31,7 @@
     <arg name="robot_vertical_offset" default="180"/>
 
 
-    <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="screen">
+    <node name="map_image_generator" pkg="map_image_generator" type="map_image_generator" respawn="true" output="$(arg output)">
         <remap from="occupancy_grid" to="$(arg input_occupancy_grid_topic)"/>
         <remap from="global_path" to="$(arg input_global_path_topic)"/>
         <remap from="input_goal" to="$(arg input_goal_topic)"/>

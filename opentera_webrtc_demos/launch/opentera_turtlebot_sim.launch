@@ -21,6 +21,8 @@
     <arg if="$(arg localization)" name="rtabmap_args" default=""/>
     <arg unless="$(arg localization)" name="rtabmap_args" default="-d"/>
 
+    <arg name="output" default="log"/>
+
     <!-- Gazebo -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find opentera_webrtc_demos)/worlds/turtlebot3_house.world"/>
@@ -104,11 +106,11 @@
             args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
     </group>
 
-    <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="screen">
+    <node name="goal_manager" type="goal_manager.py" pkg="opentera_webrtc_ros" output="$(arg output)">
         <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
     </node>
 
-    <node name="labels_manager" type="labels_manager.py" pkg="opentera_webrtc_ros" output="screen">
+    <node name="labels_manager" type="labels_manager.py" pkg="opentera_webrtc_ros" output="$(arg output)">
         <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
         <remap from="stored_labels_text" to="webrtc_data_outgoing"/>
     </node>
