@@ -53,7 +53,7 @@
         <arg name="can_send_audio_stream" value="false"/>
         <arg name="can_receive_audio_stream" value="false"/>
         <arg name="can_send_video_stream" value="true"/>
-        <arg name="can_receive_video_stream" value="true"/>
+        <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
@@ -71,7 +71,7 @@
         <arg name="can_send_audio_stream" value="false"/>
         <arg name="can_receive_audio_stream" value="false"/>
         <arg name="can_send_video_stream" value="true"/>
-        <arg name="can_receive_video_stream" value="true"/>
+        <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
