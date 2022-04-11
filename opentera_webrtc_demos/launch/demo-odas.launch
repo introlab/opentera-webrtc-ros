@@ -38,7 +38,7 @@
         <arg name="output" value="$(arg output)"/>
     </include>
 
-  <!-- Sound interface echo cancellation -->
+    <!-- Sound interface echo cancellation -->
     <node if="$(arg use_echo_cancellation)" pkg="odas_ros" type="echocancel.sh" name="echocancel" args="$(arg echo_cancellation_source) $(arg echo_cancellation_sink) $(arg echo_cancellation_dest) $(arg ec_volume_percent)" />
 
     <!-- ODAS -->
@@ -46,8 +46,8 @@
         <arg name="configuration_path" value="$(arg configuration_path)"/>
         <arg name="frame_id" value="$(arg frame_id)"/>
         <arg name="visualization" value="$(arg visualization)"/>
-        <arg name="odas_rviz" value="$(arg rviz)"/>
-        <arg name="odas_rviz_cfg" value="$(arg rviz_cfg)"/>
+        <arg name="rviz" value="$(arg odas_rviz)"/>
+        <arg name="rviz_cfg" value="$(arg odas_rviz_cfg)"/>
         <arg name="local" value="$(arg local)" />
         <arg name="force_publish_tf" value="true"/>
         <arg name="use_echo_cancellation" value="$(arg use_echo_cancellation)"/>

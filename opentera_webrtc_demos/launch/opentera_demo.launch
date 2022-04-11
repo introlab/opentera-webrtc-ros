@@ -11,13 +11,6 @@
 
     <arg name="output" default="screen"/>
 
-    <!-- Signaling server -->
-    <include file="$(find opentera_webrtc_demos)/launch/opentera_signaling_server.launch">
-        <arg name="signaling_server_port" value="$(arg signaling_server_port)" />
-        <arg name="signaling_server_password" value="$(arg signaling_server_password)" />
-        <arg name="output" value="$(arg output)"/>
-    </include>
-
     <!-- Turtlebot simulator -->
     <include file="$(find opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch">
         <arg name="model" value="$(arg model)" />
