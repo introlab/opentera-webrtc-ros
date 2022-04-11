@@ -5,7 +5,7 @@
 
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
-    <arg name="signaling_server_robot_type" default="demo"/>
+    <arg name="signaling_server_robot_type" default="BEAM"/>
 
     <arg name="python_executable" default="python3"/>
 
