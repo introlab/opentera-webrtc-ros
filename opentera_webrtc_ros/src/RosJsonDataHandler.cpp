@@ -22,6 +22,7 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh, const ros::Nod
     m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
     m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
     m_setMovementModeClient = m_nh.serviceClient<opentera_webrtc_ros_msgs::SetString>("set_movement_mode");
+    m_doMovementClient = m_nh.serviceClient<opentera_webrtc_ros_msgs::SetString>("do_movement");
 
     m_localizationModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_localization");
     m_mappingModeClient = m_nh.serviceClient<std_srvs::Empty>("/rtabmap/set_mode_mapping");
@@ -112,6 +113,15 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
             if (!m_setMovementModeClient.call(srv))
             {
                 ROS_ERROR("Set movement mode service call error: %s", srv.response.message.c_str());
+            }
+        }
+        else if (serializedData["action"] == "doMovement")
+        {
+            opentera_webrtc_ros_msgs::SetString srv;
+            srv.request.data = serializedData["cmd"];
+            if (!m_doMovementClient.call(srv))
+            {
+                ROS_ERROR("Do movement service call error: %s", srv.response.message.c_str());
             }
         }
     }

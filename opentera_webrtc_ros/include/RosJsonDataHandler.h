@@ -39,6 +39,7 @@ namespace opentera
         ros::ServiceClient m_enableCameraClient;
         ros::ServiceClient m_changeMapViewClient;
         ros::ServiceClient m_setMovementModeClient;
+        ros::ServiceClient m_doMovementClient;
 
     protected:
         ros::NodeHandle m_nh;
