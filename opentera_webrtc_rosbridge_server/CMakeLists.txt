@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosbridge_msgs
   rosapi
   rosauth
+  opentera_webrtc_ros_msgs
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -79,8 +80,7 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 # Mark executable scripts (Python etc.) for installation
 # in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/rosbridge_webrtc.py
-  scripts/rosbridge_webrtc
+  scripts/rosbridge_ros_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

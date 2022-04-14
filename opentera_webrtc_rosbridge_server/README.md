@@ -7,6 +7,20 @@ The `opentera_webrtc_native_client` Python library is also needed, but it is bui
 It is located [in this repository but under the `opentera_webrtc_ros` package](../opentera_webrtc_ros/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/python/).
 
 
+# rosbridge_ros
+
+## Description
+
+Implement a rosbridge implementation that uses ROS as a transport layer. This allows delegating the real transport layer to another ROS node.
+
+### Subscribes
+
+- data_in : `opentera_webrtc_ros_msgs/PeerData`
+
+### Advertises
+
+- data_out : `std_msgs/String`
+
 <!-- # Installation
 
 The following ROS packages are required:

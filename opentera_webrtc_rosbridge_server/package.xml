@@ -20,6 +20,7 @@
   <exec_depend>rosapi</exec_depend>
   <exec_depend>rosauth</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>opentera_webrtc_ros_msgs</exec_depend>
   <export>
   </export>
 </package>

@@ -1,0 +1,5 @@
+#! /usr/bin/env python3
+
+if __name__ == '__main__':
+    from opentera_webrtc_rosbridge_server.rosbridge_webrtc import main
+    main()

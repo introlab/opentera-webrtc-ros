@@ -1,0 +1,13 @@
+<launch>
+
+    <arg name="name" default="rosbridge_ros_node"/>
+    <arg name="data_in_topic" default="data_in"/>
+    <arg name="data_out_topic" default="data_out"/>
+
+
+    <node pkg="opentera_webrtc_rosbridge_server" name="$(arg name)" type="rosbridge_ros_node">
+        <remap from="data_in" to="$(arg data_in_topic)"/>
+        <remap from="data_out" to="$(arg data_out_topic)"/>
+    </node>
+
+</launch>
