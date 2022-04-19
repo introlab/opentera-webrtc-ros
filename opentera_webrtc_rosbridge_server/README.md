@@ -15,11 +15,11 @@ Implement a rosbridge implementation that uses ROS as a transport layer. This al
 
 ### Subscribes
 
-- data_in : `opentera_webrtc_ros_msgs/PeerData`
+- data_in (`opentera_webrtc_ros_msgs/PeerData`) : The incoming rosbridge data from WebRTC.
 
 ### Advertises
 
-- data_out : `std_msgs/String`
+- data_out (`std_msgs/String`) : The outgoing rosbridge data to WebRTC.
 
 <!-- # Installation
 
