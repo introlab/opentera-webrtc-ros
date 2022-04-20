@@ -33,9 +33,6 @@ sudo apt-get install build-essential gfortran texinfo libasound2-dev
 
 # odas_ros packages
 sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio libpulse-dev
-
-# opentera-webrtc Python packages
-python3 -m pip install -r opentera_webrtc_ros/opentera-webrtc/requirements.txt
 ```
 
 # Installation
@@ -63,35 +60,23 @@ $ git clone https://github.com/introlab/odas_ros.git --recurse-submodules
 $ git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
 ```
 
-## 3 - Build all the ROS packages
+## 3 - Install the Python requirements
+
+```bash
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
+$ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros
+$ python3 -m pip install -r requirements.txt
+$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
+$ python3 -m pip install -r requirements.txt
+```
+
+## 4 - Build all the ROS packages
 
 ```bash
 $ cd ~/teleop_ws
 $ source devel/setup.bash
 $ catkin_make
-```
-
-## 4 - Install the Python requirements for client and signaling server
-
-```bash
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
-$ python3 -m pip install -r requirements.txt
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
-$ python3 -m pip install -r requirements.txt
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
-$ python3 -m pip install -r requirements.txt
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
-$ python3 -m pip install -r requirements.txt
-```
-
-## 5 - Install the VUE.js frontend (opentera-webrtc-teleop-frontend)
-
-```bash
-$ cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
-# Run the npm package installer
-$ npm install
-# Build the frontend (this will create a dist directory with all required files)
-$ npm run build
 ```
 
 # Running the demos
