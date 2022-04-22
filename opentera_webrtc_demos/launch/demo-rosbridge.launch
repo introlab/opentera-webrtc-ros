@@ -43,7 +43,7 @@
 
         <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Rosbridge Data Channel"/>
-        <arg name="room_name" value="Rosbridge"/>
+        <arg name="room_name" value="rosbridge"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
     </include>
 
