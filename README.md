@@ -2,6 +2,9 @@
 
 Based on [opentera-webrtc](https://github.com/introlab/opentera-webrtc).
 
+# License
+By default, libwebrtc is built with non-free codecs. See [opentera-webrtc](https://github.com/introlab/opentera-webrtc#license) to build without them.
+
 # Authors
 
 - Cédric Godin (@godced)
