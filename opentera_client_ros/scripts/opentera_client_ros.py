@@ -150,7 +150,6 @@ class OpenTeraROSClient:
                     # Test for DeviceEvent
                     device_event = messages.DeviceEvent()
                     if any_msg.Unpack(device_event):
-                        # print('device_event')
                         event = DeviceEvent()
                         event.device_uuid = device_event.device_uuid
                         event.type = device_event.type
@@ -162,7 +161,6 @@ class OpenTeraROSClient:
                     # Test for JoinSessionEvent
                     join_session_event = messages.JoinSessionEvent()
                     if any_msg.Unpack(join_session_event):
-                        # print('join_session_event')
                         event = JoinSessionEvent()
                         event.session_url = join_session_event.session_url
                         event.session_creator_name = join_session_event.session_creator_name
@@ -179,7 +177,6 @@ class OpenTeraROSClient:
                     # Test for ParticipantEvent
                     participant_event = messages.ParticipantEvent()
                     if any_msg.Unpack(participant_event):
-                        # print('participant_event')
                         event = ParticipantEvent()
                         event.participant_uuid = participant_event.participant_uuid
                         event.type = participant_event.type
@@ -192,7 +189,6 @@ class OpenTeraROSClient:
                     # Test for StopSessionEvent
                     stop_session_event = messages.StopSessionEvent()
                     if any_msg.Unpack(stop_session_event):
-                        # print('stop_session_event')
                         event = StopSessionEvent()
                         event.session_uuid = stop_session_event.session_uuid
                         event.service_uuid = stop_session_event.service_uuid
@@ -202,7 +198,6 @@ class OpenTeraROSClient:
                     # Test for UserEvent
                     user_event = messages.UserEvent()
                     if any_msg.Unpack(user_event):
-                        # print('user_event')
                         event = UserEvent()
                         event.user_uuid = user_event.user_uuid
                         event.type = user_event.type
@@ -213,7 +208,6 @@ class OpenTeraROSClient:
                     # Test for LeaveSessionEvent
                     leave_session_event = messages.LeaveSessionEvent()
                     if any_msg.Unpack(leave_session_event):
-                        # print('leave_session_event')
                         event = LeaveSessionEvent()
                         event.session_uuid = leave_session_event.session_uuid
                         event.service_uuid = leave_session_event.service_uuid
@@ -226,7 +220,6 @@ class OpenTeraROSClient:
                     # Test for JoinSessionReply
                     join_session_reply = messages.JoinSessionReplyEvent()
                     if any_msg.Unpack(join_session_reply):
-                        # print('join_session_reply')
                         event = JoinSessionReplyEvent()
                         event.session_uuid = join_session_reply.session_uuid
                         event.user_uuid = join_session_reply.user_uuid

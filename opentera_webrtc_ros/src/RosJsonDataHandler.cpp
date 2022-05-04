@@ -16,7 +16,7 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh, const ros::Nod
     m_addLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimple>("add_label_simple", 1);
     m_editLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimpleEdit>("edit_label_simple", 1);
 
-    m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 1, &RosJsonDataHandler::onWebRTCDataReceived, this);
+    m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 20, &RosJsonDataHandler::onWebRTCDataReceived, this);
 
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
     m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");

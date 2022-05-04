@@ -196,13 +196,13 @@ void RosStreamBridge::onSignalingConnectionOpened()
     if (m_canSendAudioStream)
     {
         // Audio
-        m_audioSubscriber = m_nh.subscribe("audio_in", 1, &RosStreamBridge::audioCallback, this);
+        m_audioSubscriber = m_nh.subscribe("audio_in", 10, &RosStreamBridge::audioCallback, this);
     }
 
     if (m_canSendVideoStream)
     {
         // Video
-        m_imageSubscriber = m_nh.subscribe("ros_image", 1, &RosStreamBridge::imageCallback, this);
+        m_imageSubscriber = m_nh.subscribe("ros_image", 5, &RosStreamBridge::imageCallback, this);
     }
 }
 
