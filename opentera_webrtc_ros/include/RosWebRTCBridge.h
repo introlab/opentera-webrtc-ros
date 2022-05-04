@@ -46,7 +46,7 @@ namespace opentera
         virtual void connect();
         virtual void disconnect();
 
-        virtual void onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event);
+        virtual void onEvent(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
         virtual void onDataBaseEvents(const std::vector<opentera_webrtc_ros_msgs::DatabaseEvent>& events);
         virtual void onDeviceEvents(const std::vector<opentera_webrtc_ros_msgs::DeviceEvent>& events);
         virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events);
@@ -96,7 +96,7 @@ namespace opentera
 
         if (!RosNodeParameters::isStandAlone())
         {
-            m_eventSubscriber = m_nh.subscribe("events", 1, &RosWebRTCBridge::onEvent, this);
+            m_eventSubscriber = m_nh.subscribe("events", 10, &RosWebRTCBridge::onEvent, this);
         }
 
         m_peerStatusPublisher = m_nh.advertise<opentera_webrtc_ros_msgs::PeerStatus>("webrtc_peer_status", 10, false);
@@ -127,6 +127,12 @@ namespace opentera
                          << "Connecting to signaling server...");
             m_signalingClient->connect();
         }
+        else
+        {
+            ROS_ERROR_STREAM(
+                nodeName << " --> "
+                         << "Signaling client is nullptr, cannot connect.");
+        }
     }
 
     /**
@@ -144,6 +150,12 @@ namespace opentera
 
             // Reset client
             m_signalingClient = nullptr;
+        }
+        else
+        {
+            ROS_ERROR_STREAM(
+                nodeName << " --> "
+                         << "Signaling client is nullptr, cannot disconnect.");
         }
     }
 
@@ -197,62 +209,51 @@ namespace opentera
      * @param event The message received.
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onEvent(const ros::MessageEvent<opentera_webrtc_ros_msgs::OpenTeraEvent const>& event)
+    void RosWebRTCBridge<T>::onEvent(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg)
     {
-        const opentera_webrtc_ros_msgs::OpenTeraEvent msg = *(event.getMessage());
-
-        if (!msg.database_events.empty())
+        if (!msg->database_events.empty())
         {
-            // ROS_INFO("DATABASE_EVENTS");
-            onDataBaseEvents(msg.database_events);
+            onDataBaseEvents(msg->database_events);
         }
 
-        if (!msg.device_events.empty())
+        if (!msg->device_events.empty())
         {
-            // ROS_INFO("DEVICE_EVENTS");
-            onDeviceEvents(msg.device_events);
+            onDeviceEvents(msg->device_events);
         }
 
-        if (!msg.join_session_events.empty())
+        if (!msg->join_session_events.empty())
         {
-            // ROS_INFO("JOIN_SESSION_EVENTS");
-            onJoinSessionEvents(msg.join_session_events);
+            onJoinSessionEvents(msg->join_session_events);
         }
 
-        if (!msg.join_session_reply_events.empty())
+        if (!msg->join_session_reply_events.empty())
         {
-            // ROS_INFO("JOIN_SESSION_REPLY_EVENTS");
-            onJoinSessionReplyEvents(msg.join_session_reply_events);
+            onJoinSessionReplyEvents(msg->join_session_reply_events);
         }
 
-        if (!msg.leave_session_events.empty())
+        if (!msg->leave_session_events.empty())
         {
-            // ROS_INFO("LEAVE_SESSION_EVENTS");
-            onLeaveSessionEvents(msg.leave_session_events);
+            onLeaveSessionEvents(msg->leave_session_events);
         }
 
-        if (!msg.log_events.empty())
+        if (!msg->log_events.empty())
         {
-            // ROS_INFO("LOG_EVENTS");
-            onLogEvents(msg.log_events);
+            onLogEvents(msg->log_events);
         }
 
-        if (!msg.participant_events.empty())
+        if (!msg->participant_events.empty())
         {
-            // ROS_INFO("PARTICIPANT_EVENTS");
-            onParticipantEvents(msg.participant_events);
+            onParticipantEvents(msg->participant_events);
         }
 
-        if (!msg.stop_session_events.empty())
+        if (!msg->stop_session_events.empty())
         {
-            // ROS_INFO("STOP_SESSION_EVENTS");
-            onStopSessionEvents(msg.stop_session_events);
+            onStopSessionEvents(msg->stop_session_events);
         }
 
-        if (!msg.user_events.empty())
+        if (!msg->user_events.empty())
         {
-            // ROS_INFO("USER_EVENTS");
-            onUserEvents(msg.user_events);
+            onUserEvents(msg->user_events);
         }
     }
 
