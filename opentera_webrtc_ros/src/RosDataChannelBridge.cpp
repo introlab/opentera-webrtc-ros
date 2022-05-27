@@ -45,10 +45,13 @@ RosDataChannelBridge::~RosDataChannelBridge()
  */
 void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration& signalingServerConfiguration)
 {
+    bool verifySSL;
+    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
+
     string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
     ROS_INFO("Fetching ice servers from : %s", iceServersUrl.c_str());
     vector<IceServer> iceServers;
-    if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers))
+    if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
     {
         ROS_ERROR("Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
@@ -60,8 +63,6 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
         WebrtcConfiguration::create(iceServers),
         DataChannelConfiguration::create());
 
-    bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
     m_signalingClient->setTlsVerificationEnabled(verifySSL);
 }
 

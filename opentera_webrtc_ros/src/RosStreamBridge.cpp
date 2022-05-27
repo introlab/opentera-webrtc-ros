@@ -84,10 +84,14 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         residualEchoDetector,
         transientSuppression);
 
+
+    bool verifySSL;
+    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
+
     string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
     ROS_INFO("RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());
     vector<IceServer> iceServers;
-    if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers))
+    if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
     {
         ROS_ERROR("RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
@@ -100,8 +104,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         (m_canReceiveAudioStream || m_canSendAudioStream ? m_audioSource : nullptr));
 
 
-    bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
     m_signalingClient->setTlsVerificationEnabled(verifySSL);
 
     if (m_canReceiveAudioStream || m_canReceiveVideoStream)
