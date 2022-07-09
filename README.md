@@ -32,10 +32,10 @@ sudo apt-get install python3-pip portaudio19-dev
 sudo apt-get install nodejs npm
 
 # audio_utils packages
-sudo apt-get install build-essential gfortran texinfo libasound2-dev
+sudo apt-get install cmake build-essential gfortran texinfo libasound2-dev libpulse-dev libgfortran-*-dev
 
 # odas_ros packages
-sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio libpulse-dev
+sudo apt-get install libfftw3-dev libconfig-dev
 ```
 
 # Installation
