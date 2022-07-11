@@ -14,7 +14,7 @@ Here are the key features:
 
 * [Stand alone demonstrations](opentera_webrtc_demos/README.md) with simulated robot in gazebo.
 
-* [Robot site front-end](opentera_webrtc_robot_gui/README.md) to display call information.
+* [Robot side front-end (Qt)](opentera_webrtc_robot_gui/README.md) to display call information and remote user interaction.
 
 * [OpenTera client](opentera_client_ros/README.md) basic implementation to act as a connected "device" that can receive calls from the OpenTera microservice cloud. A prototype web service (portal) is available in the [opentera-teleop-service](https://github.com/introlab/opentera-teleop-service) project.
 
