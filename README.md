@@ -8,9 +8,9 @@ Here are the key features:
 
 * [ROS Streaming nodes](opentera_webrtc_ros/README.md) capable of sending / receiving audio, video and data from WebRTC streams.
 
-* Teleoperation with a [opentera-webrtc-teleop-frontend](https://github.com/introlab/opentera-webrtc-teleop-frontend) sendind and receiving commands from the WebRTC data chanel in JSON format. We hope to be compatible with [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) in the future.
+* Teleoperation with a [opentera-webrtc-teleop-frontend](https://github.com/introlab/opentera-webrtc-teleop-frontend) sendind and receiving robot commands from the WebRTC data chanel in JSON format. We hope to be compatible with [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) in the future.
 
-* Map-based 2D/3D teleoperation using [RTAB-Map ROS](https://github.com/introlab/rtabmap_ros).
+* Map-based 2D/3D teleoperation using [RTAB-Map ROS](https://github.com/introlab/rtabmap_ros). Generated floor maps are streamed like a 2D image for simplicity at the moment by the [map_image_generator](map_image_generator) node.
 
 * Sound Source Localization / Tracking / Separation using [ODAS ROS](https://github.com/introlab/odas_ros).
 
