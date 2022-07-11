@@ -1,4 +1,5 @@
-# Installation
+# opentera_webrtc_ros
+## Installation
 
 The following ROS packages are required:
 
@@ -6,47 +7,27 @@ The following ROS packages are required:
 - cv_bridge
 - std_msgs
 - sensor_msgs
+- [audio_utils](https://github.com/introlab/audio_utils)
 
-Also add the following [repository](https://github.com/introlab/audio_utils) in the catkin workspace src directory:
+## RosStreamBridge
 
-```bash
-git clone https://github.com/introlab/audio_utils.git --recurse-submodules
-```
-
-See https://github.com/introlab/audio_utils for more informations about the dependency and his usage;
-
-# Clone the repository with the submodules in the catkin workspace src directory
-
-```bash
-git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
-```
-
-# TODO
-
-Complete the following documentation.
-
-Finally the OpenTera WebRTC native client and its dependencies must have been built with same build type, Debug or
-Release as the desired build output.
-
-# RosStreamBridge
-
-## Description
+### Description
 
 Implement a ROS node that publish received images and audio as a WebRTC stream.
 It also forwards images and audio received on the WebRTC stream to ROS.
 
-### Subscribes
+#### Subscribes
 
 - ros_image : `sensor_msgs::Image`
 - audio_in : `audio_utils::AudioFrame`
 
-### Advertises
+#### Advertises
 
 - webrtc_image : `opentera_webrtc_ros::PeerImage`
 - webrtc_audio : `opentera_webrtc_ros::PeerAudio`
 - audio_mixed : `audio_utils::AudioFrame`
 
-## Default Parameters
+#### Default Parameters
 
 ```xml
 <rosparam param="is_stand_alone">true</rosparam>
@@ -72,9 +53,9 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 
 For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.launch).
 
-# RosDataChannelBridge
+## RosDataChannelBridge
 
-## Description
+### Description
 
 Implement a ROS node that publish received messages on the WebRTC
 data channel. It also forwards messages received on the WebRTC data channel to ROS.
@@ -87,7 +68,7 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 
 - webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
-## Default Parameters
+### Default Parameters
 
 ```xml
 <rosparam param="is_stand_alone" >true</rosparam>
@@ -103,21 +84,21 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 
 For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_channel_client.launch).
 
-# RosJsonDataHandler
+## RosJsonDataHandler
 
-## Decription
+### Decription
 
 Implement a ROS node that dispatch received JSON messages and forward them on the rights topics.
 
-### Subscribes
+#### Subscribes
 
 - webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
-### Advertises
+#### Advertises
 
 - cmd_vel : `geometry_msgs::Twist`
 
-## JSON Format (TODO)
+#### JSON Format ()
 
 For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
 
