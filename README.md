@@ -4,6 +4,8 @@ Welcome to the opentera-webrtc-ros project. The goal of the project is to provid
 
 Here are the key features:
 
+* [ROS Messages](opentera_webrtc_ros_msgs) adding compatibility with ROS and [OpenTera protobuf protocol](https://github.com/introlab/opentera_messages) used in[opentera-teleop-service](https://github.com/introlab/opentera-teleop-service).
+
 * [ROS Streaming nodes](opentera_webrtc_ros/README.md) capable of sending / receiving audio, video and data from WebRTC streams.
 
 * Teleoperation with a [opentera-webrtc-teleop-frontend](https://github.com/introlab/opentera-webrtc-teleop-frontend) sendind and receiving commands from the WebRTC data chanel in JSON format. We hope to be compatible with [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) in the future.
