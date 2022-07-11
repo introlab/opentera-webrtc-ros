@@ -45,7 +45,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
   {
     server_url: "http://localhost:8080",    # Signaling server URL
     client_name: "streamer",                # Peer name as which to join the room
-    room_name: "chat",                      # Room name to join in stand alone mode
+    room_name: "chat",                      # Room name to join in stand_alone mode
     room_password: "abc"                    # Room password in stand alone mode
   }
 </rosparam>
