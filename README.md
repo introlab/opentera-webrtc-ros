@@ -1,6 +1,6 @@
 # opentera-webrtc-ros
 
-Welcome to the opentera-webrtc-ros project. The goal of the project is to provide useful ROS nodes to stream audio/video/data through Google's WebRTC library wrapped in [opentera-webrtc](https://github.com/introlab/opentera-webrtc). Wrappers are written in C++ and Python and are compatible with ROS1 (Noetic) at the moment. We use the signaling server implementation provided by opentera-webrtc.
+Welcome to the opentera-webrtc-ros project. The goal of the project is to provide useful ROS nodes to stream audio/video/data through Google's WebRTC library wrapped in [opentera-webrtc](https://github.com/introlab/opentera-webrtc). Wrappers are written in C++ and Python and are compatible with ROS1 (Noetic) at the moment. We use the [signaling server](https://github.com/introlab/opentera-webrtc/tree/main/signaling-server) implementation provided by opentera-webrtc.
 
 Here are the key features:
 
