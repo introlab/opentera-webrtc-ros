@@ -76,7 +76,7 @@ data channel. It also forwards messages received on the WebRTC data channel to R
   {
     server_url: "http://localhost:8080",    # Signaling server URL
     client_name: "data_bridge",             # Peer name as which to join the room
-    room_name: "chat",                      # Room name to join in stand_alone mode
+    room_name: "chat",                      # Room name to join 
     room_password: "abc"                    # Room password in stand_alone mode
   }
 </rosparam>
