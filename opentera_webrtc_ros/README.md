@@ -1,4 +1,5 @@
 # opentera_webrtc_ros
+
 ## Installation
 
 The following ROS packages are required:
@@ -36,17 +37,17 @@ It also forwards images and audio received on the WebRTC stream to ROS.
     can_send_audio_stream: true,        # Send audio stream to the signaling server
     can_receive_audio_stream: true,     # Receive audio stream from the signaling server
     can_send_video_stream: true,        # Send video stream to the signaling server
-    can_receive_video_stream: true,     # Rreceive video stream from the signaling server
+    can_receive_video_stream: true,     # Receive video stream from the signaling server
     is_screen_cast: false,        # Is the image source a screen capture?
     needs_denoising: false        # Does the image source needs denoising?
   }
 </rosparam>
 <rosparam param="signaling">
   {
-    server_url: "http://localhost:8080",    # Signaling server URL
+    server_url: "http://localhost:8080",    # Signaling server URL used in stand_alone mode
     client_name: "streamer",                # Peer name as which to join the room
     room_name: "chat",                      # Room name to join
-    room_password: "abc"                    # Room password in stand alone mode
+    room_password: "abc"                    # Room password used in stand alone mode
   }
 </rosparam>
 ```
@@ -55,29 +56,29 @@ For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.la
 
 ## RosDataChannelBridge
 
-### Description
+### Description (RosDataChannelBridge)
 
 Implement a ROS node that publish received messages on the WebRTC
 data channel. It also forwards messages received on the WebRTC data channel to ROS.
 
-#### Subscribes
+#### Subscribes (RosDataChannelBridge)
 
 - ros_data : `std_msgs::String`
 
-#### Advertises
+#### Advertises (RosDataChannelBridge)
 
 - webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
-#### Default Parameters
+#### Default Parameters (RosDataChannelBridge)
 
 ```xml
 <rosparam param="is_stand_alone" >true</rosparam>
 <rosparam param="signaling">
   {
-    server_url: "http://localhost:8080",    # Signaling server URL
+    server_url: "http://localhost:8080",    # Signaling server URL used in stand_alone mode
     client_name: "data_bridge",             # Peer name as which to join the room
-    room_name: "chat",                      # Room name to join 
-    room_password: "abc"                    # Room password in stand_alone mode
+    room_name: "chat",                      # Room name to join
+    room_password: "abc"                    # Room password used in stand_alone mode
   }
 </rosparam>
 ```
@@ -86,33 +87,34 @@ For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_chann
 
 ## RosJsonDataHandler
 
-### Decription
+### Decription (RosJsonDataHandler)
 
 Implement a ROS node that dispatch received JSON messages and forward them on the rights topics.
-#### Subscribes
+
+#### Subscribes (RosJsonDataHandler)
 
 - webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
 
-#### Advertises
+#### Advertises (RosJsonDataHandler)
 
 - cmd_vel : `geometry_msgs::Twist`
 
-#### JSON Format ()
+#### JSON Format (RosJsonDataHandler)
 
 For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
 
 ## libnavigation
 
-### Description
+### Description (libnavigation)
 
 Shared library for `goal_manager` and `label_manager` to send navigation commands to `move_base` as well as navigation waypoints to `map_image_generator`.
 The library is embedded in both nodes, a single instance is not shared.
 
-#### Subscribed topics
+#### Subscribed topics (libnavigation)
 
 - stop (`std_msgs/Bool`): Signal to cancel all move_base goals.
 
-#### Published topics
+#### Published topics (libnavigation)
 
 - waypoint_reached (`std_msgs/String`): String of a JSON message containing the ID of the waypoint that has been reached. Used by the frontend to determine when the trajectory has been completed.
 - map_image_drawer/remove_goal: (`geometry_msgs/PoseStamped`): Removes a waypoint from the map image
@@ -120,23 +122,23 @@ The library is embedded in both nodes, a single instance is not shared.
 
 ## goal_manager
 
-### Description
+### Description (goal_manager)
 
 Manages multiple waypoints received by the frontend and sends them to move_base one at a time. This node relies a service provided by the `map_image_generator` package to convert the waypoints from image coordinates to map coordinates.
 
-#### Subscribed topics
+#### Subscribed topics (goal_manager)
 
 - waypoints (`opentera_webrtc_ros_msgs/Waypoints`): Array of image coordinate waypoints received from the frontend.
 - start (`std_msgs/Bool`): Signal to start navigating sequentially to the previously received waypoints.
 - All subscribed topics of `libnavigation`
 
-#### Published topics
+#### Published topics (goal_manager)
 
 - All published topics of `libnavigation`
 
 ## labels_manager
 
-### Description
+### Description (labels_manager)
 
 Manages labels.
 The stored labels are dependent on the `map` transform and the database needs to be cleaned if the map changes.
@@ -144,7 +146,7 @@ A label represents a name grouped with an associated pose and a description.
 This node relies on a service provided by the `map_image_generator` package to convert the labels from image coordinates to map coordinates.
 This node can also send a label as a goal to `move_base` by its name.
 
-#### Subscribed topics
+#### Subscribed topics (labels_manager)
 
 - add_label_simple (`opentera_webrtc_ros_msgs/LabelSimple`): Label received from the frontend.
 - remove_label_by_name (`std_msgs/String`): Remove a label by its name
@@ -152,7 +154,7 @@ This node can also send a label as a goal to `move_base` by its name.
 - navigate_to_label (`std_msgs/String`): Navigate to a label by its name
 - All subscribed topics of `libnavigation`
 
-#### Published topics
+#### Published topics (labels_manager)
 
 - stored_labels (`opentera_webrtc_ros_msgs/LabelArray`): Array of labels currently stored
 - stored_labels_text (`std_msgs/String`): JSON message with an array of maps `{name: string, description: string}` labels names and descriptions. Used by the frontend to display a list of labels.
