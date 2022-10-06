@@ -33,6 +33,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 
     // Buttons
     connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
+    connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
+    connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
+    connect(m_ui->cameraButton, &QPushButton::toggled, m_cameraView, [this]{ m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
 
     // Signaling events
     connect(this, &MainWindow::eventJoinSession, this, &MainWindow::_onJoinSessionEvent, Qt::QueuedConnection);
@@ -62,6 +65,9 @@ void MainWindow::setupROS()
     m_robotStatusSubscriber = m_nodeHandle.subscribe("/robot_status", 10, &MainWindow::robotStatusCallback, this);
 
     // Setup publishers
+    m_mutePublisher = m_nodeHandle.advertise<std_msgs::Bool>("mute", 1);
+
+    m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
 }
 
 void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -331,6 +337,8 @@ void MainWindow::_onRobotStatus(
     bool is_camera_on)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
+    m_ui->microphoneButton->setChecked(is_muted);
+    m_ui->cameraButton->setChecked(!is_camera_on);
 }
 
 void MainWindow::setupButtons()
@@ -341,11 +349,20 @@ void MainWindow::setupButtons()
     m_ui->configButton->setIcon(QIcon(":/settings-gear.png"));
     m_ui->configButton->setText("");
 
-    m_ui->cameraButton->setIcon(QIcon(":/webcam.png"));
+    QIcon cameraIcon;
+    cameraIcon.addFile(QStringLiteral(":/video-camera-on.png"), QSize(), QIcon::Normal, QIcon::Off);
+    cameraIcon.addFile(QStringLiteral(":/video-camera-off.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui->cameraButton->setIcon(cameraIcon);
     m_ui->cameraButton->setText("");
+    m_ui->cameraButton->setCheckable(true);
 
-    m_ui->microphoneButton->setIcon(QIcon(":/mic-on.png"));
+
+    QIcon micIcon;
+    micIcon.addFile(QStringLiteral(":/mic-on.png"), QSize(), QIcon::Normal, QIcon::Off);
+    micIcon.addFile(QStringLiteral(":/mic-off.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui->microphoneButton->setIcon(micIcon);
     m_ui->microphoneButton->setText("");
+    m_ui->microphoneButton->setCheckable(true);;
 
     m_ui->speakerButton->setIcon(QIcon(":/volume.png"));
     m_ui->speakerButton->setText("");
@@ -355,4 +372,18 @@ void MainWindow::_onConfigButtonClicked()
 {
     ConfigDialog dialog(this);
     dialog.exec();
+}
+
+void MainWindow::_onMicrophoneButtonClicked()
+{
+    std_msgs::Bool msg;
+    msg.data = m_ui->microphoneButton->isChecked();
+    m_mutePublisher.publish(msg);
+}
+
+void MainWindow::_onCameraButtonClicked()
+{
+    std_msgs::Bool msg;
+    msg.data = !m_ui->cameraButton->isChecked();
+    m_enableCameraPublisher.publish(msg);
 }

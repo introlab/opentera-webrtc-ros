@@ -3,6 +3,8 @@
 
 #include <opencv2/core.hpp>
 #include <ros/ros.h>
+#include <std_srvs/SetBool.h>
+#include <std_msgs/Bool.h>
 #include <RosVideoSource.h>
 #include <RosAudioSource.h>
 #include <OpenteraWebrtcNativeClient/StreamClient.h>
@@ -28,6 +30,9 @@ namespace opentera
         ros::Publisher m_imagePublisher;
         ros::Publisher m_audioPublisher;
         ros::Publisher m_mixedAudioPublisher;
+
+        ros::Subscriber m_muteSubscriber;
+        ros::Subscriber m_enableCameraSubscriber;
 
         bool m_canSendAudioStream;
         bool m_canSendVideoStream;
@@ -68,6 +73,9 @@ namespace opentera
 
         void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
         void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+
+        void muteCallback(const std_msgs::Bool& msg);
+        void enableCameraCallback(const std_msgs::Bool& msg);
 
     public:
         RosStreamBridge(const ros::NodeHandle& nh);

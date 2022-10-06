@@ -30,13 +30,13 @@ namespace opentera
         ros::Publisher m_removeLabelPub;
         ros::Publisher m_addLabelPub;
         ros::Publisher m_editLabelPub;
+        ros::Publisher m_mutePub;
+        ros::Publisher m_enableCameraPub;
         float m_linear_multiplier;
         float m_angular_multiplier;
         ros::ServiceClient m_dockingClient;
         ros::ServiceClient m_localizationModeClient;
         ros::ServiceClient m_mappingModeClient;
-        ros::ServiceClient m_muteClient;
-        ros::ServiceClient m_enableCameraClient;
         ros::ServiceClient m_changeMapViewClient;
         ros::ServiceClient m_setMovementModeClient;
         ros::ServiceClient m_doMovementClient;

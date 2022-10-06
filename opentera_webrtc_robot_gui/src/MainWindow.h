@@ -13,6 +13,7 @@
 #include <QImage>
 #include <QSharedPointer>
 #include <QMap>
+#include <std_msgs/Bool.h>
 
 QT_BEGIN_NAMESPACE
     namespace Ui
@@ -108,6 +109,8 @@ private slots:
         bool is_camera_on);
 
     void _onConfigButtonClicked();
+    void _onMicrophoneButtonClicked();
+    void _onCameraButtonClicked();
 
 private:
     void setupROS();
@@ -133,13 +136,15 @@ private:
     void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg);
     void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
     void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg);
-
+    
     ros::NodeHandle m_nodeHandle;
     ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;
     ros::Subscriber m_peerStatusSubscriber;
     ros::Subscriber m_openteraEventSubscriber;
     ros::Subscriber m_robotStatusSubscriber;
+    ros::Publisher m_mutePublisher;
+    ros::Publisher m_enableCameraPublisher;
 };
 
 

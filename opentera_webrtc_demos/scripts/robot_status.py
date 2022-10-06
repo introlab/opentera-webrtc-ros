@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from xmlrpc.client import Boolean
 import rospy
 import psutil
 import os
@@ -7,6 +8,7 @@ import subprocess
 import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String
+from std_msgs.msg import Bool
 import json
 
 
@@ -18,7 +20,12 @@ class RobotStatusPublisher():
         self.status_webrtc_pub = rospy.Publisher(
             '/webrtc_data_outgoing', String, queue_size=10)
         self.pub_rate = 1
-
+        self.muted_sub = rospy.Subscriber(
+            'mute', Bool, self.set_muted, queue_size=10)
+        self.muted = False
+        self.enable_camera_sub = rospy.Subscriber(
+            'enable_camera', Bool, self.set_enable_camera, queue_size=10)
+        self.cameraEnabled = True
     def get_ip_address(self, ifname: str):
         try:
             address = os.popen('ip addr show ' +
@@ -34,6 +41,12 @@ class RobotStatusPublisher():
         total_blocks = result.f_blocks
         free_blocks = result.f_bfree
         return 100 - (free_blocks * 100 / total_blocks)
+
+    def set_muted(self, msg):
+        self.muted = msg.data
+
+    def set_enable_camera(self, msg):
+        self.cameraEnabled = msg.data
 
     def run(self):
         r = rospy.Rate(self.pub_rate)
@@ -52,6 +65,9 @@ class RobotStatusPublisher():
                      100 / psutil.virtual_memory().total)
                 status.disk_usage = self.get_disk_usage()
 
+                status.is_muted = self.muted
+                status.is_camera_on = self.cameraEnabled
+                
                 subprocess_result = subprocess.Popen(
                     'iwgetid', shell=True, stdout=subprocess.PIPE)
                 subprocess_output = subprocess_result.communicate()[
@@ -94,7 +110,9 @@ class RobotStatusPublisher():
                         'diskUsage': status.disk_usage,
                         'wifiNetwork': status.wifi_network,
                         'wifiStrength': status.wifi_strength,
-                        'localIp': status.local_ip
+                        'localIp': status.local_ip,
+                        'isMuted':status.is_muted,
+                        'isCameraOn':status.is_camera_on
                     }
                 }
                 self.status_webrtc_pub.publish(json.dumps(status_dict))

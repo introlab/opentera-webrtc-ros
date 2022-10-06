@@ -8,6 +8,7 @@
         <file>mic-off.png</file>
         <file>volume.png</file>
         <file>volume-mute.png</file>
-        <file>webcam.png</file>
+        <file>video-camera-on.png</file>
+        <file>video-camera-off.png</file>
     </qresource>
 </RCC>

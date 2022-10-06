@@ -171,6 +171,8 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
                 });
         }
     }
+    m_enableCameraSubscriber = m_nh.subscribe("enable_camera", 10, &RosStreamBridge::enableCameraCallback, this);
+    m_muteSubscriber = m_nh.subscribe("mute", 10, &RosStreamBridge::muteCallback, this);
 }
 
 void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)
@@ -319,6 +321,14 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
         m_videoSource->sendFrame(msg);
     }
+}
+
+void RosStreamBridge::muteCallback(const std_msgs::Bool& msg){
+    m_signalingClient->setLocalAudioMuted(msg.data);
+}
+
+void RosStreamBridge::enableCameraCallback(const std_msgs::Bool& msg){
+    m_signalingClient->setLocalVideoMuted(!msg.data);
 }
 
 RosStreamBridge::~RosStreamBridge() = default;

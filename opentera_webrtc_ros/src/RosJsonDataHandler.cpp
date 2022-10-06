@@ -15,12 +15,12 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh, const ros::Nod
     m_removeLabelPub = m_nh.advertise<std_msgs::String>("remove_label_by_name", 1);
     m_addLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimple>("add_label_simple", 1);
     m_editLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimpleEdit>("edit_label_simple", 1);
+    m_mutePub = m_nh.advertise<std_msgs::Bool>("mute", 1);
+    m_enableCameraPub = m_nh.advertise<std_msgs::Bool>("enable_camera",1);
 
     m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 20, &RosJsonDataHandler::onWebRTCDataReceived, this);
 
     m_dockingClient = m_nh.serviceClient<std_srvs::SetBool>("do_docking");
-    m_muteClient = m_nh.serviceClient<std_srvs::SetBool>("mute");
-    m_enableCameraClient = m_nh.serviceClient<std_srvs::SetBool>("enableCamera");
     m_setMovementModeClient = m_nh.serviceClient<opentera_webrtc_ros_msgs::SetString>("set_movement_mode");
     m_doMovementClient = m_nh.serviceClient<opentera_webrtc_ros_msgs::SetString>("do_movement");
 
@@ -127,21 +127,15 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
     }
     else if (serializedData["type"] == "mute")
     {
-        std_srvs::SetBool srv;
-        srv.request.data = serializedData["value"];
-        if (!m_muteClient.call(srv))
-        {
-            ROS_ERROR("Mute service call error: %s", srv.response.message.c_str());
-        }
+        std_msgs::Bool msg;
+        msg.data = serializedData["value"];
+        m_mutePub.publish(msg);
     }
     else if (serializedData["type"] == "enableCamera")
     {
-        std_srvs::SetBool srv;
-        srv.request.data = serializedData["value"];
-        if (!m_enableCameraClient.call(srv))
-        {
-            ROS_ERROR("EnableCamera service call error: %s", srv.response.message.c_str());
-        }
+        std_msgs::Bool msg;
+        msg.data = serializedData["value"];
+        m_enableCameraPub.publish(msg);
     }
     else if (serializedData["type"] == "changeMapView")
     {
