@@ -6,7 +6,6 @@
 ConfigDialog::ConfigDialog(QWidget* parent) : m_ui(new Ui::ConfigDialog())
 {
     m_ui->setupUi(this);
-    
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
 
     //Sliders
@@ -34,5 +33,3 @@ int ConfigDialog::getVolumeSliderValue(){
 void ConfigDialog::setVolumeSliderValue(int value){
     m_ui->volumeSlider->setValue(value);
 }
-
-

@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     // Create camera view
     m_cameraView = new ROSCameraView("Local", m_ui->imageWidget);
 
-
     m_ui->imageWidgetLayout->addWidget(m_cameraView);
 
     // Setup ROS
@@ -343,13 +342,13 @@ void MainWindow::_onRobotStatus(
     float volume)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
+    m_ui->cameraButton->setChecked(!is_camera_on);
     m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
     if(mic_volume == 0) {
         m_ui->microphoneButton->setChecked(true);
     } else {
         m_ui->microphoneButton->setChecked(false);
     }
-    m_ui->cameraButton->setChecked(!is_camera_on);
     m_configDialog->setVolumeSliderValue(volume * 100);
     if(volume == 0){
         m_ui->speakerButton->setChecked(true);
