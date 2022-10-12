@@ -46,8 +46,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
     bool noiseSuppression;
     bool highPassFilter;
     bool stereoSwapping;
-    bool typingDetection;
-    bool residualEchoDetector;
     bool transientSuppression;
 
     // Load ROS parameters
@@ -60,8 +58,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         noiseSuppression,
         highPassFilter,
         stereoSwapping,
-        typingDetection,
-        residualEchoDetector,
         transientSuppression);
 
 
@@ -80,8 +76,6 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
         noiseSuppression,
         highPassFilter,
         stereoSwapping,
-        typingDetection,
-        residualEchoDetector,
         transientSuppression);
 
 
