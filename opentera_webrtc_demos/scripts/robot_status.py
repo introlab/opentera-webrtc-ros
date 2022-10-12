@@ -7,8 +7,7 @@ import os
 import subprocess
 import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
-from std_msgs.msg import String
-from std_msgs.msg import Bool
+from std_msgs.msg import String, Bool, Float32
 import json
 
 
@@ -20,12 +19,15 @@ class RobotStatusPublisher():
         self.status_webrtc_pub = rospy.Publisher(
             '/webrtc_data_outgoing', String, queue_size=10)
         self.pub_rate = 1
-        self.muted_sub = rospy.Subscriber(
-            'mute', Bool, self.set_muted, queue_size=10)
-        self.muted = False
+        self.mic_volume_sub = rospy.Subscriber(
+            'mic_volume', Float32, self.set_mic_volume, queue_size=10)
+        self.micVolume = 1
         self.enable_camera_sub = rospy.Subscriber(
             'enable_camera', Bool, self.set_enable_camera, queue_size=10)
         self.cameraEnabled = True
+        self.volume_sub = rospy.Subscriber(
+            'volume', Float32, self.set_volume, queue_size=10)
+        self.volume = 1
     def get_ip_address(self, ifname: str):
         try:
             address = os.popen('ip addr show ' +
@@ -42,11 +44,14 @@ class RobotStatusPublisher():
         free_blocks = result.f_bfree
         return 100 - (free_blocks * 100 / total_blocks)
 
-    def set_muted(self, msg):
-        self.muted = msg.data
+    def set_mic_volume(self, msg):
+        self.micVolume = msg.data
 
     def set_enable_camera(self, msg):
         self.cameraEnabled = msg.data
+    
+    def set_volume(self, msg):
+        self.volume = msg.data
 
     def run(self):
         r = rospy.Rate(self.pub_rate)
@@ -65,9 +70,10 @@ class RobotStatusPublisher():
                      100 / psutil.virtual_memory().total)
                 status.disk_usage = self.get_disk_usage()
 
-                status.is_muted = self.muted
+                status.mic_volume = self.micVolume
                 status.is_camera_on = self.cameraEnabled
-                
+                status.volume = self.volume
+
                 subprocess_result = subprocess.Popen(
                     'iwgetid', shell=True, stdout=subprocess.PIPE)
                 subprocess_output = subprocess_result.communicate()[
@@ -111,8 +117,9 @@ class RobotStatusPublisher():
                         'wifiNetwork': status.wifi_network,
                         'wifiStrength': status.wifi_strength,
                         'localIp': status.local_ip,
-                        'isMuted':status.is_muted,
-                        'isCameraOn':status.is_camera_on
+                        'micVolume':status.mic_volume,
+                        'isCameraOn':status.is_camera_on,
+                        'volume':status.volume
                     }
                 }
                 self.status_webrtc_pub.publish(json.dumps(status_dict))

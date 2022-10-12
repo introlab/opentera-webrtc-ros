@@ -1,6 +1,5 @@
 #include "ui_MainWindow.h"
 #include "MainWindow.h"
-#include "ConfigDialog.h"
 #include <QGraphicsScene>
 #include <QThread>
 #include <QDebug>
@@ -12,9 +11,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     // Buttons
     setupButtons();
 
+    //ConfigDialog
+    m_configDialog = new ConfigDialog(this);
+
     // Toolbar
     m_toolbar = new GraphicsViewToolbar(m_ui->toolboxWidget);
-
 
     // Create camera view
     m_cameraView = new ROSCameraView("Local", m_ui->imageWidget);
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::toggled, m_cameraView, [this]{ m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
+    connect(m_ui->speakerButton, &QPushButton::clicked, this, &MainWindow::_onSpeakerButtonClicked);
 
     // Signaling events
     connect(this, &MainWindow::eventJoinSession, this, &MainWindow::_onJoinSessionEvent, Qt::QueuedConnection);
@@ -65,9 +67,11 @@ void MainWindow::setupROS()
     m_robotStatusSubscriber = m_nodeHandle.subscribe("/robot_status", 10, &MainWindow::robotStatusCallback, this);
 
     // Setup publishers
-    m_mutePublisher = m_nodeHandle.advertise<std_msgs::Bool>("mute", 1);
+    m_micVolumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("mic_volume", 1);
 
     m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
+
+    m_volumePublisher= m_nodeHandle.advertise<std_msgs::Float32>("volume", 1);
 }
 
 void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -278,8 +282,9 @@ void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatus
         QString::fromStdString(msg->wifi_network),
         msg->wifi_strength,
         QString::fromStdString(msg->local_ip),
-        msg->is_muted,
-        msg->is_camera_on);
+        msg->mic_volume,
+        msg->is_camera_on,
+        msg->volume);
 }
 
 
@@ -333,12 +338,25 @@ void MainWindow::_onRobotStatus(
     const QString& wifi_network,
     float wifi_strength,
     const QString& local_ip,
-    bool is_muted,
-    bool is_camera_on)
+    float mic_volume,
+    bool is_camera_on,
+    float volume)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
-    m_ui->microphoneButton->setChecked(is_muted);
+    m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
+    if(mic_volume == 0) {
+        m_ui->microphoneButton->setChecked(true);
+    } else {
+        m_ui->microphoneButton->setChecked(false);
+    }
     m_ui->cameraButton->setChecked(!is_camera_on);
+    m_configDialog->setVolumeSliderValue(volume * 100);
+    if(volume == 0){
+        m_ui->speakerButton->setChecked(true);
+    } else {
+        m_ui->speakerButton->setChecked(false);
+    }
+
 }
 
 void MainWindow::setupButtons()
@@ -363,22 +381,31 @@ void MainWindow::setupButtons()
     m_ui->microphoneButton->setIcon(micIcon);
     m_ui->microphoneButton->setText("");
     m_ui->microphoneButton->setCheckable(true);;
-
-    m_ui->speakerButton->setIcon(QIcon(":/volume.png"));
+    
+    QIcon speakerIcon;
+    speakerIcon.addFile(QStringLiteral(":/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
+    speakerIcon.addFile(QStringLiteral(":/volume-mute.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
+    m_ui->speakerButton->setCheckable(true);
 }
 
 void MainWindow::_onConfigButtonClicked()
 {
-    ConfigDialog dialog(this);
-    dialog.exec();
+    m_configDialog->exec();
 }
 
 void MainWindow::_onMicrophoneButtonClicked()
 {
-    std_msgs::Bool msg;
-    msg.data = m_ui->microphoneButton->isChecked();
-    m_mutePublisher.publish(msg);
+    std_msgs::Float32 msg;
+    if(m_ui->microphoneButton->isChecked()) {
+        msg.data = 0;
+        m_configDialog->setMicVolumeSliderValue(0);
+    } else {
+        msg.data = 1;
+        m_configDialog->setMicVolumeSliderValue(100);
+    }
+    m_micVolumePublisher.publish(msg);
 }
 
 void MainWindow::_onCameraButtonClicked()
@@ -386,4 +413,43 @@ void MainWindow::_onCameraButtonClicked()
     std_msgs::Bool msg;
     msg.data = !m_ui->cameraButton->isChecked();
     m_enableCameraPublisher.publish(msg);
+}
+
+void MainWindow::_onSpeakerButtonClicked()
+{
+    std_msgs::Float32 msg;
+    if(m_ui->speakerButton->isChecked()) {
+        msg.data = 0;
+        m_configDialog->setVolumeSliderValue(0);
+    } else {
+        msg.data = 1;
+        m_configDialog->setVolumeSliderValue(100);
+    }
+    m_volumePublisher.publish(msg);
+}
+
+void MainWindow::_onMicVolumeSliderValueChanged()
+{
+    float value = m_configDialog->getMicVolumeSliderValue();
+    if(value == 0){
+        m_ui->microphoneButton->setChecked(true);
+    } else {
+        m_ui->microphoneButton->setChecked(false);
+    }
+    std_msgs::Float32 msg;
+    msg.data = value/100;
+    m_micVolumePublisher.publish(msg);
+}
+
+void MainWindow::_onVolumeSliderValueChanged()
+{
+    float value = m_configDialog->getVolumeSliderValue();
+    if(value == 0){
+        m_ui->speakerButton->setChecked(true);
+    } else {
+        m_ui->speakerButton->setChecked(false);
+    }
+    std_msgs::Float32 msg;
+    msg.data = value/100;
+    m_volumePublisher.publish(msg);
 }

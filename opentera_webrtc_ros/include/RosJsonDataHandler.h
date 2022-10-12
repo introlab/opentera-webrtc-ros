@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
 
@@ -30,8 +31,9 @@ namespace opentera
         ros::Publisher m_removeLabelPub;
         ros::Publisher m_addLabelPub;
         ros::Publisher m_editLabelPub;
-        ros::Publisher m_mutePub;
+        ros::Publisher m_micVolumePub;
         ros::Publisher m_enableCameraPub;
+        ros::Publisher m_volumePub;
         float m_linear_multiplier;
         float m_angular_multiplier;
         ros::ServiceClient m_dockingClient;

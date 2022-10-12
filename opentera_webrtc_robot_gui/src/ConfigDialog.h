@@ -20,6 +20,11 @@ public:
     ConfigDialog(QWidget* parent = nullptr);
     ~ConfigDialog();
 
+    int getMicVolumeSliderValue();
+    void setMicVolumeSliderValue(int value);
+    int getVolumeSliderValue();
+    void setVolumeSliderValue(int value);
+
 protected:
     Ui::ConfigDialog* m_ui;
 };

@@ -15,8 +15,9 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh, const ros::Nod
     m_removeLabelPub = m_nh.advertise<std_msgs::String>("remove_label_by_name", 1);
     m_addLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimple>("add_label_simple", 1);
     m_editLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimpleEdit>("edit_label_simple", 1);
-    m_mutePub = m_nh.advertise<std_msgs::Bool>("mute", 1);
+    m_micVolumePub = m_nh.advertise<std_msgs::Float32>("mic_volume", 1);
     m_enableCameraPub = m_nh.advertise<std_msgs::Bool>("enable_camera",1);
+    m_volumePub = m_nh.advertise<std_msgs::Float32>("volume",1);
 
     m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 20, &RosJsonDataHandler::onWebRTCDataReceived, this);
 
@@ -125,17 +126,23 @@ void RosJsonDataHandler::onWebRTCDataReceived(const ros::MessageEvent<opentera_w
             }
         }
     }
-    else if (serializedData["type"] == "mute")
+    else if (serializedData["type"] == "micVolume")
     {
-        std_msgs::Bool msg;
+        std_msgs::Float32 msg;
         msg.data = serializedData["value"];
-        m_mutePub.publish(msg);
+        m_micVolumePub.publish(msg);
     }
     else if (serializedData["type"] == "enableCamera")
     {
         std_msgs::Bool msg;
         msg.data = serializedData["value"];
         m_enableCameraPub.publish(msg);
+    }
+    else if (serializedData["type"] == "volume")
+    {
+        std_msgs::Float32 msg;
+        msg.data = serializedData["value"];
+        m_volumePub.publish(msg);
     }
     else if (serializedData["type"] == "changeMapView")
     {

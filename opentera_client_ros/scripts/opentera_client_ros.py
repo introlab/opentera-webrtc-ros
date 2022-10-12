@@ -60,8 +60,9 @@ class OpenTeraROSClient:
                 'wifiNetwork': status.wifi_network,
                 'wifiStrength': status.wifi_strength,
                 'localIp': status.local_ip,
-                'isMuted':status.is_muted,
-                'isCameraOn':status.is_camera_on
+                'micVolume':status.mic_volume,
+                'isCameraOn':status.is_camera_on,
+                'volume':status.volume
             }
         }
 

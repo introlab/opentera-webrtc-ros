@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "ConfigDialog.h"
 #include "GraphicsViewToolbar.h"
 #include "ROSCameraView.h"
 #include <ros/ros.h>
@@ -14,6 +15,7 @@
 #include <QSharedPointer>
 #include <QMap>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float32.h>
 
 QT_BEGIN_NAMESPACE
     namespace Ui
@@ -30,6 +32,8 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     void setImage(const QImage& image);
+    void _onMicVolumeSliderValueChanged();
+    void _onVolumeSliderValueChanged();
 
 
 signals:
@@ -47,8 +51,9 @@ signals:
         const QString& wifi_network,
         float wifi_strength,
         const QString& local_ip,
-        bool is_muted,
-        bool is_camera_on);
+        float mic_volume,
+        bool is_camera_on,
+        float volume);
     void eventJoinSession(
         const QString& session_url,
         const QString& session_creator_name,
@@ -105,12 +110,14 @@ private slots:
         const QString& wif_network,
         float wifi_strength,
         const QString& local_ip,
-        bool is_muted,
-        bool is_camera_on);
+        float mic_volume,
+        bool is_camera_on,
+        float volume);
 
     void _onConfigButtonClicked();
     void _onMicrophoneButtonClicked();
     void _onCameraButtonClicked();
+    void _onSpeakerButtonClicked();
 
 private:
     void setupROS();
@@ -118,6 +125,9 @@ private:
     void closeEvent(QCloseEvent* event) override;
 
     Ui::MainWindow* m_ui;
+
+    //ConfigDialog
+    ConfigDialog* m_configDialog;
 
     // Toolbar
     GraphicsViewToolbar* m_toolbar;
@@ -143,8 +153,9 @@ private:
     ros::Subscriber m_peerStatusSubscriber;
     ros::Subscriber m_openteraEventSubscriber;
     ros::Subscriber m_robotStatusSubscriber;
-    ros::Publisher m_mutePublisher;
+    ros::Publisher m_micVolumePublisher;
     ros::Publisher m_enableCameraPublisher;
+    ros::Publisher m_volumePublisher;
 };
 
 
