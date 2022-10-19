@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
     opentera_webrtc_ros_msgs
     std_srvs
     visualization_msgs
+    map_image_generator
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -80,6 +81,9 @@ execute_process(
 if (${OPENTERA_WEBRTC_ROS_PYTHON_VERSION} VERSION_LESS "3.8.0")
     set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PYTHON_EXECUTABLE_SIGNALING_SERVER "python3.8" CACHE STRING "")
 endif ()
+
+# Use the system (ROS) version of Python
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_VERSION "${OPENTERA_WEBRTC_ROS_PYTHON_VERSION}" CACHE STRING "")
 
 add_subdirectory(opentera-webrtc)
 
