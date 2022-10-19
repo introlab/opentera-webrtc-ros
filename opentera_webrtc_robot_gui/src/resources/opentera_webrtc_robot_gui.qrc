@@ -10,5 +10,16 @@
         <file>volume-mute.png</file>
         <file>video-camera-on.png</file>
         <file>video-camera-off.png</file>
+        <file>battery-full.png</file>
+        <file>battery-medium.png</file>
+        <file>battery-low.png</file>
+        <file>battery-almost-empty.png</file>
+        <file>battery-slash.png</file>
+        <file>battery-charging.png</file>
+        <file>network-0-bars.png</file>
+        <file>network-1-bar.png</file>
+        <file>network-2-bars.png</file>
+        <file>network-3-bars.png</file>
+        <file>network-4-bars.png</file>
     </qresource>
 </RCC>

@@ -6,7 +6,7 @@
 ConfigDialog::ConfigDialog(QWidget* parent) : m_ui(new Ui::ConfigDialog())
 {
     m_ui->setupUi(this);
-    setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
+    //setWindowFlags(Qt::Dialog | Qt::WindowTitleHint);
 
     //Sliders
     m_ui->micVolumeSlider->setValue(100);

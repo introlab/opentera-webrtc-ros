@@ -17,7 +17,7 @@ class RobotStatusPublisher():
             '/robot_status', RobotStatus, queue_size=10)
         self.status_webrtc_pub = rospy.Publisher(
             '/webrtc_data_outgoing', String, queue_size=10)
-        self.pub_rate = 1
+        self.pub_rate = 10
         self.mic_volume_sub = rospy.Subscriber(
             'mic_volume', Float32, self.set_mic_volume, queue_size=10)
         self.micVolume = 1
@@ -55,13 +55,14 @@ class RobotStatusPublisher():
     def run(self):
         r = rospy.Rate(self.pub_rate)
         while not rospy.is_shutdown():
-            for i in range(100, -1, -5):
+            for i in range(100, -1, -1):
                 # Fill timestamp
                 status = RobotStatus()
                 status.header.stamp = rospy.Time.now()
 
                 # Fill (mostly fake) robot info
-                status.battery_voltage = float(i)
+                status.battery_level = float(i)
+                status.battery_voltage = 12.0
                 status.battery_current = 1.0
                 status.cpu_usage = psutil.cpu_percent()
                 status.mem_usage = 100 - \
@@ -93,9 +94,10 @@ class RobotStatusPublisher():
                     denominator = int(
                         re.search('/(.+?) ', decoded_output).group(1))
                     status.wifi_strength = numerator / denominator * 100
+                    status.wifi_strength = float(i)
                     status.local_ip = self.get_ip_address(wifi_interface_name)
                 else:
-                    status.wifi_strength = 0
+                    status.wifi_strength = float(i)
                     status.local_ip = '127.0.0.1'
 
                 # Publish for ROS

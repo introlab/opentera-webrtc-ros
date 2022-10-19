@@ -1,12 +1,12 @@
 <launch>
-    <arg name="signaling_server_hostname" default="localhost"/>
-    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_hostname" default="10.42.0.30"/>
+    <arg name="signaling_server_port" default="8090"/>
     <arg name="signaling_server_password" default="abc"/>
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
     <arg name="rviz" default="false"/>
-    <arg name="is_stand_alone" default="false"/>
+    <arg name="is_stand_alone" default="true"/>
 
     <arg name="output" default="screen"/>
 

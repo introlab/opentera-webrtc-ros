@@ -14,6 +14,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     //ConfigDialog
     m_configDialog = new ConfigDialog(this);
 
+    //Statistics
+    m_Statistics = new Statistics(this);
+
     // Toolbar
     m_toolbar = new GraphicsViewToolbar(m_ui->toolboxWidget);
 
@@ -33,6 +36,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 
     // Buttons
     connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
+    connect(m_ui->batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked); 
+
     connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::toggled, m_cameraView, [this]{ m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
@@ -342,6 +347,9 @@ void MainWindow::_onRobotStatus(
     float volume)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
+    m_statistics->updateCharts(battery_voltage, battery_current, battery_level);
+    setBatteryLevel(is_charging, battery_level);
+    setNetworkStrength(wifi_strength);
     m_ui->cameraButton->setChecked(!is_camera_on);
     m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
     if(mic_volume == 0) {
@@ -356,6 +364,63 @@ void MainWindow::_onRobotStatus(
         m_ui->speakerButton->setChecked(false);
     }
 
+}
+
+void MainWindow::setBatteryLevel(bool is_charging, float battery_level){
+    QIcon newIcon;
+    QString text;
+    text.setNum(battery_level);
+    if(is_charging)
+    {
+        newIcon.addFile(":/battery-charging.png");
+    }
+    else if(battery_level <= 5)
+    {
+        newIcon.addFile(":/battery-almost-empty.png");
+    }
+    else if(battery_level <= 33)
+    {
+        newIcon.addFile(":/battery-low.png");
+    }
+    else if(battery_level <= 66)
+    {
+        newIcon.addFile(":/battery-medium.png");
+    }
+    else if(battery_level <= 100)
+    {
+        newIcon.addFile(":/battery-full.png");
+    }
+    else
+    {
+        newIcon.addFile(":/battery-empty.png");
+    }
+    m_ui->batteryButton->setIcon(newIcon);
+    text.append("%");
+    m_ui->batteryButton->setText(text);
+
+}
+
+void MainWindow::setNetworkStrength(float wifi_strength){
+    QIcon newIcon;
+    if(wifi_strength == 0){
+        newIcon.addFile(":/network-0-bars");
+    }
+    else if(wifi_strength <= 25)
+    {
+        newIcon.addFile(":/network-1-bar");
+    }
+    else if(wifi_strength <= 50)
+    {
+        newIcon.addFile(":/network-2-bars");
+    }
+    else if(wifi_strength <= 75)
+    {
+        newIcon.addFile(":/network-3-bars");
+    }
+    else{
+        newIcon.addFile(":/network-4-bars");
+    }
+    m_ui->networkButton->setIcon(newIcon);
 }
 
 void MainWindow::setupButtons()
@@ -387,11 +452,27 @@ void MainWindow::setupButtons()
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
     m_ui->speakerButton->setCheckable(true);
+
+    /*QFont batteryFont = m_ui->batteryButton->font();
+    batteryFont.setPointSize(8);
+    m_ui->batteryButton->setFont(batteryFont);*/
+    m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
+    m_ui->batteryButton->setText("0%");
+
+    m_ui->networkButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui->networkButton->setIcon(QIcon(":/network-0-bars"));
+    m_ui->networkButton->setText("");
 }
 
 void MainWindow::_onConfigButtonClicked()
 {
     m_configDialog->exec();
+}
+
+void MainWindow::_onBatteryButtonClicked()
+{
+    m_statistics->exec();
 }
 
 void MainWindow::_onMicrophoneButtonClicked()

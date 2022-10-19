@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "Statistics.h"
 #include "ConfigDialog.h"
 #include "GraphicsViewToolbar.h"
 #include "ROSCameraView.h"
@@ -14,6 +15,7 @@
 #include <QImage>
 #include <QSharedPointer>
 #include <QMap>
+#include <QToolButton>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 
@@ -115,6 +117,7 @@ private slots:
         float volume);
 
     void _onConfigButtonClicked();
+    void _onBatteryButtonClicked();
     void _onMicrophoneButtonClicked();
     void _onCameraButtonClicked();
     void _onSpeakerButtonClicked();
@@ -122,12 +125,17 @@ private slots:
 private:
     void setupROS();
     void setupButtons();
+    void setBatteryLevel(bool is_charging, float battery_level);
+    void setNetworkStrength(float wifi_strength);
     void closeEvent(QCloseEvent* event) override;
 
     Ui::MainWindow* m_ui;
 
     //ConfigDialog
     ConfigDialog* m_configDialog;
+
+    //Statistics
+    Statistics* m_statistics;
 
     // Toolbar
     GraphicsViewToolbar* m_toolbar;
