@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     m_configDialog = new ConfigDialog(this);
 
     //Statistics
-    m_Statistics = new Statistics(this);
+    m_statistics = new Statistics(this);
 
     // Toolbar
     m_toolbar = new GraphicsViewToolbar(m_ui->toolboxWidget);

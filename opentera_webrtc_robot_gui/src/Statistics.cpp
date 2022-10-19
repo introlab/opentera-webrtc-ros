@@ -30,9 +30,9 @@ void Statistics::setupCharts()
     setDefaultChart(m_batteryCurrentLineSeries, m_batteryCurrentChart, 0, 5);
     m_batteryCurrentChartView = new QChartView(m_batteryCurrentChart);
 
-    m_ui->batteryLevelGroupBox->layout()->addWidget(m_batteryLevelChartView);
-    m_ui->batteryVoltageGroupBox->layout()->addWidget(m_batteryVoltageChartView);
-    m_ui->batteryCurrentGroupBox->layout()->addWidget(m_batteryCurrentChartView);
+    m_ui->firstGroupBox->layout()->addWidget(m_batteryLevelChartView);
+    m_ui->secondGroupBox->layout()->addWidget(m_batteryVoltageChartView);
+    m_ui->thirdGroupBox->layout()->addWidget(m_batteryCurrentChartView);
 }
 
 void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax){
