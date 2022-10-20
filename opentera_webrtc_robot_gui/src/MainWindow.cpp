@@ -347,7 +347,7 @@ void MainWindow::_onRobotStatus(
     float volume)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
-    m_statistics->updateCharts(battery_voltage, battery_current, battery_level);
+    m_statistics->updateCharts(battery_voltage, battery_current, battery_level, cpu_usage, mem_usage, disk_usage, wifi_strength);
     setBatteryLevel(is_charging, battery_level);
     setNetworkStrength(wifi_strength);
     m_ui->cameraButton->setChecked(!is_camera_on);
@@ -472,6 +472,7 @@ void MainWindow::_onConfigButtonClicked()
 
 void MainWindow::_onBatteryButtonClicked()
 {
+    m_statistics->setCurrentPage("battery");
     m_statistics->exec();
 }
 

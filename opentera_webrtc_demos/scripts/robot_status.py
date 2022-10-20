@@ -94,7 +94,6 @@ class RobotStatusPublisher():
                     denominator = int(
                         re.search('/(.+?) ', decoded_output).group(1))
                     status.wifi_strength = numerator / denominator * 100
-                    status.wifi_strength = float(i)
                     status.local_ip = self.get_ip_address(wifi_interface_name)
                 else:
                     status.wifi_strength = float(i)
