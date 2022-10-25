@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     // Buttons
     setupButtons();
 
-    //ConfigDialog
+    // ConfigDialog
     m_configDialog = new ConfigDialog(this);
 
     // Toolbar
@@ -35,7 +35,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
     connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
-    connect(m_ui->cameraButton, &QPushButton::toggled, m_cameraView, [this]{ m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
+    connect(
+        m_ui->cameraButton,
+        &QPushButton::toggled,
+        m_cameraView,
+        [this] { m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
     connect(m_ui->speakerButton, &QPushButton::clicked, this, &MainWindow::_onSpeakerButtonClicked);
 
     // Signaling events
@@ -70,7 +74,7 @@ void MainWindow::setupROS()
 
     m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
 
-    m_volumePublisher= m_nodeHandle.advertise<std_msgs::Float32>("volume", 1);
+    m_volumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("volume", 1);
 }
 
 void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -344,18 +348,23 @@ void MainWindow::_onRobotStatus(
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
     m_ui->cameraButton->setChecked(!is_camera_on);
     m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
-    if(mic_volume == 0) {
+    if (mic_volume == 0)
+    {
         m_ui->microphoneButton->setChecked(true);
-    } else {
+    }
+    else
+    {
         m_ui->microphoneButton->setChecked(false);
     }
     m_configDialog->setVolumeSliderValue(volume * 100);
-    if(volume == 0){
+    if (volume == 0)
+    {
         m_ui->speakerButton->setChecked(true);
-    } else {
+    }
+    else
+    {
         m_ui->speakerButton->setChecked(false);
     }
-
 }
 
 void MainWindow::setupButtons()
@@ -379,8 +388,8 @@ void MainWindow::setupButtons()
     micIcon.addFile(QStringLiteral(":/mic-off.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->microphoneButton->setIcon(micIcon);
     m_ui->microphoneButton->setText("");
-    m_ui->microphoneButton->setCheckable(true);;
-    
+    m_ui->microphoneButton->setCheckable(true);
+
     QIcon speakerIcon;
     speakerIcon.addFile(QStringLiteral(":/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
     speakerIcon.addFile(QStringLiteral(":/volume-mute.png"), QSize(), QIcon::Normal, QIcon::On);
@@ -397,10 +406,13 @@ void MainWindow::_onConfigButtonClicked()
 void MainWindow::_onMicrophoneButtonClicked()
 {
     std_msgs::Float32 msg;
-    if(m_ui->microphoneButton->isChecked()) {
+    if (m_ui->microphoneButton->isChecked())
+    {
         msg.data = 0;
         m_configDialog->setMicVolumeSliderValue(0);
-    } else {
+    }
+    else
+    {
         msg.data = 1;
         m_configDialog->setMicVolumeSliderValue(100);
     }
@@ -417,10 +429,13 @@ void MainWindow::_onCameraButtonClicked()
 void MainWindow::_onSpeakerButtonClicked()
 {
     std_msgs::Float32 msg;
-    if(m_ui->speakerButton->isChecked()) {
+    if (m_ui->speakerButton->isChecked())
+    {
         msg.data = 0;
         m_configDialog->setVolumeSliderValue(0);
-    } else {
+    }
+    else
+    {
         msg.data = 1;
         m_configDialog->setVolumeSliderValue(100);
     }
@@ -430,25 +445,31 @@ void MainWindow::_onSpeakerButtonClicked()
 void MainWindow::_onMicVolumeSliderValueChanged()
 {
     float value = m_configDialog->getMicVolumeSliderValue();
-    if(value == 0){
+    if (value == 0)
+    {
         m_ui->microphoneButton->setChecked(true);
-    } else {
+    }
+    else
+    {
         m_ui->microphoneButton->setChecked(false);
     }
     std_msgs::Float32 msg;
-    msg.data = value/100;
+    msg.data = value / 100;
     m_micVolumePublisher.publish(msg);
 }
 
 void MainWindow::_onVolumeSliderValueChanged()
 {
     float value = m_configDialog->getVolumeSliderValue();
-    if(value == 0){
+    if (value == 0)
+    {
         m_ui->speakerButton->setChecked(true);
-    } else {
+    }
+    else
+    {
         m_ui->speakerButton->setChecked(false);
     }
     std_msgs::Float32 msg;
-    msg.data = value/100;
+    msg.data = value / 100;
     m_volumePublisher.publish(msg);
 }

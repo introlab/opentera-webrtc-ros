@@ -126,7 +126,7 @@ private:
 
     Ui::MainWindow* m_ui;
 
-    //ConfigDialog
+    // ConfigDialog
     ConfigDialog* m_configDialog;
 
     // Toolbar
@@ -146,7 +146,7 @@ private:
     void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg);
     void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
     void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg);
-    
+
     ros::NodeHandle m_nodeHandle;
     ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;
