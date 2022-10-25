@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from genericpath import getsize
+import time
 import rospy
 import psutil
 import os
@@ -8,6 +10,8 @@ import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String, Bool, Float32
 import json
+import speedtest
+import psutil
 
 
 class RobotStatusPublisher():
@@ -17,7 +21,7 @@ class RobotStatusPublisher():
             '/robot_status', RobotStatus, queue_size=10)
         self.status_webrtc_pub = rospy.Publisher(
             '/webrtc_data_outgoing', String, queue_size=10)
-        self.pub_rate = 10
+        self.pub_rate = 1
         self.mic_volume_sub = rospy.Subscriber(
             'mic_volume', Float32, self.set_mic_volume, queue_size=10)
         self.micVolume = 1
@@ -26,7 +30,12 @@ class RobotStatusPublisher():
         self.cameraEnabled = True
         self.volume_sub = rospy.Subscriber(
             'volume', Float32, self.set_volume, queue_size=10)
+            
         self.volume = 1
+        self.io = psutil.net_io_counters()
+        self.bytes_sent = 0
+        self.bytes_recv = 0
+
     def get_ip_address(self, ifname: str):
         try:
             address = os.popen('ip addr show ' +
@@ -51,7 +60,7 @@ class RobotStatusPublisher():
     
     def set_volume(self, msg):
         self.volume = msg.data
-
+            
     def run(self):
         r = rospy.Rate(self.pub_rate)
         while not rospy.is_shutdown():
@@ -95,6 +104,11 @@ class RobotStatusPublisher():
                         re.search('/(.+?) ', decoded_output).group(1))
                     status.wifi_strength = numerator / denominator * 100
                     status.local_ip = self.get_ip_address(wifi_interface_name)
+
+                    io_2 = psutil.net_io_counters()
+                    status.upload_speed, status.download_speed = io_2.bytes_sent - self.bytes_sent, io_2.bytes_recv - self.bytes_recv
+                    self.bytes_sent, self.bytes_recv = io_2.bytes_sent, io_2.bytes_recv
+
                 else:
                     status.wifi_strength = float(i)
                     status.local_ip = '127.0.0.1'
@@ -116,6 +130,8 @@ class RobotStatusPublisher():
                         'diskUsage': status.disk_usage,
                         'wifiNetwork': status.wifi_network,
                         'wifiStrength': status.wifi_strength,
+                        'uploadSpeed': status.upload_speed,
+                        'downloadSpeed': status.download_speed,
                         'localIp': status.local_ip,
                         'micVolume':status.mic_volume,
                         'isCameraOn':status.is_camera_on,

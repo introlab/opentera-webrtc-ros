@@ -285,6 +285,8 @@ void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatus
         msg->disk_usage,
         QString::fromStdString(msg->wifi_network),
         msg->wifi_strength,
+        msg->upload_speed,
+        msg->download_speed,
         QString::fromStdString(msg->local_ip),
         msg->mic_volume,
         msg->is_camera_on,
@@ -341,13 +343,26 @@ void MainWindow::_onRobotStatus(
     float disk_usage,
     const QString& wifi_network,
     float wifi_strength,
+    float upload_speed,
+    float download_speed,
     const QString& local_ip,
     float mic_volume,
     bool is_camera_on,
     float volume)
 {
     m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
-    m_statistics->updateCharts(battery_voltage, battery_current, battery_level, cpu_usage, mem_usage, disk_usage, wifi_strength);
+    m_statistics->updateCharts(
+        battery_voltage,
+        battery_current,
+        battery_level,
+        cpu_usage,
+        mem_usage,
+        disk_usage,
+        wifi_network,
+        wifi_strength,
+        upload_speed,
+        download_speed,
+        local_ip);
     setBatteryLevel(is_charging, battery_level);
     setNetworkStrength(wifi_strength);
     m_ui->cameraButton->setChecked(!is_camera_on);

@@ -33,9 +33,11 @@ public:
         float cpu_usage,
         float mem_usage,
         float disk_usage,
-        //const QString& wifi_network, TODO i
-        float wifi_strength
-        //const QString& local_ip, TODO i
+        const QString& wifi_network,
+        float wifi_strength,
+        float upload_speed,
+        float download_speed,
+        const QString& local_ip
     );
 
 public slots:
@@ -45,6 +47,15 @@ protected:
 private slots:
     void _onMenuButtonClicked();
 private:
+    QDateTime startTime;
+    int maxRange;
+
+    int maxUploadSpeed = 0;
+    int minUploadSpeed = 1000000000;
+
+    int maxDownloadSpeed = 0;
+    int minDownloadSpeed = 1000000000;
+
     QLineSeries* m_batteryLevelLineSeries;
     QChart* m_batteryLevelChart;
 
@@ -56,6 +67,12 @@ private:
 
     QLineSeries* m_networkStrengthLineSeries;
     QChart* m_networkStrengthChart;
+
+    QLineSeries* m_uploadSpeedLineSeries;
+    QChart* m_uploadSpeedChart;
+
+    QLineSeries* m_downloadSpeedLineSeries;
+    QChart* m_downloadSpeedChart;
 
     QLineSeries* m_cpuUsageLineSeries;
     QChart* m_cpuUsageChart;
@@ -74,6 +91,8 @@ private:
 
     void setupCharts();
     void setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax);
+
+    void adjustNetworkSpeedCharts(QDateTime now, float uploadSpeed, float downloadSpeed);
 };
 
 #endif  //#define _BATTERY_STATISTICS_H_

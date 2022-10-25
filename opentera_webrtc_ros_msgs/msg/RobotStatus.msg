@@ -10,6 +10,8 @@ float32 mem_usage
 float32 disk_usage
 string wifi_network
 float32 wifi_strength  # 0 - 100
+float32 upload_speed
+float32 download_speed
 string local_ip
 float32 mic_volume
 bool is_camera_on

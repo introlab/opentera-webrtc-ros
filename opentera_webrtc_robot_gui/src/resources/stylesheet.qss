@@ -306,3 +306,26 @@ QProgressBar::chunk {
 QMenu::separator {
     background: #353535;
 }
+
+#taskBarFrame, #menuButton, #menuLabel {
+    background: #2E2E2E;
+}
+
+#menuBarFrame {
+    background: #5A5A5A;
+}
+
+#batteryMenuButton, #networkMenuButton, #systemMenuButton {
+    background: #5A5A5A;
+    padding-top:3px;
+    padding-bottom:3px;
+    border:none;
+}
+
+#batteryMenuButton:hover, #networkMenuButton:hover, #systemMenuButton:hover {
+    background: #424242;
+}
+
+#batteryMenuButton:checked, #networkMenuButton:checked, #systemMenuButton:checked {
+    background: #2E2E2E;
+}
