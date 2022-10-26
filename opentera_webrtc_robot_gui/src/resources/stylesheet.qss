@@ -329,3 +329,21 @@ QMenu::separator {
 #batteryMenuButton:checked, #networkMenuButton:checked, #systemMenuButton:checked {
     background: #2E2E2E;
 }
+
+#timeFrameComboBox {
+    background-color: #2E2E2E;
+    text-align: right;
+}
+
+#timeFrameComboBox::drop-down {
+    background-color: #2E2E2E;
+    border: none;
+}
+
+#timeFrameComboBox::down-arrow {
+    border: none;
+    background-color: #2E2E2E;
+    image: url(:/down-arrow.png);
+    width: 12px;
+    height: 12px;
+}

@@ -27,8 +27,8 @@ public:
     ~Statistics();
 
     void updateCharts(
-        float battery_voltage, 
-        float battery_current, 
+        float battery_voltage,
+        float battery_current,
         float battery_level,
         float cpu_usage,
         float mem_usage,
@@ -37,15 +37,14 @@ public:
         float wifi_strength,
         float upload_speed,
         float download_speed,
-        const QString& local_ip
-    );
+        const QString& local_ip);
 
 public slots:
     void setCurrentPage(QString page);
+
 protected:
     Ui::Statistics* m_ui;
-private slots:
-    void _onMenuButtonClicked();
+
 private:
     QDateTime startTime;
     int maxRange;
@@ -88,11 +87,11 @@ private:
     QChartView* m_thirdChartView;
 
     void setupMenu();
-
     void setupCharts();
     void setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax);
 
-    void adjustNetworkSpeedCharts(QDateTime now, float uploadSpeed, float downloadSpeed);
+    void setDateTimeAxisFormat(QString format);
+    float getMaxYAxisData(QLineSeries* series, QDateTime now);
 };
 
 #endif  //#define _BATTERY_STATISTICS_H_

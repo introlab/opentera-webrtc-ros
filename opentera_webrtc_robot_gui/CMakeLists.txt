@@ -32,7 +32,6 @@ set(srcs
     src/main.cpp
     src/MainWindow.cpp
     src/ROSCameraView.cpp
-    src/GraphicsViewToolbar.cpp
     src/ConfigDialog.cpp
     src/Statistics.cpp
 )
@@ -40,7 +39,6 @@ set(srcs
 set(headers
     src/MainWindow.h
     src/ROSCameraView.h
-    src/GraphicsViewToolbar.h
     src/ConfigDialog.h
     src/Statistics.h
 )

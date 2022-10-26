@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from genericpath import getsize
-import time
 import rospy
 import psutil
 import os
@@ -32,7 +30,7 @@ class RobotStatusPublisher():
             'volume', Float32, self.set_volume, queue_size=10)
             
         self.volume = 1
-        self.io = psutil.net_io_counters()
+        self.io = psutil.net_io_counters(pernic=True)
         self.bytes_sent = 0
         self.bytes_recv = 0
 
@@ -105,9 +103,9 @@ class RobotStatusPublisher():
                     status.wifi_strength = numerator / denominator * 100
                     status.local_ip = self.get_ip_address(wifi_interface_name)
 
-                    io_2 = psutil.net_io_counters()
-                    status.upload_speed, status.download_speed = io_2.bytes_sent - self.bytes_sent, io_2.bytes_recv - self.bytes_recv
-                    self.bytes_sent, self.bytes_recv = io_2.bytes_sent, io_2.bytes_recv
+                    io_2 = psutil.net_io_counters(pernic=True)
+                    status.upload_speed, status.download_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8, (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8
+                    self.bytes_sent, self.bytes_recv = io_2[wifi_interface_name].bytes_sent, io_2[wifi_interface_name].bytes_recv
 
                 else:
                     status.wifi_strength = float(i)

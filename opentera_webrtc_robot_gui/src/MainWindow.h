@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "Statistics.h"
 #include "ConfigDialog.h"
-#include "GraphicsViewToolbar.h"
 #include "ROSCameraView.h"
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -122,6 +121,7 @@ private slots:
 
     void _onConfigButtonClicked();
     void _onBatteryButtonClicked();
+    void _onNetworkButtonClicked();
     void _onMicrophoneButtonClicked();
     void _onCameraButtonClicked();
     void _onSpeakerButtonClicked();
@@ -135,14 +135,11 @@ private:
 
     Ui::MainWindow* m_ui;
 
-    //ConfigDialog
+    // ConfigDialog
     ConfigDialog* m_configDialog;
 
-    //Statistics
+    // Statistics
     Statistics* m_statistics;
-
-    // Toolbar
-    GraphicsViewToolbar* m_toolbar;
 
     // Remote views
     QMap<QString, ROSCameraView*> m_remoteViews;
@@ -158,7 +155,7 @@ private:
     void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg);
     void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
     void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg);
-    
+
     ros::NodeHandle m_nodeHandle;
     ros::Subscriber m_peerImageSubscriber;
     ros::Subscriber m_localImageSubscriber;

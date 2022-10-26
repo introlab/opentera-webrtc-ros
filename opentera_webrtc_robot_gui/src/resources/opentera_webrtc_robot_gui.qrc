@@ -23,5 +23,6 @@
         <file>network-4-bars.png</file>
         <file>three-horizontal-lines.png</file>
         <file>computer.png</file>
+        <file>down-arrow.png</file>
     </qresource>
 </RCC>

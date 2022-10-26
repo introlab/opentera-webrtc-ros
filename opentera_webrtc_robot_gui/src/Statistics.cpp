@@ -15,11 +15,15 @@ Statistics::Statistics(QWidget* parent) : m_ui(new Ui::Statistics())
 Statistics::~Statistics() {}
 
 void Statistics::setupMenu()
-{   
+{
     m_ui->menuBarFrame->setVisible(false);
 
     m_ui->menuButton->setIcon(QIcon(":/three-horizontal-lines.png"));
-    connect(m_ui->menuButton, &QPushButton::clicked, this, &Statistics::_onMenuButtonClicked);
+    connect(
+        m_ui->menuButton,
+        &QPushButton::clicked,
+        this,
+        [this] { m_ui->menuBarFrame->setVisible(!m_ui->menuBarFrame->isVisible()); });
 
     QFont titleFont;
     titleFont.setPointSize(15);
@@ -27,6 +31,7 @@ void Statistics::setupMenu()
     m_ui->menuLabel->setFont(titleFont);
 
     maxRange = 1800;
+    m_ui->timeFrameComboBox->addItem("Last minute", 60);
     m_ui->timeFrameComboBox->addItem("Last 5 minutes", 300);
     m_ui->timeFrameComboBox->addItem("Last 15 minutes", 900);
     m_ui->timeFrameComboBox->addItem("Last 30 minutes", maxRange);
@@ -35,22 +40,22 @@ void Statistics::setupMenu()
     m_ui->batteryMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     m_ui->batteryMenuButton->setText("Battery");
     m_ui->batteryMenuButton->setCheckable(true);
-    connect(m_ui->batteryMenuButton, &QPushButton::clicked, this, [this]{setCurrentPage("battery");});
-    
+    connect(m_ui->batteryMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("battery"); });
+
     m_ui->networkMenuButton->setIcon(QIcon(":/network-4-bars.png"));
     m_ui->networkMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     m_ui->networkMenuButton->setText("Network");
     m_ui->networkMenuButton->setCheckable(true);
-    connect(m_ui->networkMenuButton, &QPushButton::clicked, this, [this]{setCurrentPage("network");});
-    
+    connect(m_ui->networkMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("network"); });
+
     m_ui->systemMenuButton->setIcon(QIcon(":/computer.png"));
     m_ui->systemMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     m_ui->systemMenuButton->setText("System");
     m_ui->systemMenuButton->setCheckable(true);
-    connect(m_ui->systemMenuButton, &QPushButton::clicked, this, [this]{setCurrentPage("system");});
+    connect(m_ui->systemMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("system"); });
 }
 
-void Statistics::setupCharts() 
+void Statistics::setupCharts()
 {
     QFont infoFont;
     infoFont.setPointSize(15);
@@ -101,7 +106,7 @@ void Statistics::setupCharts()
     m_diskUsageChart = new QChart();
     setDefaultChart(m_diskUsageLineSeries, m_diskUsageChart, 0, 100);
 
-    
+
     m_firstChartView = new QChartView(m_batteryLevelChart);
     m_secondChartView = new QChartView(m_batteryVoltageChart);
     m_thirdChartView = new QChartView(m_batteryCurrentChart);
@@ -110,7 +115,8 @@ void Statistics::setupCharts()
     m_ui->thirdGroupBox->layout()->addWidget(m_thirdChartView);
 }
 
-void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax){
+void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax)
+{
     chart->legend()->hide();
     chart->addSeries(series);
 
@@ -121,7 +127,7 @@ void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMi
     QDateTimeAxis* xAxis = new QDateTimeAxis();
     QValueAxis* yAxis = new QValueAxis();
 
-    yAxis->setRange(yAxisMin,yAxisMax);
+    yAxis->setRange(yAxisMin, yAxisMax);
     yAxis->setTitleText("");
     xAxis->setTitleText("");
 
@@ -135,8 +141,8 @@ void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMi
 }
 
 void Statistics::updateCharts(
-    float battery_voltage, 
-    float battery_current, 
+    float battery_voltage,
+    float battery_current,
     float battery_level,
     float cpu_usage,
     float mem_usage,
@@ -145,20 +151,21 @@ void Statistics::updateCharts(
     float wifi_strength,
     float upload_speed,
     float download_speed,
-    const QString& local_ip
-    )
+    const QString& local_ip)
 {
-    QDateTime now = QDateTime::currentDateTime(); 
+    QDateTime now = QDateTime::currentDateTime();
 
-    QDateTimeAxis* batteryLevelXAxis = (QDateTimeAxis*)m_batteryLevelChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* batteryVoltageXAxis = (QDateTimeAxis*)m_batteryVoltageChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* batteryCurrentXAxis = (QDateTimeAxis*)m_batteryCurrentChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* networkStrengthXAxis = (QDateTimeAxis*)m_networkStrengthChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* uploadSpeedXAxis = (QDateTimeAxis*)m_uploadSpeedChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* downloadSpeedXAxis = (QDateTimeAxis*)m_downloadSpeedChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* cpuUsageXAxis = (QDateTimeAxis*)m_cpuUsageChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* memUsageXAxis = (QDateTimeAxis*)m_memUsageChart->axes(Qt::Horizontal)[0]; 
-    QDateTimeAxis* diskUsageXAxis = (QDateTimeAxis*)m_diskUsageChart->axes(Qt::Horizontal)[0]; 
+    QDateTimeAxis* batteryLevelXAxis = (QDateTimeAxis*)m_batteryLevelChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* batteryVoltageXAxis = (QDateTimeAxis*)m_batteryVoltageChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* batteryCurrentXAxis = (QDateTimeAxis*)m_batteryCurrentChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* networkStrengthXAxis = (QDateTimeAxis*)m_networkStrengthChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* uploadSpeedXAxis = (QDateTimeAxis*)m_uploadSpeedChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* downloadSpeedXAxis = (QDateTimeAxis*)m_downloadSpeedChart->axes(Qt::Horizontal)[0];
+    QValueAxis* uploadSpeedYAxis = (QValueAxis*)m_uploadSpeedChart->axes(Qt::Vertical)[0];
+    QValueAxis* downloadSpeedYAxis = (QValueAxis*)m_downloadSpeedChart->axes(Qt::Vertical)[0];
+    QDateTimeAxis* cpuUsageXAxis = (QDateTimeAxis*)m_cpuUsageChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* memUsageXAxis = (QDateTimeAxis*)m_memUsageChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* diskUsageXAxis = (QDateTimeAxis*)m_diskUsageChart->axes(Qt::Horizontal)[0];
 
     m_batteryLevelLineSeries->append(now.toMSecsSinceEpoch(), battery_level);
     m_batteryVoltageLineSeries->append(now.toMSecsSinceEpoch(), battery_voltage);
@@ -170,10 +177,16 @@ void Statistics::updateCharts(
     m_ui->secondInfoLabel->setText(local_ip);
 
     m_networkStrengthLineSeries->append(now.toMSecsSinceEpoch(), wifi_strength);
-    adjustNetworkSpeedCharts(now, upload_speed, download_speed);
-    /*m_ui->secondGroupBox->setTitle(QString::number(upload_speed/1000000));
-    m_uploadSpeedLineSeries->append(now.toMSecsSinceEpoch(), upload_speed/1000000);
-    m_downloadSpeedLineSeries->append(now.toMSecsSinceEpoch(), download_speed/1000000);*/
+
+    float uploadSpeedMb = upload_speed / 1048576;
+    float downloadSpeedMb = download_speed / 1048576;
+
+    m_uploadSpeedLineSeries->append(now.toMSecsSinceEpoch(), uploadSpeedMb);
+    m_downloadSpeedLineSeries->append(now.toMSecsSinceEpoch(), downloadSpeedMb);
+
+    // TODO change units and max according to the visible max value
+    uploadSpeedYAxis->setMax(getMaxYAxisData(m_uploadSpeedLineSeries, now));
+    downloadSpeedYAxis->setMax(getMaxYAxisData(m_downloadSpeedLineSeries, now));
 
     m_cpuUsageLineSeries->append(now.toMSecsSinceEpoch(), cpu_usage);
     m_memUsageLineSeries->append(now.toMSecsSinceEpoch(), mem_usage);
@@ -181,7 +194,7 @@ void Statistics::updateCharts(
 
     int range = m_ui->timeFrameComboBox->currentData().toInt();
     int elapsedTime = now.toSecsSinceEpoch() - startTime.toSecsSinceEpoch();
-    if(elapsedTime < range)
+    if (elapsedTime < range)
     {
         batteryLevelXAxis->setMax(now);
         batteryVoltageXAxis->setMax(now);
@@ -193,9 +206,9 @@ void Statistics::updateCharts(
         memUsageXAxis->setMax(now);
         diskUsageXAxis->setMax(now);
     }
-    else 
+    else
     {
-        QDateTime minTime = now.addSecs(-1*range);
+        QDateTime minTime = now.addSecs(-1 * range);
         batteryLevelXAxis->setRange(minTime, now);
         batteryVoltageXAxis->setRange(minTime, now);
         batteryCurrentXAxis->setRange(minTime, now);
@@ -207,7 +220,7 @@ void Statistics::updateCharts(
         diskUsageXAxis->setRange(minTime, now);
     }
 
-    if(elapsedTime >= maxRange)
+    if (elapsedTime >= maxRange)
     {
         m_batteryLevelLineSeries->remove(0);
         m_batteryVoltageLineSeries->remove(0);
@@ -220,24 +233,34 @@ void Statistics::updateCharts(
         m_diskUsageLineSeries->remove(0);
     }
 
-    //Order is important, setting the format once after setting the max and the min prevents a visual bug where the axis disappears 
-    if(batteryLevelXAxis->format() != "h:mm")
+    // Order is important, setting the format at least once after setting the max and the min prevents a visual bug
+    // where the axis disappears
+    if (m_ui->timeFrameComboBox->currentData().toInt() == 60 && batteryLevelXAxis->format() != "mm:ss")
     {
-        batteryLevelXAxis->setFormat("h:mm");
-        batteryVoltageXAxis->setFormat("h:mm");
-        batteryCurrentXAxis->setFormat("h:mm");
-        networkStrengthXAxis->setFormat("h:mm");
-        uploadSpeedXAxis->setFormat("h:mm");
-        downloadSpeedXAxis->setFormat("h:mm");
-        cpuUsageXAxis->setFormat("h:mm");
-        memUsageXAxis->setFormat("h:mm");
-        diskUsageXAxis->setFormat("h:mm");
+        setDateTimeAxisFormat("mm:ss");
     }
+    else if (m_ui->timeFrameComboBox->currentData().toInt() != 60 && batteryLevelXAxis->format() != "h:mm")
+    {
+        setDateTimeAxisFormat("h:mm");
+    }
+}
+
+void Statistics::setDateTimeAxisFormat(QString format)
+{
+    static_cast<QDateTimeAxis*>(m_batteryLevelChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_batteryVoltageChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_batteryCurrentChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_networkStrengthChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_uploadSpeedChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_downloadSpeedChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_cpuUsageChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_memUsageChart->axes(Qt::Horizontal)[0])->setFormat(format);
+    static_cast<QDateTimeAxis*>(m_diskUsageChart->axes(Qt::Horizontal)[0])->setFormat(format);
 }
 
 void Statistics::setCurrentPage(QString page)
 {
-    if(page ==  "battery")
+    if (page == "battery")
     {
         m_ui->menuLabel->setText("Battery");
         m_ui->batteryMenuButton->setChecked(true);
@@ -253,7 +276,7 @@ void Statistics::setCurrentPage(QString page)
 
         m_ui->infoFrame->setVisible(false);
     }
-    else if(page == "network")
+    else if (page == "network")
     {
         m_ui->menuLabel->setText("Network");
         m_ui->batteryMenuButton->setChecked(false);
@@ -269,7 +292,7 @@ void Statistics::setCurrentPage(QString page)
 
         m_ui->infoFrame->setVisible(true);
     }
-    else if(page == "system")
+    else if (page == "system")
     {
         m_ui->menuLabel->setText("System");
         m_ui->batteryMenuButton->setChecked(false);
@@ -287,57 +310,21 @@ void Statistics::setCurrentPage(QString page)
     }
 }
 
-void Statistics::adjustNetworkSpeedCharts(QDateTime now, float uploadSpeed, float downloadSpeed)
+float Statistics::getMaxYAxisData(QLineSeries* series, QDateTime now)
 {
-    QString units[4] = {"bps", "Kbps", "Mbps", "Gbps"};
-    int i=0;
-    float roundedUpSpeed = uploadSpeed;
-    while(roundedUpSpeed > 1024)
-    {
-        roundedUpSpeed = roundedUpSpeed/1024;
-        i++;
-    }
-    m_ui->secondGroupBox->setTitle("Upload speed (" + units[i] + ")");
-    m_uploadSpeedLineSeries->append(now.toMSecsSinceEpoch(), roundedUpSpeed);
-    if(uploadSpeed > maxUploadSpeed || uploadSpeed < minUploadSpeed){
-        QValueAxis* uploadSpeedYAxis = (QValueAxis*)m_uploadSpeedChart->axes(Qt::Vertical)[0]; 
-        if(uploadSpeed > maxUploadSpeed)
-        {
-            uploadSpeedYAxis->setMax(roundedUpSpeed + 10);
-            maxUploadSpeed = uploadSpeed;
-        }
-        else
-        {
-            uploadSpeedYAxis->setMin(roundedUpSpeed - 10);
-            minUploadSpeed = uploadSpeed;
-        }
-    }
+    QList<QPointF>::iterator i;
+    QList<QPointF> list = series->points();
+    float max = 0;
 
-    int j=0;
-    float roundedDownSpeed = downloadSpeed;
-    while(roundedDownSpeed > 1024)
-    {
-        roundedDownSpeed = roundedDownSpeed/1024;
-        j++;
-    }
-    m_ui->secondGroupBox->setTitle("Download speed (" + units[j] + ")");
-    m_downloadSpeedLineSeries->append(now.toMSecsSinceEpoch(), roundedDownSpeed);
-    if(downloadSpeed > maxDownloadSpeed || downloadSpeed < minDownloadSpeed){
-        QValueAxis* downloadSpeedYAxis = (QValueAxis*)m_downloadSpeedChart->axes(Qt::Vertical)[0]; 
-        if(downloadSpeed > maxUploadSpeed)
-        {
-            downloadSpeedYAxis->setMax(roundedDownSpeed + 10);
-            maxDownloadSpeed = downloadSpeed;
-        }
-        else
-        {
-            downloadSpeedYAxis->setMin(roundedDownSpeed - 10);
-            minDownloadSpeed = downloadSpeed;
-        }
-    }
-}
+    int range = m_ui->timeFrameComboBox->currentData().toInt();
+    QDateTime minTime = now.addSecs(-1 * range);
 
-void Statistics::_onMenuButtonClicked() //TODO i oneline?
-{
-    m_ui->menuBarFrame->setVisible(!m_ui->menuBarFrame->isVisible());
+    for (i = list.begin(); i != list.end(); i++)
+    {
+        if (i->y() > max)
+        {
+            max = i->y();
+        }
+    }
+    return max;
 }
