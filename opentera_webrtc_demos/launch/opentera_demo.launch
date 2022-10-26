@@ -1,5 +1,5 @@
 <launch>
-    <arg name="signaling_server_hostname" default=""/>
+    <arg name="signaling_server_hostname" default="localhost"/>
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
     <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
@@ -8,13 +8,6 @@
     <arg name="map_refresh_rate" default="5.0"/>
     <arg name="rviz" default="false"/>
     <arg name="is_stand_alone" default="false"/>
-    
-    <arg name="pulse_audio_source" default="alsa_input.pci-0000_00_1b.0.analog-stereo" />
-    <arg name="pulse_audio_sink" default="alsa_output.pci-0000_00_1b.0.analog-stereo" />
-    <!--arg name="pulse_audio_sink" default="default" /-->
-    <arg name="ec_volume_percent" default="90" />
-    <arg name="echo_cancellation_dest" default="odas_echo_cancelled"/>
-    <arg name="use_echo_cancellation" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -45,12 +38,11 @@
         <arg name="can_receive_video_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
         <arg name="input_camera_topic" value="/front_camera/image_raw"/>
-        <arg name="input_audio_topic" value="/audio_out"/>
     </include>
 
     <!-- Bottom camera -->
@@ -64,7 +56,7 @@
         <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Camera 2"/>
         <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
@@ -82,43 +74,12 @@
         <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Map image"/>
         <arg name="room_name" value="Map"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
         <arg name="input_camera_topic" value="/map_image_generator/image"/>
     </include>
-    
-    <!-- Audio Playback (must be started before capture so echo cancel can work)-->
-    <!-- Sound -->
-    <node pkg="audio_utils" type="playback_node" name="playback_node" respawn="true" output="screen">
-        <param name="backend" value="pulse_audio"/>
-        <!--param name="backend" value="alsa"/-->
-        <param unless="$(arg use_echo_cancellation)" name="device" value="$(arg pulse_audio_sink)"/>
-        <param if="$(arg use_echo_cancellation)" name="device" value="$(arg echo_cancellation_dest)_ec_sink"/>
-        <param name="format" value="signed_16"/>
-        <param name="channel_count" value="1"/>
-        <param name="sampling_frequency" value="48000"/>
-        <param name="frame_sample_count" value="480"/>
-        <param name="latency_us" value="10000"/>
-        <remap from="audio_in" to="audio_mixed"/>
-    </node>
-
-    <!-- Audio Capture -->
-    <!-- Sound -->
-    <node pkg="audio_utils" type="capture_node" name="capture_node" output="screen" launch-prefix="bash -c 'sleep 5; $0 $1 $2 $3 $4 $5 $6' ">
-        <param name="backend" value="pulse_audio"/>
-        <param unless="$(arg use_echo_cancellation)" name="device" value="$(arg pulse_audio_source)"/>
-        <param if="$(arg use_echo_cancellation)" name="device" value="$(arg echo_cancellation_dest)_ec"/>
-        <param name="format" value="signed_16"/>
-        <param name="channel_count" value="2"/>
-        <param name="sampling_frequency" value="48000"/>
-        <param name="frame_sample_count" value="4800"/>
-        <param name="merge" value="true"/>
-        <param name="gain" value="0.5"/>
-        <param name="latency_us" value="10000"/>
-        <rosparam param="channel_map">[front-left,front-right]</rosparam>
-    </node>
 
     <!-- Data Channel  -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_data_channel_client.launch">
@@ -126,7 +87,7 @@
         <arg name="output" value="$(arg output)"/>
         <arg name="is_stand_alone" value="$(arg is_stand_alone)"/>
 
-        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Data Channel"/>
         <arg name="room_name" value="Teleop"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
