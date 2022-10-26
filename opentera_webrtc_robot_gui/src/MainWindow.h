@@ -32,8 +32,8 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     void setImage(const QImage& image);
-    void _onMicVolumeSliderValueChanged();
-    void _onVolumeSliderValueChanged();
+    void onMicVolumeSliderValueChanged();
+    void onVolumeSliderValueChanged();
 
 
 signals:

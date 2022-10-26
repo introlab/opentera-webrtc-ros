@@ -3,24 +3,16 @@
 
 #include "ui_ConfigDialog.h"
 
-ConfigDialog::ConfigDialog(QWidget* parent) : m_ui(new Ui::ConfigDialog())
+ConfigDialog::ConfigDialog(MainWindow* parent) : m_ui(new Ui::ConfigDialog())
 {
     m_ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
 
     // Sliders
     m_ui->micVolumeSlider->setValue(100);
-    connect(
-        m_ui->micVolumeSlider,
-        &QSlider::valueChanged,
-        dynamic_cast<MainWindow*>(parent),
-        &MainWindow::_onMicVolumeSliderValueChanged);
+    connect(m_ui->micVolumeSlider, &QSlider::valueChanged, parent, &MainWindow::onMicVolumeSliderValueChanged);
     m_ui->volumeSlider->setValue(100);
-    connect(
-        m_ui->volumeSlider,
-        &QSlider::valueChanged,
-        dynamic_cast<MainWindow*>(parent),
-        &MainWindow::_onVolumeSliderValueChanged);
+    connect(m_ui->volumeSlider, &QSlider::valueChanged, parent, &MainWindow::onVolumeSliderValueChanged);
 }
 
 ConfigDialog::~ConfigDialog() {}

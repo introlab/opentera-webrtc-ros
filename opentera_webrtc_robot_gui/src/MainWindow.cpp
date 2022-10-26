@@ -442,7 +442,7 @@ void MainWindow::_onSpeakerButtonClicked()
     m_volumePublisher.publish(msg);
 }
 
-void MainWindow::_onMicVolumeSliderValueChanged()
+void MainWindow::onMicVolumeSliderValueChanged()
 {
     float value = m_configDialog->getMicVolumeSliderValue();
     if (value == 0)
@@ -458,7 +458,7 @@ void MainWindow::_onMicVolumeSliderValueChanged()
     m_micVolumePublisher.publish(msg);
 }
 
-void MainWindow::_onVolumeSliderValueChanged()
+void MainWindow::onVolumeSliderValueChanged()
 {
     float value = m_configDialog->getVolumeSliderValue();
     if (value == 0)
