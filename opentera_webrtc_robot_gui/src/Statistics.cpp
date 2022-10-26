@@ -155,17 +155,17 @@ void Statistics::updateCharts(
 {
     QDateTime now = QDateTime::currentDateTime();
 
-    QDateTimeAxis* batteryLevelXAxis = (QDateTimeAxis*)m_batteryLevelChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* batteryVoltageXAxis = (QDateTimeAxis*)m_batteryVoltageChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* batteryCurrentXAxis = (QDateTimeAxis*)m_batteryCurrentChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* networkStrengthXAxis = (QDateTimeAxis*)m_networkStrengthChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* uploadSpeedXAxis = (QDateTimeAxis*)m_uploadSpeedChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* downloadSpeedXAxis = (QDateTimeAxis*)m_downloadSpeedChart->axes(Qt::Horizontal)[0];
-    QValueAxis* uploadSpeedYAxis = (QValueAxis*)m_uploadSpeedChart->axes(Qt::Vertical)[0];
-    QValueAxis* downloadSpeedYAxis = (QValueAxis*)m_downloadSpeedChart->axes(Qt::Vertical)[0];
-    QDateTimeAxis* cpuUsageXAxis = (QDateTimeAxis*)m_cpuUsageChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* memUsageXAxis = (QDateTimeAxis*)m_memUsageChart->axes(Qt::Horizontal)[0];
-    QDateTimeAxis* diskUsageXAxis = (QDateTimeAxis*)m_diskUsageChart->axes(Qt::Horizontal)[0];
+    QDateTimeAxis* batteryLevelXAxis = static_cast<QDateTimeAxis*>(m_batteryLevelChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* batteryVoltageXAxis = static_cast<QDateTimeAxis*>(m_batteryVoltageChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* batteryCurrentXAxis = static_cast<QDateTimeAxis*>(m_batteryCurrentChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* networkStrengthXAxis = static_cast<QDateTimeAxis*>(m_networkStrengthChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* uploadSpeedXAxis = static_cast<QDateTimeAxis*>(m_uploadSpeedChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* downloadSpeedXAxis = static_cast<QDateTimeAxis*>(m_downloadSpeedChart->axes(Qt::Horizontal)[0]);
+    QValueAxis* uploadSpeedYAxis = static_cast<QValueAxis*>(m_uploadSpeedChart->axes(Qt::Vertical)[0]);
+    QValueAxis* downloadSpeedYAxis = static_cast<QValueAxis*>(m_downloadSpeedChart->axes(Qt::Vertical)[0]);
+    QDateTimeAxis* cpuUsageXAxis = static_cast<QDateTimeAxis*>(m_cpuUsageChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* memUsageXAxis = static_cast<QDateTimeAxis*>(m_memUsageChart->axes(Qt::Horizontal)[0]);
+    QDateTimeAxis* diskUsageXAxis = static_cast<QDateTimeAxis*>(m_diskUsageChart->axes(Qt::Horizontal)[0]);
 
     m_batteryLevelLineSeries->append(now.toMSecsSinceEpoch(), battery_level);
     m_batteryVoltageLineSeries->append(now.toMSecsSinceEpoch(), battery_voltage);
