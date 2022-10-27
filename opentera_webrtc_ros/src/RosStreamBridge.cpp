@@ -165,6 +165,9 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
                 });
         }
     }
+    m_micVolumeSubscriber = m_nh.subscribe("mic_volume", 10, &RosStreamBridge::micVolumeCallback, this);
+    m_enableCameraSubscriber = m_nh.subscribe("enable_camera", 10, &RosStreamBridge::enableCameraCallback, this);
+    m_volumeSubscriber = m_nh.subscribe("volume", 10, &RosStreamBridge::volumeCallback, this);
 }
 
 void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)
@@ -312,6 +315,35 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     if (m_videoSource)
     {
         m_videoSource->sendFrame(msg);
+    }
+}
+
+void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg)
+{
+    if (msg.data != 0)
+    {
+        m_signalingClient->setLocalAudioMuted(false);
+    }
+    else
+    {
+        m_signalingClient->setLocalAudioMuted(true);
+    }
+}
+
+void RosStreamBridge::enableCameraCallback(const std_msgs::Bool& msg)
+{
+    m_signalingClient->setLocalVideoMuted(!msg.data);
+}
+
+void RosStreamBridge::volumeCallback(const std_msgs::Float32& msg)
+{
+    if (msg.data != 0)
+    {
+        m_signalingClient->setRemoteAudioMuted(false);
+    }
+    else
+    {
+        m_signalingClient->setRemoteAudioMuted(true);
     }
 }
 

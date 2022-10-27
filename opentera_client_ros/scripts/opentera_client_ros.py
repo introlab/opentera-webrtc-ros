@@ -59,7 +59,10 @@ class OpenTeraROSClient:
                 'diskUsage': status.disk_usage,
                 'wifiNetwork': status.wifi_network,
                 'wifiStrength': status.wifi_strength,
-                'localIp': status.local_ip
+                'localIp': status.local_ip,
+                'micVolume':status.mic_volume,
+                'isCameraOn':status.is_camera_on,
+                'volume':status.volume
             }
         }
 

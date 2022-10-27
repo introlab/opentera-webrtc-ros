@@ -3,7 +3,6 @@
 
 #include <QDialog>
 
-
 QT_BEGIN_NAMESPACE
     namespace Ui
     {
@@ -11,14 +10,20 @@ QT_BEGIN_NAMESPACE
     }
 QT_END_NAMESPACE
 
+class MainWindow;
 
 class ConfigDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    ConfigDialog(QWidget* parent = nullptr);
+    ConfigDialog(MainWindow* parent = nullptr);
     ~ConfigDialog();
+
+    int getMicVolumeSliderValue();
+    void setMicVolumeSliderValue(int value);
+    int getVolumeSliderValue();
+    void setVolumeSliderValue(int value);
 
 protected:
     Ui::ConfigDialog* m_ui;
