@@ -476,7 +476,7 @@ void MainWindow::setupButtons()
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
     m_ui->speakerButton->setCheckable(true);
-    
+
     m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
     m_ui->batteryButton->setText("0%");
@@ -542,7 +542,7 @@ void MainWindow::_onSpeakerButtonClicked()
     m_volumePublisher.publish(msg);
 }
 
-void MainWindow::_onMicVolumeSliderValueChanged()
+void MainWindow::onMicVolumeSliderValueChanged()
 {
     float value = m_configDialog->getMicVolumeSliderValue();
     if (value == 0)
@@ -558,7 +558,7 @@ void MainWindow::_onMicVolumeSliderValueChanged()
     m_micVolumePublisher.publish(msg);
 }
 
-void MainWindow::_onVolumeSliderValueChanged()
+void MainWindow::onVolumeSliderValueChanged()
 {
     float value = m_configDialog->getVolumeSliderValue();
     if (value == 0)

@@ -233,8 +233,7 @@ void Statistics::updateCharts(
         m_diskUsageLineSeries->remove(0);
     }
 
-    // Order is important, setting the format at least once after setting the max and the min prevents a visual bug
-    // where the axis disappears
+    // Order is important, setting the format once after setting the max and the min prevents a bug where the axis disappears
     if (m_ui->timeFrameComboBox->currentData().toInt() == 60 && batteryLevelXAxis->format() != "mm:ss")
     {
         setDateTimeAxisFormat("mm:ss");

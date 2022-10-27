@@ -8,7 +8,6 @@ import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String, Bool, Float32
 import json
-import speedtest
 import psutil
 
 
@@ -60,7 +59,7 @@ class RobotStatusPublisher():
     def run(self):
         r = rospy.Rate(self.pub_rate)
         while not rospy.is_shutdown():
-            for i in range(100, -1, -1):
+            for i in range(100, -1, -5):
                 # Fill timestamp
                 status = RobotStatus()
                 status.header.stamp = rospy.Time.now()
@@ -102,11 +101,12 @@ class RobotStatusPublisher():
                     status.local_ip = self.get_ip_address(wifi_interface_name)
 
                     io_2 = psutil.net_io_counters(pernic=True)
-                    status.upload_speed, status.download_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8, (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8
-                    self.bytes_sent, self.bytes_recv = io_2[wifi_interface_name].bytes_sent, io_2[wifi_interface_name].bytes_recv
-
+                    status.upload_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8
+                    status.download_speed = (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8
+                    self.bytes_sent = io_2[wifi_interface_name].bytes_sent
+                    self.bytes_recv = io_2[wifi_interface_name].bytes_recv
                 else:
-                    status.wifi_strength = float(i)
+                    status.wifi_strength = 0
                     status.local_ip = '127.0.0.1'
 
                 # Publish for ROS

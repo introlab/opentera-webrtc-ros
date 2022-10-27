@@ -49,12 +49,6 @@ private:
     QDateTime startTime;
     int maxRange;
 
-    int maxUploadSpeed = 0;
-    int minUploadSpeed = 1000000000;
-
-    int maxDownloadSpeed = 0;
-    int minDownloadSpeed = 1000000000;
-
     QLineSeries* m_batteryLevelLineSeries;
     QChart* m_batteryLevelChart;
 
