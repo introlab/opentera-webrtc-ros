@@ -61,6 +61,9 @@ $sudo apt-get install cmake build-essential gfortran texinfo libasound2-dev libp
 
 # odas_ros packages
 $sudo apt-get install libfftw3-dev libconfig-dev
+
+# qt submodules
+$sudo apt-get install libqt5charts5-dev
 ```
 
 ## Installation
