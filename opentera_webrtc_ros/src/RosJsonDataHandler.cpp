@@ -16,8 +16,8 @@ RosJsonDataHandler::RosJsonDataHandler(const ros::NodeHandle& nh, const ros::Nod
     m_addLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimple>("add_label_simple", 1);
     m_editLabelPub = m_nh.advertise<opentera_webrtc_ros_msgs::LabelSimpleEdit>("edit_label_simple", 1);
     m_micVolumePub = m_nh.advertise<std_msgs::Float32>("mic_volume", 1);
-    m_enableCameraPub = m_nh.advertise<std_msgs::Bool>("enable_camera",1);
-    m_volumePub = m_nh.advertise<std_msgs::Float32>("volume",1);
+    m_enableCameraPub = m_nh.advertise<std_msgs::Bool>("enable_camera", 1);
+    m_volumePub = m_nh.advertise<std_msgs::Float32>("volume", 1);
 
     m_webrtcDataSubscriber = m_nh.subscribe("webrtc_data", 20, &RosJsonDataHandler::onWebRTCDataReceived, this);
 

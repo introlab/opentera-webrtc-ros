@@ -318,22 +318,31 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
-void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg){
-    if(msg.data != 0){
+void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg)
+{
+    if (msg.data != 0)
+    {
         m_signalingClient->setLocalAudioMuted(false);
-    } else {
+    }
+    else
+    {
         m_signalingClient->setLocalAudioMuted(true);
     }
 }
 
-void RosStreamBridge::enableCameraCallback(const std_msgs::Bool& msg){
+void RosStreamBridge::enableCameraCallback(const std_msgs::Bool& msg)
+{
     m_signalingClient->setLocalVideoMuted(!msg.data);
 }
 
-void RosStreamBridge::volumeCallback(const std_msgs::Float32& msg){
-    if(msg.data != 0) {
+void RosStreamBridge::volumeCallback(const std_msgs::Float32& msg)
+{
+    if (msg.data != 0)
+    {
         m_signalingClient->setRemoteAudioMuted(false);
-    } else {
+    }
+    else
+    {
         m_signalingClient->setRemoteAudioMuted(true);
     }
 }

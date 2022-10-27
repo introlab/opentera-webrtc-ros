@@ -21,19 +21,17 @@ class RobotStatusPublisher():
             '/webrtc_data_outgoing', String, queue_size=10)
         self.pub_rate = 1
         self.mic_volume_sub = rospy.Subscriber(
-            'mic_volume', Float32, self.set_mic_volume, queue_size=10)
-        self.micVolume = 1
+            'mic_volume', Float32, self._set_mic_volume_cb, queue_size=10)
+        self.mic_volume = 1
         self.enable_camera_sub = rospy.Subscriber(
-            'enable_camera', Bool, self.set_enable_camera, queue_size=10)
-        self.cameraEnabled = True
+            'enable_camera', Bool, self._set_enable_camera_cb, queue_size=10)
+        self.camera_enabled = True
         self.volume_sub = rospy.Subscriber(
-            'volume', Float32, self.set_volume, queue_size=10)
-            
+            'volume', Float32, self._set_volume_cb, queue_size=10)
         self.volume = 1
         self.io = psutil.net_io_counters(pernic=True)
         self.bytes_sent = 0
         self.bytes_recv = 0
-
     def get_ip_address(self, ifname: str):
         try:
             address = os.popen('ip addr show ' +
@@ -50,15 +48,15 @@ class RobotStatusPublisher():
         free_blocks = result.f_bfree
         return 100 - (free_blocks * 100 / total_blocks)
 
-    def set_mic_volume(self, msg):
-        self.micVolume = msg.data
+    def _set_mic_volume_cb(self, msg):
+        self.mic_volume = msg.data
 
-    def set_enable_camera(self, msg):
-        self.cameraEnabled = msg.data
+    def _set_enable_camera_cb(self, msg):
+        self.camera_enabled = msg.data
     
-    def set_volume(self, msg):
+    def _set_volume_cb(self, msg):
         self.volume = msg.data
-            
+
     def run(self):
         r = rospy.Rate(self.pub_rate)
         while not rospy.is_shutdown():
@@ -77,8 +75,8 @@ class RobotStatusPublisher():
                      100 / psutil.virtual_memory().total)
                 status.disk_usage = self.get_disk_usage()
 
-                status.mic_volume = self.micVolume
-                status.is_camera_on = self.cameraEnabled
+                status.mic_volume = self.mic_volume
+                status.is_camera_on = self.camera_enabled
                 status.volume = self.volume
 
                 subprocess_result = subprocess.Popen(

@@ -476,10 +476,7 @@ void MainWindow::setupButtons()
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
     m_ui->speakerButton->setCheckable(true);
-
-    /*QFont batteryFont = m_ui->batteryButton->font();
-    batteryFont.setPointSize(8);
-    m_ui->batteryButton->setFont(batteryFont);*/
+    
     m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
     m_ui->batteryButton->setText("0%");
