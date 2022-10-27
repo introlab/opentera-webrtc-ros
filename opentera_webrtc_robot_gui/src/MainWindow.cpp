@@ -387,28 +387,28 @@ void MainWindow::_onRobotStatus(
     }
 }
 
-void MainWindow::setBatteryLevel(bool is_charging, float battery_level)
+void MainWindow::setBatteryLevel(bool isCharging, float batteryLevel)
 {
     QIcon newIcon;
     QString text;
-    text.setNum(battery_level);
-    if (is_charging)
+    text.setNum(batteryLevel);
+    if (isCharging)
     {
         newIcon.addFile(":/battery-charging.png");
     }
-    else if (battery_level <= 5)
+    else if (batteryLevel <= 5)
     {
         newIcon.addFile(":/battery-almost-empty.png");
     }
-    else if (battery_level <= 33)
+    else if (batteryLevel <= 33)
     {
         newIcon.addFile(":/battery-low.png");
     }
-    else if (battery_level <= 66)
+    else if (batteryLevel <= 66)
     {
         newIcon.addFile(":/battery-medium.png");
     }
-    else if (battery_level <= 100)
+    else if (batteryLevel <= 100)
     {
         newIcon.addFile(":/battery-full.png");
     }
@@ -421,22 +421,22 @@ void MainWindow::setBatteryLevel(bool is_charging, float battery_level)
     m_ui->batteryButton->setText(text);
 }
 
-void MainWindow::setNetworkStrength(float wifi_strength)
+void MainWindow::setNetworkStrength(float wifiStrength)
 {
     QIcon newIcon;
-    if (wifi_strength == 0)
+    if (wifiStrength == 0)
     {
         newIcon.addFile(":/network-0-bars");
     }
-    else if (wifi_strength <= 25)
+    else if (wifiStrength <= 25)
     {
         newIcon.addFile(":/network-1-bar");
     }
-    else if (wifi_strength <= 50)
+    else if (wifiStrength <= 50)
     {
         newIcon.addFile(":/network-2-bars");
     }
-    else if (wifi_strength <= 75)
+    else if (wifiStrength <= 75)
     {
         newIcon.addFile(":/network-3-bars");
     }
