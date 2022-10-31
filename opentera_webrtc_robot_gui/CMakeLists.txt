@@ -22,7 +22,7 @@ execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL)
+set(opentera_webrtc_robot_gui_components Core Widgets Gui OpenGL Charts)
 
 # Uncomment if you want to use another Qt Version
 # set(Qt5_DIR $ENV{HOME}/Qt/5.12.12/gcc_64/lib/cmake/Qt5)
@@ -32,20 +32,21 @@ set(srcs
     src/main.cpp
     src/MainWindow.cpp
     src/ROSCameraView.cpp
-    src/GraphicsViewToolbar.cpp
     src/ConfigDialog.cpp
+    src/Statistics.cpp
 )
 
 set(headers
     src/MainWindow.h
     src/ROSCameraView.h
-    src/GraphicsViewToolbar.h
     src/ConfigDialog.h
+    src/Statistics.h
 )
 
 set(uis
     src/ui/MainWindow.ui
     src/ui/ConfigDialog.ui
+    src/ui/Statistics.ui
 )
 
 set(qrcs

@@ -14,8 +14,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     // ConfigDialog
     m_configDialog = new ConfigDialog(this);
 
-    // Toolbar
-    m_toolbar = new GraphicsViewToolbar(m_ui->toolboxWidget);
+    // Statistics
+    m_statistics = new Statistics(this);
 
     // Create camera view
     m_cameraView = new ROSCameraView("Local", m_ui->imageWidget);
@@ -33,6 +33,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
 
     // Buttons
     connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
+    connect(m_ui->batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked);
+    connect(m_ui->networkButton, &QToolButton::clicked, this, &MainWindow::_onNetworkButtonClicked);
+
     connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
     connect(
@@ -284,6 +287,8 @@ void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatus
         msg->disk_usage,
         QString::fromStdString(msg->wifi_network),
         msg->wifi_strength,
+        msg->upload_speed,
+        msg->download_speed,
         QString::fromStdString(msg->local_ip),
         msg->mic_volume,
         msg->is_camera_on,
@@ -340,12 +345,27 @@ void MainWindow::_onRobotStatus(
     float disk_usage,
     const QString& wifi_network,
     float wifi_strength,
+    float upload_speed,
+    float download_speed,
     const QString& local_ip,
     float mic_volume,
     bool is_camera_on,
     float volume)
 {
-    m_toolbar->setBatteryStatus(is_charging, battery_voltage, battery_current, battery_level);
+    m_statistics->updateCharts(
+        battery_voltage,
+        battery_current,
+        battery_level,
+        cpu_usage,
+        mem_usage,
+        disk_usage,
+        wifi_network,
+        wifi_strength,
+        upload_speed,
+        download_speed,
+        local_ip);
+    setBatteryLevel(is_charging, battery_level);
+    setNetworkStrength(wifi_strength);
     m_ui->cameraButton->setChecked(!is_camera_on);
     m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
     if (mic_volume == 0)
@@ -365,6 +385,66 @@ void MainWindow::_onRobotStatus(
     {
         m_ui->speakerButton->setChecked(false);
     }
+}
+
+void MainWindow::setBatteryLevel(bool isCharging, float batteryLevel)
+{
+    QIcon newIcon;
+    QString text;
+    text.setNum(batteryLevel);
+    if (isCharging)
+    {
+        newIcon.addFile(":/battery-charging.png");
+    }
+    else if (batteryLevel <= 5 && batteryLevel >= -0.1)
+    {
+        newIcon.addFile(":/battery-almost-empty.png");
+    }
+    else if (batteryLevel <= 33)
+    {
+        newIcon.addFile(":/battery-low.png");
+    }
+    else if (batteryLevel <= 66)
+    {
+        newIcon.addFile(":/battery-medium.png");
+    }
+    else if (batteryLevel <= 100)
+    {
+        newIcon.addFile(":/battery-full.png");
+    }
+    else
+    {
+        newIcon.addFile(":/battery-empty.png");
+    }
+    m_ui->batteryButton->setIcon(newIcon);
+    text.append("%");
+    m_ui->batteryButton->setText(text);
+}
+
+void MainWindow::setNetworkStrength(float wifiStrength)
+{
+    QIcon newIcon;
+    if (wifiStrength <= 0.1)
+    {
+        newIcon.addFile(":/network-0-bars");
+    }
+    else if (wifiStrength <= 25)
+    {
+        newIcon.addFile(":/network-1-bar");
+    }
+    else if (wifiStrength <= 50)
+    {
+        newIcon.addFile(":/network-2-bars");
+    }
+    else if (wifiStrength <= 75)
+    {
+        newIcon.addFile(":/network-3-bars");
+    }
+    else
+    {
+        newIcon.addFile(":/network-4-bars");
+    }
+    m_ui->networkButton->setIcon(newIcon);
 }
 
 void MainWindow::setupButtons()
@@ -396,11 +476,31 @@ void MainWindow::setupButtons()
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
     m_ui->speakerButton->setCheckable(true);
+
+    m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
+    m_ui->batteryButton->setText("0%");
+
+    m_ui->networkButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui->networkButton->setIcon(QIcon(":/network-0-bars"));
+    m_ui->networkButton->setText("");
 }
 
 void MainWindow::_onConfigButtonClicked()
 {
     m_configDialog->exec();
+}
+
+void MainWindow::_onBatteryButtonClicked()
+{
+    m_statistics->setCurrentPage("battery");
+    m_statistics->exec();
+}
+
+void MainWindow::_onNetworkButtonClicked()
+{
+    m_statistics->setCurrentPage("network");
+    m_statistics->exec();
 }
 
 void MainWindow::_onMicrophoneButtonClicked()

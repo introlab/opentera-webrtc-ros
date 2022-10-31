@@ -8,6 +8,7 @@ import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String, Bool, Float32
 import json
+import psutil
 
 
 class RobotStatusPublisher():
@@ -27,6 +28,9 @@ class RobotStatusPublisher():
         self.volume_sub = rospy.Subscriber(
             'volume', Float32, self._set_volume_cb, queue_size=10)
         self.volume = 1
+        self.io = psutil.net_io_counters(pernic=True)
+        self.bytes_sent = 0
+        self.bytes_recv = 0
     def get_ip_address(self, ifname: str):
         try:
             address = os.popen('ip addr show ' +
@@ -61,7 +65,8 @@ class RobotStatusPublisher():
                 status.header.stamp = rospy.Time.now()
 
                 # Fill (mostly fake) robot info
-                status.battery_voltage = float(i)
+                status.battery_level = float(i)
+                status.battery_voltage = 12.0
                 status.battery_current = 1.0
                 status.cpu_usage = psutil.cpu_percent()
                 status.mem_usage = 100 - \
@@ -94,6 +99,12 @@ class RobotStatusPublisher():
                         re.search('/(.+?) ', decoded_output).group(1))
                     status.wifi_strength = numerator / denominator * 100
                     status.local_ip = self.get_ip_address(wifi_interface_name)
+
+                    io_2 = psutil.net_io_counters(pernic=True)
+                    status.upload_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8
+                    status.download_speed = (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8
+                    self.bytes_sent = io_2[wifi_interface_name].bytes_sent
+                    self.bytes_recv = io_2[wifi_interface_name].bytes_recv
                 else:
                     status.wifi_strength = 0
                     status.local_ip = '127.0.0.1'
@@ -115,6 +126,8 @@ class RobotStatusPublisher():
                         'diskUsage': status.disk_usage,
                         'wifiNetwork': status.wifi_network,
                         'wifiStrength': status.wifi_strength,
+                        'uploadSpeed': status.upload_speed,
+                        'downloadSpeed': status.download_speed,
                         'localIp': status.local_ip,
                         'micVolume':status.mic_volume,
                         'isCameraOn':status.is_camera_on,

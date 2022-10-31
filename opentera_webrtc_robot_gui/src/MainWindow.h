@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "Statistics.h"
 #include "ConfigDialog.h"
-#include "GraphicsViewToolbar.h"
 #include "ROSCameraView.h"
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -14,6 +14,7 @@
 #include <QImage>
 #include <QSharedPointer>
 #include <QMap>
+#include <QToolButton>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 
@@ -50,6 +51,8 @@ signals:
         float disk_usage,
         const QString& wifi_network,
         float wifi_strength,
+        float upload_speed,
+        float download_speed,
         const QString& local_ip,
         float mic_volume,
         bool is_camera_on,
@@ -109,12 +112,16 @@ private slots:
         float disk_usage,
         const QString& wif_network,
         float wifi_strength,
+        float upload_speed,
+        float download_speed,
         const QString& local_ip,
         float mic_volume,
         bool is_camera_on,
         float volume);
 
     void _onConfigButtonClicked();
+    void _onBatteryButtonClicked();
+    void _onNetworkButtonClicked();
     void _onMicrophoneButtonClicked();
     void _onCameraButtonClicked();
     void _onSpeakerButtonClicked();
@@ -122,6 +129,8 @@ private slots:
 private:
     void setupROS();
     void setupButtons();
+    void setBatteryLevel(bool isCharging, float batteryLevel);
+    void setNetworkStrength(float wifiStrength);
     void closeEvent(QCloseEvent* event) override;
 
     Ui::MainWindow* m_ui;
@@ -129,8 +138,8 @@ private:
     // ConfigDialog
     ConfigDialog* m_configDialog;
 
-    // Toolbar
-    GraphicsViewToolbar* m_toolbar;
+    // Statistics
+    Statistics* m_statistics;
 
     // Remote views
     QMap<QString, ROSCameraView*> m_remoteViews;
