@@ -396,7 +396,7 @@ void MainWindow::setBatteryLevel(bool isCharging, float batteryLevel)
     {
         newIcon.addFile(":/battery-charging.png");
     }
-    else if (batteryLevel <= 5)
+    else if (batteryLevel <= 5 && batteryLevel >= -0.1)
     {
         newIcon.addFile(":/battery-almost-empty.png");
     }
@@ -424,7 +424,7 @@ void MainWindow::setBatteryLevel(bool isCharging, float batteryLevel)
 void MainWindow::setNetworkStrength(float wifiStrength)
 {
     QIcon newIcon;
-    if (wifiStrength == 0)
+    if (wifiStrength <= 0.1)
     {
         newIcon.addFile(":/network-0-bars");
     }

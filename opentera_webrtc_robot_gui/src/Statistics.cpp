@@ -319,11 +319,11 @@ float Statistics::getMaxYAxisData(QLineSeries* series, QDateTime now)
     int range = m_ui->timeFrameComboBox->currentData().toInt();
     QDateTime minTime = now.addSecs(-1 * range);
 
-    for (i = list.begin(); i != list.end(); i++)
+    for (QPointF i : list)
     {
-        if (i->y() > max)
+        if (i.y() > max)
         {
-            max = i->y();
+            max = i.y();
         }
     }
     return max;

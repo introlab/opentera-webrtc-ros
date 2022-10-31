@@ -212,13 +212,13 @@
         <widget class="QToolButton" name="batteryButton">
          <property name="minimumSize">
           <size>
-           <width>60</width>
+           <width>65</width>
            <height>60</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>65</width>
            <height>60</height>
           </size>
          </property>
