@@ -1,0 +1,48 @@
+<launch>
+    <arg name="name" default="face_following"/>
+    <arg name="output" default="log"/>
+
+    <arg name="input_camera_topic" default="/camera1/image_raw"/>
+    <arg name="output_camera_topic" default="/face_camera/image_raw"/>
+
+    <arg name="refresh_rate_param" default="30.0"/>
+    <arg name="width_param" default="400"/>
+    <arg name="height_param" default="400"/>
+
+    <arg name="frames_used_for_stabilizer_param" default="15"/>
+
+    <arg name="min_width_change_param" default="0.2"/>
+    <arg name="min_height_change_param" default="0.4"/>
+    <arg name="min_x_change_param" default="0.1"/>
+    <arg name="min_y_change_param" default="0.1"/>
+
+    <arg name="right_margin_param" default="0.2"/>
+    <arg name="left_margin_param" default="0.2"/>
+    <arg name="top_margin_param" default="0.2"/>
+    <arg name="bottom_margin_param" default="0.25"/>
+
+    <arg name="is_peer_image_param" default="false"/>
+
+    <node name="$(arg name)" pkg="face_following" type="face_following" respawn="true" output="$(arg output)">
+        <remap from="input_image" to="$(arg input_camera_topic)"/>
+        <remap from="output_image" to="$(arg output_camera_topic)"/>
+
+        <param name="refresh_rate" type="double" value="$(arg refresh_rate_param)"/>
+        <param name="width" type="int" value="$(arg width_param)"/>
+        <param name="height" type="int" value="$(arg height_param)"/>
+
+        <param name="frames_used_for_stabilizer" type="int" value="$(arg frames_used_for_stabilizer_param)"/>
+
+        <param name="min_width_change" type="double" value="$(arg min_width_change_param)"/>
+        <param name="min_height_change" type="double" value="$(arg min_height_change_param)"/>
+        <param name="min_x_change" type="double" value="$(arg min_x_change_param)"/>
+        <param name="min_y_change" type="double" value="$(arg min_y_change_param)"/>
+
+        <param name="right_margin" type="double" value="$(arg right_margin_param)"/>
+        <param name="left_margin" type="double" value="$(arg left_margin_param)"/>
+        <param name="top_margin" type="double" value="$(arg top_margin_param)"/>
+        <param name="bottom_margin" type="double" value="$(arg bottom_margin_param)"/>
+
+        <param name="is_peer_image" type="bool" value="$(arg is_peer_image_param)"/>
+    </node>
+</launch>

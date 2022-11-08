@@ -21,6 +21,8 @@
     <depend>message_runtime</depend>
     <depend>std_srvs</depend>
     <depend>map_image_generator</depend>
+    <depend>face_following</depend>
+    <depend>cv_camera</depend>
     <exec_depend>rospy</exec_depend>
     <exec_depend>visualization_msgs</exec_depend>
     <export>
