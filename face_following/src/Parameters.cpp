@@ -19,7 +19,7 @@ namespace internal
 Parameters::Parameters(ros::NodeHandle& nodeHandle)
 {
     using namespace internal;
-    
+
     m_refreshRate = getParam<double>("refresh_rate", 30.0);
     m_width = getParam<int>("width", 400);
     m_height = getParam<int>("height", 400);

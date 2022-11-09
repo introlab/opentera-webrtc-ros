@@ -31,14 +31,16 @@ FaceFollower::FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle)
     m_yAspect = m_yAspect / d;
 
     image_transport::ImageTransport it(m_nodeHandle);
-    if(m_parameters.isPeerImage())
+    if (m_parameters.isPeerImage())
     {
-        m_peerFrameSubscriber = m_nodeHandle.subscribe("input_image", 10, &FaceFollower::peerFrameReceivedCallback, this);
+        m_peerFrameSubscriber =
+            m_nodeHandle.subscribe("input_image", 10, &FaceFollower::peerFrameReceivedCallback, this);
         m_peerFramePublisher = m_nodeHandle.advertise<opentera_webrtc_ros_msgs::PeerImage>("output_image", 10, false);
     }
     else
     {
-        m_itSubscriber = it.subscribe("input_image", 1, boost::bind(&FaceFollower::localFrameReceivedCallback, this, _1));
+        m_itSubscriber =
+            it.subscribe("input_image", 1, boost::bind(&FaceFollower::localFrameReceivedCallback, this, _1));
         m_itPublisher = it.advertise("output_image", 1);
     }
 }
@@ -129,8 +131,9 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
         int minXChange = m_oldCutout.width * m_parameters.minXChange();
         int minYChange = m_oldCutout.height * m_parameters.minYChange();
 
-        if (cutout.height < m_oldCutout.height + minHeightChange && cutout.height > m_oldCutout.height - minHeightChange &&
-            cutout.width < m_oldCutout.width + minWidthChange && cutout.width > m_oldCutout.width - minWidthChange)
+        if (cutout.height < m_oldCutout.height + minHeightChange &&
+            cutout.height > m_oldCutout.height - minHeightChange && cutout.width < m_oldCutout.width + minWidthChange &&
+            cutout.width > m_oldCutout.width - minWidthChange)
         {
             cutout.height = m_oldCutout.height;
             cutout.width = m_oldCutout.width;
@@ -151,7 +154,7 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
             cutout = getAverageRect(m_cutoutList);
         }
 
-        if ( r.height/ static_cast<float>(r.width) >= m_aspectRatio)
+        if (r.height / static_cast<float>(r.width) >= m_aspectRatio)
         {
             cutout.height = getClosestNumberDividableBy(cutout.height, m_yAspect / m_xAspect);
             cutout.width = cutout.height / m_aspectRatio;
@@ -202,7 +205,8 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
 
 std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
 {
-    cv::Mat blob = cv::dnn::blobFromImage(frame, m_scale, cv::Size(m_inputWidth, m_inputHeight), m_meanValues, false, false);
+    cv::Mat blob =
+        cv::dnn::blobFromImage(frame, m_scale, cv::Size(m_inputWidth, m_inputHeight), m_meanValues, false, false);
     m_network.setInput(blob, "data");
     cv::Mat detection = m_network.forward("detection_out");
     cv::Mat detectionMatrix(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());

@@ -39,12 +39,12 @@ namespace face_following
     public:
         FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle);
         virtual ~FaceFollower();
-        
+
         void localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg);
         void peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg);
 
     private:
-        std::vector<cv::Rect> detectFaces(const cv::Mat &frame);
+        std::vector<cv::Rect> detectFaces(const cv::Mat& frame);
         cv::Mat cutoutFace(cv::Mat frame);
         cv::Rect getAverageRect(std::list<cv::Rect> rectangles);
         int getClosestNumberDividableBy(float a, float b);
