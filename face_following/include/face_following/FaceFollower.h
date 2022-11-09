@@ -20,14 +20,9 @@ namespace face_following
         ros::Publisher m_peerFramePublisher;
         image_transport::Subscriber m_itSubscriber;
         image_transport::Publisher m_itPublisher;
-
         int m_pubCounter;
+
         cv::dnn::Net m_network;
-        int m_inputWidth;
-        int m_inputHeight;
-        double m_scale;
-        cv::Scalar m_meanValues;
-        float m_confidenceThreshold;
 
         int m_maxCutoutListSize;
         std::list<cv::Rect> m_cutoutList;

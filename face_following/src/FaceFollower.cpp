@@ -8,18 +8,10 @@ FaceFollower::FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle)
     : m_parameters(parameters),
       m_nodeHandle(nodeHandle)
 {
-    m_pubCounter = 0;
-
-    m_confidenceThreshold = 0.5;
-    m_inputHeight = 300;
-    m_inputWidth = 300;
-    m_scale = 1.0;
-    m_meanValues = {104.0, 177.0, 123.0};
-    string deployPath = "/home/joli1801/Downloads/deploy.prototxt";
-    string modelPath = "/home/joli1801/Downloads/res10_300x300_ssd_iter_140000.caffemodel";
+    std::string deployPath = m_parameters.dnnDeployPath();
+    std::string modelPath = m_parameters.dnnModelPath();
     m_network = cv::dnn::readNetFromCaffe(deployPath, modelPath);
 
-    m_maxCutoutListSize = 15;  // PARAM
     m_oldCutout = cv::Rect(0, 0, 0, 0);
     m_xAspect = m_parameters.width();
     m_yAspect = m_parameters.height();
@@ -30,6 +22,7 @@ FaceFollower::FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle)
     m_xAspect = m_xAspect / d;
     m_yAspect = m_yAspect / d;
 
+    m_pubCounter = 0;
     image_transport::ImageTransport it(m_nodeHandle);
     if (m_parameters.isPeerImage())
     {
@@ -205,8 +198,19 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
 
 std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
 {
+    float confidenceThreshold = 0.5;
+    int inputHeight = 300;
+    int inputWidth = 300;
+    double scale = 1.0;
+    cv::Scalar meanValues = {104.0, 177.0, 123.0};
+
+    if(m_parameters.useGpu())
+    {
+        m_network.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+        m_network.setPreferableTarget(cv::dnn::DNN_BACKEND_CUDA);
+    }
     cv::Mat blob =
-        cv::dnn::blobFromImage(frame, m_scale, cv::Size(m_inputWidth, m_inputHeight), m_meanValues, false, false);
+        cv::dnn::blobFromImage(frame, scale, cv::Size(inputWidth, inputHeight), meanValues, false, false);
     m_network.setInput(blob, "data");
     cv::Mat detection = m_network.forward("detection_out");
     cv::Mat detectionMatrix(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());
@@ -217,16 +221,15 @@ std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
     {
         float confidence = detectionMatrix.at<float>(i, 2);
 
-        if (confidence < m_confidenceThreshold)
+        if (confidence > confidenceThreshold)
         {
-            continue;
-        }
-        int bottomLeftX = static_cast<int>(detectionMatrix.at<float>(i, 3) * frame.cols);
-        int bottomLeftY = static_cast<int>(detectionMatrix.at<float>(i, 4) * frame.rows);
-        int topRightX = static_cast<int>(detectionMatrix.at<float>(i, 5) * frame.cols);
-        int topRightY = static_cast<int>(detectionMatrix.at<float>(i, 6) * frame.rows);
+            int bottomLeftX = static_cast<int>(detectionMatrix.at<float>(i, 3) * frame.cols);
+            int bottomLeftY = static_cast<int>(detectionMatrix.at<float>(i, 4) * frame.rows);
+            int topRightX = static_cast<int>(detectionMatrix.at<float>(i, 5) * frame.cols);
+            int topRightY = static_cast<int>(detectionMatrix.at<float>(i, 6) * frame.rows);
 
-        faces.emplace_back(bottomLeftX, bottomLeftY, (topRightX - bottomLeftX), (topRightY - bottomLeftY));
+            faces.emplace_back(bottomLeftX, bottomLeftY, (topRightX - bottomLeftX), (topRightY - bottomLeftY));
+        }
     }
 
     return faces;

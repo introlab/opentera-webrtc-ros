@@ -37,6 +37,12 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_bottomMargin = getParam<float>("bottom_margin", 0.25);
 
     m_isPeerImage = getParam<bool>("is_peer_image", false);
+
+    std::string name = getParam<std::string>("name", "face_following");
+    m_dnnModelPath = getParam<std::string>("dnn_model_path", ros::package::getPath(name) + "/models/model/res10_300x300_ssd_iter_140000.caffemodel");
+    m_dnnDeployPath = getParam<std::string>("dnn_deploy_path", ros::package::getPath(name) + "/models/deploy.prototxt");
+
+    m_useGpu = getParam<bool>("use_gpu", false);
 }
 
 Parameters::~Parameters() = default;

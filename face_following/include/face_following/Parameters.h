@@ -2,6 +2,7 @@
 #define PARAMETERS_H
 
 #include <ros/ros.h>
+#include <ros/package.h>
 
 namespace face_following
 {
@@ -23,7 +24,12 @@ namespace face_following
         double m_topMargin;
         double m_bottomMargin;
 
-        bool m_isPeerImage;        
+        bool m_isPeerImage;
+
+        std::string m_dnnModelPath;
+        std::string m_dnnDeployPath;
+
+        bool m_useGpu;
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
@@ -46,6 +52,11 @@ namespace face_following
         double bottomMargin() const;
 
         bool isPeerImage() const;
+
+        std::string dnnModelPath() const;
+        std::string dnnDeployPath() const;
+
+        bool useGpu() const;
     };
 
     inline double Parameters::refreshRate() const { return m_refreshRate; }
@@ -73,6 +84,12 @@ namespace face_following
     inline double Parameters::bottomMargin() const { return m_bottomMargin; }
 
     inline bool Parameters::isPeerImage() const { return m_isPeerImage; }
+
+    inline std::string Parameters::dnnModelPath() const { return m_dnnModelPath; }
+
+    inline std::string Parameters::dnnDeployPath() const { return m_dnnDeployPath; }
+
+    inline bool Parameters::useGpu() const { return m_useGpu; }
 }
 
 #endif

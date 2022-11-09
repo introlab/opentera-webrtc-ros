@@ -22,11 +22,17 @@
     <arg name="bottom_margin_param" default="0.25"/>
 
     <arg name="is_peer_image_param" default="false"/>
+    
+    <arg name="dnn_model_path_param" default="$(find face_following)/models/res10_300x300_ssd_iter_140000.caffemodel"/>
+    <arg name="dnn_deploy_path_param" default="$(find face_following)/models/deploy.prototxt"/>
+
+    <arg name="use_gpu_param" default="false"/>
 
     <node name="$(arg name)" pkg="face_following" type="face_following" respawn="true" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 
+        <param name="name" type="string" value="$(arg name)"/>
         <param name="refresh_rate" type="double" value="$(arg refresh_rate_param)"/>
         <param name="width" type="int" value="$(arg width_param)"/>
         <param name="height" type="int" value="$(arg height_param)"/>
@@ -44,5 +50,10 @@
         <param name="bottom_margin" type="double" value="$(arg bottom_margin_param)"/>
 
         <param name="is_peer_image" type="bool" value="$(arg is_peer_image_param)"/>
+
+        <param name="dnn_model_path" type="string" value="$(arg dnn_model_path_param)"/>
+        <param name="dnn_deploy_path" type="string" value="$(arg dnn_deploy_path_param)"/>
+
+        <param name="use_gpu" type="bool" value="$(arg use_gpu_param)"/>
     </node>
 </launch>

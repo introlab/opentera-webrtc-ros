@@ -219,3 +219,10 @@ target_link_libraries(face_following
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+#Download face detection dnn model
+add_custom_target(
+        download_face_detection_dnn_model ALL
+        COMMAND scripts/download_model.bash
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
