@@ -6,6 +6,9 @@
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
     <arg name="rviz" default="false"/>
+    <arg name="camera_id" default="0"/>
+    <arg name="use_outgoing_face_following" default="false"/>
+    <arg name="use_incoming_face_following" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -26,6 +29,9 @@
         <arg name="rviz" value="$(arg rviz)"/>
         <arg name="output" value="$(arg output)"/>
         <arg name="is_stand_alone" value="false"/>
+        <arg name="camera_id" value="$(arg camera_id)"/>
+        <arg name="use_outgoing_face_following" value="$(arg use_outgoing_face_following)"/>
+        <arg name="use_incoming_face_following" default="$(arg use_incoming_face_following)"/>
     </include>
 
 </launch>
