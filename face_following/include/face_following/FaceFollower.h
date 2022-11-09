@@ -24,7 +24,6 @@ namespace face_following
 
         cv::dnn::Net m_network;
 
-        int m_maxCutoutListSize;
         std::list<cv::Rect> m_cutoutList;
         cv::Rect m_oldCutout;
         float m_xAspect;

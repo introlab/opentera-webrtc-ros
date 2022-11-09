@@ -74,7 +74,6 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
 {
     std::vector<cv::Rect> faces = detectFaces(frame);
 
-    // Stabilisation
     if (!faces.empty() && faces.size() == 1)
     {
         cv::Rect cutout = m_oldCutout;
@@ -147,6 +146,7 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
             cutout = getAverageRect(m_cutoutList);
         }
 
+        // Ensure that the aspect ratio is preserved after calculating the new cutout
         if (r.height / static_cast<float>(r.width) >= m_aspectRatio)
         {
             cutout.height = getClosestNumberDividableBy(cutout.height, m_yAspect / m_xAspect);
@@ -158,15 +158,14 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
             cutout.height = cutout.width * m_aspectRatio;
         }
 
-        if (cutout.width < m_oldCutout.width + m_xAspect && cutout.width > m_oldCutout.width - m_xAspect)
+        if (cutout.width < m_oldCutout.width + m_xAspect && cutout.width > m_oldCutout.width - m_xAspect ||
+            cutout.height < m_oldCutout.height + m_yAspect && cutout.height > m_oldCutout.height - m_yAspect)
         {
             cutout.width = m_oldCutout.width;
-        }
-        if (cutout.height < m_oldCutout.height + m_yAspect && cutout.height > m_oldCutout.height - m_yAspect)
-        {
             cutout.height = m_oldCutout.height;
         }
 
+        // Ensure that the cutout doesn't go beyond the boundaries of the original frame
         if (cutout.width <= 0)
         {
             cutout.width = 1;

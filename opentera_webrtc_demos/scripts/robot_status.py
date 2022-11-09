@@ -58,7 +58,7 @@ class RobotStatusPublisher():
     def run(self):
         r = rospy.Rate(self.pub_rate)
         while not rospy.is_shutdown():
-            for i in range(100, -1, -1):
+            for i in range(100, -1, -5):
                 # Fill timestamp
                 status = RobotStatus()
                 status.header.stamp = rospy.Time.now()
