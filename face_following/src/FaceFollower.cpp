@@ -192,7 +192,10 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
         frame = frame(m_oldCutout);
     }
 
-    cv::resize(frame, frame, cv::Size(m_parameters.width(), m_parameters.height()));
+    if (faces.size() <= 1)
+    {
+        cv::resize(frame, frame, cv::Size(m_parameters.width(), m_parameters.height()));
+    }
     return frame;
 }
 
@@ -204,13 +207,12 @@ std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
     double scale = 1.0;
     cv::Scalar meanValues = {104.0, 177.0, 123.0};
 
-    if(m_parameters.useGpu())
+    if (m_parameters.useGpu())
     {
         m_network.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
         m_network.setPreferableTarget(cv::dnn::DNN_BACKEND_CUDA);
     }
-    cv::Mat blob =
-        cv::dnn::blobFromImage(frame, scale, cv::Size(inputWidth, inputHeight), meanValues, false, false);
+    cv::Mat blob = cv::dnn::blobFromImage(frame, scale, cv::Size(inputWidth, inputHeight), meanValues, false, false);
     m_network.setInput(blob, "data");
     cv::Mat detection = m_network.forward("detection_out");
     cv::Mat detectionMatrix(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());

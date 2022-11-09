@@ -105,7 +105,7 @@ class RobotStatusPublisher():
                     self.bytes_sent = io_2[wifi_interface_name].bytes_sent
                     self.bytes_recv = io_2[wifi_interface_name].bytes_recv
                 else:
-                    status.wifi_strength = float(i)
+                    status.wifi_strength = 0
                     status.local_ip = '127.0.0.1'
 
                 # Publish for ROS
