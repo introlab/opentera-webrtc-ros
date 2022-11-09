@@ -33,8 +33,8 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     void setImage(const QImage& image);
-    void _onMicVolumeSliderValueChanged();
-    void _onVolumeSliderValueChanged();
+    void onMicVolumeSliderValueChanged();
+    void onVolumeSliderValueChanged();
 
 
 signals:
@@ -129,8 +129,8 @@ private slots:
 private:
     void setupROS();
     void setupButtons();
-    void setBatteryLevel(bool is_charging, float battery_level);
-    void setNetworkStrength(float wifi_strength);
+    void setBatteryLevel(bool isCharging, float batteryLevel);
+    void setNetworkStrength(float wifiStrength);
     void closeEvent(QCloseEvent* event) override;
 
     Ui::MainWindow* m_ui;

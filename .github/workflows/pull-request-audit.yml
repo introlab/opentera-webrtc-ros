@@ -36,6 +36,7 @@ jobs:
           sudo apt-get install nodejs npm
           sudo apt-get install build-essential gfortran texinfo libasound2-dev
           sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev pulseaudio
+          sudo apt-get install libqt5charts5-dev
 
       - name: Clone audio_utils in ROS workspace
         working-directory: catkin_ws/src
