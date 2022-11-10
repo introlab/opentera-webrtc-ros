@@ -8,8 +8,8 @@
     <arg name="rviz" default="false"/>
     <arg name="is_stand_alone" default="false"/>
     <arg name="camera_id" default="0"/>
-    <arg name="use_outgoing_face_following" default="false"/>
-    <arg name="use_incoming_face_following" default="false"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -23,8 +23,8 @@
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
         <arg name="rviz" value="$(arg rviz)"/>
         <arg name="camera_id" value="$(arg camera_id)"/>
-        <arg name="use_outgoing_face_following" value="$(arg use_outgoing_face_following)"/>
-        <arg name="use_incoming_face_following" default="$(arg use_incoming_face_following)"/>
+        <arg name="use_outgoing_face_cropping" value="$(arg use_outgoing_face_cropping)"/>
+        <arg name="use_incoming_face_cropping" default="$(arg use_incoming_face_cropping)"/>
         <arg name="output" value="$(arg output)"/>
     </include>
 
@@ -38,8 +38,8 @@
         <arg name="robot_vertical_offset" value="$(arg robot_vertical_offset)"/>
         <arg name="rviz" value="$(arg rviz)"/>
         <arg name="camera_id" value="$(arg camera_id)"/>
-        <arg name="use_outgoing_face_following" value="$(arg use_outgoing_face_following)"/>
-        <arg name="use_incoming_face_following" default="$(arg use_incoming_face_following)"/>
+        <arg name="use_outgoing_face_cropping" value="$(arg use_outgoing_face_cropping)"/>
+        <arg name="use_incoming_face_cropping" default="$(arg use_incoming_face_cropping)"/>
         <arg name="output" value="$(arg output)"/>
     </include>
 

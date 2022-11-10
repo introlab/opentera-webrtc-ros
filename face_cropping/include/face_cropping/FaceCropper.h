@@ -1,7 +1,7 @@
-#ifndef FACE_FOLLOWER_H
-#define FACE_FOLLOWER_H
+#ifndef FACE_CROPPER_H
+#define FACE_CROPPER_H
 
-#include "face_following/Parameters.h"
+#include "face_cropping/Parameters.h"
 
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -10,9 +10,9 @@
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
 #include <opencv4/opencv2/dnn.hpp>
 
-namespace face_following
+namespace face_cropping
 {
-    class FaceFollower
+    class FaceCropper
     {
         const Parameters& m_parameters;
         ros::NodeHandle& m_nodeHandle;
@@ -31,8 +31,8 @@ namespace face_following
         float m_aspectRatio;
 
     public:
-        FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle);
-        virtual ~FaceFollower();
+        FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle);
+        virtual ~FaceCropper();
 
         void localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg);
         void peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg);

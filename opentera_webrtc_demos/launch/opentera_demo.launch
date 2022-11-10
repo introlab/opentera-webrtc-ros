@@ -9,8 +9,8 @@
     <arg name="rviz" default="false"/>
     <arg name="is_stand_alone" default="false"/>
     <arg name="camera_id" default="0"/>
-    <arg name="use_outgoing_face_following" default="false"/>
-    <arg name="use_incoming_face_following" default="false"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -31,15 +31,15 @@
     </include>
 
     <!-- face follower local -->
-    <include if="$(arg use_outgoing_face_following)" file="$(find face_following)/launch/face_following.launch" >
+    <include if="$(arg use_outgoing_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/camera1/image_raw"/>
         <arg name="output_camera_topic" value="/face_camera/image_raw"/>
     </include>
 
     <!-- face follower webrtc -->
-    <include if="$(arg use_incoming_face_following)" file="$(find face_following)/launch/face_following.launch" >
-        <arg name="name" value="face_following_webrtc"/>
+    <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
+        <arg name="name" value="face_cropping_webrtc"/>
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/webrtc_image"/>
         <arg name="output_camera_topic" value="/face_webrtc_image"/>
@@ -61,8 +61,8 @@
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg if="$(arg use_outgoing_face_following)" name="input_camera_topic" value="/face_camera/image_raw"/>
-        <arg unless="$(arg use_outgoing_face_following)" name="input_camera_topic" value="/front_camera/image_raw"/>
+        <arg if="$(arg use_outgoing_face_cropping)" name="input_camera_topic" value="/face_camera/image_raw"/>
+        <arg unless="$(arg use_outgoing_face_cropping)" name="input_camera_topic" value="/front_camera/image_raw"/>
     </include>
 
     <!-- Bottom camera -->
@@ -126,15 +126,15 @@
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
     <!-- Loopback or webcam camera -->
-    <node if="$(arg use_outgoing_face_following)" pkg="cv_camera" type="cv_camera_node" name="camera1">
+    <node if="$(arg use_outgoing_face_cropping)" pkg="cv_camera" type="cv_camera_node" name="camera1">
         <param name="device_id" type="int" value="$(arg camera_id)"/>
         <param name="rate" type="double" value="30"/>
         <param name="cv_cap_prop_fps" type="double" value="30"/>
     </node>
 
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="$(arg output)" respawn="true">
-        <remap if="$(arg use_incoming_face_following)" from="webrtc_image" to="face_webrtc_image"/>
-        <remap if="$(arg use_outgoing_face_following)" from="/front_camera/image_raw" to="/face_camera/image_raw"/>
+        <remap if="$(arg use_incoming_face_cropping)" from="webrtc_image" to="face_webrtc_image"/>
+        <remap if="$(arg use_outgoing_face_cropping)" from="/front_camera/image_raw" to="/face_camera/image_raw"/>
     </node>
 
 </launch>

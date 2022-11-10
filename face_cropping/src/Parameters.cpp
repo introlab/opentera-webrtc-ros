@@ -1,8 +1,8 @@
-#include "face_following/Parameters.h"
+#include "face_cropping/Parameters.h"
 
 #include <type_traits>
 
-using namespace face_following;
+using namespace face_cropping;
 namespace internal
 {
     template<typename T>
@@ -38,7 +38,7 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
 
     m_isPeerImage = getParam<bool>("is_peer_image", false);
 
-    std::string name = getParam<std::string>("name", "face_following");
+    std::string name = getParam<std::string>("name", "face_cropping");
     m_dnnModelPath = getParam<std::string>(
         "dnn_model_path",
         ros::package::getPath(name) + "/models/model/res10_300x300_ssd_iter_140000.caffemodel");

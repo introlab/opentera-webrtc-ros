@@ -30,7 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
     visualization_msgs
     map_image_generator
     cv_camera
-    face_following
+    face_cropping
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures

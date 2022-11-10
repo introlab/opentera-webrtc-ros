@@ -1,4 +1,4 @@
-# face_following
+# face_cropping
 
 ## Installation
 
@@ -24,4 +24,4 @@ It can either subscribe to a `opentera_webrtc_ros::PeerImage` or a `sensor_msgs:
 
 - output_image : `opentera_webrtc_ros::PeerImage` or `sensor_msgs::ImageConstPtr`
 
-For usage exemple look at [face_following.launch](launch/face_following.launch).
+For usage exemple look at [face_cropping.launch](launch/face_cropping.launch).

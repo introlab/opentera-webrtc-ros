@@ -1,13 +1,19 @@
-#include "face_following/FaceFollower.h"
+#include "face_cropping/FaceCropper.h"
 #include <iostream>
 
-using namespace face_following;
+using namespace face_cropping;
 using namespace std;
 
-FaceFollower::FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle)
+FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     : m_parameters(parameters),
       m_nodeHandle(nodeHandle)
 {
+    if (m_parameters.useGpu())
+    {
+        m_network.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+        m_network.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+    }
+
     std::string deployPath = m_parameters.dnnDeployPath();
     std::string modelPath = m_parameters.dnnModelPath();
     m_network = cv::dnn::readNetFromCaffe(deployPath, modelPath);
@@ -22,25 +28,26 @@ FaceFollower::FaceFollower(Parameters& parameters, ros::NodeHandle& nodeHandle)
     m_xAspect = m_xAspect / d;
     m_yAspect = m_yAspect / d;
 
+
     m_pubCounter = 0;
     image_transport::ImageTransport it(m_nodeHandle);
     if (m_parameters.isPeerImage())
     {
         m_peerFrameSubscriber =
-            m_nodeHandle.subscribe("input_image", 10, &FaceFollower::peerFrameReceivedCallback, this);
+            m_nodeHandle.subscribe("input_image", 10, &FaceCropper::peerFrameReceivedCallback, this);
         m_peerFramePublisher = m_nodeHandle.advertise<opentera_webrtc_ros_msgs::PeerImage>("output_image", 10, false);
     }
     else
     {
         m_itSubscriber =
-            it.subscribe("input_image", 1, boost::bind(&FaceFollower::localFrameReceivedCallback, this, _1));
+            it.subscribe("input_image", 1, boost::bind(&FaceCropper::localFrameReceivedCallback, this, _1));
         m_itPublisher = it.advertise("output_image", 1);
     }
 }
 
-FaceFollower::~FaceFollower() = default;
+FaceCropper::~FaceCropper() = default;
 
-void FaceFollower::localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg)
+void FaceCropper::localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
     cv::Mat frame = cutoutFace(cvPtr->image);
@@ -48,7 +55,7 @@ void FaceFollower::localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& 
     m_itPublisher.publish(processedMsg);
 }
 
-void FaceFollower::peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg)
+void FaceCropper::peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg)
 {
     cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg->frame, sensor_msgs::image_encodings::BGR8);
     cv::Mat frame = cutoutFace(cvPtr->image);
@@ -59,7 +66,7 @@ void FaceFollower::peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::Pee
     m_peerFramePublisher.publish(newPeerImage);
 }
 
-sensor_msgs::ImageConstPtr FaceFollower::cvMatToImageConstPtr(cv::Mat frame)
+sensor_msgs::ImageConstPtr FaceCropper::cvMatToImageConstPtr(cv::Mat frame)
 {
     std_msgs::Header header;
     header.seq = m_pubCounter;
@@ -70,7 +77,7 @@ sensor_msgs::ImageConstPtr FaceFollower::cvMatToImageConstPtr(cv::Mat frame)
     return processedMsg;
 }
 
-cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
+cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 {
     std::vector<cv::Rect> faces = detectFaces(frame);
 
@@ -198,7 +205,7 @@ cv::Mat FaceFollower::cutoutFace(cv::Mat frame)
     return frame;
 }
 
-std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
+std::vector<cv::Rect> FaceCropper::detectFaces(const cv::Mat& frame)
 {
     float confidenceThreshold = 0.5;
     int inputHeight = 300;
@@ -206,11 +213,6 @@ std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
     double scale = 1.0;
     cv::Scalar meanValues = {104.0, 177.0, 123.0};
 
-    if (m_parameters.useGpu())
-    {
-        m_network.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-        m_network.setPreferableTarget(cv::dnn::DNN_BACKEND_CUDA);
-    }
     cv::Mat blob = cv::dnn::blobFromImage(frame, scale, cv::Size(inputWidth, inputHeight), meanValues, false, false);
     m_network.setInput(blob, "data");
     cv::Mat detection = m_network.forward("detection_out");
@@ -236,7 +238,7 @@ std::vector<cv::Rect> FaceFollower::detectFaces(const cv::Mat& frame)
     return faces;
 }
 
-int FaceFollower::getGCD(int a, int b)
+int FaceCropper::getGCD(int a, int b)
 {
     if (b == 0)
     {
@@ -245,7 +247,7 @@ int FaceFollower::getGCD(int a, int b)
     return getGCD(b, a % b);
 }
 
-int FaceFollower::getClosestNumberDividableBy(float a, float b)
+int FaceCropper::getClosestNumberDividableBy(float a, float b)
 {
     float n1 = a;
     while (ceilf(n1 / b) / floorf(n1 / b) != 1.0)
@@ -264,7 +266,7 @@ int FaceFollower::getClosestNumberDividableBy(float a, float b)
     return n2;
 }
 
-cv::Rect FaceFollower::getAverageRect(std::list<cv::Rect> list)
+cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
 {
     cv::Rect r(0, 0, 0, 0);
     if (!list.empty())

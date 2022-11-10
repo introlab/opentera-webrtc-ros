@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(face_following)
+project(face_cropping)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES face_following
+#  LIBRARIES face_cropping
 #  CATKIN_DEPENDS cv_bridge opentera_webrtc_ros_msgs roscpp image_transport sensor_msgs
 #  DEPENDS system_lib
 )
@@ -122,22 +122,22 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(face_following
-    include/face_following/FaceFollower.h
-    include/face_following/Parameters.h
+add_executable(face_cropping
+    include/face_cropping/FaceCropper.h
+    include/face_cropping/Parameters.h
     src/main.cpp
-    src/FaceFollower.cpp
+    src/FaceCropper.cpp
     src/Parameters.cpp
 )
 
-target_link_libraries(face_following
+target_link_libraries(face_cropping
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/face_following.cpp
+#   src/${PROJECT_NAME}/face_cropping.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -148,7 +148,7 @@ target_link_libraries(face_following
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/face_following_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/face_cropping_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -212,7 +212,7 @@ target_link_libraries(face_following
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_face_following.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_face_cropping.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
