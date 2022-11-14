@@ -1,4 +1,5 @@
 #include "face_cropping/FaceCropper.h"
+#include "face_cropping/MathUtils.h"
 #include <iostream>
 
 using namespace face_cropping;
@@ -6,7 +7,8 @@ using namespace std;
 
 FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     : m_parameters(parameters),
-      m_nodeHandle(nodeHandle)
+      m_nodeHandle(nodeHandle),
+      m_imageTransport(nodeHandle)
 {
     if (m_parameters.useGpu())
     {
@@ -28,9 +30,7 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     m_xAspect = m_xAspect / d;
     m_yAspect = m_yAspect / d;
 
-
     m_pubCounter = 0;
-    image_transport::ImageTransport it(m_nodeHandle);
     if (m_parameters.isPeerImage())
     {
         m_peerFrameSubscriber =
@@ -39,9 +39,11 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     }
     else
     {
-        m_itSubscriber =
-            it.subscribe("input_image", 1, boost::bind(&FaceCropper::localFrameReceivedCallback, this, _1));
-        m_itPublisher = it.advertise("output_image", 1);
+        m_itSubscriber = m_imageTransport.subscribe(
+            "input_image",
+            1,
+            [this](const sensor_msgs::ImageConstPtr& msg) { localFrameReceivedCallback(msg); });
+        m_itPublisher = m_imageTransport.advertise("output_image", 1);
     }
 }
 
@@ -238,34 +240,6 @@ std::vector<cv::Rect> FaceCropper::detectFaces(const cv::Mat& frame)
     return faces;
 }
 
-int FaceCropper::getGCD(int a, int b)
-{
-    if (b == 0)
-    {
-        return a;
-    }
-    return getGCD(b, a % b);
-}
-
-int FaceCropper::getClosestNumberDividableBy(float a, float b)
-{
-    float n1 = a;
-    while (ceilf(n1 / b) / floorf(n1 / b) != 1.0)
-    {
-        n1 += 1;
-    }
-    float n2 = a;
-    while (ceilf(n2 / b) / floorf(n2 / b) != 1.0)
-    {
-        n2 -= 1;
-    }
-    if (abs(n1 - a) > abs(a - n2))
-    {
-        return n1;
-    }
-    return n2;
-}
-
 cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
 {
     cv::Rect r(0, 0, 0, 0);
@@ -284,7 +258,7 @@ cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
         r.y /= i;
 
         float newWidth = r.width / i;
-        if (ceilf(newWidth) / floorf(newWidth) == 1.0)
+        if (fabsf(roundf(newWidth) - newWidth) > 0.00001f)
         {
             r.width = newWidth;
         }
@@ -294,7 +268,7 @@ cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
         }
 
         float newHeight = r.height / i;
-        if (ceilf(newHeight) / floorf(newHeight) == 1.0)
+        if (fabsf(roundf(newHeight) - newHeight) > 0.00001f)
         {
             r.height = newHeight;
         }

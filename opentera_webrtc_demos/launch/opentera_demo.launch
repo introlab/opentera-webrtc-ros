@@ -30,20 +30,20 @@
         <arg name="output" value="$(arg output)"/>
     </include>
 
-    <!-- face follower local -->
+    <!-- Face cropper local -->
     <include if="$(arg use_outgoing_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/camera1/image_raw"/>
         <arg name="output_camera_topic" value="/face_camera/image_raw"/>
     </include>
 
-    <!-- face follower webrtc -->
+    <!-- Face cropper webrtc -->
     <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
         <arg name="name" value="face_cropping_webrtc"/>
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/webrtc_image"/>
         <arg name="output_camera_topic" value="/face_webrtc_image"/>
-        <arg name="is_peer_image_param" value="true"/>
+        <arg name="is_peer_image" value="true"/>
     </include>
 
     <!-- Front camera -->
@@ -128,8 +128,6 @@
     <!-- Loopback or webcam camera -->
     <node if="$(arg use_outgoing_face_cropping)" pkg="cv_camera" type="cv_camera_node" name="camera1">
         <param name="device_id" type="int" value="$(arg camera_id)"/>
-        <param name="rate" type="double" value="30"/>
-        <param name="cv_cap_prop_fps" type="double" value="30"/>
     </node>
 
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="$(arg output)" respawn="true">

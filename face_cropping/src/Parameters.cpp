@@ -3,23 +3,19 @@
 #include <type_traits>
 
 using namespace face_cropping;
-namespace internal
-{
-    template<typename T>
-    T getParam(const std::string& name, const T& defaultValue)
-    {
-        ros::NodeHandle nh{"~"};
-        T value;
-        nh.param<T>(name, value, defaultValue);
-        return value;
-    }
 
+template<typename T>
+static T getParam(const std::string& name, const T& defaultValue)
+{
+    ros::NodeHandle nh{"~"};
+    T value;
+    nh.param<T>(name, value, defaultValue);
+    return value;
 }
+
 
 Parameters::Parameters(ros::NodeHandle& nodeHandle)
 {
-    using namespace internal;
-
     m_refreshRate = getParam<double>("refresh_rate", 30.0);
     m_width = getParam<int>("width", 400);
     m_height = getParam<int>("height", 400);
@@ -46,5 +42,3 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
 
     m_useGpu = getParam<bool>("use_gpu", false);
 }
-
-Parameters::~Parameters() = default;

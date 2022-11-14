@@ -15,13 +15,7 @@ int main(int argc, char** argv)
     Parameters parameters{nodeHandleParam};
     FaceCropper faceCropper{parameters, nodeHandle};
 
-    ros::Rate loop_rate{parameters.refreshRate()};
-
-    while (ros::ok())
-    {
-        loop_rate.sleep();
-        ros::spinOnce();
-    }
+    ros::spin();
 
     return 0;
 }

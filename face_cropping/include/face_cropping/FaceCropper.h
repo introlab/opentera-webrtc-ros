@@ -18,6 +18,7 @@ namespace face_cropping
         ros::NodeHandle& m_nodeHandle;
         ros::Subscriber m_peerFrameSubscriber;
         ros::Publisher m_peerFramePublisher;
+        image_transport::ImageTransport m_imageTransport;
         image_transport::Subscriber m_itSubscriber;
         image_transport::Publisher m_itPublisher;
         int m_pubCounter;
@@ -41,8 +42,6 @@ namespace face_cropping
         std::vector<cv::Rect> detectFaces(const cv::Mat& frame);
         cv::Mat cutoutFace(cv::Mat frame);
         cv::Rect getAverageRect(std::list<cv::Rect> rectangles);
-        int getClosestNumberDividableBy(float a, float b);
-        int getGCD(int num, int den);
         sensor_msgs::ImageConstPtr cvMatToImageConstPtr(cv::Mat frame);
     };
 }

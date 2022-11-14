@@ -33,7 +33,6 @@ namespace face_cropping
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
-        virtual ~Parameters();
 
         double refreshRate() const;
         int width() const;
