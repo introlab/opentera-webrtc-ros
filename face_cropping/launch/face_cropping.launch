@@ -11,24 +11,35 @@
 
     <arg name="frames_used_for_stabilizer" default="15"/>
 
-    <arg name="min_width_change" default="0.2"/>
-    <arg name="min_height_change" default="0.4"/>
-    <arg name="min_x_change" default="0.1"/>
-    <arg name="min_y_change" default="0.1"/>
+    <arg name="min_width_change" default="0.15"/>
+    <arg name="min_height_change" default="0.15"/>
+    <arg name="min_x_change" default="0.15"/>
+    <arg name="min_y_change" default="0.15"/>
 
-    <arg name="right_margin" default="0.2"/>
-    <arg name="left_margin" default="0.2"/>
+    <arg name="right_margin" default="0.1"/>
+    <arg name="left_margin" default="0.1"/>
     <arg name="top_margin" default="0.2"/>
-    <arg name="bottom_margin" default="0.25"/>
+    <arg name="bottom_margin" default="0.2"/>
 
     <arg name="is_peer_image" default="false"/>
 
-    <arg name="dnn_model_path" default="$(find face_cropping)/models/res10_300x300_ssd_iter_140000.caffemodel"/>
-    <arg name="dnn_deploy_path" default="$(find face_cropping)/models/deploy.prototxt"/>
+    <arg name="haar_cascade_path" default="$(find face_cropping)/models/haarcascade_frontalface_default.xml"/>
+    <arg name="lbp_cascade_path" default="$(find face_cropping)/models/lbpcascade_frontalface_improved.xml"/>
 
-    <arg name="use_gpu" default="false"/>
+    <arg name="use_lbp" default="false"/>
 
-    <node name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
+    <arg name="detection_frames" default="1"/>
+    <arg name="detection_scale" default="1"/>
+    <arg name="min_face_width" default="75"/>
+    <arg name="min_face_height" default="75"/>
+
+    <arg name="max_position_step" default="0.15"/>
+    <arg name="max_size_step" default="0.15"/>
+
+    <arg name="face_storing_frames" default="15"/>
+    <arg name="valid_face_min_time" default="0.8"/>
+
+    <node if="true" name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 
@@ -51,9 +62,17 @@
 
         <param name="is_peer_image" type="bool" value="$(arg is_peer_image)"/>
 
-        <param name="dnn_model_path" type="string" value="$(arg dnn_model_path)"/>
-        <param name="dnn_deploy_path" type="string" value="$(arg dnn_deploy_path)"/>
+        <param name="haar_cascade_path" type="string" value="$(arg haar_cascade_path)"/>
+        <param name="lbp_cascade_path" type="string" value="$(arg lbp_cascade_path)"/>
 
-        <param name="use_gpu" type="bool" value="$(arg use_gpu)"/>
+        <param name="use_lbp" type="bool" value="$(arg use_lbp)"/>
+
+        <param name="detection_frames" type="int" value="$(arg detection_frames)"/>
+        <param name="detection_scale" type="double" value="$(arg detection_scale)"/>
+        <param name="min_face_width" type="int" value="$(arg min_face_width)"/>
+        <param name="min_face_height" type="int" value="$(arg min_face_height)"/>
+
+        <param name="max_position_step" type="double" value="$(arg max_position_step)"/>
+        <param name="max_size_step" type="double" value="$(arg max_size_step)"/>
     </node>
 </launch>

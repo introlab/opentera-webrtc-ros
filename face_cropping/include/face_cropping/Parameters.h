@@ -26,10 +26,21 @@ namespace face_cropping
 
         bool m_isPeerImage;
 
-        std::string m_dnnModelPath;
-        std::string m_dnnDeployPath;
+        std::string m_haarCascadePath;
+        std::string m_lbpCascadePath;
 
-        bool m_useGpu;
+        bool m_useLbp;
+
+        int m_detectionFrames;
+        double m_detectionScale;
+        int m_minFaceWidth;
+        int m_minFaceHeight;
+
+        double m_maxSizeStep;
+        double m_maxPositionStep;
+
+        int m_faceStoringFrames;
+        double m_validFaceMinTime;
 
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
@@ -52,10 +63,21 @@ namespace face_cropping
 
         bool isPeerImage() const;
 
-        std::string dnnModelPath() const;
-        std::string dnnDeployPath() const;
+        std::string haarCascadePath() const;
+        std::string lbpCascadePath() const;
 
-        bool useGpu() const;
+        bool useLbp() const;
+
+        int detectionFrames() const;
+        double detectionScale() const;
+        int minFaceWidth() const;
+        int minFaceHeight() const;
+
+        double maxSizeStep() const;
+        double maxPositionStep() const;
+
+        int faceStoringFrames() const;
+        double validFaceMinTime() const;
     };
 
     inline double Parameters::refreshRate() const
@@ -123,19 +145,59 @@ namespace face_cropping
         return m_isPeerImage;
     }
 
-    inline std::string Parameters::dnnModelPath() const
+    inline std::string Parameters::haarCascadePath() const
     {
-        return m_dnnModelPath;
+        return m_haarCascadePath;
     }
 
-    inline std::string Parameters::dnnDeployPath() const
+    inline std::string Parameters::lbpCascadePath() const
     {
-        return m_dnnDeployPath;
+        return m_lbpCascadePath;
     }
 
-    inline bool Parameters::useGpu() const
+    inline bool Parameters::useLbp() const
     {
-        return m_useGpu;
+        return m_useLbp;
+    }
+
+    inline int Parameters::detectionFrames() const
+    {
+        return m_detectionFrames;
+    }
+
+    inline double Parameters::detectionScale() const
+    {
+        return m_detectionScale;
+    }
+
+    inline int Parameters::minFaceWidth() const
+    {
+        return m_minFaceWidth;
+    }
+
+    inline int Parameters::minFaceHeight() const
+    {
+        return m_minFaceHeight;
+    }
+
+    inline double Parameters::maxSizeStep() const
+    {
+        return m_maxSizeStep;
+    }
+
+    inline double Parameters::maxPositionStep() const
+    {
+        return m_maxPositionStep;
+    }
+
+    inline int Parameters::faceStoringFrames() const
+    {
+        return m_faceStoringFrames;
+    }
+
+    inline double Parameters::validFaceMinTime() const
+    {
+        return m_validFaceMinTime;
     }
 }
 

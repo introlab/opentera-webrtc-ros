@@ -9,6 +9,7 @@
 #include <sensor_msgs/Image.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
 #include <opencv4/opencv2/dnn.hpp>
+#include <opencv4/opencv2/objdetect.hpp>
 
 namespace face_cropping
 {
@@ -30,6 +31,7 @@ namespace face_cropping
         float m_xAspect;
         float m_yAspect;
         float m_aspectRatio;
+        std::vector<std::vector<std::tuple<int, cv::Rect>>> m_lastDetectedFaces;
 
     public:
         FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle);
@@ -37,12 +39,15 @@ namespace face_cropping
 
         void localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg);
         void peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg);
+        cv::CascadeClassifier faceCascade;
 
     private:
-        std::vector<cv::Rect> detectFaces(const cv::Mat& frame);
+        std::vector<cv::Rect> detectFaces(cv::Mat& frame);
         cv::Mat cutoutFace(cv::Mat frame);
         cv::Rect getAverageRect(std::list<cv::Rect> rectangles);
         sensor_msgs::ImageConstPtr cvMatToImageConstPtr(cv::Mat frame);
+        std::vector<cv::Rect> getValidFaces(std::vector<cv::Rect> detectedFaces, cv::Mat frame);
+        void updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, cv::Mat frame);
     };
 }
 #endif

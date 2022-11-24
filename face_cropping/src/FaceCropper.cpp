@@ -10,16 +10,6 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
       m_nodeHandle(nodeHandle),
       m_imageTransport(nodeHandle)
 {
-    if (m_parameters.useGpu())
-    {
-        m_network.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-        m_network.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
-    }
-
-    std::string deployPath = m_parameters.dnnDeployPath();
-    std::string modelPath = m_parameters.dnnModelPath();
-    m_network = cv::dnn::readNetFromCaffe(deployPath, modelPath);
-
     m_oldCutout = cv::Rect(0, 0, 0, 0);
     m_xAspect = m_parameters.width();
     m_yAspect = m_parameters.height();
@@ -29,6 +19,16 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
 
     m_xAspect = m_xAspect / d;
     m_yAspect = m_yAspect / d;
+    if (m_parameters.useLbp())
+    {
+        std::cout << "use lbp" << std::endl;
+        faceCascade.load(m_parameters.lbpCascadePath());
+    }
+    else
+    {
+        std::cout << "use haar" << std::endl;
+        faceCascade.load(m_parameters.haarCascadePath());
+    }
 
     m_pubCounter = 0;
     if (m_parameters.isPeerImage())
@@ -81,7 +81,17 @@ sensor_msgs::ImageConstPtr FaceCropper::cvMatToImageConstPtr(cv::Mat frame)
 
 cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 {
-    std::vector<cv::Rect> faces = detectFaces(frame);
+    if(m_pubCounter == 0 )
+    {
+        m_oldCutout.width = frame.size().width;
+        m_oldCutout.height = frame.size().height;
+    }
+
+    std::vector<cv::Rect> faces;
+    if(m_pubCounter % m_parameters.detectionFrames() == 0)
+    {
+        faces = detectFaces(frame);
+    }
 
     if (!faces.empty() && faces.size() == 1)
     {
@@ -155,7 +165,7 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
             cutout = getAverageRect(m_cutoutList);
         }
 
-        // Ensure that the aspect ratio is preserved after calculating the new cutout
+        // Ensures that the aspect ratio is preserved after calculating the new cutout
         if (r.height / static_cast<float>(r.width) >= m_aspectRatio)
         {
             cutout.height = getClosestNumberDividableBy(cutout.height, m_yAspect / m_xAspect);
@@ -174,7 +184,7 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
             cutout.height = m_oldCutout.height;
         }
 
-        // Ensure that the cutout doesn't go beyond the boundaries of the original frame
+        // Ensures that the cutout doesn't go beyond the boundaries of the original frame
         if (cutout.width <= 0)
         {
             cutout.width = 1;
@@ -200,44 +210,42 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
         frame = frame(m_oldCutout);
     }
 
-    if (faces.size() <= 1)
+    if (faces.size() <= 1 && !frame.empty())
     {
         cv::resize(frame, frame, cv::Size(m_parameters.width(), m_parameters.height()));
     }
     return frame;
 }
 
-std::vector<cv::Rect> FaceCropper::detectFaces(const cv::Mat& frame)
+std::vector<cv::Rect> FaceCropper::detectFaces(cv::Mat& frame)
 {
-    float confidenceThreshold = 0.5;
-    int inputHeight = 300;
-    int inputWidth = 300;
-    double scale = 1.0;
-    cv::Scalar meanValues = {104.0, 177.0, 123.0};
+    cv::Mat resizedFrame = frame.clone();
+    int newWidth = m_parameters.detectionScale()*frame.size().width;
+    int newHeight = m_parameters.detectionScale()*frame.size().height;
 
-    cv::Mat blob = cv::dnn::blobFromImage(frame, scale, cv::Size(inputWidth, inputHeight), meanValues, false, false);
-    m_network.setInput(blob, "data");
-    cv::Mat detection = m_network.forward("detection_out");
-    cv::Mat detectionMatrix(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());
+    cv::resize(frame, resizedFrame, cv::Size(newWidth, newHeight));
+    
+    std::vector<cv::Rect> detectedFaces;
+    std::vector<cv::Rect> validFaces;
 
-    std::vector<cv::Rect> faces;
+    cv::Mat gray;
 
-    for (int i = 0; i < detectionMatrix.rows; i++)
+    cv::cvtColor(resizedFrame, gray, cv::COLOR_RGBA2GRAY, 0);
+
+    faceCascade.detectMultiScale(gray, detectedFaces, 1.1, 3, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(m_parameters.minFaceWidth(), m_parameters.minFaceHeight()));
+
+    for(cv::Rect & r : detectedFaces)
     {
-        float confidence = detectionMatrix.at<float>(i, 2);
-
-        if (confidence > confidenceThreshold)
-        {
-            int bottomLeftX = static_cast<int>(detectionMatrix.at<float>(i, 3) * frame.cols);
-            int bottomLeftY = static_cast<int>(detectionMatrix.at<float>(i, 4) * frame.rows);
-            int topRightX = static_cast<int>(detectionMatrix.at<float>(i, 5) * frame.cols);
-            int topRightY = static_cast<int>(detectionMatrix.at<float>(i, 6) * frame.rows);
-
-            faces.emplace_back(bottomLeftX, bottomLeftY, (topRightX - bottomLeftX), (topRightY - bottomLeftY));
-        }
+        r.x /= m_parameters.detectionScale();
+        r.y /= m_parameters.detectionScale();
+        r.width /= m_parameters.detectionScale();
+        r.height /= m_parameters.detectionScale();
     }
+    std::cout << "visages detecté: " << detectedFaces.size() << std::endl;
 
-    return faces;
+    validFaces = getValidFaces(detectedFaces, frame);
+        
+    return validFaces;
 }
 
 cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
@@ -282,4 +290,98 @@ cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
         }
     }
     return r;
+}
+
+std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedFaces, cv::Mat frame)
+{
+    updateLastFacesDetected(detectedFaces, frame);
+
+    std::vector<cv::Rect> validFaces;
+
+    float maxOverlapPercentage = 0.15;
+
+    for(int i=0; i<m_lastDetectedFaces.size(); i++) //changer loop
+    {
+        std::vector<std::tuple<int, cv::Rect>> faceVector = m_lastDetectedFaces[i];
+
+        std::vector<std::vector<std::tuple<int, cv::Rect>>> otherFaceVectors = m_lastDetectedFaces;
+        otherFaceVectors.erase(otherFaceVectors.begin() + i);
+        bool overlaps = false;
+        cv::Rect face1 = get<1>(faceVector.back());
+        for(std::vector<std::tuple<int, cv::Rect>> & otherFaceVector : otherFaceVectors)
+        {
+            cv::Rect face2 = get<1>(otherFaceVector.back());
+            if((face1 & face2).area() > face1.area() * maxOverlapPercentage && faceVector.size() < otherFaceVector.size())
+            {
+                overlaps = true;
+            }
+        }
+
+        if(faceVector.size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() && !overlaps)
+        {
+            cv::rectangle(frame, get<1>(faceVector.back()), cv::Scalar(0, 255, 0), 2);
+            validFaces.emplace_back(get<1>(faceVector.back()));
+        } 
+    }
+    std::cout << "valid faces size: " << validFaces.size() << std::endl;
+    std::cout << "m_lastDetectedFaces size: " << m_lastDetectedFaces.size() << std::endl;
+    return validFaces;
+}
+
+void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, cv::Mat frame)
+{
+    for(std::vector<std::vector<std::tuple<int, cv::Rect>>>::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
+    {
+        (*it).erase(std::remove_if(std::begin(*it), std::end(*it), [this](std::tuple<int, cv::Rect> & item)
+        {
+            return get<0>(item) < m_pubCounter - m_parameters.faceStoringFrames(); 
+        }), std::end(*it));
+    }
+    m_lastDetectedFaces.erase(std::remove_if(std::begin(m_lastDetectedFaces), std::end(m_lastDetectedFaces), [this](std::vector<std::tuple<int, cv::Rect>> & item)
+    {
+        return item.size() == 0; 
+    }), std::end(m_lastDetectedFaces));
+
+    for(cv::Rect & detectedFace : detectedFaces)
+    {
+        bool isNewFace = true;
+        if(!m_lastDetectedFaces.empty())
+        {
+            for(std::vector<std::vector<std::tuple<int, cv::Rect>>>::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
+            {
+                std::tuple<int, cv::Rect>& tuple = (*it).back();
+                cv::Rect oldFace = get<1>(tuple);
+                
+                float stepX = detectedFace.x * m_parameters.maxPositionStep();
+                float stepY = detectedFace.y * m_parameters.maxPositionStep();
+                float stepW = detectedFace.width * m_parameters.maxSizeStep();
+                float stepH = detectedFace.height * m_parameters.maxSizeStep();
+
+                if(detectedFace.x < oldFace.x + stepX && detectedFace.x > oldFace.x - stepX &&
+                    detectedFace.y < oldFace.y + stepY && detectedFace.y > oldFace.y - stepY &&
+                    detectedFace.width < oldFace.width + stepW && detectedFace.width > oldFace.width - stepW &&
+                    detectedFace.height < oldFace.height + stepH && detectedFace.height > oldFace.height - stepH)
+                {
+                    isNewFace = false;
+                    ((*it).emplace_back(make_tuple(m_pubCounter, detectedFace)));
+                    if((*it).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime())
+                    {
+                        cv::rectangle(frame, detectedFace, cv::Scalar(0, 255, 0), 2);
+                    }
+                    else
+                    {
+                        cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+                    }
+                    break;
+                }
+            }
+        }
+        if(isNewFace)
+        {
+            cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+            std::vector<std::tuple<int, cv::Rect>> newVect;
+            newVect.emplace_back(make_tuple(m_pubCounter, detectedFace));
+            m_lastDetectedFaces.emplace_back(newVect);
+        }
+    }
 }

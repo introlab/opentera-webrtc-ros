@@ -35,10 +35,21 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_isPeerImage = getParam<bool>("is_peer_image", false);
 
     std::string name = getParam<std::string>("name", "face_cropping");
-    m_dnnModelPath = getParam<std::string>(
-        "dnn_model_path",
-        ros::package::getPath(name) + "/models/model/res10_300x300_ssd_iter_140000.caffemodel");
-    m_dnnDeployPath = getParam<std::string>("dnn_deploy_path", ros::package::getPath(name) + "/models/deploy.prototxt");
+    m_haarCascadePath = getParam<std::string>(
+        "haar_cascade_path",
+        ros::package::getPath(name) + "/models/haarcascade_frontalface_default.xml");
+    m_lbpCascadePath = getParam<std::string>("lbp_cascade_path", ros::package::getPath(name) + "/models/lbpcascade_frontalface.xml");
 
-    m_useGpu = getParam<bool>("use_gpu", false);
+    m_useLbp = getParam<bool>("use_lbp", false);
+
+    m_detectionFrames = getParam<int>("detection_frames", 1);
+    m_detectionScale = getParam<double>("detection_scale", 1);
+    m_minFaceWidth = getParam<int>("min_face_width", 50);
+    m_minFaceHeight = getParam<int>("min_face_height", 50);
+
+    m_maxSizeStep = getParam<double>("max_size_step", 0.05);
+    m_maxPositionStep = getParam<double>("max_position_step", 0.05);
+
+    m_faceStoringFrames = getParam<int>("face_storing_frames", 10);
+    m_validFaceMinTime = getParam<double>("valid_face_min_time", 0.75);
 }
