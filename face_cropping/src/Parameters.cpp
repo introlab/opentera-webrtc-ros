@@ -20,6 +20,8 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_width = getParam<int>("width", 400);
     m_height = getParam<int>("height", 400);
 
+    m_secondsWithoutDetection = getParam<int>("seconds_without_detection", 5);
+
     m_framesUsedForStabilizer = getParam<int>("frames_used_for_stabilizer", 15);
 
     m_minWidthChange = getParam<float>("min_width_change", 0.2);
@@ -38,7 +40,8 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
     m_haarCascadePath = getParam<std::string>(
         "haar_cascade_path",
         ros::package::getPath(name) + "/models/haarcascade_frontalface_default.xml");
-    m_lbpCascadePath = getParam<std::string>("lbp_cascade_path", ros::package::getPath(name) + "/models/lbpcascade_frontalface.xml");
+    m_lbpCascadePath =
+        getParam<std::string>("lbp_cascade_path", ros::package::getPath(name) + "/models/lbpcascade_frontalface.xml");
 
     m_useLbp = getParam<bool>("use_lbp", false);
 
@@ -52,4 +55,6 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
 
     m_faceStoringFrames = getParam<int>("face_storing_frames", 10);
     m_validFaceMinTime = getParam<double>("valid_face_min_time", 0.75);
+
+    m_highlightDetections = getParam<bool>("highlight_detections", false);
 }

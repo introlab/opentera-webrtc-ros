@@ -12,6 +12,8 @@ namespace face_cropping
         int m_width;
         int m_height;
 
+        int m_secondsWithoutDetection;
+
         int m_framesUsedForStabilizer;
 
         double m_minWidthChange;
@@ -42,12 +44,16 @@ namespace face_cropping
         int m_faceStoringFrames;
         double m_validFaceMinTime;
 
+        bool m_highlightDetections;
+
     public:
         explicit Parameters(ros::NodeHandle& nodeHandle);
 
         double refreshRate() const;
         int width() const;
         int height() const;
+
+        int secondsWithoutDetection() const;
 
         int framesUsedForStabilizer() const;
 
@@ -78,127 +84,61 @@ namespace face_cropping
 
         int faceStoringFrames() const;
         double validFaceMinTime() const;
+
+        bool highlightDetections() const;
     };
 
-    inline double Parameters::refreshRate() const
-    {
-        return m_refreshRate;
-    }
+    inline double Parameters::refreshRate() const { return m_refreshRate; }
 
-    inline int Parameters::width() const
-    {
-        return m_width;
-    }
+    inline int Parameters::width() const { return m_width; }
 
-    inline int Parameters::height() const
-    {
-        return m_height;
-    }
+    inline int Parameters::height() const { return m_height; }
 
-    inline int Parameters::framesUsedForStabilizer() const
-    {
-        return m_framesUsedForStabilizer;
-    }
+    inline int Parameters::secondsWithoutDetection() const { return m_secondsWithoutDetection; }
 
-    inline double Parameters::minWidthChange() const
-    {
-        return m_minWidthChange;
-    }
+    inline int Parameters::framesUsedForStabilizer() const { return m_framesUsedForStabilizer; }
 
-    inline double Parameters::minHeightChange() const
-    {
-        return m_minHeightChange;
-    }
+    inline double Parameters::minWidthChange() const { return m_minWidthChange; }
 
-    inline double Parameters::minXChange() const
-    {
-        return m_minXChange;
-    }
+    inline double Parameters::minHeightChange() const { return m_minHeightChange; }
 
-    inline double Parameters::minYChange() const
-    {
-        return m_minYChange;
-    }
+    inline double Parameters::minXChange() const { return m_minXChange; }
 
-    inline double Parameters::rightMargin() const
-    {
-        return m_rightMargin;
-    }
+    inline double Parameters::minYChange() const { return m_minYChange; }
 
-    inline double Parameters::leftMargin() const
-    {
-        return m_leftMargin;
-    }
+    inline double Parameters::rightMargin() const { return m_rightMargin; }
 
-    inline double Parameters::topMargin() const
-    {
-        return m_topMargin;
-    }
+    inline double Parameters::leftMargin() const { return m_leftMargin; }
 
-    inline double Parameters::bottomMargin() const
-    {
-        return m_bottomMargin;
-    }
+    inline double Parameters::topMargin() const { return m_topMargin; }
 
-    inline bool Parameters::isPeerImage() const
-    {
-        return m_isPeerImage;
-    }
+    inline double Parameters::bottomMargin() const { return m_bottomMargin; }
 
-    inline std::string Parameters::haarCascadePath() const
-    {
-        return m_haarCascadePath;
-    }
+    inline bool Parameters::isPeerImage() const { return m_isPeerImage; }
 
-    inline std::string Parameters::lbpCascadePath() const
-    {
-        return m_lbpCascadePath;
-    }
+    inline std::string Parameters::haarCascadePath() const { return m_haarCascadePath; }
 
-    inline bool Parameters::useLbp() const
-    {
-        return m_useLbp;
-    }
+    inline std::string Parameters::lbpCascadePath() const { return m_lbpCascadePath; }
 
-    inline int Parameters::detectionFrames() const
-    {
-        return m_detectionFrames;
-    }
+    inline bool Parameters::useLbp() const { return m_useLbp; }
 
-    inline double Parameters::detectionScale() const
-    {
-        return m_detectionScale;
-    }
+    inline int Parameters::detectionFrames() const { return m_detectionFrames; }
 
-    inline int Parameters::minFaceWidth() const
-    {
-        return m_minFaceWidth;
-    }
+    inline double Parameters::detectionScale() const { return m_detectionScale; }
 
-    inline int Parameters::minFaceHeight() const
-    {
-        return m_minFaceHeight;
-    }
+    inline int Parameters::minFaceWidth() const { return m_minFaceWidth; }
 
-    inline double Parameters::maxSizeStep() const
-    {
-        return m_maxSizeStep;
-    }
+    inline int Parameters::minFaceHeight() const { return m_minFaceHeight; }
 
-    inline double Parameters::maxPositionStep() const
-    {
-        return m_maxPositionStep;
-    }
+    inline double Parameters::maxSizeStep() const { return m_maxSizeStep; }
 
-    inline int Parameters::faceStoringFrames() const
-    {
-        return m_faceStoringFrames;
-    }
+    inline double Parameters::maxPositionStep() const { return m_maxPositionStep; }
 
-    inline double Parameters::validFaceMinTime() const
-    {
-        return m_validFaceMinTime;
-    }
+    inline int Parameters::faceStoringFrames() const { return m_faceStoringFrames; }
+
+    inline double Parameters::validFaceMinTime() const { return m_validFaceMinTime; }
+
+    inline bool Parameters::highlightDetections() const { return m_highlightDetections; }
 }
 
 #endif

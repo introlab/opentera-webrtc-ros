@@ -8,15 +8,16 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
-#include <opencv4/opencv2/dnn.hpp>
 #include <opencv4/opencv2/objdetect.hpp>
 
 namespace face_cropping
 {
+    using detectionVector = std::vector<std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>>;
+
     class FaceCropper
     {
-        const Parameters& m_parameters;
-        ros::NodeHandle& m_nodeHandle;
+        Parameters m_parameters;
+        ros::NodeHandle m_nodeHandle;
         ros::Subscriber m_peerFrameSubscriber;
         ros::Publisher m_peerFramePublisher;
         image_transport::ImageTransport m_imageTransport;
@@ -24,14 +25,13 @@ namespace face_cropping
         image_transport::Publisher m_itPublisher;
         int m_pubCounter;
 
-        cv::dnn::Net m_network;
-
         std::list<cv::Rect> m_cutoutList;
         cv::Rect m_oldCutout;
         float m_xAspect;
         float m_yAspect;
         float m_aspectRatio;
-        std::vector<std::vector<std::tuple<int, cv::Rect>>> m_lastDetectedFaces;
+        detectionVector m_lastDetectedFaces;
+        int m_noDetectionCounter;
 
     public:
         FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle);

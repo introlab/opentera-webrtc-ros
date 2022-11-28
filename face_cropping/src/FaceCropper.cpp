@@ -1,6 +1,5 @@
 #include "face_cropping/FaceCropper.h"
 #include "face_cropping/MathUtils.h"
-#include <iostream>
 
 using namespace face_cropping;
 using namespace std;
@@ -10,6 +9,7 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
       m_nodeHandle(nodeHandle),
       m_imageTransport(nodeHandle)
 {
+    m_noDetectionCounter = 0;
     m_oldCutout = cv::Rect(0, 0, 0, 0);
     m_xAspect = m_parameters.width();
     m_yAspect = m_parameters.height();
@@ -21,12 +21,10 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     m_yAspect = m_yAspect / d;
     if (m_parameters.useLbp())
     {
-        std::cout << "use lbp" << std::endl;
         faceCascade.load(m_parameters.lbpCascadePath());
     }
     else
     {
-        std::cout << "use haar" << std::endl;
         faceCascade.load(m_parameters.haarCascadePath());
     }
 
@@ -81,14 +79,8 @@ sensor_msgs::ImageConstPtr FaceCropper::cvMatToImageConstPtr(cv::Mat frame)
 
 cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 {
-    if(m_pubCounter == 0 )
-    {
-        m_oldCutout.width = frame.size().width;
-        m_oldCutout.height = frame.size().height;
-    }
-
     std::vector<cv::Rect> faces;
-    if(m_pubCounter % m_parameters.detectionFrames() == 0)
+    if (m_pubCounter % m_parameters.detectionFrames() == 0)
     {
         faces = detectFaces(frame);
     }
@@ -204,13 +196,22 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 
         frame = frame(cutout);
         m_oldCutout = cutout;
+        m_noDetectionCounter = 0;
     }
-    else if (faces.size() == 0)
+    else if (
+        faces.size() == 0 && m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection())
     {
+        m_noDetectionCounter++;
         frame = frame(m_oldCutout);
     }
+    else if (faces.size() > 1)
+    {
+        m_noDetectionCounter = 0;
+    }
 
-    if (faces.size() <= 1 && !frame.empty())
+    if (faces.size() <= 1 && !frame.empty() &&
+        m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection() &&
+        m_oldCutout != cv::Rect(0, 0, 0, 0))  // empecher frame original
     {
         cv::resize(frame, frame, cv::Size(m_parameters.width(), m_parameters.height()));
     }
@@ -220,11 +221,11 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 std::vector<cv::Rect> FaceCropper::detectFaces(cv::Mat& frame)
 {
     cv::Mat resizedFrame = frame.clone();
-    int newWidth = m_parameters.detectionScale()*frame.size().width;
-    int newHeight = m_parameters.detectionScale()*frame.size().height;
+    int newWidth = m_parameters.detectionScale() * frame.size().width;
+    int newHeight = m_parameters.detectionScale() * frame.size().height;
 
     cv::resize(frame, resizedFrame, cv::Size(newWidth, newHeight));
-    
+
     std::vector<cv::Rect> detectedFaces;
     std::vector<cv::Rect> validFaces;
 
@@ -232,19 +233,24 @@ std::vector<cv::Rect> FaceCropper::detectFaces(cv::Mat& frame)
 
     cv::cvtColor(resizedFrame, gray, cv::COLOR_RGBA2GRAY, 0);
 
-    faceCascade.detectMultiScale(gray, detectedFaces, 1.1, 3, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(m_parameters.minFaceWidth(), m_parameters.minFaceHeight()));
+    faceCascade.detectMultiScale(
+        gray,
+        detectedFaces,
+        1.1,
+        3,
+        0 | cv::CASCADE_SCALE_IMAGE,
+        cv::Size(m_parameters.minFaceWidth(), m_parameters.minFaceHeight()));
 
-    for(cv::Rect & r : detectedFaces)
+    for (cv::Rect& r : detectedFaces)
     {
         r.x /= m_parameters.detectionScale();
         r.y /= m_parameters.detectionScale();
         r.width /= m_parameters.detectionScale();
         r.height /= m_parameters.detectionScale();
     }
-    std::cout << "visages detecté: " << detectedFaces.size() << std::endl;
 
     validFaces = getValidFaces(detectedFaces, frame);
-        
+
     return validFaces;
 }
 
@@ -298,77 +304,86 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
 
     std::vector<cv::Rect> validFaces;
 
-    float maxOverlapPercentage = 0.15;
+    float maxOverlapPercentage = 0.2;
 
-    for(int i=0; i<m_lastDetectedFaces.size(); i++) //changer loop
+    for (int i = 0; i < m_lastDetectedFaces.size(); i++)
     {
-        std::vector<std::tuple<int, cv::Rect>> faceVector = m_lastDetectedFaces[i];
+        std::tuple<int, std::vector<std::tuple<int, cv::Rect>>> faceVector = m_lastDetectedFaces[i];
 
-        std::vector<std::vector<std::tuple<int, cv::Rect>>> otherFaceVectors = m_lastDetectedFaces;
+        detectionVector otherFaceVectors = m_lastDetectedFaces;
         otherFaceVectors.erase(otherFaceVectors.begin() + i);
         bool overlaps = false;
-        cv::Rect face1 = get<1>(faceVector.back());
-        for(std::vector<std::tuple<int, cv::Rect>> & otherFaceVector : otherFaceVectors)
+        cv::Rect face1 = get<1>(get<1>(faceVector).back());
+        for (std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>& otherFaceVector : otherFaceVectors)
         {
-            cv::Rect face2 = get<1>(otherFaceVector.back());
-            if((face1 & face2).area() > face1.area() * maxOverlapPercentage && faceVector.size() < otherFaceVector.size())
+            cv::Rect face2 = get<1>(get<1>(otherFaceVector).back());
+            if ((face1 & face2).area() > face1.area() * maxOverlapPercentage &&
+                get<1>(faceVector).size() <= get<1>(otherFaceVector).size() &&
+                get<0>(faceVector) > get<0>(otherFaceVector))
             {
                 overlaps = true;
             }
         }
 
-        if(faceVector.size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() && !overlaps)
+        if (get<1>(faceVector).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() && !overlaps)
         {
-            cv::rectangle(frame, get<1>(faceVector.back()), cv::Scalar(0, 255, 0), 2);
-            validFaces.emplace_back(get<1>(faceVector.back()));
-        } 
+            if (m_parameters.highlightDetections())
+            {
+                cv::rectangle(frame, get<1>(get<1>(faceVector).back()), cv::Scalar(0, 255, 0), 2);
+            }
+            validFaces.emplace_back(get<1>(get<1>(faceVector).back()));
+        }
     }
-    std::cout << "valid faces size: " << validFaces.size() << std::endl;
-    std::cout << "m_lastDetectedFaces size: " << m_lastDetectedFaces.size() << std::endl;
     return validFaces;
 }
 
 void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, cv::Mat frame)
 {
-    for(std::vector<std::vector<std::tuple<int, cv::Rect>>>::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
+    for (detectionVector::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
     {
-        (*it).erase(std::remove_if(std::begin(*it), std::end(*it), [this](std::tuple<int, cv::Rect> & item)
-        {
-            return get<0>(item) < m_pubCounter - m_parameters.faceStoringFrames(); 
-        }), std::end(*it));
+        get<1>(*it).erase(
+            std::remove_if(
+                std::begin(get<1>(*it)),
+                std::end(get<1>(*it)),
+                [this](std::tuple<int, cv::Rect>& item)
+                { return get<0>(item) < m_pubCounter - m_parameters.faceStoringFrames(); }),
+            std::end(get<1>(*it)));
     }
-    m_lastDetectedFaces.erase(std::remove_if(std::begin(m_lastDetectedFaces), std::end(m_lastDetectedFaces), [this](std::vector<std::tuple<int, cv::Rect>> & item)
-    {
-        return item.size() == 0; 
-    }), std::end(m_lastDetectedFaces));
+    m_lastDetectedFaces.erase(
+        std::remove_if(
+            std::begin(m_lastDetectedFaces),
+            std::end(m_lastDetectedFaces),
+            [this](std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>& item) { return get<1>(item).size() == 0; }),
+        std::end(m_lastDetectedFaces));
 
-    for(cv::Rect & detectedFace : detectedFaces)
+    for (cv::Rect& detectedFace : detectedFaces)
     {
         bool isNewFace = true;
-        if(!m_lastDetectedFaces.empty())
+        if (!m_lastDetectedFaces.empty())
         {
-            for(std::vector<std::vector<std::tuple<int, cv::Rect>>>::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
+            for (detectionVector::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
             {
-                std::tuple<int, cv::Rect>& tuple = (*it).back();
+                std::tuple<int, cv::Rect>& tuple = get<1>(*it).back();
                 cv::Rect oldFace = get<1>(tuple);
-                
+
                 float stepX = detectedFace.x * m_parameters.maxPositionStep();
                 float stepY = detectedFace.y * m_parameters.maxPositionStep();
                 float stepW = detectedFace.width * m_parameters.maxSizeStep();
                 float stepH = detectedFace.height * m_parameters.maxSizeStep();
 
-                if(detectedFace.x < oldFace.x + stepX && detectedFace.x > oldFace.x - stepX &&
+                if (detectedFace.x < oldFace.x + stepX && detectedFace.x > oldFace.x - stepX &&
                     detectedFace.y < oldFace.y + stepY && detectedFace.y > oldFace.y - stepY &&
                     detectedFace.width < oldFace.width + stepW && detectedFace.width > oldFace.width - stepW &&
                     detectedFace.height < oldFace.height + stepH && detectedFace.height > oldFace.height - stepH)
                 {
                     isNewFace = false;
-                    ((*it).emplace_back(make_tuple(m_pubCounter, detectedFace)));
-                    if((*it).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime())
+                    (get<1>(*it).emplace_back(make_tuple(m_pubCounter, detectedFace)));
+                    if (get<1>(*it).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() &&
+                        m_parameters.highlightDetections())
                     {
                         cv::rectangle(frame, detectedFace, cv::Scalar(0, 255, 0), 2);
                     }
-                    else
+                    else if (m_parameters.highlightDetections())
                     {
                         cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
                     }
@@ -376,12 +391,15 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                 }
             }
         }
-        if(isNewFace)
+        if (isNewFace)
         {
-            cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+            if (m_parameters.highlightDetections())
+            {
+                cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+            }
             std::vector<std::tuple<int, cv::Rect>> newVect;
             newVect.emplace_back(make_tuple(m_pubCounter, detectedFace));
-            m_lastDetectedFaces.emplace_back(newVect);
+            m_lastDetectedFaces.emplace_back(make_tuple(m_pubCounter, newVect));
         }
     }
 }

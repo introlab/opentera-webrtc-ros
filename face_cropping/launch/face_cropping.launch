@@ -7,7 +7,9 @@
 
     <arg name="refresh_rate" default="30.0"/>
     <arg name="width" default="400"/>
-    <arg name="height" default="400"/>
+    <arg name="height" default="800"/>
+
+    <arg name="seconds_without_detection" default="5"/>
 
     <arg name="frames_used_for_stabilizer" default="15"/>
 
@@ -18,7 +20,7 @@
 
     <arg name="right_margin" default="0.1"/>
     <arg name="left_margin" default="0.1"/>
-    <arg name="top_margin" default="0.2"/>
+    <arg name="top_margin" default="0.1"/>
     <arg name="bottom_margin" default="0.2"/>
 
     <arg name="is_peer_image" default="false"/>
@@ -39,6 +41,8 @@
     <arg name="face_storing_frames" default="15"/>
     <arg name="valid_face_min_time" default="0.8"/>
 
+    <arg name="highlight_detections" default="false"/>
+
     <node if="true" name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
@@ -47,6 +51,8 @@
         <param name="refresh_rate" type="double" value="$(arg refresh_rate)"/>
         <param name="width" type="int" value="$(arg width)"/>
         <param name="height" type="int" value="$(arg height)"/>
+
+        <param name="seconds_without_detection" type="int" value="$(arg seconds_without_detection)"/>
 
         <param name="frames_used_for_stabilizer" type="int" value="$(arg frames_used_for_stabilizer)"/>
 
@@ -74,5 +80,7 @@
 
         <param name="max_position_step" type="double" value="$(arg max_position_step)"/>
         <param name="max_size_step" type="double" value="$(arg max_size_step)"/>
+
+        <param name="highlight_detections" type="bool" value="$(arg highlight_detections)"/>
     </node>
 </launch>
