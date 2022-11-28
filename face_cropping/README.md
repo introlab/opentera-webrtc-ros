@@ -55,13 +55,13 @@ A boolean that shows if the image subscribes to and publishes a `opentera_webrtc
 Both strings, the paths to the cascade files used to detect faces. By default this is the path to the files in the models folder where we installed said files, but other cascade files can be used.
 
 ### use_lbp
-A boolean value that determines if haar or lbp cascades are used for face detection. Haar face detection is more accurate and causes less false detections, but lbp is faster and much more inaccurate, by default haar is used.
+A boolean value that determines if haar or lbp cascades are used for face detection. Haar face detection is more accurate and causes less false detections, but lbp is faster and much more inaccurate. Using haar is strongly recommended unless you really need the performance boost. By default it is set to false.
 
 ### detection_frames
 An integer that represents when the detection occurs, for example a value of 3 will cause the program to detect the faces every 3 frames. This won't improve performance in terms of fps, but may cause a reduction in the cpu utilization. Going above 2 or 3 will cause the cropping to be less responsive. By default has a value of 1.
 
 ### detection_scale
-A double that represents a percentage of the incoming image's resolution. It's used to downsacle the image before detecting the face causing major improvements in performance. The outgoing image will stay at full resolution, but the detection will use a lower resolution. Going below a resolution of 480p may cause problems with the accuracy and range of the face detection. If the camera's resolution is above 480p-720p, it is strongly recommended to downscale it to improve performance.
+A double that represents a percentage of the incoming image's resolution. It's used to downsacle the image before detecting the face causing major improvements in performance. The outgoing image will stay at full resolution, but the detection will use a lower resolution. Going below a resolution of 360p may cause problems with the accuracy and range of the face detection. If the camera's resolution is above 480p-720p, it is strongly recommended to downscale it to improve performance.
 
 ### min_face_width and min_face_height
 Integers representing the minimum size of a face in pixels. This helps reducing false detection but reduces the range of the face detection. A lower value also significantly reduces performance, therefore a value in the range of 50 to 100 is recommended, by default 75x75.
@@ -77,6 +77,22 @@ A float that indicates the percentage of the last frames where a face needs to b
 
 ### highlight_detections
 A boolean that represents if the bounding boxes of the detections are shown. Mostly used for debug and testing purposes, setting this to true can be very useful to check for false detections and detection losses, by default it is false and no boxes are shown. When the boxes are shown, a green box means that the detection is valid, a red one that it's invalid and therefore not taken into consideration and no box means that there were no detections.
+
+## Test results
+
+All tests were conducted in the ros pipeline, with other ros nodes running. The laptop tests were conducted on an intel i7-7700HQ  
+
+| device | method | detection resolution | detection frames | detection time | fps        | cpu% |
+| ------ | ------ | -------------------- | ---------------- | -------------- | ---------- | ---- |
+| laptop | haar   | 640/480              | 2                | 6-20ms         | 50-100     | 135  |
+| laptop | haar   | 480/360              | 2                | 6-20ms         | 60-120     | 112  |
+| laptop | lbp    | 640/480              | 2                | 3-15ms         | 80-200     | 98   |
+| ttop   | haar   | 1280/720             | 2                | 35-55ms        | 15-24      | 130  |
+| ttop   | haar   | 640/360              | 2                | 10-20ms        | 35-60      | 55   |
+| ttop   | haar   | 640/360              | 1                | 12-20ms        | 40-60      | 65   |
+| ttop   | lbp    | 1280/720             | 2                | 10-20ms        | 60-85      | 42.8 |
+| ttop   | lbp    | 640/360              | 2                | 6-12ms         | 90-120     | 30   |
+| ttop   | lbp    | 1280/720             | 1                | 14-21ms        | 35-45      | 58   |
 
 ## Known issues
 
