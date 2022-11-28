@@ -80,7 +80,7 @@ A boolean that represents if the bounding boxes of the detections are shown. Mos
 
 ## Test results
 
-All tests were conducted in the ros pipeline, with other ros nodes running. The laptop tests were conducted on an intel i7-7700HQ  
+All tests were conducted in the ros pipeline, with other ros nodes running. The laptop tests were conducted on an intel i7-7700HQ.  
 
 | device | method | detection resolution | detection frames | detection time | fps        | cpu% |
 | ------ | ------ | -------------------- | ---------------- | -------------- | ---------- | ---- |
