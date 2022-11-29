@@ -235,7 +235,7 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
 
     if (faces.size() <= 1 && !frame.empty() &&
         m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection() &&
-        m_oldCutout != cv::Rect(0, 0, 0, 0))  // empecher frame original
+        m_oldCutout != cv::Rect(0, 0, 0, 0))
     {
         cv::resize(frame, frame, cv::Size(m_parameters.width(), m_parameters.height()));
     }
