@@ -29,6 +29,7 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     }
 
     m_pubCounter = 0;
+    m_enabled = true;
     if (m_parameters.isPeerImage())
     {
         m_peerFrameSubscriber =
@@ -43,27 +44,48 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
             [this](const sensor_msgs::ImageConstPtr& msg) { localFrameReceivedCallback(msg); });
         m_itPublisher = m_imageTransport.advertise("output_image", 1);
     }
+    m_enableCroppingSubscriber =
+        m_nodeHandle.subscribe("enable_face_cropping", 10, &FaceCropper::enableFaceCroppingCallback, this);
 }
 
 FaceCropper::~FaceCropper() = default;
 
+void FaceCropper::enableFaceCroppingCallback(const std_msgs::Bool& msg)
+{
+    m_enabled = msg.data;
+}
+
 void FaceCropper::localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-    cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-    cv::Mat frame = cutoutFace(cvPtr->image);
-    sensor_msgs::ImageConstPtr processedMsg = cvMatToImageConstPtr(frame);
-    m_itPublisher.publish(processedMsg);
+    if (m_enabled)
+    {
+        cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+        cv::Mat frame = cutoutFace(cvPtr->image);
+        sensor_msgs::ImageConstPtr processedMsg = cvMatToImageConstPtr(frame);
+        m_itPublisher.publish(processedMsg);
+    }
+    else
+    {
+        m_itPublisher.publish(msg);
+    }
 }
 
 void FaceCropper::peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg)
 {
-    cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg->frame, sensor_msgs::image_encodings::BGR8);
-    cv::Mat frame = cutoutFace(cvPtr->image);
-    sensor_msgs::ImageConstPtr processedMsg = cvMatToImageConstPtr(frame);
-    opentera_webrtc_ros_msgs::PeerImage newPeerImage;
-    newPeerImage.frame = *processedMsg;
-    newPeerImage.sender = msg->sender;
-    m_peerFramePublisher.publish(newPeerImage);
+    if (m_enabled)
+    {
+        cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg->frame, sensor_msgs::image_encodings::BGR8);
+        cv::Mat frame = cutoutFace(cvPtr->image);
+        sensor_msgs::ImageConstPtr processedMsg = cvMatToImageConstPtr(frame);
+        opentera_webrtc_ros_msgs::PeerImage newPeerImage;
+        newPeerImage.frame = *processedMsg;
+        newPeerImage.sender = msg->sender;
+        m_peerFramePublisher.publish(newPeerImage);
+    }
+    else
+    {
+        m_peerFramePublisher.publish(msg);
+    }
 }
 
 sensor_msgs::ImageConstPtr FaceCropper::cvMatToImageConstPtr(cv::Mat frame)
@@ -199,7 +221,9 @@ cv::Mat FaceCropper::cutoutFace(cv::Mat frame)
         m_noDetectionCounter = 0;
     }
     else if (
-        faces.size() == 0 && m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection())
+        faces.size() == 0 &&
+        m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection() &&
+        m_oldCutout != cv::Rect(0, 0, 0, 0))
     {
         m_noDetectionCounter++;
         frame = frame(m_oldCutout);

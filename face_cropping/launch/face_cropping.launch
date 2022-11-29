@@ -6,8 +6,8 @@
     <arg name="output_camera_topic" default="/face_camera/image_raw"/>
 
     <arg name="refresh_rate" default="30.0"/>
-    <arg name="width" default="400"/>
-    <arg name="height" default="800"/>
+    <arg name="width" default="480"/>
+    <arg name="height" default="720"/>
 
     <arg name="seconds_without_detection" default="5"/>
 

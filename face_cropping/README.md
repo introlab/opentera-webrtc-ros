@@ -34,7 +34,7 @@ The face cropping node contains multiple parameters which can improve performanc
 The refresh rate of the user's screen, integer 30 fps by default.
 
 ### width and height
-The width and height of the cropped face that are both integers, an important note is that the aspect ratio derived from these values is going to affect how smooth the movement feels. Since that aspect ratio needs to be preserved, the minimum steps of the frame surrounding the face are of that aspect ratio in pixels. Therefore an aspect ratio of 1:1 is going to feel smoother than one of 16:9, an aspect ratio of lower values is recommended. The default values are an height of 800 and a width of 400.
+The width and height of the cropped face that are both integers, an important note is that the aspect ratio derived from these values is going to affect how smooth the movement feels. Since that aspect ratio needs to be preserved, the minimum steps of the frame surrounding the face are of that aspect ratio in pixels. Therefore an aspect ratio of 1:1 is going to feel smoother than one of 16:9, an aspect ratio of lower values is recommended. The default values are an height of 720 and a width of 480.
 
 ### seconds_without_detection
 An integer representing the amount of seconds needed without a detection before the frame resets to show the whole image. A value too low, may cause unwanted zoom outs and one too high will cause the image to stay cropped even if no one is detected, by default as a value of 5.
@@ -90,7 +90,7 @@ All tests were conducted in the ros pipeline, with other ros nodes running. The 
 | ttop   | haar   | 1280/720             | 2                | 35-55ms        | 15-24      | 130  |
 | ttop   | haar   | 640/360              | 2                | 10-20ms        | 35-60      | 55   |
 | ttop   | haar   | 640/360              | 1                | 12-20ms        | 40-60      | 65   |
-| ttop   | lbp    | 1280/720             | 2                | 10-20ms        | 60-85      | 42.8 |
+| ttop   | lbp    | 1280/720             | 2                | 10-20ms        | 60-85      | 42   |
 | ttop   | lbp    | 640/360              | 2                | 6-12ms         | 90-120     | 30   |
 | ttop   | lbp    | 1280/720             | 1                | 14-21ms        | 35-45      | 58   |
 
