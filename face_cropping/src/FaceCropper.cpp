@@ -338,6 +338,8 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
         otherFaceVectors.erase(otherFaceVectors.begin() + i);
         bool overlaps = false;
         cv::Rect face1 = get<1>(get<1>(faceVector).back());
+
+        // Validates that faces don't overlap with each other, if they do, the oldest and more constant one is valid
         for (std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>& otherFaceVector : otherFaceVectors)
         {
             cv::Rect face2 = get<1>(get<1>(otherFaceVector).back());
@@ -349,13 +351,14 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
             }
         }
 
+        // Ensures that a face as been detected for long enough to be valid
         if (get<1>(faceVector).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() && !overlaps)
         {
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, get<1>(get<1>(faceVector).back()), cv::Scalar(0, 255, 0), 2);
+                cv::rectangle(frame, face1, cv::Scalar(0, 255, 0), 2);
             }
-            validFaces.emplace_back(get<1>(get<1>(faceVector).back()));
+            validFaces.emplace_back(face1);
         }
     }
     return validFaces;
@@ -363,6 +366,7 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
 
 void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, cv::Mat frame)
 {
+    // Deletes face detections that have been in the detectionVector for more than the faceStoringFrames parameter
     for (detectionVector::iterator it = m_lastDetectedFaces.begin(); it != m_lastDetectedFaces.end(); it++)
     {
         get<1>(*it).erase(
@@ -373,6 +377,8 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                 { return get<0>(item) < m_pubCounter - m_parameters.faceStoringFrames(); }),
             std::end(get<1>(*it)));
     }
+
+    // Deletes faces that no longer have detections
     m_lastDetectedFaces.erase(
         std::remove_if(
             std::begin(m_lastDetectedFaces),
@@ -380,6 +386,7 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
             [this](std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>& item) { return get<1>(item).size() == 0; }),
         std::end(m_lastDetectedFaces));
 
+    // Checks each detections to see if they match a stored face
     for (cv::Rect& detectedFace : detectedFaces)
     {
         bool isNewFace = true;
@@ -400,6 +407,7 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                     detectedFace.width < oldFace.width + stepW && detectedFace.width > oldFace.width - stepW &&
                     detectedFace.height < oldFace.height + stepH && detectedFace.height > oldFace.height - stepH)
                 {
+                    // The detection matches a face, so it's added in the face's vector
                     isNewFace = false;
                     (get<1>(*it).emplace_back(make_tuple(m_pubCounter, detectedFace)));
                     if (get<1>(*it).size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() &&
@@ -417,6 +425,7 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
         }
         if (isNewFace)
         {
+            // The detection doensn't match any faces, so a face is created
             if (m_parameters.highlightDetections())
             {
                 cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
