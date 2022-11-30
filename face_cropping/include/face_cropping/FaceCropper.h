@@ -10,6 +10,7 @@
 #include <sensor_msgs/Image.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
 #include <opencv4/opencv2/objdetect.hpp>
+#include <numeric>
 
 namespace face_cropping
 {

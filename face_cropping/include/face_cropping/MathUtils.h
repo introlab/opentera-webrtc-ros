@@ -5,15 +5,6 @@
 
 namespace face_cropping
 {
-    int getGCD(int a, int b)
-    {
-        if (b == 0)
-        {
-            return a;
-        }
-        return getGCD(b, a % b);
-    }
-
     int getClosestNumberDividableBy(float a, float b)
     {
         float n1 = a;

@@ -11,14 +11,12 @@ FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
 {
     m_noDetectionCounter = 0;
     m_oldCutout = cv::Rect(0, 0, 0, 0);
-    m_xAspect = m_parameters.width();
-    m_yAspect = m_parameters.height();
+
+    int d = std::gcd(m_parameters.width(), m_parameters.height());
+    m_xAspect = m_parameters.width() / d;
+    m_yAspect = m_parameters.height() / d;
     m_aspectRatio = m_yAspect / m_xAspect;
 
-    int d = getGCD(m_xAspect, m_yAspect);
-
-    m_xAspect = m_xAspect / d;
-    m_yAspect = m_yAspect / d;
     if (m_parameters.useLbp())
     {
         faceCascade.load(m_parameters.lbpCascadePath());
