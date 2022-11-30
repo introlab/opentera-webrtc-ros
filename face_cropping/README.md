@@ -14,10 +14,13 @@ The following ROS packages are required:
 
 Implements a ROS node that subscribes to an image stream. It detects a face in the received frame and crops it out. If more than one face is detected, it publishes the received image without changes. But if one face is detected it advertises the up or down scaled cropped image containing the face.
 
+It can be enabled and disabled from the robot gui by pressing the face cropping button, by default it is enabled.
+
 It can either subscribe to a `opentera_webrtc_ros::PeerImage` or a `sensor_msgs::Image` and advertises the same type depending on the `is_peer_image` parameter.
 
 ### Subscribes
 
+- enable_face_cropping : `std_msgs::Bool`
 - input_image : `opentera_webrtc_ros::PeerImage` or `sensor_msgs::Image`
 
 ### Advertises

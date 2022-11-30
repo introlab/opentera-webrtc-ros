@@ -43,7 +43,7 @@
 
     <arg name="highlight_detections" default="false"/>
 
-    <node if="true" name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
+    <node name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 

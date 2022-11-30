@@ -463,14 +463,12 @@ void MainWindow::setupButtons()
     cropFaceIcon.addFile(QStringLiteral(":/frame-person.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->cropFaceButton->setIcon(cropFaceIcon);
     m_ui->cropFaceButton->setText("");
-    m_ui->cropFaceButton->setCheckable(true);
 
     QIcon cameraIcon;
     cameraIcon.addFile(QStringLiteral(":/video-camera-on.png"), QSize(), QIcon::Normal, QIcon::Off);
     cameraIcon.addFile(QStringLiteral(":/video-camera-off.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->cameraButton->setIcon(cameraIcon);
     m_ui->cameraButton->setText("");
-    m_ui->cameraButton->setCheckable(true);
 
 
     QIcon micIcon;
@@ -478,14 +476,12 @@ void MainWindow::setupButtons()
     micIcon.addFile(QStringLiteral(":/mic-off.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->microphoneButton->setIcon(micIcon);
     m_ui->microphoneButton->setText("");
-    m_ui->microphoneButton->setCheckable(true);
 
     QIcon speakerIcon;
     speakerIcon.addFile(QStringLiteral(":/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
     speakerIcon.addFile(QStringLiteral(":/volume-mute.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
-    m_ui->speakerButton->setCheckable(true);
 
     m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));

@@ -13,7 +13,17 @@
 
 namespace face_cropping
 {
-    using detectionVector = std::vector<std::tuple<int, std::vector<std::tuple<int, cv::Rect>>>>;
+    struct DetectionFrame
+    {
+        int frame;
+        cv::Rect detection;
+    };
+
+    struct FaceVector
+    {
+        int origin;
+        std::vector<DetectionFrame> face;
+    };
 
     class FaceCropper
     {
@@ -25,15 +35,16 @@ namespace face_cropping
         image_transport::ImageTransport m_imageTransport;
         image_transport::Subscriber m_itSubscriber;
         image_transport::Publisher m_itPublisher;
-        int m_pubCounter;
+        int m_frameCounter;
         bool m_enabled;
 
         std::list<cv::Rect> m_cutoutList;
         cv::Rect m_oldCutout;
+        cv::Mat m_resizedFrame;
         float m_xAspect;
         float m_yAspect;
         float m_aspectRatio;
-        detectionVector m_lastDetectedFaces;
+        std::vector<FaceVector> m_lastDetectedFaces;
         int m_noDetectionCounter;
 
     public:
@@ -49,9 +60,13 @@ namespace face_cropping
         std::vector<cv::Rect> detectFaces(cv::Mat& frame);
         cv::Mat cutoutFace(cv::Mat frame);
         cv::Rect getAverageRect(std::list<cv::Rect> rectangles);
-        sensor_msgs::ImageConstPtr cvMatToImageConstPtr(cv::Mat frame);
         std::vector<cv::Rect> getValidFaces(std::vector<cv::Rect> detectedFaces, cv::Mat frame);
         void updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, cv::Mat frame);
+        bool imageIsModifiable();
+        cv::Rect getCutoutDimensions(cv::Rect face);
+        cv::Rect validateCutoutMinimumChange(cv::Rect cutout);
+        cv::Rect validateAspectRatio(cv::Rect cutout, cv::Rect face);
+        cv::Rect correctCutoutBoundaries(cv::Rect cutout, cv::Mat frame);
     };
 }
 #endif
