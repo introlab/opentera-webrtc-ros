@@ -59,9 +59,7 @@ void FaceCropper::localFrameReceivedCallback(const sensor_msgs::ImageConstPtr& m
     {
         cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
         cv::Mat frame = cutoutFace(cvPtr->image);
-        sensor_msgs::ImageConstPtr processedMsg =
-            cv_bridge::CvImage(msg->header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg();
-        m_itPublisher.publish(processedMsg);
+        m_itPublisher.publish(cv_bridge::CvImage(msg->header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg());
     }
     else
     {
@@ -75,10 +73,9 @@ void FaceCropper::peerFrameReceivedCallback(const opentera_webrtc_ros_msgs::Peer
     {
         cv_bridge::CvImagePtr cvPtr = cv_bridge::toCvCopy(msg->frame, sensor_msgs::image_encodings::BGR8);
         cv::Mat frame = cutoutFace(cvPtr->image);
-        sensor_msgs::ImageConstPtr processedMsg =
-            cv_bridge::CvImage(msg->frame.header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg();
         opentera_webrtc_ros_msgs::PeerImage newPeerImage;
-        newPeerImage.frame = *processedMsg;
+        newPeerImage.frame =
+            *cv_bridge::CvImage(msg->frame.header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg();
         newPeerImage.sender = msg->sender;
         m_peerFramePublisher.publish(newPeerImage);
     }
@@ -317,28 +314,22 @@ cv::Rect FaceCropper::getAverageRect(std::list<cv::Rect> list)
         r.x /= i;
         r.y /= i;
 
-        float newWidth = r.width / i;
-        if (static_cast<int>(trunc(newWidth)) > 0)
+        if (r.width / i >= 1.f)
         {
-            r.width = newWidth;
+            r.width = static_cast<int>(r.width / i);
         }
         else
         {
-            r.width = static_cast<int>(round(newWidth));
+            r.width = 1;
         }
 
-        float newHeight = r.height / i;
-        if (static_cast<int>(trunc(newHeight)) > 0)
+        if (r.height / i >= 1.f)
         {
-            r.height = newHeight;
-        }
-        else if (abs(ceilf(newHeight) - newHeight) > abs(newHeight - floorf(newHeight)))
-        {
-            r.height = ceilf(newHeight);
+            r.height = static_cast<int>(r.height / i);
         }
         else
         {
-            r.height = floorf(newHeight);
+            r.height = 1;
         }
     }
     return r;
@@ -352,23 +343,22 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
 
     float maxOverlapPercentage = 0.2;
 
-    for (int i = 0; i < m_lastDetectedFaces.size(); i++)
+    for (auto& faceVector : m_lastDetectedFaces)
     {
-        struct FaceVector faceVector = m_lastDetectedFaces[i];  // changer nom facevector
-
-        std::vector<FaceVector> otherFaceVectors = m_lastDetectedFaces;
-        otherFaceVectors.erase(otherFaceVectors.begin() + i);
         bool overlaps = false;
         cv::Rect face1 = faceVector.face.back().detection;
 
         // Validates that faces don't overlap with each other, if they do, the oldest and more constant one is valid
-        for (auto& otherFaceVector : otherFaceVectors)
+        for (auto& otherFaceVector : m_lastDetectedFaces)
         {
-            cv::Rect face2 = otherFaceVector.face.back().detection;
-            if ((face1 & face2).area() > face1.area() * maxOverlapPercentage &&
-                faceVector.face.size() <= otherFaceVector.face.size() && faceVector.origin > otherFaceVector.origin)
+            if (&faceVector != &otherFaceVector)
             {
-                overlaps = true;
+                cv::Rect face2 = otherFaceVector.face.back().detection;
+                if ((face1 & face2).area() > face1.area() * maxOverlapPercentage &&
+                    faceVector.face.size() <= otherFaceVector.face.size() && faceVector.origin > otherFaceVector.origin)
+                {
+                    overlaps = true;
+                }
             }
         }
 
@@ -377,7 +367,7 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
         {
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, face1, cv::Scalar(0, 255, 0), 2);
+                cv::rectangle(frame, face1, cv::Scalar(GREEN[0], GREEN[1], GREEN[2]), 2);
             }
             validFaces.emplace_back(face1);
         }
@@ -390,21 +380,13 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
     // Deletes face detections that have been in the detectionVector for more than the faceStoringFrames parameter
     for (auto& faceVector : m_lastDetectedFaces)
     {
-        faceVector.face.erase(
-            std::remove_if(
-                std::begin(faceVector.face),
-                std::end(faceVector.face),
-                [this](auto& item) { return item.frame < m_frameCounter - m_parameters.faceStoringFrames(); }),
-            std::end(faceVector.face));
+        eraseRemoveIf<DetectionFrame>(
+            faceVector.face,
+            [this](DetectionFrame& item) { return item.frame < m_frameCounter - m_parameters.faceStoringFrames(); });
     }
 
     // Deletes faces that no longer have detections
-    m_lastDetectedFaces.erase(
-        std::remove_if(
-            std::begin(m_lastDetectedFaces),
-            std::end(m_lastDetectedFaces),
-            [this](auto& item) { return (item).face.size() == 0; }),
-        std::end(m_lastDetectedFaces));
+    eraseRemoveIf<FaceVector>(m_lastDetectedFaces, [this](FaceVector& item) { return (item).face.size() == 0; });
 
     // Checks each detections to see if they match a stored face
     for (cv::Rect& detectedFace : detectedFaces)
@@ -428,17 +410,15 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                 {
                     // The detection matches a face, so it's added in the face's vector
                     isNewFace = false;
-
-                    struct DetectionFrame newDetection = {m_frameCounter, detectedFace};
-                    faceVector.face.emplace_back(newDetection);
+                    faceVector.face.emplace_back(DetectionFrame{m_frameCounter, detectedFace});
                     if (faceVector.face.size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() &&
                         m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, cv::Scalar(0, 255, 0), 2);
+                        cv::rectangle(frame, detectedFace, cv::Scalar(GREEN[0], GREEN[1], GREEN[2]), 2);
                     }
                     else if (m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+                        cv::rectangle(frame, detectedFace, cv::Scalar(RED[0], RED[1], RED[2]), 2);
                     }
                     break;
                 }
@@ -449,14 +429,12 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
             // The detection doensn't match any faces, so a face is created
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, detectedFace, cv::Scalar(255, 0, 0), 2);
+                cv::rectangle(frame, detectedFace, cv::Scalar(RED[0], RED[1], RED[2]), 2);
             }
 
             std::vector<DetectionFrame> newVect;
-            struct DetectionFrame newDetection = {m_frameCounter, detectedFace};
-            newVect.emplace_back(newDetection);
-            struct FaceVector newFace = {m_frameCounter, newVect};
-            m_lastDetectedFaces.emplace_back(newFace);
+            newVect.emplace_back(DetectionFrame{m_frameCounter, detectedFace});
+            m_lastDetectedFaces.emplace_back(FaceVector{m_frameCounter, newVect});
         }
     }
 }
@@ -465,4 +443,10 @@ bool FaceCropper::imageIsModifiable()
 {
     return m_noDetectionCounter < m_parameters.refreshRate() * m_parameters.secondsWithoutDetection() &&
            m_oldCutout != cv::Rect(0, 0, 0, 0);
+}
+
+template<typename T>
+void FaceCropper::eraseRemoveIf(std::vector<T>& vector, std::function<bool(T&)> condition)
+{
+    vector.erase(std::remove_if(std::begin(vector), std::end(vector), condition), std::end(vector));
 }

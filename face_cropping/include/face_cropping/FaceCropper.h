@@ -26,6 +26,9 @@ namespace face_cropping
         std::vector<DetectionFrame> face;
     };
 
+    constexpr double GREEN[3] = {0, 255, 0};
+    constexpr double RED[3] = {255, 0, 0};
+
     class FaceCropper
     {
         Parameters m_parameters;
@@ -68,6 +71,9 @@ namespace face_cropping
         cv::Rect validateCutoutMinimumChange(cv::Rect cutout);
         cv::Rect validateAspectRatio(cv::Rect cutout, cv::Rect face);
         cv::Rect correctCutoutBoundaries(cv::Rect cutout, cv::Mat frame);
+
+        template<typename T>
+        void eraseRemoveIf(std::vector<T>& vector, std::function<bool(T&)> condition);
     };
 }
 #endif
