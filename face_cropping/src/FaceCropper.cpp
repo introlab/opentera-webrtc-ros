@@ -367,7 +367,7 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
         {
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, face1, cv::Scalar(GREEN[0], GREEN[1], GREEN[2]), 2);
+                cv::rectangle(frame, face1, GREEN, 2);
             }
             validFaces.emplace_back(face1);
         }
@@ -414,11 +414,11 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                     if (faceVector.face.size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() &&
                         m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, cv::Scalar(GREEN[0], GREEN[1], GREEN[2]), 2);
+                        cv::rectangle(frame, detectedFace, GREEN, 2);
                     }
                     else if (m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, cv::Scalar(RED[0], RED[1], RED[2]), 2);
+                        cv::rectangle(frame, detectedFace, RED, 2);
                     }
                     break;
                 }
@@ -429,7 +429,7 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
             // The detection doensn't match any faces, so a face is created
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, detectedFace, cv::Scalar(RED[0], RED[1], RED[2]), 2);
+                cv::rectangle(frame, detectedFace, RED, 2);
             }
 
             std::vector<DetectionFrame> newVect;
