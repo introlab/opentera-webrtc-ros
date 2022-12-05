@@ -26,9 +26,6 @@ namespace face_cropping
         std::vector<DetectionFrame> face;
     };
 
-    const cv::Scalar GREEN = cv::Scalar(0, 255, 0);
-    const cv::Scalar RED = cv::Scalar(255, 0, 0);
-
     class FaceCropper
     {
         Parameters m_parameters;

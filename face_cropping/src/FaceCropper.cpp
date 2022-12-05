@@ -4,6 +4,9 @@
 using namespace face_cropping;
 using namespace std;
 
+inline const cv::Scalar BOUNDING_BOX_GREEN = cv::Scalar(0, 255, 0);
+inline const cv::Scalar BOUNDING_BOX_RED = cv::Scalar(255, 0, 0);
+
 FaceCropper::FaceCropper(Parameters& parameters, ros::NodeHandle& nodeHandle)
     : m_parameters(parameters),
       m_nodeHandle(nodeHandle),
@@ -367,7 +370,7 @@ std::vector<cv::Rect> FaceCropper::getValidFaces(std::vector<cv::Rect> detectedF
         {
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, face1, GREEN, 2);
+                cv::rectangle(frame, face1, BOUNDING_BOX_GREEN, 2);
             }
             validFaces.emplace_back(face1);
         }
@@ -414,11 +417,11 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
                     if (faceVector.face.size() > m_parameters.faceStoringFrames() * m_parameters.validFaceMinTime() &&
                         m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, GREEN, 2);
+                        cv::rectangle(frame, detectedFace, BOUNDING_BOX_GREEN, 2);
                     }
                     else if (m_parameters.highlightDetections())
                     {
-                        cv::rectangle(frame, detectedFace, RED, 2);
+                        cv::rectangle(frame, detectedFace, BOUNDING_BOX_RED, 2);
                     }
                     break;
                 }
@@ -429,7 +432,7 @@ void FaceCropper::updateLastFacesDetected(std::vector<cv::Rect> detectedFaces, c
             // The detection doensn't match any faces, so a face is created
             if (m_parameters.highlightDetections())
             {
-                cv::rectangle(frame, detectedFace, RED, 2);
+                cv::rectangle(frame, detectedFace, BOUNDING_BOX_RED, 2);
             }
 
             std::vector<DetectionFrame> newVect;
