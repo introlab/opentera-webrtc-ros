@@ -5,6 +5,7 @@
 #include "Statistics.h"
 #include "ConfigDialog.h"
 #include "ROSCameraView.h"
+#include "LocalCameraWindow.h"
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
@@ -17,6 +18,7 @@
 #include <QToolButton>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
+#include <cmath>
 
 QT_BEGIN_NAMESPACE
     namespace Ui
@@ -30,12 +32,24 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = nullptr);
+    MainWindow(QString devicePropertiesPath, QWidget* parent = nullptr);
     ~MainWindow();
     void setImage(const QImage& image);
+    QRect getCameraSpace();
     void onMicVolumeSliderValueChanged();
     void onVolumeSliderValueChanged();
+    void onOpacitySliderValueChanged();
+    void closeCameraWindow();
 
+    // Device properties
+    int m_screenWidth;
+    int m_screenHeight;
+    int m_defaultLocalCameraWidth;
+    int m_defaultLocalCameraHeight;
+    double m_diagonalLength;
+    double m_defaultLocalCameraOpacity;
+    int m_defaultLocalCameraX;
+    int m_defaultLocalCameraY;
 
 signals:
     void newLocalImage(const QImage& image);
@@ -120,6 +134,7 @@ private slots:
         float volume);
 
     void _onConfigButtonClicked();
+    void _onCameraVisibilityButtonClicked();
     void _onBatteryButtonClicked();
     void _onNetworkButtonClicked();
     void _onMicrophoneButtonClicked();
@@ -129,11 +144,20 @@ private slots:
 private:
     void setupROS();
     void setupButtons();
+    void setDeviceProperties(QString path);
     void setBatteryLevel(bool isCharging, float batteryLevel);
     void setNetworkStrength(float wifiStrength);
     void closeEvent(QCloseEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
+
+    // Main View
     Ui::MainWindow* m_ui;
+
+    // Local camera
+    ROSCameraView* m_cameraView;
+    LocalCameraWindow* m_localCameraWindow;
 
     // ConfigDialog
     ConfigDialog* m_configDialog;
@@ -143,9 +167,6 @@ private:
 
     // Remote views
     QMap<QString, ROSCameraView*> m_remoteViews;
-
-    // Main View
-    ROSCameraView* m_cameraView;
 
     // ROS
 

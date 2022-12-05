@@ -17,12 +17,12 @@ public:
 
     void setImage(const QImage& image);
 
-
 protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
     QImage m_image;
+    QVBoxLayout* m_layout;
 };
 
 
@@ -37,9 +37,12 @@ public:
 public slots:
     void setText(const QString& text);
     void setImage(const QImage& image);
+    void useWindowStyle();
+    void useWidgetStyle();
 
 private:
     QVBoxLayout* m_layout;
+    QVBoxLayout* m_widgetStyleLayout;
     GLCameraWidget* m_cameraWidget;
     QLabel* m_label;
 };

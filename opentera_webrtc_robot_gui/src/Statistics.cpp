@@ -3,13 +3,32 @@
 
 #include "ui_Statistics.h"
 
-Statistics::Statistics(QWidget* parent) : m_ui(new Ui::Statistics())
+Statistics::Statistics(MainWindow* parent) : m_ui(new Ui::Statistics())
 {
     m_ui->setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
     setupMenu();
     setupCharts();
     startTime = QDateTime::currentDateTime();
+
+    m_graphTab = new QTabWidget();
+    if (parent->m_diagonalLength <= 10)
+    {
+        resize(parent->size().width() * 0.9, parent->size().height() * 0.9);
+        QGridLayout* layout = static_cast<QGridLayout*>(m_ui->graphFrame->layout());
+        layout->removeWidget(m_ui->firstGroupBox);
+        layout->removeWidget(m_ui->secondGroupBox);
+        layout->removeWidget(m_ui->thirdGroupBox);
+        delete layout;
+
+        m_graphTab->tabBar()->setDocumentMode(true);
+        m_graphTab->tabBar()->setExpanding(true);
+        m_graphTab->addTab(m_ui->firstGroupBox, m_ui->firstGroupBox->title());
+        m_graphTab->addTab(m_ui->secondGroupBox, m_ui->secondGroupBox->title());
+        m_graphTab->addTab(m_ui->thirdGroupBox, m_ui->thirdGroupBox->title());
+        m_graphTab->setStyleSheet("QTabBar::tab { height: 50px; width: 160px; }");
+        m_ui->graphHorizontalLayout->addWidget(m_graphTab);
+    }
 }
 
 Statistics::~Statistics() {}
@@ -274,6 +293,13 @@ void Statistics::setCurrentPage(QString page)
         m_ui->thirdGroupBox->setTitle("Current (A)");
         m_thirdChartView->setChart(m_batteryCurrentChart);
 
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "Charge");
+            m_graphTab->setTabText(1, "Voltage");
+            m_graphTab->setTabText(2, "Current");
+        }
+
         m_ui->infoFrame->setVisible(false);
     }
     else if (page == "network")
@@ -290,6 +316,13 @@ void Statistics::setCurrentPage(QString page)
         m_ui->thirdGroupBox->setTitle("Upload speed (Mbps)");
         m_thirdChartView->setChart(m_uploadSpeedChart);
 
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "Wifi strength");
+            m_graphTab->setTabText(1, "Download speed");
+            m_graphTab->setTabText(2, "Upload speed");
+        }
+
         m_ui->infoFrame->setVisible(true);
     }
     else if (page == "system")
@@ -305,6 +338,13 @@ void Statistics::setCurrentPage(QString page)
         m_secondChartView->setChart(m_memUsageChart);
         m_ui->thirdGroupBox->setTitle("Storage (%)");
         m_thirdChartView->setChart(m_diskUsageChart);
+
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "CPU");
+            m_graphTab->setTabText(1, "Memory");
+            m_graphTab->setTabText(2, "Storage");
+        }
 
         m_ui->infoFrame->setVisible(false);
     }

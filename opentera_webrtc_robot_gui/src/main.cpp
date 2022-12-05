@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QDebug>
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <signal.h>
 #include <QThread>
 #include <QFile>
@@ -22,6 +23,14 @@ int main(int argc, char* argv[])
     bool fullScreen = false;
     nh.getParam("fullScreen", fullScreen);
 
+
+    std::string packageName, jsonFilePath;
+    nh.param<std::string>("name", packageName, "opentera_webrtc_robot_gui");
+    nh.param<std::string>(
+        "device_properties_path",
+        jsonFilePath,
+        ros::package::getPath(packageName) + "/src/resources/DeviceProperties.json");
+
     ros::AsyncSpinner spinner(1);
 
     /* Set up the structure to specify the action */
@@ -31,9 +40,10 @@ int main(int argc, char* argv[])
     action.sa_flags = 0;
     sigaction(SIGINT, &action, NULL);
 
+    // Hides an internal error that comes from resizing an QGLWidget, which doesn't affect our use
+    qputenv("QT_LOGGING_RULES", QByteArray("*.debug=false;qt.qpa.xcb=false"));
 
     QApplication app(argc, argv);
-
     // Stylesheet
     QFile file(":/stylesheet.qss");
     file.open(QFile::ReadOnly);
@@ -41,7 +51,7 @@ int main(int argc, char* argv[])
     app.setStyleSheet(stylesheet);
 
 
-    MainWindow w;
+    MainWindow w(QString::fromStdString(jsonFilePath));
     if (fullScreen)
     {
         w.showFullScreen();
@@ -66,4 +76,7 @@ int main(int argc, char* argv[])
 
     // Stop ROS loop
     spinner.stop();
+
+    // Fixes a bug where the program would stay open because of the camera window
+    w.closeCameraWindow();
 }

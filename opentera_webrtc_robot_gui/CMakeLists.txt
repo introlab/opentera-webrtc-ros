@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
     opentera_webrtc_ros_msgs
     roscpp
     rospy
+    roslib
     std_msgs
     sensor_msgs
 )
@@ -34,6 +35,7 @@ set(srcs
     src/ROSCameraView.cpp
     src/ConfigDialog.cpp
     src/Statistics.cpp
+    src/LocalCameraWindow.cpp
 )
 
 set(headers
@@ -41,6 +43,7 @@ set(headers
     src/ROSCameraView.h
     src/ConfigDialog.h
     src/Statistics.h
+    src/LocalCameraWindow.h
 )
 
 set(uis

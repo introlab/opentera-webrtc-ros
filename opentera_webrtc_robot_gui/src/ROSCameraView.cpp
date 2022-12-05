@@ -3,10 +3,12 @@
 #include <QBrush>
 #include <QColor>
 #include <QDebug>
+#include <iostream>
 
 GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget(parent)
 {
-    // resize(640,480);
+    m_layout = new QVBoxLayout(this);
+    setLayout(m_layout);
 }
 
 void GLCameraWidget::setImage(const QImage& image)
@@ -61,9 +63,12 @@ ROSCameraView::ROSCameraView(QWidget* parent)
     m_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_label->setMaximumHeight(25);
     m_layout->addWidget(m_label);
+
     // CameraWidget
     m_cameraWidget = new GLCameraWidget(this);
     m_layout->addWidget(m_cameraWidget);
+
+    m_widgetStyleLayout = m_layout;
 }
 
 ROSCameraView::ROSCameraView(const QString& label, QWidget* parent) : ROSCameraView(parent)
@@ -80,5 +85,24 @@ void ROSCameraView::setText(const QString& text)
 void ROSCameraView::setImage(const QImage& image)
 {
     if (m_cameraWidget)
+    {
         m_cameraWidget->setImage(image);
+    }
+}
+
+void ROSCameraView::useWindowStyle()
+{
+    if (m_layout == m_widgetStyleLayout)
+    {
+        m_layout->setMargin(0);
+        m_layout->setSpacing(0);
+        m_layout->setContentsMargins(0, 0, 0, 0);
+        m_layout->removeWidget(m_label);
+    }
+}
+
+void ROSCameraView::useWidgetStyle()
+{
+    m_layout = m_widgetStyleLayout;
+    m_layout->insertWidget(0, m_label);
 }

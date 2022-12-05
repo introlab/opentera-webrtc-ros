@@ -17,13 +17,14 @@ QT_BEGIN_NAMESPACE
     }
 QT_END_NAMESPACE
 
+class MainWindow;
 
 class Statistics : public QDialog
 {
     Q_OBJECT
 
 public:
-    Statistics(QWidget* parent = nullptr);
+    Statistics(MainWindow* parent = nullptr);
     ~Statistics();
 
     void updateCharts(
@@ -79,6 +80,8 @@ private:
     QChartView* m_firstChartView;
     QChartView* m_secondChartView;
     QChartView* m_thirdChartView;
+
+    QTabWidget* m_graphTab;
 
     void setupMenu();
     void setupCharts();
