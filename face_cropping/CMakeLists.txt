@@ -223,7 +223,7 @@ target_link_libraries(face_cropping
 
 #Download face detection dnn model
 add_custom_target(
-        download_face_detection_dnn_model ALL
-        COMMAND scripts/download_model.bash
+        download_face_detection_models ALL
+        COMMAND scripts/download_models.bash
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
