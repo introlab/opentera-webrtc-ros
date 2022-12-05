@@ -9,12 +9,12 @@ LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog(parent)
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_QuitOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
+    setFocusPolicy(Qt::StrongFocus);
     setWindowOpacity(m_parent->m_defaultLocalCameraOpacity / 100);
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setMargin(0);
     setLayout(layout);
     setVisible(false);
-    setSizeGripEnabled(true);
     resize(m_parent->m_defaultLocalCameraWidth, m_parent->m_defaultLocalCameraHeight);
 }
 
@@ -22,7 +22,6 @@ void LocalCameraWindow::addCamera(QWidget* cameraView)
 {
     layout()->addWidget(cameraView);
     moveToDefaultPosition();
-
     setVisible(true);
 }
 
@@ -70,6 +69,18 @@ void LocalCameraWindow::followMainWindow(QPoint positionDiff)
 void LocalCameraWindow::mousePressEvent(QMouseEvent* event)
 {
     m_pos = event->pos();
+    if (event->buttons() & Qt::LeftButton)
+    {
+        setSizeGripEnabled(true);
+    }
+}
+
+void LocalCameraWindow::focusOutEvent(QFocusEvent* event)
+{
+    if (isSizeGripEnabled())
+    {
+        setSizeGripEnabled(false);
+    }
 }
 
 void LocalCameraWindow::mouseMoveEvent(QMouseEvent* event)
