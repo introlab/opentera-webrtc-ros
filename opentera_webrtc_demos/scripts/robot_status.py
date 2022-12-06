@@ -8,7 +8,6 @@ import re
 from opentera_webrtc_ros_msgs.msg import RobotStatus
 from std_msgs.msg import String, Bool, Float32
 import json
-import psutil
 
 
 class RobotStatusPublisher():

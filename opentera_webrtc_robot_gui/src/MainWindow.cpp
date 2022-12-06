@@ -41,6 +41,7 @@ MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent) : QMainWin
     connect(m_ui->batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked);
     connect(m_ui->networkButton, &QToolButton::clicked, this, &MainWindow::_onNetworkButtonClicked);
 
+    connect(m_ui->cropFaceButton, &QPushButton::clicked, this, &MainWindow::_onCropFaceButtonClicked);
     connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
     connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
     connect(
@@ -78,6 +79,8 @@ void MainWindow::setupROS()
     m_robotStatusSubscriber = m_nodeHandle.subscribe("/robot_status", 10, &MainWindow::robotStatusCallback, this);
 
     // Setup publishers
+    m_enableFaceCroppingPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_face_cropping", 1);
+
     m_micVolumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("mic_volume", 1);
 
     m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
@@ -518,6 +521,12 @@ void MainWindow::setupButtons()
     m_ui->configButton->setIcon(QIcon(":/settings-gear.png"));
     m_ui->configButton->setText("");
 
+    QIcon cropFaceIcon;
+    cropFaceIcon.addFile(QStringLiteral(":/frame-person-disable.png"), QSize(), QIcon::Normal, QIcon::Off);
+    cropFaceIcon.addFile(QStringLiteral(":/frame-person.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui->cropFaceButton->setIcon(cropFaceIcon);
+    m_ui->cropFaceButton->setText("");
+
     QIcon cameraVisibilityIcon;
     cameraVisibilityIcon.addFile(QStringLiteral(":/hide-camera.png"), QSize(), QIcon::Normal, QIcon::Off);
     cameraVisibilityIcon.addFile(QStringLiteral(":/show-camera.png"), QSize(), QIcon::Normal, QIcon::On);
@@ -530,7 +539,6 @@ void MainWindow::setupButtons()
     cameraIcon.addFile(QStringLiteral(":/video-camera-off.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->cameraButton->setIcon(cameraIcon);
     m_ui->cameraButton->setText("");
-    m_ui->cameraButton->setCheckable(true);
 
 
     QIcon micIcon;
@@ -538,14 +546,12 @@ void MainWindow::setupButtons()
     micIcon.addFile(QStringLiteral(":/mic-off.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->microphoneButton->setIcon(micIcon);
     m_ui->microphoneButton->setText("");
-    m_ui->microphoneButton->setCheckable(true);
 
     QIcon speakerIcon;
     speakerIcon.addFile(QStringLiteral(":/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
     speakerIcon.addFile(QStringLiteral(":/volume-mute.png"), QSize(), QIcon::Normal, QIcon::On);
     m_ui->speakerButton->setIcon(speakerIcon);
     m_ui->speakerButton->setText("");
-    m_ui->speakerButton->setCheckable(true);
 
     m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
@@ -592,6 +598,20 @@ void MainWindow::_onNetworkButtonClicked()
 {
     m_statistics->setCurrentPage("network");
     m_statistics->exec();
+}
+
+void MainWindow::_onCropFaceButtonClicked()
+{
+    std_msgs::Bool msg;
+    if (m_ui->cropFaceButton->isChecked())
+    {
+        msg.data = false;
+    }
+    else
+    {
+        msg.data = true;
+    }
+    m_enableFaceCroppingPublisher.publish(msg);
 }
 
 void MainWindow::_onMicrophoneButtonClicked()

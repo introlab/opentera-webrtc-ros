@@ -136,6 +136,7 @@ private slots:
     void _onCameraVisibilityButtonClicked();
     void _onBatteryButtonClicked();
     void _onNetworkButtonClicked();
+    void _onCropFaceButtonClicked();
     void _onMicrophoneButtonClicked();
     void _onCameraButtonClicked();
     void _onSpeakerButtonClicked();
@@ -182,6 +183,7 @@ private:
     ros::Subscriber m_peerStatusSubscriber;
     ros::Subscriber m_openteraEventSubscriber;
     ros::Subscriber m_robotStatusSubscriber;
+    ros::Publisher m_enableFaceCroppingPublisher;
     ros::Publisher m_micVolumePublisher;
     ros::Publisher m_enableCameraPublisher;
     ros::Publisher m_volumePublisher;
