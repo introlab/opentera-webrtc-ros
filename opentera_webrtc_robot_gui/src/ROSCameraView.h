@@ -34,6 +34,8 @@ public:
     ROSCameraView(QWidget* parent = nullptr);
     ROSCameraView(const QString& label, QWidget* parent = nullptr);
 
+    bool m_usingWindowStyle;
+
 public slots:
     void setText(const QString& text);
     void setImage(const QImage& image);

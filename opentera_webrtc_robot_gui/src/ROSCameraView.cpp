@@ -67,6 +67,7 @@ ROSCameraView::ROSCameraView(QWidget* parent)
     m_cameraWidget = new GLCameraWidget(this);
     m_layout->addWidget(m_cameraWidget);
 
+    m_usingWindowStyle = false;
     m_widgetStyleLayout = m_layout;
 }
 
@@ -89,17 +90,19 @@ void ROSCameraView::setImage(const QImage& image)
 
 void ROSCameraView::useWindowStyle()
 {
-    if (m_layout == m_widgetStyleLayout)
+    if (!m_usingWindowStyle)
     {
         m_layout->setMargin(0);
         m_layout->setSpacing(0);
         m_layout->setContentsMargins(0, 0, 0, 0);
         m_layout->removeWidget(m_label);
+        m_usingWindowStyle = true;
     }
 }
 
 void ROSCameraView::useWidgetStyle()
 {
     m_layout = m_widgetStyleLayout;
+    m_usingWindowStyle = false;
     m_layout->insertWidget(0, m_label);
 }

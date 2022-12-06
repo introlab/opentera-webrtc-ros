@@ -634,8 +634,10 @@ void MainWindow::_onCameraButtonClicked()
 {
     std_msgs::Bool msg;
     msg.data = !m_ui->cameraButton->isChecked();
-    m_localCameraWindow->setVisible(!m_ui->cameraButton->isChecked() && !m_ui->cameraVisibilityButton->isChecked());
-    m_ui->cameraVisibilityButton->setVisible(!m_ui->cameraButton->isChecked());
+    m_localCameraWindow->setVisible(
+        !m_ui->cameraButton->isChecked() && !m_ui->cameraVisibilityButton->isChecked() &&
+        m_cameraView->m_usingWindowStyle);
+    m_ui->cameraVisibilityButton->setVisible(!m_ui->cameraButton->isChecked() && m_cameraView->m_usingWindowStyle);
     m_enableCameraPublisher.publish(msg);
 }
 

@@ -27,5 +27,7 @@
         <file>show-camera.png</file>
         <file>hide-camera.png</file>
         <file>expand-arrows.png</file>
+        <file>frame-person.png</file>
+        <file>frame-person-disable.png</file>
     </qresource>
 </RCC>
