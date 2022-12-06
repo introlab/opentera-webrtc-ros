@@ -24,5 +24,8 @@
         <file>three-horizontal-lines.png</file>
         <file>computer.png</file>
         <file>down-arrow.png</file>
+        <file>show-camera.png</file>
+        <file>hide-camera.png</file>
+        <file>expand-arrows.png</file>
     </qresource>
 </RCC>
