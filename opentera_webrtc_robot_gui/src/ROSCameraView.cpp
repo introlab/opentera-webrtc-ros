@@ -3,7 +3,6 @@
 #include <QBrush>
 #include <QColor>
 #include <QDebug>
-#include <iostream>
 
 GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget(parent)
 {
@@ -85,9 +84,7 @@ void ROSCameraView::setText(const QString& text)
 void ROSCameraView::setImage(const QImage& image)
 {
     if (m_cameraWidget)
-    {
         m_cameraWidget->setImage(image);
-    }
 }
 
 void ROSCameraView::useWindowStyle()

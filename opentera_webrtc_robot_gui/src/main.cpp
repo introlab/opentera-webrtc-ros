@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     action.sa_flags = 0;
     sigaction(SIGINT, &action, NULL);
 
-    // Hides an internal error that comes from resizing an QGLWidget, which doesn't affect our use
+    // Hides an internal error that comes from resizing a QGLWidget, which doesn't affect our use
     qputenv("QT_LOGGING_RULES", QByteArray("*.debug=false;qt.qpa.xcb=false"));
 
     QApplication app(argc, argv);

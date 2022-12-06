@@ -18,7 +18,6 @@
 #include <QToolButton>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
-#include <cmath>
 
 QT_BEGIN_NAMESPACE
     namespace Ui

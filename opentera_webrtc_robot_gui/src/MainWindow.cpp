@@ -87,6 +87,15 @@ void MainWindow::setupROS()
 
 void MainWindow::setDeviceProperties(QString path)
 {
+    m_screenWidth = 600;
+    m_screenHeight = 1024;
+    m_defaultLocalCameraWidth = 320;
+    m_defaultLocalCameraHeight = 240;
+    m_diagonalLength = 7;
+    m_defaultLocalCameraOpacity = 90;
+    m_defaultLocalCameraX = 10;
+    m_defaultLocalCameraY = -10;
+
     QFile file;
     file.setFileName(path);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -96,29 +105,22 @@ void MainWindow::setDeviceProperties(QString path)
         QJsonDocument doc = QJsonDocument::fromJson(properties.toUtf8());
         QJsonObject propertiesObject = doc.object();
 
-        m_screenWidth = propertiesObject.value("width").toInt();
-        m_screenHeight = propertiesObject.value("height").toInt();
-        m_defaultLocalCameraWidth = propertiesObject.value("defaultLocalCameraWidth").toInt();
-        m_defaultLocalCameraHeight = propertiesObject.value("defaultLocalCameraHeight").toInt();
-        m_diagonalLength = propertiesObject.value("diagonalLength").toDouble();
-        m_defaultLocalCameraOpacity = propertiesObject.value("defaultLocalCameraOpacity").toDouble();
-        m_defaultLocalCameraX = propertiesObject.value("defaultLocalCameraX").toInt();
-        m_defaultLocalCameraY = propertiesObject.value("defaultLocalCameraY").toInt();
+        m_screenWidth = propertiesObject.value("width").toInt(m_screenWidth);
+        m_screenHeight = propertiesObject.value("height").toInt(m_screenHeight);
+        m_defaultLocalCameraWidth = propertiesObject.value("defaultLocalCameraWidth").toInt(m_defaultLocalCameraWidth);
+        m_defaultLocalCameraHeight =
+            propertiesObject.value("defaultLocalCameraHeight").toInt(m_defaultLocalCameraHeight);
+        m_diagonalLength = propertiesObject.value("diagonalLength").toDouble(m_diagonalLength);
+        m_defaultLocalCameraOpacity =
+            propertiesObject.value("defaultLocalCameraOpacity").toDouble(m_defaultLocalCameraOpacity);
+        m_defaultLocalCameraX = propertiesObject.value("defaultLocalCameraX").toInt(m_defaultLocalCameraX);
+        m_defaultLocalCameraY = propertiesObject.value("defaultLocalCameraY").toInt(m_defaultLocalCameraY);
 
         resize(m_screenWidth, m_screenHeight);
     }
     else
     {
         ROS_WARN("Device properties file not found, using default properties");
-
-        m_screenWidth = 1080;
-        m_screenHeight = 1920;
-        m_defaultLocalCameraWidth = 300;
-        m_defaultLocalCameraHeight = 200;
-        m_diagonalLength = 15;
-        m_defaultLocalCameraOpacity = 1;
-        m_defaultLocalCameraX = 10;
-        m_defaultLocalCameraY = -10;
     }
 }
 
@@ -269,8 +271,8 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 
                 if (m_remoteViews.empty())
                 {
-                    m_localCameraWindow->removeCamera(m_cameraView);
                     // Put back full size self camera
+                    m_localCameraWindow->removeCamera(m_cameraView);
                     m_ui->imageWidgetLayout->addWidget(m_cameraView);
                     m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
                     m_cameraView->useWidgetStyle();
