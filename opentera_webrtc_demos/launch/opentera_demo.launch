@@ -8,6 +8,9 @@
     <arg name="map_refresh_rate" default="5.0"/>
     <arg name="rviz" default="false"/>
     <arg name="is_stand_alone" default="false"/>
+    <arg name="camera_id" default="0"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -27,6 +30,22 @@
         <arg name="output" value="$(arg output)"/>
     </include>
 
+    <!-- Face cropper local -->
+    <include if="$(arg use_outgoing_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
+        <arg name="output" value="$(arg output)"/>
+        <arg name="input_camera_topic" value="/camera1/image_raw"/>
+        <arg name="output_camera_topic" value="/face_camera/image_raw"/>
+    </include>
+
+    <!-- Face cropper webrtc -->
+    <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
+        <arg name="name" value="face_cropping_webrtc"/>
+        <arg name="output" value="$(arg output)"/>
+        <arg name="input_camera_topic" value="/webrtc_image"/>
+        <arg name="output_camera_topic" value="/face_webrtc_image"/>
+        <arg name="is_peer_image" value="true"/>
+    </include>
+
     <!-- Front camera -->
     <include file="$(find opentera_webrtc_ros)/launch/ros_stream_client.launch">
         <arg name="name" value="topic_streamer1"/>
@@ -38,11 +57,12 @@
         <arg name="can_receive_video_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
-        <arg name="input_camera_topic" value="/front_camera/image_raw"/>
+        <arg if="$(arg use_outgoing_face_cropping)" name="input_camera_topic" value="/face_camera/image_raw"/>
+        <arg unless="$(arg use_outgoing_face_cropping)" name="input_camera_topic" value="/front_camera/image_raw"/>
     </include>
 
     <!-- Bottom camera -->
@@ -56,7 +76,7 @@
         <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Camera 2"/>
         <arg name="room_name" value="CameraX"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
@@ -74,7 +94,7 @@
         <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
         <arg name="client_name" value="Map image"/>
         <arg name="room_name" value="Map"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
@@ -87,7 +107,7 @@
         <arg name="output" value="$(arg output)"/>
         <arg name="is_stand_alone" value="$(arg is_stand_alone)"/>
 
-        <arg name="server_url" value="http://localhost:$(arg signaling_server_port)"/>
+        <arg name="server_url" value="http://$(arg signaling_server_hostname):$(arg signaling_server_port)"/>
         <arg name="client_name" value="Robot Data Channel"/>
         <arg name="room_name" value="Teleop"/>
         <arg name="room_password" value="$(arg signaling_server_password)"/>
@@ -105,6 +125,14 @@
     <!-- Robot status simulated data -->
     <node name="robot_status" type="robot_status.py" pkg="opentera_webrtc_demos" />
 
-    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="$(arg output)" respawn="true"/>
+    <!-- Loopback or webcam camera -->
+    <node if="$(arg use_outgoing_face_cropping)" pkg="cv_camera" type="cv_camera_node" name="camera1">
+        <param name="device_id" type="int" value="$(arg camera_id)"/>
+    </node>
+
+    <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="$(arg output)" respawn="true">
+        <remap if="$(arg use_incoming_face_cropping)" from="webrtc_image" to="face_webrtc_image"/>
+        <remap if="$(arg use_outgoing_face_cropping)" from="/front_camera/image_raw" to="/face_camera/image_raw"/>
+    </node>
 
 </launch>

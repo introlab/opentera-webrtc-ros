@@ -45,25 +45,25 @@ The procedure is written for Ubuntu 20.04 using ROS noetic. We assume ROS is alr
 
 ```bash
 # opentera-webrtc-ros packages
-$sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo $ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
+sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-cv-camera ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
 
 # protobuf
-$sudo apt-get install libprotobuf-dev protobuf-compiler python3-protobuf
+sudo apt-get install libprotobuf-dev protobuf-compiler python3-protobuf
 
 # python dependencies
-$sudo apt-get install python3-pip portaudio19-dev
+sudo apt-get install python3-pip portaudio19-dev
 
 # nodejs dependencies
-$sudo apt-get install nodejs npm
+sudo apt-get install nodejs npm
 
 # audio_utils packages
-$sudo apt-get install cmake build-essential gfortran texinfo libasound2-dev libpulse-dev libgfortran-*-dev
+sudo apt-get install cmake build-essential gfortran texinfo libasound2-dev libpulse-dev libgfortran-*-dev
 
 # odas_ros packages
-$sudo apt-get install libfftw3-dev libconfig-dev
+sudo apt-get install libfftw3-dev libconfig-dev
 
 # qt submodules
-$sudo apt-get install libqt5charts5-dev
+sudo apt-get install libqt5charts5-dev
 ```
 
 ## Installation
@@ -72,42 +72,42 @@ $sudo apt-get install libqt5charts5-dev
 
 ```bash
 # Make sure ROS is installed first.
-$source /opt/ros/noetic/setup.bash
+source /opt/ros/noetic/setup.bash
 # Create the workspace and initial build files
-$mkdir -p ~/teleop_ws/src
-$cd ~/teleop_ws/
-$catkin_make
+mkdir -p ~/teleop_ws/src
+cd ~/teleop_ws/
+catkin_make
 ```
 
 ### 2 - Get all the required ROS packages
 
 ```bash
-$cd ~/teleop_ws/src
+cd ~/teleop_ws/src
 # audio_utils
-$git clone https://github.com/introlab/audio_utils.git --recurse-submodules
+git clone https://github.com/introlab/audio_utils.git --recurse-submodules
 # odas_ros
-$git clone https://github.com/introlab/odas_ros.git --recurse-submodules
+git clone https://github.com/introlab/odas_ros.git --recurse-submodules
 # opentera-webrtc-ros
-$git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
+git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules
 ```
 
 ### 3 - Install the Python requirements
 
 ```bash
-$cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
-$python3 -m pip install -r requirements.txt
-$cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros
-$python3 -m pip install -r requirements.txt
-$cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
-$python3 -m pip install -r requirements.txt
+cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_client_ros
+python3 -m pip install -r requirements.txt
+cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros
+python3 -m pip install -r requirements.txt
+cd ~/teleop_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
+python3 -m pip install -r requirements.txt
 ```
 
 ### 4 - Build all the ROS packages
 
 ```bash
-$cd ~/teleop_ws
-$source devel/setup.bash
-$catkin_make
+cd ~/teleop_ws
+source devel/setup.bash
+catkin_make
 ```
 
 ## Running the demos
