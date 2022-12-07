@@ -1,21 +1,18 @@
 #include "LocalCameraWindow.h"
 #include "MainWindow.h"
 
-LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog(parent)
+LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog{parent}, m_parent(parent)
 {
-    m_parent = parent;
-
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowTitleHint | Qt::Tool | Qt::Dialog);
     setAttribute(Qt::WA_DeleteOnClose);
-    setAttribute(Qt::WA_QuitOnClose);
     setAttribute(Qt::WA_TranslucentBackground);
     setFocusPolicy(Qt::StrongFocus);
-    setWindowOpacity(m_parent->m_defaultLocalCameraOpacity / 100);
+    setWindowOpacity(m_parent->m_deviceProperties.defaultLocalCameraOpacity / 100);
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setMargin(0);
     setLayout(layout);
     setVisible(false);
-    resize(m_parent->m_defaultLocalCameraWidth, m_parent->m_defaultLocalCameraHeight);
+    resize(m_parent->m_deviceProperties.defaultLocalCameraWidth, m_parent->m_deviceProperties.defaultLocalCameraHeight);
 }
 
 void LocalCameraWindow::addCamera(QWidget* cameraView)
@@ -34,24 +31,12 @@ void LocalCameraWindow::removeCamera(QWidget* cameraView)
 void LocalCameraWindow::moveToDefaultPosition()
 {
     QRect mainWindowRect = m_parent->getCameraSpace();
-    int x = m_parent->m_defaultLocalCameraX;
-    int y = m_parent->m_defaultLocalCameraY;
-    if (x > 0 && y > 0)
-    {
-        move(mainWindowRect.left() + x, mainWindowRect.top() + y);
-    }
-    else if (x < 0 && y > 0)
-    {
-        move(mainWindowRect.right() - width() + x, mainWindowRect.top() + y);
-    }
-    else if (x > 0 && y < 0)
-    {
-        move(mainWindowRect.left() + x, mainWindowRect.bottom() - height() + y);
-    }
-    else
-    {
-        move(mainWindowRect.right() - width() + x, mainWindowRect.bottom() - height() + y);
-    }
+    int x = m_parent->m_deviceProperties.defaultLocalCameraX;
+    int y = m_parent->m_deviceProperties.defaultLocalCameraY;
+
+    int newX = (x >= 0) ? mainWindowRect.left() + x : mainWindowRect.right() - width() + x;
+    int newY = (y > 0) ? mainWindowRect.top() + y : mainWindowRect.bottom() - height() + y;
+    move(newX, newY);
 }
 
 void LocalCameraWindow::adjustPositionFromBottomLeft(QSize oldWindowSize, QSize newWindowSize)

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "ui_MainWindow.h"
 #include "Statistics.h"
 #include "ConfigDialog.h"
 #include "ROSCameraView.h"
@@ -26,29 +27,60 @@ QT_BEGIN_NAMESPACE
     }
 QT_END_NAMESPACE
 
+struct deviceProperties
+{
+    int screenWidth = 600;
+    int screenHeight = 1024;
+    int defaultLocalCameraWidth = 320;
+    int defaultLocalCameraHeight = 240;
+    double diagonalLength = 7;
+    double defaultLocalCameraOpacity = 90;
+    int defaultLocalCameraX = 10;
+    int defaultLocalCameraY = -10;
+
+    deviceProperties(QString jsonFilePath)
+    {
+        QFile file;
+        file.setFileName(jsonFilePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QString properties = file.readAll();
+            file.close();
+            QJsonDocument doc = QJsonDocument::fromJson(properties.toUtf8());
+            QJsonObject propertiesObject = doc.object();
+
+            screenWidth = propertiesObject.value("width").toInt(screenWidth);
+            screenHeight = propertiesObject.value("height").toInt(screenHeight);
+            defaultLocalCameraWidth = propertiesObject.value("defaultLocalCameraWidth").toInt(defaultLocalCameraWidth);
+            defaultLocalCameraHeight =
+                propertiesObject.value("defaultLocalCameraHeight").toInt(defaultLocalCameraHeight);
+            diagonalLength = propertiesObject.value("diagonalLength").toDouble(diagonalLength);
+            defaultLocalCameraOpacity =
+                propertiesObject.value("defaultLocalCameraOpacity").toDouble(defaultLocalCameraOpacity);
+            defaultLocalCameraX = propertiesObject.value("defaultLocalCameraX").toInt(defaultLocalCameraX);
+            defaultLocalCameraY = propertiesObject.value("defaultLocalCameraY").toInt(defaultLocalCameraY);
+        }
+        else
+        {
+            ROS_WARN("Device properties file not found, using default properties");
+        }
+    }
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
     MainWindow(QString devicePropertiesPath, QWidget* parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() = default;
     void setImage(const QImage& image);
     QRect getCameraSpace();
     void onMicVolumeSliderValueChanged();
     void onVolumeSliderValueChanged();
     void onOpacitySliderValueChanged();
     void closeCameraWindow();
-
-    // Device properties
-    int m_screenWidth;
-    int m_screenHeight;
-    int m_defaultLocalCameraWidth;
-    int m_defaultLocalCameraHeight;
-    double m_diagonalLength;
-    double m_defaultLocalCameraOpacity;
-    int m_defaultLocalCameraX;
-    int m_defaultLocalCameraY;
+    deviceProperties m_deviceProperties;
 
 signals:
     void newLocalImage(const QImage& image);
@@ -144,7 +176,6 @@ private slots:
 private:
     void setupROS();
     void setupButtons();
-    void setDeviceProperties(QString path);
     void setBatteryLevel(bool isCharging, float batteryLevel);
     void setNetworkStrength(float wifiStrength);
     void closeEvent(QCloseEvent* event) override;
@@ -153,7 +184,7 @@ private:
 
 
     // Main View
-    Ui::MainWindow* m_ui;
+    Ui::MainWindow m_ui;
 
     // Local camera
     ROSCameraView* m_cameraView;

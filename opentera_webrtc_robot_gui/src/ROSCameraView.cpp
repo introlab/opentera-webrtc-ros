@@ -4,11 +4,7 @@
 #include <QColor>
 #include <QDebug>
 
-GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget(parent)
-{
-    m_layout = new QVBoxLayout(this);
-    setLayout(m_layout);
-}
+GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget{parent} {}
 
 void GLCameraWidget::setImage(const QImage& image)
 {
@@ -102,7 +98,20 @@ void ROSCameraView::useWindowStyle()
 
 void ROSCameraView::useWidgetStyle()
 {
-    m_layout = m_widgetStyleLayout;
-    m_usingWindowStyle = false;
-    m_layout->insertWidget(0, m_label);
+    if (m_usingWindowStyle)
+    {
+        m_layout = m_widgetStyleLayout;
+        m_usingWindowStyle = false;
+        m_layout->insertWidget(0, m_label);
+    }
+}
+
+void ROSCameraView::setUsingWindowStyle(bool value)
+{
+    m_usingWindowStyle = value;
+}
+
+bool ROSCameraView::getUsingWindowStyle()
+{
+    return m_usingWindowStyle;
 }

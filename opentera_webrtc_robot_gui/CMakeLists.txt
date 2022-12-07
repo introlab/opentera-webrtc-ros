@@ -245,11 +245,9 @@ install(TARGETS ${PROJECT_NAME}_node
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(FILES src/resources/DeviceProperties.json
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/src/resources
+)
 
 #############
 ## Testing ##

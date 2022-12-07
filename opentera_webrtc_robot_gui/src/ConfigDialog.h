@@ -2,6 +2,7 @@
 #define _CONFIG_DIALOG_H_
 
 #include <QDialog>
+#include "ui_ConfigDialog.h"
 
 QT_BEGIN_NAMESPACE
     namespace Ui
@@ -18,7 +19,7 @@ class ConfigDialog : public QDialog
 
 public:
     ConfigDialog(MainWindow* parent = nullptr);
-    ~ConfigDialog();
+    ~ConfigDialog() = default;
 
     int getMicVolumeSliderValue();
     void setMicVolumeSliderValue(int value);
@@ -28,7 +29,7 @@ public:
     void setOpacitySliderValue(int value);
 
 protected:
-    Ui::ConfigDialog* m_ui;
+    Ui::ConfigDialog m_ui;
 
 private:
     int m_lastOpacityValue;
