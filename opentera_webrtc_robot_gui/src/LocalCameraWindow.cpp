@@ -35,7 +35,7 @@ void LocalCameraWindow::moveToDefaultPosition()
     int y = m_parent->m_deviceProperties.defaultLocalCameraY;
 
     int newX = (x >= 0) ? mainWindowRect.left() + x : mainWindowRect.right() - width() + x;
-    int newY = (y > 0) ? mainWindowRect.top() + y : mainWindowRect.bottom() - height() + y;
+    int newY = (y >= 0) ? mainWindowRect.top() + y : mainWindowRect.bottom() - height() + y;
     move(newX, newY);
 }
 
