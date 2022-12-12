@@ -183,6 +183,8 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
         emit eventStopSession(
             QString::fromStdString(msg->stop_session_events[i].session_uuid),
             QString::fromStdString(msg->stop_session_events[i].service_uuid));
+
+        setLocalCameraStyle(false);
     }
 }
 
@@ -196,10 +198,7 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
 {
     if (m_remoteViews.empty())
     {
-        m_ui.imageWidgetLayout->removeWidget(m_cameraView);
-        m_localCameraWindow->addCamera(m_cameraView);
-        m_cameraView->useWindowStyle();
-        m_ui.cameraVisibilityButton->setVisible(true);
+        setLocalCameraStyle(true);
     }
 
     if (!m_remoteViews.contains(id))
@@ -231,12 +230,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 
                 if (m_remoteViews.empty())
                 {
-                    // Put back full size self camera
-                    m_localCameraWindow->removeCamera(m_cameraView);
-                    m_ui.imageWidgetLayout->addWidget(m_cameraView);
-                    m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-                    m_cameraView->useWidgetStyle();
-                    m_ui.cameraVisibilityButton->setVisible(false);
+                    setLocalCameraStyle(false);
                 }
             }
             break;
@@ -467,6 +461,25 @@ void MainWindow::setNetworkStrength(float wifiStrength)
         newIcon.addFile(":/network-4-bars");
     }
     m_ui.networkButton->setIcon(newIcon);
+}
+
+void MainWindow::setLocalCameraStyle(bool useWindow)
+{
+    if (useWindow)
+    {
+        m_ui.imageWidgetLayout->removeWidget(m_cameraView);
+        m_localCameraWindow->addCamera(m_cameraView);
+        m_cameraView->useWindowStyle();
+        m_ui.cameraVisibilityButton->setVisible(true);
+    }
+    else
+    {
+        m_localCameraWindow->removeCamera(m_cameraView);
+        m_ui.imageWidgetLayout->addWidget(m_cameraView);
+        m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        m_cameraView->useWidgetStyle();
+        m_ui.cameraVisibilityButton->setVisible(false);
+    }
 }
 
 void MainWindow::setupButtons()
