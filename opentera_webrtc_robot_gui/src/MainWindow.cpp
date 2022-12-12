@@ -184,7 +184,7 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
             QString::fromStdString(msg->stop_session_events[i].session_uuid),
             QString::fromStdString(msg->stop_session_events[i].service_uuid));
 
-        setLocalCameraStyle(false);
+        setLocalCameraStyle(CameraStyle::widget);
     }
 }
 
@@ -198,7 +198,7 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
 {
     if (m_remoteViews.empty())
     {
-        setLocalCameraStyle(true);
+        setLocalCameraStyle(CameraStyle::window);
     }
 
     if (!m_remoteViews.contains(id))
@@ -230,7 +230,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 
                 if (m_remoteViews.empty())
                 {
-                    setLocalCameraStyle(false);
+                    setLocalCameraStyle(CameraStyle::widget);
                 }
             }
             break;
@@ -463,9 +463,9 @@ void MainWindow::setNetworkStrength(float wifiStrength)
     m_ui.networkButton->setIcon(newIcon);
 }
 
-void MainWindow::setLocalCameraStyle(bool useWindow)
+void MainWindow::setLocalCameraStyle(CameraStyle style)
 {
-    if (useWindow)
+    if (style == CameraStyle::window)
     {
         m_ui.imageWidgetLayout->removeWidget(m_cameraView);
         m_localCameraWindow->addCamera(m_cameraView);

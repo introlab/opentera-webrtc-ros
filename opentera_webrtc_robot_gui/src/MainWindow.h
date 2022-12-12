@@ -172,7 +172,7 @@ private:
     void setupButtons();
     void setBatteryLevel(bool isCharging, float batteryLevel);
     void setNetworkStrength(float wifiStrength);
-    void setLocalCameraStyle(bool useWindow);
+    void setLocalCameraStyle(CameraStyle style);
     void closeEvent(QCloseEvent* event) override;
     void moveEvent(QMoveEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;

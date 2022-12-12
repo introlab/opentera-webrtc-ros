@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <ros/ros.h>
 #include <ros/package.h>
-#include <signal.h>
 #include <QThread>
 #include <QFile>
 #include <initializer_list>
@@ -24,7 +23,7 @@ void catchUnixSignals(std::initializer_list<int> quitSignals)
         sigaddset(&blockingMask, sig);
     }
 
-    sigaction sa;
+    struct sigaction sa;
     sa.sa_handler = handler;
     sa.sa_mask = blockingMask;
     sa.sa_flags = 0;
