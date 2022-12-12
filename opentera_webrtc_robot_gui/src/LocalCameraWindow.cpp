@@ -1,7 +1,7 @@
 #include "LocalCameraWindow.h"
 #include "MainWindow.h"
 
-LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog{parent}, m_parent(parent)
+LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog{parent}, m_parent{parent}
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowTitleHint | Qt::Tool | Qt::Dialog);
     setAttribute(Qt::WA_DeleteOnClose);

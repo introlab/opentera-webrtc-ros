@@ -26,6 +26,13 @@ private:
 };
 
 
+enum class CameraStyle
+{
+    window,
+    widget
+};
+
+
 class ROSCameraView : public QWidget
 {
     Q_OBJECT
@@ -34,8 +41,7 @@ public:
     ROSCameraView(QWidget* parent = nullptr);
     ROSCameraView(const QString& label, QWidget* parent = nullptr);
 
-    void setUsingWindowStyle(bool value);
-    bool getUsingWindowStyle();
+    CameraStyle getCurrentStyle();
 
 public slots:
     void setText(const QString& text);
@@ -44,7 +50,7 @@ public slots:
     void useWidgetStyle();
 
 private:
-    bool m_usingWindowStyle;
+    CameraStyle m_currentStyle;
 
     QVBoxLayout* m_layout;
     QVBoxLayout* m_widgetStyleLayout;

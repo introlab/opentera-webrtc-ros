@@ -46,10 +46,10 @@ void GLCameraWidget::paintEvent(QPaintEvent* event)
 }
 
 ROSCameraView::ROSCameraView(QWidget* parent)
-    : QWidget(parent),
-      m_layout(nullptr),
-      m_label(nullptr),
-      m_cameraWidget(nullptr)
+    : QWidget{parent},
+      m_layout{nullptr},
+      m_label{nullptr},
+      m_cameraWidget{nullptr}
 {
     m_layout = new QVBoxLayout(this);
 
@@ -63,11 +63,11 @@ ROSCameraView::ROSCameraView(QWidget* parent)
     m_cameraWidget = new GLCameraWidget(this);
     m_layout->addWidget(m_cameraWidget);
 
-    m_usingWindowStyle = false;
+    m_currentStyle = CameraStyle::widget;
     m_widgetStyleLayout = m_layout;
 }
 
-ROSCameraView::ROSCameraView(const QString& label, QWidget* parent) : ROSCameraView(parent)
+ROSCameraView::ROSCameraView(const QString& label, QWidget* parent) : ROSCameraView{parent}
 {
     m_label->setText(label);
 }
@@ -86,32 +86,27 @@ void ROSCameraView::setImage(const QImage& image)
 
 void ROSCameraView::useWindowStyle()
 {
-    if (!m_usingWindowStyle)
+    if (m_currentStyle == CameraStyle::widget)
     {
         m_layout->setMargin(0);
         m_layout->setSpacing(0);
         m_layout->setContentsMargins(0, 0, 0, 0);
         m_layout->removeWidget(m_label);
-        m_usingWindowStyle = true;
+        m_currentStyle = CameraStyle::window;
     }
 }
 
 void ROSCameraView::useWidgetStyle()
 {
-    if (m_usingWindowStyle)
+    if (m_currentStyle == CameraStyle::window)
     {
         m_layout = m_widgetStyleLayout;
-        m_usingWindowStyle = false;
+        m_currentStyle = CameraStyle::widget;
         m_layout->insertWidget(0, m_label);
     }
 }
 
-void ROSCameraView::setUsingWindowStyle(bool value)
+CameraStyle ROSCameraView::getCurrentStyle()
 {
-    m_usingWindowStyle = value;
-}
-
-bool ROSCameraView::getUsingWindowStyle()
-{
-    return m_usingWindowStyle;
+    return m_currentStyle;
 }

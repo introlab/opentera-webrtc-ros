@@ -5,7 +5,7 @@
 
 MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
     : QMainWindow{parent},
-      m_deviceProperties(devicePropertiesPath)
+      m_deviceProperties{devicePropertiesPath}
 {
     m_ui.setupUi(this);
 
@@ -605,8 +605,9 @@ void MainWindow::_onCameraButtonClicked()
     msg.data = !m_ui.cameraButton->isChecked();
     m_localCameraWindow->setVisible(
         !m_ui.cameraButton->isChecked() && !m_ui.cameraVisibilityButton->isChecked() &&
-        m_cameraView->getUsingWindowStyle());
-    m_ui.cameraVisibilityButton->setVisible(!m_ui.cameraButton->isChecked() && m_cameraView->getUsingWindowStyle());
+        m_cameraView->getCurrentStyle() == CameraStyle::window);
+    m_ui.cameraVisibilityButton->setVisible(
+        !m_ui.cameraButton->isChecked() && m_cameraView->getCurrentStyle() == CameraStyle::window);
     m_enableCameraPublisher.publish(msg);
 }
 

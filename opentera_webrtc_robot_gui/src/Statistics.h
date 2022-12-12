@@ -12,13 +12,6 @@
 using namespace QtCharts;
 
 
-QT_BEGIN_NAMESPACE
-    namespace Ui
-    {
-        class Statistics;
-    }
-QT_END_NAMESPACE
-
 class MainWindow;
 
 class Statistics : public QDialog

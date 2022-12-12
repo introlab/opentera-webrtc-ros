@@ -20,14 +20,8 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 
-QT_BEGIN_NAMESPACE
-    namespace Ui
-    {
-        class MainWindow;
-    }
-QT_END_NAMESPACE
 
-struct deviceProperties
+struct DeviceProperties
 {
     int screenWidth = 600;
     int screenHeight = 1024;
@@ -38,7 +32,7 @@ struct deviceProperties
     int defaultLocalCameraX = 10;
     int defaultLocalCameraY = -10;
 
-    deviceProperties(QString jsonFilePath)
+    explicit DeviceProperties(QString jsonFilePath)
     {
         QFile file;
         file.setFileName(jsonFilePath);
@@ -80,7 +74,7 @@ public:
     void onVolumeSliderValueChanged();
     void onOpacitySliderValueChanged();
     void closeCameraWindow();
-    deviceProperties m_deviceProperties;
+    DeviceProperties m_deviceProperties;
 
 signals:
     void newLocalImage(const QImage& image);

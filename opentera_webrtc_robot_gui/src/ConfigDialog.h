@@ -4,12 +4,6 @@
 #include <QDialog>
 #include "ui_ConfigDialog.h"
 
-QT_BEGIN_NAMESPACE
-    namespace Ui
-    {
-        class ConfigDialog;
-    }
-QT_END_NAMESPACE
 
 class MainWindow;
 

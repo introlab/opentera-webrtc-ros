@@ -20,15 +20,19 @@ void catchUnixSignals(std::initializer_list<int> quitSignals)
     sigset_t blockingMask;
     sigemptyset(&blockingMask);
     for (auto sig : quitSignals)
+    {
         sigaddset(&blockingMask, sig);
+    }
 
-    struct sigaction sa;
+    sigaction sa;
     sa.sa_handler = handler;
     sa.sa_mask = blockingMask;
     sa.sa_flags = 0;
 
     for (auto sig : quitSignals)
+    {
         sigaction(sig, &sa, nullptr);
+    }
 }
 
 int main(int argc, char* argv[])
