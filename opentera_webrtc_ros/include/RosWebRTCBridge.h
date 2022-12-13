@@ -25,7 +25,7 @@
 
 namespace opentera
 {
-
+    
     /**
      * @brief Interface a ROS node to bridge WebRTC to ROS topics
      */
@@ -36,6 +36,7 @@ namespace opentera
 
     private:
         ros::Subscriber m_eventSubscriber;
+        bool m_hasMultipleDevices;
 
     protected:
         std::string nodeName;
@@ -223,6 +224,14 @@ namespace opentera
 
         if (!msg->join_session_events.empty())
         {
+            for (auto i = 0; i < msg->join_session_events.size(); i++)
+            {
+                if (msg->join_session_events[i].session_devices.size() > 1)
+                {
+                    m_hasMultipleDevices = true;
+                }
+            }
+
             onJoinSessionEvents(msg->join_session_events);
         }
 
@@ -430,10 +439,21 @@ namespace opentera
     void RosWebRTCBridge<T>::onRoomClientsChanged(const std::vector<RoomClient>& roomClients)
     {
         std::string log = nodeName + " --> Signaling on room clients changed:";
+        bool clientNotConnected = false;
         for (const auto& client : roomClients)
         {
             log += "\n\tid: " + client.id() + ", name: " + client.name() +
-                   ", isConnected: " + (client.isConnected() ? "true" : "false");
+                   ", isConnected: " + (client.isConnected() ? "true" : "false") + client.data()->get_string();
+
+            if (!client.isConnected())
+            {
+                clientNotConnected = true;
+            }
+        }
+        if (clientNotConnected && m_hasMultipleDevices)
+        {
+            m_signalingClient->callAll();
+            m_hasMultipleDevices = false;
         }
         ROS_INFO_STREAM(log);
     }

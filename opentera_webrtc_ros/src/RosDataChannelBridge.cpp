@@ -73,6 +73,7 @@ void RosDataChannelBridge::initAdvertiseTopics()
 {
     m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data_incoming", 10);
     m_dataSubscriber = m_nh.subscribe("webrtc_data_outgoing", 10, &RosDataChannelBridge::onRosData, this);
+    m_callAllSubscriber = m_nh.subscribe("call_all", 10, &RosDataChannelBridge::callAllCallBack, this);
 }
 
 /**
@@ -113,6 +114,11 @@ void RosDataChannelBridge::stopDataChannelCallback()
     {
         m_signalingClient->setOnDataChannelMessageString(nullptr);
     }
+}
+
+void RosDataChannelBridge::callAllCallBack(const std_msgs::Empty& msg)
+{
+    m_signalingClient->callAll();
 }
 
 void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)

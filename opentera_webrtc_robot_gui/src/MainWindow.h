@@ -16,7 +16,9 @@
 #include <QMap>
 #include <QToolButton>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/String.h>
 
 QT_BEGIN_NAMESPACE
     namespace Ui
@@ -35,6 +37,7 @@ public:
     void setImage(const QImage& image);
     void onMicVolumeSliderValueChanged();
     void onVolumeSliderValueChanged();
+    void endCall();
 
 
 signals:
@@ -119,6 +122,7 @@ private slots:
         bool is_camera_on,
         float volume);
 
+    void _onHangUpButtonClicked();
     void _onConfigButtonClicked();
     void _onBatteryButtonClicked();
     void _onNetworkButtonClicked();
@@ -167,6 +171,8 @@ private:
     ros::Publisher m_micVolumePublisher;
     ros::Publisher m_enableCameraPublisher;
     ros::Publisher m_volumePublisher;
+    ros::Publisher m_callAllPublisher;
+    ros::Publisher m_manageSessionPublisher;
 };
 
 

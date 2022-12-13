@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>Test_640x480.png</file>
         <file>phone-call-end.png</file>
+        <file>phone-call-start.png</file>
         <file>stylesheet.qss</file>
         <file>settings-gear.png</file>
         <file>mic-on.png</file>
@@ -24,5 +25,7 @@
         <file>three-horizontal-lines.png</file>
         <file>computer.png</file>
         <file>down-arrow.png</file>
+        <file>frame-person.png</file>
+        <file>frame-person-disable.png</file>
     </qresource>
 </RCC>

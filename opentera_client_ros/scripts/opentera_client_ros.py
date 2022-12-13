@@ -34,6 +34,7 @@ class OpenTeraROSClient:
 
     login_api_endpoint = '/api/device/login'
     status_api_endpoint = '/api/device/status'
+    stop_session_endpoint = '/robot/api/session/manager'
 
     def __init__(self, url: str, token: str):
         self.__base_url = url
@@ -42,7 +43,12 @@ class OpenTeraROSClient:
             'events', OpenTeraEvent, queue_size=10)
         self.__robot_status_subscriber = rospy.Subscriber(
             'robot_status', RobotStatus, self.robot_status_callback)
+        self.__manage_session_subscriber = rospy.Subscriber(
+            'manage_session', String, self.manage_session_callback)
         self.__robot_status = {}
+        self.__stop_session_json = {}
+        self.__client = {}
+        self.__eventLoop = {}
 
     def robot_status_callback(self, status: RobotStatus):
         # Update internal status
@@ -68,6 +74,15 @@ class OpenTeraROSClient:
             }
         }
 
+    def manage_session_callback(self, msg: String):
+        asyncio.run_coroutine_threadsafe(self._opentera_send_manage_session(msg.data), self.__eventLoop)
+    
+    def __set_stop_session(self, session_uuid):
+        self.__stop_session_json = {
+            'session_uuid': session_uuid,
+            'action': 'stop'
+        }
+
     async def _fetch(self, client, url, params=None):
         if params is None:
             params = {}
@@ -77,27 +92,27 @@ class OpenTeraROSClient:
             else:
                 return {}
 
-    async def _opentera_main_loop(self, url, token):
+    async def _opentera_main_loop(self):
 
-        async with aiohttp.ClientSession() as client:
-            params = {'token': token}
-            login_info = await self._fetch(client, url + OpenTeraROSClient.login_api_endpoint, params)
+        async with aiohttp.ClientSession() as self.__client:
+            params = {'token': self.__token}
+            login_info = await self._fetch(self.__client, self.__base_url + OpenTeraROSClient.login_api_endpoint, params)
             print(login_info)
             if 'websocket_url' in login_info:
                 websocket_url = login_info['websocket_url']
 
-                ws = await client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
+                ws = await self.__client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
                 print(ws)
 
                 # Create alive publishing task
-                status_task = asyncio.get_event_loop().create_task(
-                    self._opentera_send_device_status(client, url + OpenTeraROSClient.status_api_endpoint, token))
+                status_task = self.__eventLoop.create_task(
+                    self._opentera_send_device_status(self.__base_url + OpenTeraROSClient.status_api_endpoint))
 
                 while not rospy.is_shutdown():
                     msg = await ws.receive()
 
                     if msg.type == aiohttp.WSMsgType.text:
-                        await self._parse_message(client, msg.json())
+                        await self._parse_message(self.__client, msg.json())
                     if msg.type == aiohttp.WSMsgType.closed:
                         print('websocket closed')
                         break
@@ -112,28 +127,29 @@ class OpenTeraROSClient:
 
     def run(self):
         try:
-            loop = asyncio.get_event_loop()
+
+            self.__eventLoop = asyncio.get_event_loop()
 
             main_task = asyncio.ensure_future(
-                self._opentera_main_loop(self.__base_url, self.__token))
+                self._opentera_main_loop())
 
             for signal in [SIGINT, SIGTERM]:
-                loop.add_signal_handler(signal, main_task.cancel)
+                self.__eventLoop.add_signal_handler(signal, main_task.cancel)
 
-            loop.run_until_complete(main_task)
+            self.__eventLoop.run_until_complete(main_task)
         except asyncio.CancelledError as e:
             print('Main Task cancelled', e)
             # Exit ROS loop
             rospy.signal_shutdown('SIGINT/SIGTERM Detected')
 
-    async def _opentera_send_device_status(self, client: aiohttp.ClientSession, url: str, token: str):
+    async def _opentera_send_device_status(self, url: str):
         while not rospy.is_shutdown():
             try:
                 # Every 10 seconds
                 await asyncio.sleep(10)
-                params = {'token': token}
+                params = {'token': self.__token}
 
-                async with client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
+                async with self.__client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
                     if response.status != 200:
                         print('Send status failed')
                         break
@@ -141,6 +157,19 @@ class OpenTeraROSClient:
                 print('_opentera_send_device_status', e)
                 # Exit loop
                 break
+
+    async def _opentera_send_manage_session(self, action):
+        params = {'token': self.__token}
+        if (action == 'stop'):
+            try:
+                async with self.__client.post(self.__base_url + OpenTeraROSClient.stop_session_endpoint, 
+                    params=params, json=self.__stop_session_json, verify_ssl=False) as response:
+                        if response.status != 200:
+                            print('Send stop session failed')
+            except asyncio.CancelledError as e:
+                    print('_opentera_send_manage_session', e)
+        else:
+            print('Action not implemented')
 
     async def _parse_message(self, client: aiohttp.ClientSession, msg_dict: dict):
         try:
@@ -177,6 +206,8 @@ class OpenTeraROSClient:
                         event.session_parameters = join_session_event.session_parameters
                         event.service_uuid = join_session_event.service_uuid
                         opentera_events.join_session_events.append(event)
+
+                        self.__set_stop_session(event.session_uuid)
                         continue
 
                     # Test for ParticipantEvent

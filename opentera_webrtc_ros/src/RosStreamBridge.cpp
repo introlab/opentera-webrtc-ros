@@ -150,7 +150,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
                         std::forward<decltype(PH5)>(PH5));
                 });
         }
-
+        
         if (m_canReceiveVideoStream)
         {
             m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
@@ -165,6 +165,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
                 });
         }
     }
+    m_callAllSubscriber = m_nh.subscribe("call_all", 10, &RosStreamBridge::callAllCallBack, this);
     m_micVolumeSubscriber = m_nh.subscribe("mic_volume", 10, &RosStreamBridge::micVolumeCallback, this);
     m_enableCameraSubscriber = m_nh.subscribe("enable_camera", 10, &RosStreamBridge::enableCameraCallback, this);
     m_volumeSubscriber = m_nh.subscribe("volume", 10, &RosStreamBridge::volumeCallback, this);
@@ -316,6 +317,11 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
         m_videoSource->sendFrame(msg);
     }
+}
+
+void RosStreamBridge::callAllCallBack(const std_msgs::Empty& msg)
+{
+    m_signalingClient->callAll();
 }
 
 void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg)

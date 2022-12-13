@@ -66,4 +66,6 @@ int main(int argc, char* argv[])
 
     // Stop ROS loop
     spinner.stop();
+
+    w.endCall();
 }
