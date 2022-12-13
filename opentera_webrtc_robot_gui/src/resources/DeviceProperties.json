@@ -1,0 +1,10 @@
+{
+    "width":600,
+    "height":1024,
+    "diagonalLength": 7,
+    "defaultLocalCameraWidth":320,
+    "defaultLocalCameraHeight":240,
+    "defaultLocalCameraOpacity":90,
+    "defaultLocalCameraX":10,
+    "defaultLocalCameraY":-10
+}

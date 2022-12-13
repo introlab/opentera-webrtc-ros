@@ -1,12 +1,16 @@
-#include "ui_MainWindow.h"
 #include "MainWindow.h"
 #include <QGraphicsScene>
 #include <QThread>
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::MainWindow)
+MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
+    : QMainWindow{parent},
+      m_deviceProperties{devicePropertiesPath}
 {
-    m_ui->setupUi(this);
+    m_ui.setupUi(this);
+
+    // Resize to specified default size
+    resize(m_deviceProperties.screenWidth, m_deviceProperties.screenHeight);
 
     // Buttons
     setupButtons();
@@ -18,9 +22,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     m_statistics = new Statistics(this);
 
     // Create camera view
-    m_cameraView = new ROSCameraView("Local", m_ui->imageWidget);
+    m_cameraView = new ROSCameraView("Local", m_ui.imageWidget);
 
-    m_ui->imageWidgetLayout->addWidget(m_cameraView);
+    m_ui.imageWidgetLayout->addWidget(m_cameraView);
+    m_localCameraWindow = new LocalCameraWindow(this);
 
     // Setup ROS
     setupROS();
@@ -32,30 +37,26 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), m_ui(new Ui::Main
     connect(this, &MainWindow::newRobotStatus, this, &MainWindow::_onRobotStatus, Qt::QueuedConnection);
 
     // Buttons
-    connect(m_ui->hangUpButton, &QPushButton::clicked, this, &MainWindow::_onHangUpButtonClicked);
-    connect(m_ui->configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
-    connect(m_ui->batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked);
-    connect(m_ui->networkButton, &QToolButton::clicked, this, &MainWindow::_onNetworkButtonClicked);
+    connect(m_ui.hangUpButton, &QPushButton::clicked, this, &MainWindow::_onHangUpButtonClicked);
+    connect(m_ui.configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
+    connect(m_ui.cameraVisibilityButton, &QPushButton::clicked, this, &MainWindow::_onCameraVisibilityButtonClicked);
+    connect(m_ui.batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked);
+    connect(m_ui.networkButton, &QToolButton::clicked, this, &MainWindow::_onNetworkButtonClicked);
 
-    connect(m_ui->cropFaceButton, &QPushButton::clicked, this, &MainWindow::_onCropFaceButtonClicked);
-    connect(m_ui->microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
-    connect(m_ui->cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
+    connect(m_ui.cropFaceButton, &QPushButton::clicked, this, &MainWindow::_onCropFaceButtonClicked);
+    connect(m_ui.microphoneButton, &QPushButton::clicked, this, &MainWindow::_onMicrophoneButtonClicked);
+    connect(m_ui.cameraButton, &QPushButton::clicked, this, &MainWindow::_onCameraButtonClicked);
     connect(
-        m_ui->cameraButton,
+        m_ui.cameraButton,
         &QPushButton::toggled,
         m_cameraView,
-        [this] { m_cameraView->setVisible(!m_ui->cameraButton->isChecked()); });
-    connect(m_ui->speakerButton, &QPushButton::clicked, this, &MainWindow::_onSpeakerButtonClicked);
+        [this] { m_cameraView->setVisible(!m_ui.cameraButton->isChecked()); });
+    connect(m_ui.speakerButton, &QPushButton::clicked, this, &MainWindow::_onSpeakerButtonClicked);
 
     // Signaling events
     connect(this, &MainWindow::eventJoinSession, this, &MainWindow::_onJoinSessionEvent, Qt::QueuedConnection);
     connect(this, &MainWindow::eventLeaveSession, this, &MainWindow::_onLeaveSessionEvent, Qt::QueuedConnection);
     connect(this, &MainWindow::eventStopSession, this, &MainWindow::_onStopSessionEvent, Qt::QueuedConnection);
-}
-
-MainWindow::~MainWindow()
-{
-    delete m_ui;
 }
 
 void MainWindow::setupROS()
@@ -187,25 +188,30 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
         emit eventStopSession(
             QString::fromStdString(msg->stop_session_events[i].session_uuid),
             QString::fromStdString(msg->stop_session_events[i].service_uuid));
+
+        setLocalCameraStyle(CameraStyle::widget);
     }
 }
 
 void MainWindow::_onLocalImage(const QImage& image)
 {
-    // qDebug() << "_onLocalImage Current Thread " << QThread::currentThread();
     m_cameraView->setImage(image);
 }
 
 
 void MainWindow::_onPeerImage(const QString& id, const QString& name, const QImage& image)
 {
+    if (m_remoteViews.empty())
+    {
+        setLocalCameraStyle(CameraStyle::window);
+    }
+
     if (!m_remoteViews.contains(id))
     {
         ROSCameraView* camera = new ROSCameraView(name, nullptr);
         camera->setImage(image);
-        m_ui->imageWidgetLayout->addWidget(camera);
+        m_ui.imageWidgetLayout->addWidget(camera);
         m_remoteViews[id] = camera;
-        m_cameraView->setMaximumSize(320, 240);
     }
     else
     {
@@ -219,7 +225,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
     switch (status)
     {
         case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_CONNECTED:
-            m_ui->hangUpButton->setChecked(true);
+            m_ui.hangUpButton->setChecked(true);
             break;
 
         case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_DISCONNECTED:
@@ -230,8 +236,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 
                 if (m_remoteViews.empty())
                 {
-                    // Put back full size self camera
-                    m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+                    setLocalCameraStyle(CameraStyle::widget);
                 }
             }
             break;
@@ -258,6 +263,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     QMainWindow::closeEvent(event);
     QApplication::quit();
+}
+
+void MainWindow::closeCameraWindow()
+{
+    if (m_localCameraWindow)
+    {
+        m_localCameraWindow->close();
+    }
 }
 
 void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg)
@@ -316,7 +329,7 @@ void MainWindow::_onJoinSessionEvent(
     const QString& session_parameters,
     const QString& service_uuid)
 {
-    m_ui->hangUpButton->setEnabled(true);
+    m_ui.hangUpButton->setEnabled(true);
 }
 
 void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString& service_uuid)
@@ -334,8 +347,8 @@ void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString&
 
     // Put back full size self camera
     m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    m_ui->hangUpButton->setEnabled(false);
-    m_ui->hangUpButton->setChecked(false);
+    m_ui.hangUpButton->setEnabled(false);
+    m_ui.hangUpButton->setChecked(false);
 }
 
 void MainWindow::_onLeaveSessionEvent(
@@ -345,8 +358,8 @@ void MainWindow::_onLeaveSessionEvent(
     QList<QString> leaving_users,
     QList<QString> leaving_devices)
 {
-    m_ui->hangUpButton->setEnabled(false);
-    m_ui->hangUpButton->setChecked(false);
+    m_ui.hangUpButton->setEnabled(false);
+    m_ui.hangUpButton->setChecked(false);
 }
 
 void MainWindow::_onRobotStatus(
@@ -380,24 +393,24 @@ void MainWindow::_onRobotStatus(
         local_ip);
     setBatteryLevel(is_charging, battery_level);
     setNetworkStrength(wifi_strength);
-    m_ui->cameraButton->setChecked(!is_camera_on);
+    m_ui.cameraButton->setChecked(!is_camera_on);
     m_configDialog->setMicVolumeSliderValue(mic_volume * 100);
     if (mic_volume == 0)
     {
-        m_ui->microphoneButton->setChecked(true);
+        m_ui.microphoneButton->setChecked(true);
     }
     else
     {
-        m_ui->microphoneButton->setChecked(false);
+        m_ui.microphoneButton->setChecked(false);
     }
     m_configDialog->setVolumeSliderValue(volume * 100);
     if (volume == 0)
     {
-        m_ui->speakerButton->setChecked(true);
+        m_ui.speakerButton->setChecked(true);
     }
     else
     {
-        m_ui->speakerButton->setChecked(false);
+        m_ui.speakerButton->setChecked(false);
     }
 }
 
@@ -430,9 +443,9 @@ void MainWindow::setBatteryLevel(bool isCharging, float batteryLevel)
     {
         newIcon.addFile(":/battery-empty.png");
     }
-    m_ui->batteryButton->setIcon(newIcon);
+    m_ui.batteryButton->setIcon(newIcon);
     text.append("%");
-    m_ui->batteryButton->setText(text);
+    m_ui.batteryButton->setText(text);
 }
 
 void MainWindow::setNetworkStrength(float wifiStrength)
@@ -458,7 +471,26 @@ void MainWindow::setNetworkStrength(float wifiStrength)
     {
         newIcon.addFile(":/network-4-bars");
     }
-    m_ui->networkButton->setIcon(newIcon);
+    m_ui.networkButton->setIcon(newIcon);
+}
+
+void MainWindow::setLocalCameraStyle(CameraStyle style)
+{
+    if (style == CameraStyle::window)
+    {
+        m_ui.imageWidgetLayout->removeWidget(m_cameraView);
+        m_localCameraWindow->addCamera(m_cameraView);
+        m_cameraView->useWindowStyle();
+        m_ui.cameraVisibilityButton->setVisible(true);
+    }
+    else
+    {
+        m_localCameraWindow->removeCamera(m_cameraView);
+        m_ui.imageWidgetLayout->addWidget(m_cameraView);
+        m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        m_cameraView->useWidgetStyle();
+        m_ui.cameraVisibilityButton->setVisible(false);
+    }
 }
 
 void MainWindow::setupButtons()
@@ -466,49 +498,70 @@ void MainWindow::setupButtons()
     QIcon phoneIcon;
     phoneIcon.addFile(QStringLiteral(":/phone-call-start.png"), QSize(), QIcon::Normal, QIcon::Off);
     phoneIcon.addFile(QStringLiteral(":/phone-call-end.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui->hangUpButton->setIcon(phoneIcon);
-    m_ui->hangUpButton->setText("");
+    m_ui.hangUpButton->setIcon(phoneIcon);
+    m_ui.hangUpButton->setText("");
 
-    m_ui->configButton->setIcon(QIcon(":/settings-gear.png"));
-    m_ui->configButton->setText("");
+    m_ui.configButton->setIcon(QIcon(":/settings-gear.png"));
+    m_ui.configButton->setText("");
 
     QIcon cropFaceIcon;
     cropFaceIcon.addFile(QStringLiteral(":/frame-person-disable.png"), QSize(), QIcon::Normal, QIcon::Off);
     cropFaceIcon.addFile(QStringLiteral(":/frame-person.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui->cropFaceButton->setIcon(cropFaceIcon);
-    m_ui->cropFaceButton->setText("");
+    m_ui.cropFaceButton->setIcon(cropFaceIcon);
+    m_ui.cropFaceButton->setText("");
+
+    QIcon cameraVisibilityIcon;
+    cameraVisibilityIcon.addFile(QStringLiteral(":/hide-camera.png"), QSize(), QIcon::Normal, QIcon::Off);
+    cameraVisibilityIcon.addFile(QStringLiteral(":/show-camera.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui.cameraVisibilityButton->setIcon(cameraVisibilityIcon);
+    m_ui.cameraVisibilityButton->setText("");
+    m_ui.cameraVisibilityButton->setVisible(false);
+
+    QIcon cropFaceIcon;
+    cropFaceIcon.addFile(QStringLiteral(":/frame-person-disable.png"), QSize(), QIcon::Normal, QIcon::Off);
+    cropFaceIcon.addFile(QStringLiteral(":/frame-person.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui.cropFaceButton->setIcon(cropFaceIcon);
+    m_ui.cropFaceButton->setText("");
 
     QIcon cameraIcon;
     cameraIcon.addFile(QStringLiteral(":/video-camera-on.png"), QSize(), QIcon::Normal, QIcon::Off);
     cameraIcon.addFile(QStringLiteral(":/video-camera-off.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui->cameraButton->setIcon(cameraIcon);
-    m_ui->cameraButton->setText("");
+    m_ui.cameraButton->setIcon(cameraIcon);
+    m_ui.cameraButton->setText("");
 
 
     QIcon micIcon;
     micIcon.addFile(QStringLiteral(":/mic-on.png"), QSize(), QIcon::Normal, QIcon::Off);
     micIcon.addFile(QStringLiteral(":/mic-off.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui->microphoneButton->setIcon(micIcon);
-    m_ui->microphoneButton->setText("");
+    m_ui.microphoneButton->setIcon(micIcon);
+    m_ui.microphoneButton->setText("");
 
     QIcon speakerIcon;
     speakerIcon.addFile(QStringLiteral(":/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
     speakerIcon.addFile(QStringLiteral(":/volume-mute.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui->speakerButton->setIcon(speakerIcon);
-    m_ui->speakerButton->setText("");
+    m_ui.speakerButton->setIcon(speakerIcon);
+    m_ui.speakerButton->setText("");
 
-    m_ui->batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_ui->batteryButton->setIcon(QIcon(":/battery-empty.png"));
-    m_ui->batteryButton->setText("0%");
+    m_ui.batteryButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui.batteryButton->setIcon(QIcon(":/battery-empty.png"));
+    m_ui.batteryButton->setText("0%");
 
-    m_ui->networkButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    m_ui->networkButton->setIcon(QIcon(":/network-0-bars"));
-    m_ui->networkButton->setText("");
+    m_ui.networkButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_ui.networkButton->setIcon(QIcon(":/network-0-bars"));
+    m_ui.networkButton->setText("");
+}
+
+QRect MainWindow::getCameraSpace()
+{
+    int taskbarHeight = this->frameGeometry().height() - this->geometry().height();
+    QRect camRect = m_ui.imageWidget->geometry();
+    camRect.moveTo(camRect.x() + this->pos().x(), camRect.y() + this->pos().y() + taskbarHeight);
+    return camRect;
 }
 
 void MainWindow::_onHangUpButtonClicked()
 {
-    if (m_ui->hangUpButton->isChecked())
+    if (m_ui.hangUpButton->isChecked())
     {
         std_msgs::Empty msg;
         m_callAllPublisher.publish(msg);
@@ -524,12 +577,25 @@ void MainWindow::endCall()
     std_msgs::String msg;
     msg.data = "stop";
     m_manageSessionPublisher.publish(msg);
-    m_ui->hangUpButton->setEnabled(false);
+    m_ui.hangUpButton->setEnabled(false);
 }
 
 void MainWindow::_onConfigButtonClicked()
 {
     m_configDialog->exec();
+}
+
+void MainWindow::_onCameraVisibilityButtonClicked()
+{
+    m_localCameraWindow->setVisible(!m_ui.cameraVisibilityButton->isChecked());
+    if (m_ui.cameraVisibilityButton->isChecked())
+    {
+        m_configDialog->setOpacitySliderValue(0);
+    }
+    else
+    {
+        m_configDialog->setOpacitySliderValue(100);
+    }
 }
 
 void MainWindow::_onBatteryButtonClicked()
@@ -547,7 +613,7 @@ void MainWindow::_onNetworkButtonClicked()
 void MainWindow::_onCropFaceButtonClicked()
 {
     std_msgs::Bool msg;
-    if (m_ui->cropFaceButton->isChecked())
+    if (m_ui.cropFaceButton->isChecked())
     {
         msg.data = false;
     }
@@ -561,7 +627,7 @@ void MainWindow::_onCropFaceButtonClicked()
 void MainWindow::_onMicrophoneButtonClicked()
 {
     std_msgs::Float32 msg;
-    if (m_ui->microphoneButton->isChecked())
+    if (m_ui.microphoneButton->isChecked())
     {
         msg.data = 0;
         m_configDialog->setMicVolumeSliderValue(0);
@@ -577,14 +643,19 @@ void MainWindow::_onMicrophoneButtonClicked()
 void MainWindow::_onCameraButtonClicked()
 {
     std_msgs::Bool msg;
-    msg.data = !m_ui->cameraButton->isChecked();
+    msg.data = !m_ui.cameraButton->isChecked();
+    m_localCameraWindow->setVisible(
+        !m_ui.cameraButton->isChecked() && !m_ui.cameraVisibilityButton->isChecked() &&
+        m_cameraView->getCurrentStyle() == CameraStyle::window);
+    m_ui.cameraVisibilityButton->setVisible(
+        !m_ui.cameraButton->isChecked() && m_cameraView->getCurrentStyle() == CameraStyle::window);
     m_enableCameraPublisher.publish(msg);
 }
 
 void MainWindow::_onSpeakerButtonClicked()
 {
     std_msgs::Float32 msg;
-    if (m_ui->speakerButton->isChecked())
+    if (m_ui.speakerButton->isChecked())
     {
         msg.data = 0;
         m_configDialog->setVolumeSliderValue(0);
@@ -602,15 +673,34 @@ void MainWindow::onMicVolumeSliderValueChanged()
     float value = m_configDialog->getMicVolumeSliderValue();
     if (value == 0)
     {
-        m_ui->microphoneButton->setChecked(true);
+        m_ui.microphoneButton->setChecked(true);
     }
     else
     {
-        m_ui->microphoneButton->setChecked(false);
+        m_ui.microphoneButton->setChecked(false);
     }
     std_msgs::Float32 msg;
     msg.data = value / 100;
     m_micVolumePublisher.publish(msg);
+}
+
+void MainWindow::onOpacitySliderValueChanged()
+{
+    int value = m_configDialog->getOpacitySliderValue();
+    m_localCameraWindow->setWindowOpacity(value / 100.0);
+    if (value == 0)
+    {
+        m_ui.cameraVisibilityButton->setChecked(true);
+    }
+    else
+    {
+        m_ui.cameraVisibilityButton->setChecked(false);
+
+        if (!m_localCameraWindow->isVisible() && !m_ui.cameraButton->isChecked())
+        {
+            m_localCameraWindow->setVisible(true);
+        }
+    }
 }
 
 void MainWindow::onVolumeSliderValueChanged()
@@ -618,13 +708,25 @@ void MainWindow::onVolumeSliderValueChanged()
     float value = m_configDialog->getVolumeSliderValue();
     if (value == 0)
     {
-        m_ui->speakerButton->setChecked(true);
+        m_ui.speakerButton->setChecked(true);
     }
     else
     {
-        m_ui->speakerButton->setChecked(false);
+        m_ui.speakerButton->setChecked(false);
     }
     std_msgs::Float32 msg;
     msg.data = value / 100;
     m_volumePublisher.publish(msg);
+}
+
+void MainWindow::moveEvent(QMoveEvent* event)
+{
+    m_localCameraWindow->followMainWindow(event->pos() - event->oldPos());
+    QMainWindow::moveEvent(event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    m_localCameraWindow->adjustPositionFromBottomLeft(event->oldSize(), event->size());
+    QMainWindow::resizeEvent(event);
 }

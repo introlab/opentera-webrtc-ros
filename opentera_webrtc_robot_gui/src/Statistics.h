@@ -7,24 +7,20 @@
 #include <QLineSeries>
 #include <chrono>
 
+#include "ui_Statistics.h"
+
 using namespace QtCharts;
 
 
-QT_BEGIN_NAMESPACE
-    namespace Ui
-    {
-        class Statistics;
-    }
-QT_END_NAMESPACE
-
+class MainWindow;
 
 class Statistics : public QDialog
 {
     Q_OBJECT
 
 public:
-    Statistics(QWidget* parent = nullptr);
-    ~Statistics();
+    Statistics(MainWindow* parent = nullptr);
+    ~Statistics() = default;
 
     void updateCharts(
         float battery_voltage,
@@ -43,7 +39,7 @@ public slots:
     void setCurrentPage(QString page);
 
 protected:
-    Ui::Statistics* m_ui;
+    Ui::Statistics m_ui;
 
 private:
     QDateTime startTime;
@@ -79,6 +75,8 @@ private:
     QChartView* m_firstChartView;
     QChartView* m_secondChartView;
     QChartView* m_thirdChartView;
+
+    QTabWidget* m_graphTab;
 
     void setupMenu();
     void setupCharts();
