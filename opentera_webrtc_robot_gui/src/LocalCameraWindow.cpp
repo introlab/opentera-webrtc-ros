@@ -13,6 +13,7 @@ LocalCameraWindow::LocalCameraWindow(MainWindow* parent) : QDialog{parent}, m_pa
     setLayout(layout);
     setVisible(false);
     resize(m_parent->m_deviceProperties.defaultLocalCameraWidth, m_parent->m_deviceProperties.defaultLocalCameraHeight);
+    setMinimumSize(50, 50);
 }
 
 void LocalCameraWindow::addCamera(QWidget* cameraView)

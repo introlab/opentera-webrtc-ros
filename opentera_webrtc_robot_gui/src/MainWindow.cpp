@@ -211,6 +211,7 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
         ROSCameraView* camera = new ROSCameraView(name, nullptr);
         camera->setImage(image);
         m_ui.imageWidgetLayout->addWidget(camera);
+        std::cout << "cam size " << camera->size().height() << std::endl;
         m_remoteViews[id] = camera;
     }
     else
@@ -516,12 +517,6 @@ void MainWindow::setupButtons()
     m_ui.cameraVisibilityButton->setIcon(cameraVisibilityIcon);
     m_ui.cameraVisibilityButton->setText("");
     m_ui.cameraVisibilityButton->setVisible(false);
-
-    QIcon cropFaceIcon;
-    cropFaceIcon.addFile(QStringLiteral(":/frame-person-disable.png"), QSize(), QIcon::Normal, QIcon::Off);
-    cropFaceIcon.addFile(QStringLiteral(":/frame-person.png"), QSize(), QIcon::Normal, QIcon::On);
-    m_ui.cropFaceButton->setIcon(cropFaceIcon);
-    m_ui.cropFaceButton->setText("");
 
     QIcon cameraIcon;
     cameraIcon.addFile(QStringLiteral(":/video-camera-on.png"), QSize(), QIcon::Normal, QIcon::Off);
