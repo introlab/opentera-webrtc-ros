@@ -1,58 +1,73 @@
 #include "Statistics.h"
 #include "MainWindow.h"
 
-#include "ui_Statistics.h"
-
-Statistics::Statistics(QWidget* parent) : m_ui(new Ui::Statistics())
+Statistics::Statistics(MainWindow* parent)
 {
-    m_ui->setupUi(this);
+    m_ui.setupUi(this);
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint);
     setupMenu();
     setupCharts();
     startTime = QDateTime::currentDateTime();
-}
 
-Statistics::~Statistics() {}
+    m_graphTab = new QTabWidget(this);
+    if (parent->m_deviceProperties.diagonalLength <= 10)
+    {
+        resize(parent->size().width() * 0.9, parent->size().height() * 0.9);
+        QGridLayout* layout = dynamic_cast<QGridLayout*>(m_ui.graphFrame->layout());
+        layout->removeWidget(m_ui.firstGroupBox);
+        layout->removeWidget(m_ui.secondGroupBox);
+        layout->removeWidget(m_ui.thirdGroupBox);
+        m_ui.graphHorizontalLayout->removeWidget(m_ui.graphFrame);
+
+        m_graphTab->tabBar()->setDocumentMode(true);
+        m_graphTab->tabBar()->setExpanding(true);
+        m_graphTab->addTab(m_ui.firstGroupBox, m_ui.firstGroupBox->title());
+        m_graphTab->addTab(m_ui.secondGroupBox, m_ui.secondGroupBox->title());
+        m_graphTab->addTab(m_ui.thirdGroupBox, m_ui.thirdGroupBox->title());
+        m_graphTab->setStyleSheet("QTabBar::tab { height: 50px; width: 160px; }");
+        m_ui.graphHorizontalLayout->addWidget(m_graphTab);
+    }
+}
 
 void Statistics::setupMenu()
 {
-    m_ui->menuBarFrame->setVisible(false);
+    m_ui.menuBarFrame->setVisible(false);
 
-    m_ui->menuButton->setIcon(QIcon(":/three-horizontal-lines.png"));
+    m_ui.menuButton->setIcon(QIcon(":/three-horizontal-lines.png"));
     connect(
-        m_ui->menuButton,
+        m_ui.menuButton,
         &QPushButton::clicked,
         this,
-        [this] { m_ui->menuBarFrame->setVisible(!m_ui->menuBarFrame->isVisible()); });
+        [this] { m_ui.menuBarFrame->setVisible(!m_ui.menuBarFrame->isVisible()); });
 
     QFont titleFont;
     titleFont.setPointSize(15);
     titleFont.setBold(true);
-    m_ui->menuLabel->setFont(titleFont);
+    m_ui.menuLabel->setFont(titleFont);
 
     maxRange = 1800;
-    m_ui->timeFrameComboBox->addItem("Last minute", 60);
-    m_ui->timeFrameComboBox->addItem("Last 5 minutes", 300);
-    m_ui->timeFrameComboBox->addItem("Last 15 minutes", 900);
-    m_ui->timeFrameComboBox->addItem("Last 30 minutes", maxRange);
+    m_ui.timeFrameComboBox->addItem("Last minute", 60);
+    m_ui.timeFrameComboBox->addItem("Last 5 minutes", 300);
+    m_ui.timeFrameComboBox->addItem("Last 15 minutes", 900);
+    m_ui.timeFrameComboBox->addItem("Last 30 minutes", maxRange);
 
-    m_ui->batteryMenuButton->setIcon(QIcon(":/battery-full.png"));
-    m_ui->batteryMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    m_ui->batteryMenuButton->setText("Battery");
-    m_ui->batteryMenuButton->setCheckable(true);
-    connect(m_ui->batteryMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("battery"); });
+    m_ui.batteryMenuButton->setIcon(QIcon(":/battery-full.png"));
+    m_ui.batteryMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    m_ui.batteryMenuButton->setText("Battery");
+    m_ui.batteryMenuButton->setCheckable(true);
+    connect(m_ui.batteryMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("battery"); });
 
-    m_ui->networkMenuButton->setIcon(QIcon(":/network-4-bars.png"));
-    m_ui->networkMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    m_ui->networkMenuButton->setText("Network");
-    m_ui->networkMenuButton->setCheckable(true);
-    connect(m_ui->networkMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("network"); });
+    m_ui.networkMenuButton->setIcon(QIcon(":/network-4-bars.png"));
+    m_ui.networkMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    m_ui.networkMenuButton->setText("Network");
+    m_ui.networkMenuButton->setCheckable(true);
+    connect(m_ui.networkMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("network"); });
 
-    m_ui->systemMenuButton->setIcon(QIcon(":/computer.png"));
-    m_ui->systemMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    m_ui->systemMenuButton->setText("System");
-    m_ui->systemMenuButton->setCheckable(true);
-    connect(m_ui->systemMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("system"); });
+    m_ui.systemMenuButton->setIcon(QIcon(":/computer.png"));
+    m_ui.systemMenuButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    m_ui.systemMenuButton->setText("System");
+    m_ui.systemMenuButton->setCheckable(true);
+    connect(m_ui.systemMenuButton, &QPushButton::clicked, this, [this] { setCurrentPage("system"); });
 }
 
 void Statistics::setupCharts()
@@ -60,15 +75,15 @@ void Statistics::setupCharts()
     QFont infoFont;
     infoFont.setPointSize(15);
     infoFont.setBold(true);
-    m_ui->firstInfoLabel->setFont(infoFont);
-    m_ui->secondInfoLabel->setFont(infoFont);
+    m_ui.firstInfoLabel->setFont(infoFont);
+    m_ui.secondInfoLabel->setFont(infoFont);
 
     QFont groupBoxFont;
     groupBoxFont.setPointSize(12);
     groupBoxFont.setBold(true);
-    m_ui->firstGroupBox->setFont(groupBoxFont);
-    m_ui->secondGroupBox->setFont(groupBoxFont);
-    m_ui->thirdGroupBox->setFont(groupBoxFont);
+    m_ui.firstGroupBox->setFont(groupBoxFont);
+    m_ui.secondGroupBox->setFont(groupBoxFont);
+    m_ui.thirdGroupBox->setFont(groupBoxFont);
 
     m_batteryLevelLineSeries = new QLineSeries();
     m_batteryLevelChart = new QChart();
@@ -110,9 +125,9 @@ void Statistics::setupCharts()
     m_firstChartView = new QChartView(m_batteryLevelChart);
     m_secondChartView = new QChartView(m_batteryVoltageChart);
     m_thirdChartView = new QChartView(m_batteryCurrentChart);
-    m_ui->firstGroupBox->layout()->addWidget(m_firstChartView);
-    m_ui->secondGroupBox->layout()->addWidget(m_secondChartView);
-    m_ui->thirdGroupBox->layout()->addWidget(m_thirdChartView);
+    m_ui.firstGroupBox->layout()->addWidget(m_firstChartView);
+    m_ui.secondGroupBox->layout()->addWidget(m_secondChartView);
+    m_ui.thirdGroupBox->layout()->addWidget(m_thirdChartView);
 }
 
 void Statistics::setDefaultChart(QLineSeries* series, QChart* chart, int yAxisMin, int yAxisMax)
@@ -173,8 +188,8 @@ void Statistics::updateCharts(
 
     QString networkName = wifi_network;
     networkName.replace(QString("\n"), QString(""));
-    m_ui->firstInfoLabel->setText(networkName);
-    m_ui->secondInfoLabel->setText(local_ip);
+    m_ui.firstInfoLabel->setText(networkName);
+    m_ui.secondInfoLabel->setText(local_ip);
 
     m_networkStrengthLineSeries->append(now.toMSecsSinceEpoch(), wifi_strength);
 
@@ -192,7 +207,7 @@ void Statistics::updateCharts(
     m_memUsageLineSeries->append(now.toMSecsSinceEpoch(), mem_usage);
     m_diskUsageLineSeries->append(now.toMSecsSinceEpoch(), disk_usage);
 
-    int range = m_ui->timeFrameComboBox->currentData().toInt();
+    int range = m_ui.timeFrameComboBox->currentData().toInt();
     int elapsedTime = now.toSecsSinceEpoch() - startTime.toSecsSinceEpoch();
     if (elapsedTime < range)
     {
@@ -235,11 +250,11 @@ void Statistics::updateCharts(
 
     // Order is important
     // Setting the format once after setting the max and the min prevents a bug where the axis disappears
-    if (m_ui->timeFrameComboBox->currentData().toInt() == 60 && batteryLevelXAxis->format() != "mm:ss")
+    if (m_ui.timeFrameComboBox->currentData().toInt() == 60 && batteryLevelXAxis->format() != "mm:ss")
     {
         setDateTimeAxisFormat("mm:ss");
     }
-    else if (m_ui->timeFrameComboBox->currentData().toInt() != 60 && batteryLevelXAxis->format() != "h:mm")
+    else if (m_ui.timeFrameComboBox->currentData().toInt() != 60 && batteryLevelXAxis->format() != "h:mm")
     {
         setDateTimeAxisFormat("h:mm");
     }
@@ -262,51 +277,72 @@ void Statistics::setCurrentPage(QString page)
 {
     if (page == "battery")
     {
-        m_ui->menuLabel->setText("Battery");
-        m_ui->batteryMenuButton->setChecked(true);
-        m_ui->networkMenuButton->setChecked(false);
-        m_ui->systemMenuButton->setChecked(false);
+        m_ui.menuLabel->setText("Battery");
+        m_ui.batteryMenuButton->setChecked(true);
+        m_ui.networkMenuButton->setChecked(false);
+        m_ui.systemMenuButton->setChecked(false);
 
-        m_ui->firstGroupBox->setTitle("Charge (%)");
+        m_ui.firstGroupBox->setTitle("Charge (%)");
         m_firstChartView->setChart(m_batteryLevelChart);
-        m_ui->secondGroupBox->setTitle("Voltage (V)");
+        m_ui.secondGroupBox->setTitle("Voltage (V)");
         m_secondChartView->setChart(m_batteryVoltageChart);
-        m_ui->thirdGroupBox->setTitle("Current (A)");
+        m_ui.thirdGroupBox->setTitle("Current (A)");
         m_thirdChartView->setChart(m_batteryCurrentChart);
 
-        m_ui->infoFrame->setVisible(false);
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "Charge");
+            m_graphTab->setTabText(1, "Voltage");
+            m_graphTab->setTabText(2, "Current");
+        }
+
+        m_ui.infoFrame->setVisible(false);
     }
     else if (page == "network")
     {
-        m_ui->menuLabel->setText("Network");
-        m_ui->batteryMenuButton->setChecked(false);
-        m_ui->networkMenuButton->setChecked(true);
-        m_ui->systemMenuButton->setChecked(false);
+        m_ui.menuLabel->setText("Network");
+        m_ui.batteryMenuButton->setChecked(false);
+        m_ui.networkMenuButton->setChecked(true);
+        m_ui.systemMenuButton->setChecked(false);
 
-        m_ui->firstGroupBox->setTitle("Wifi strength (%)");
+        m_ui.firstGroupBox->setTitle("Wifi strength (%)");
         m_firstChartView->setChart(m_networkStrengthChart);
-        m_ui->secondGroupBox->setTitle("Download speed (Mbps)");
+        m_ui.secondGroupBox->setTitle("Download speed (Mbps)");
         m_secondChartView->setChart(m_downloadSpeedChart);
-        m_ui->thirdGroupBox->setTitle("Upload speed (Mbps)");
+        m_ui.thirdGroupBox->setTitle("Upload speed (Mbps)");
         m_thirdChartView->setChart(m_uploadSpeedChart);
 
-        m_ui->infoFrame->setVisible(true);
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "Wifi strength");
+            m_graphTab->setTabText(1, "Download speed");
+            m_graphTab->setTabText(2, "Upload speed");
+        }
+
+        m_ui.infoFrame->setVisible(true);
     }
     else if (page == "system")
     {
-        m_ui->menuLabel->setText("System");
-        m_ui->batteryMenuButton->setChecked(false);
-        m_ui->networkMenuButton->setChecked(false);
-        m_ui->systemMenuButton->setChecked(true);
+        m_ui.menuLabel->setText("System");
+        m_ui.batteryMenuButton->setChecked(false);
+        m_ui.networkMenuButton->setChecked(false);
+        m_ui.systemMenuButton->setChecked(true);
 
-        m_ui->firstGroupBox->setTitle("CPU (%)");
+        m_ui.firstGroupBox->setTitle("CPU (%)");
         m_firstChartView->setChart(m_cpuUsageChart);
-        m_ui->secondGroupBox->setTitle("Memory (%)");
+        m_ui.secondGroupBox->setTitle("Memory (%)");
         m_secondChartView->setChart(m_memUsageChart);
-        m_ui->thirdGroupBox->setTitle("Storage (%)");
+        m_ui.thirdGroupBox->setTitle("Storage (%)");
         m_thirdChartView->setChart(m_diskUsageChart);
 
-        m_ui->infoFrame->setVisible(false);
+        if (m_graphTab->count() > 0)
+        {
+            m_graphTab->setTabText(0, "CPU");
+            m_graphTab->setTabText(1, "Memory");
+            m_graphTab->setTabText(2, "Storage");
+        }
+
+        m_ui.infoFrame->setVisible(false);
     }
 }
 
@@ -316,7 +352,7 @@ float Statistics::getMaxYAxisData(QLineSeries* series, QDateTime now)
     QList<QPointF> list = series->points();
     float max = 0;
 
-    int range = m_ui->timeFrameComboBox->currentData().toInt();
+    int range = m_ui.timeFrameComboBox->currentData().toInt();
     QDateTime minTime = now.addSecs(-1 * range);
 
     for (QPointF i : list)

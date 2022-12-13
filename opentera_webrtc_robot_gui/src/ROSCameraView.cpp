@@ -4,10 +4,7 @@
 #include <QColor>
 #include <QDebug>
 
-GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget(parent)
-{
-    // resize(640,480);
-}
+GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget{parent} {}
 
 void GLCameraWidget::setImage(const QImage& image)
 {
@@ -49,10 +46,10 @@ void GLCameraWidget::paintEvent(QPaintEvent* event)
 }
 
 ROSCameraView::ROSCameraView(QWidget* parent)
-    : QWidget(parent),
-      m_layout(nullptr),
-      m_label(nullptr),
-      m_cameraWidget(nullptr)
+    : QWidget{parent},
+      m_layout{nullptr},
+      m_label{nullptr},
+      m_cameraWidget{nullptr}
 {
     m_layout = new QVBoxLayout(this);
 
@@ -61,12 +58,16 @@ ROSCameraView::ROSCameraView(QWidget* parent)
     m_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_label->setMaximumHeight(25);
     m_layout->addWidget(m_label);
+
     // CameraWidget
     m_cameraWidget = new GLCameraWidget(this);
     m_layout->addWidget(m_cameraWidget);
+
+    m_currentStyle = CameraStyle::widget;
+    m_widgetStyleLayout = m_layout;
 }
 
-ROSCameraView::ROSCameraView(const QString& label, QWidget* parent) : ROSCameraView(parent)
+ROSCameraView::ROSCameraView(const QString& label, QWidget* parent) : ROSCameraView{parent}
 {
     m_label->setText(label);
 }
@@ -81,4 +82,31 @@ void ROSCameraView::setImage(const QImage& image)
 {
     if (m_cameraWidget)
         m_cameraWidget->setImage(image);
+}
+
+void ROSCameraView::useWindowStyle()
+{
+    if (m_currentStyle == CameraStyle::widget)
+    {
+        m_layout->setMargin(0);
+        m_layout->setSpacing(0);
+        m_layout->setContentsMargins(0, 0, 0, 0);
+        m_layout->removeWidget(m_label);
+        m_currentStyle = CameraStyle::window;
+    }
+}
+
+void ROSCameraView::useWidgetStyle()
+{
+    if (m_currentStyle == CameraStyle::window)
+    {
+        m_layout = m_widgetStyleLayout;
+        m_currentStyle = CameraStyle::widget;
+        m_layout->insertWidget(0, m_label);
+    }
+}
+
+CameraStyle ROSCameraView::getCurrentStyle()
+{
+    return m_currentStyle;
 }
