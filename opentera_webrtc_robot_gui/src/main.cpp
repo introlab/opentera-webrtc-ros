@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     spinner.stop();
 
     w.endCall();
-    
+
     // Fixes a bug where the program would stay open because of the camera window
     w.closeCameraWindow();
 }

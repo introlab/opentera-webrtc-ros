@@ -211,7 +211,6 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
         ROSCameraView* camera = new ROSCameraView(name, nullptr);
         camera->setImage(image);
         m_ui.imageWidgetLayout->addWidget(camera);
-        std::cout << "cam size " << camera->size().height() << std::endl;
         m_remoteViews[id] = camera;
     }
     else
