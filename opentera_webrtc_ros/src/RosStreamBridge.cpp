@@ -150,6 +150,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
                         std::forward<decltype(PH5)>(PH5));
                 });
         }
+
         if (m_canReceiveVideoStream)
         {
             m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
