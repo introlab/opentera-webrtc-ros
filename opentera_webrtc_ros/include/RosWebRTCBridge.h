@@ -25,7 +25,7 @@
 
 namespace opentera
 {
-    
+
     /**
      * @brief Interface a ROS node to bridge WebRTC to ROS topics
      */
@@ -231,7 +231,6 @@ namespace opentera
                     m_hasMultipleDevices = true;
                 }
             }
-
             onJoinSessionEvents(msg->join_session_events);
         }
 
@@ -443,8 +442,7 @@ namespace opentera
         for (const auto& client : roomClients)
         {
             log += "\n\tid: " + client.id() + ", name: " + client.name() +
-                   ", isConnected: " + (client.isConnected() ? "true" : "false") + client.data()->get_string();
-
+                   ", isConnected: " + (client.isConnected() ? "true" : "false");
             if (!client.isConnected())
             {
                 clientNotConnected = true;
