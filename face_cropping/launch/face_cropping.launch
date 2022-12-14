@@ -47,7 +47,6 @@
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 
-        <param name="name" type="string" value="$(arg name)"/>
         <param name="refresh_rate" type="double" value="$(arg refresh_rate)"/>
         <param name="width" type="int" value="$(arg width)"/>
         <param name="height" type="int" value="$(arg height)"/>
