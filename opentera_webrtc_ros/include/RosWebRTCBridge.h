@@ -429,22 +429,19 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onRoomClientsChanged(const std::vector<RoomClient>& roomClients)
     {
-        std::string log = nodeName + " --> Signaling on room clients changed:";
-        bool clientNotConnected = false;
+        ROS_INFO_STREAM(nodeName << " --> Signaling on room clients changed:\n");
+        bool allClientsConnected = true;
         for (const auto& client : roomClients)
         {
-            log += "\n\tid: " + client.id() + ", name: " + client.name() +
-                   ", isConnected: " + (client.isConnected() ? "true" : "false");
-            if (!client.isConnected())
-            {
-                clientNotConnected = true;
-            }
+            ROS_INFO_STREAM(
+                "\tid: " << client.id() << ", name: " << client.name() << ", isConnected: " << std::boolalpha
+                         << client.isConnected() << "\n");
+            allClientsConnected &= client.isConnected();
         }
-        if (clientNotConnected)
+        if (!allClientsConnected)
         {
             m_signalingClient->callAll();
         }
-        ROS_INFO_STREAM(log);
     }
 
     /**

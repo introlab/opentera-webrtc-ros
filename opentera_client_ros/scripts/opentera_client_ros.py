@@ -97,12 +97,12 @@ class OpenTeraROSClient:
         async with aiohttp.ClientSession() as self.__client:
             params = {'token': self.__token}
             login_info = await self._fetch(self.__client, self.__base_url + OpenTeraROSClient.login_api_endpoint, params)
-            print(login_info)
+            rospy.loginfo(login_info)
             if 'websocket_url' in login_info:
                 websocket_url = login_info['websocket_url']
 
                 ws = await self.__client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
-                print(ws)
+                rospy.loginfo(ws)
 
                 # Create alive publishing task
                 status_task = self.__eventLoop.create_task(
@@ -114,10 +114,10 @@ class OpenTeraROSClient:
                     if msg.type == aiohttp.WSMsgType.text:
                         await self._parse_message(self.__client, msg.json())
                     if msg.type == aiohttp.WSMsgType.closed:
-                        print('websocket closed')
+                        rospy.loginfo('websocket closed')
                         break
                     if msg.type == aiohttp.WSMsgType.error:
-                        print('websocket error')
+                        rospy.loginfo('websocket error')
                         break
 
                 status_task.cancel()
@@ -138,7 +138,7 @@ class OpenTeraROSClient:
 
             self.__eventLoop.run_until_complete(main_task)
         except asyncio.CancelledError as e:
-            print('Main Task cancelled', e)
+            rospy.logerr('Main Task cancelled', e)
             # Exit ROS loop
             rospy.signal_shutdown('SIGINT/SIGTERM Detected')
 
@@ -151,10 +151,10 @@ class OpenTeraROSClient:
 
                 async with self.__client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
                     if response.status != 200:
-                        print('Send status failed')
+                        rospy.logwarn('Send status failed')
                         break
             except asyncio.CancelledError as e:
-                print('_opentera_send_device_status', e)
+                rospy.logerr('_opentera_send_device_status', e)
                 # Exit loop
                 break
 
@@ -165,11 +165,11 @@ class OpenTeraROSClient:
                 async with self.__client.post(self.__base_url + OpenTeraROSClient.stop_session_endpoint, 
                     params=params, json=self.__stop_session_json, verify_ssl=False) as response:
                         if response.status != 200:
-                            print('Send stop session failed')
+                            rospy.logwarn('Send stop session failed')
             except asyncio.CancelledError as e:
-                    print('_opentera_send_manage_session', e)
+                    rospy.logerr('_opentera_send_manage_session', e)
         else:
-            print('Action not implemented')
+            raise NotImplementedError(f"Action {action} not implemented")
 
     async def _parse_message(self, client: aiohttp.ClientSession, msg_dict: dict):
         try:
@@ -272,7 +272,7 @@ class OpenTeraROSClient:
                 self.__event_publisher.publish(opentera_events)
 
         except ParseError as e:
-            print(e)
+            rospy.logerr(e)
 
         return
 
