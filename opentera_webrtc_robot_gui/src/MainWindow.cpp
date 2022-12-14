@@ -37,6 +37,7 @@ MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
     connect(this, &MainWindow::newRobotStatus, this, &MainWindow::_onRobotStatus, Qt::QueuedConnection);
 
     // Buttons
+    connect(m_ui.hangUpButton, &QPushButton::clicked, this, &MainWindow::_onHangUpButtonClicked);
     connect(m_ui.configButton, &QPushButton::clicked, this, &MainWindow::_onConfigButtonClicked);
     connect(m_ui.cameraVisibilityButton, &QPushButton::clicked, this, &MainWindow::_onCameraVisibilityButtonClicked);
     connect(m_ui.batteryButton, &QToolButton::clicked, this, &MainWindow::_onBatteryButtonClicked);
@@ -82,6 +83,10 @@ void MainWindow::setupROS()
     m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
 
     m_volumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("volume", 1);
+
+    m_callAllPublisher = m_nodeHandle.advertise<std_msgs::Empty>("call_all", 1);
+
+    m_manageSessionPublisher = m_nodeHandle.advertise<std_msgs::String>("manage_session", 1);
 }
 
 void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -220,6 +225,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
     switch (status)
     {
         case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_CONNECTED:
+            m_ui.hangUpButton->setChecked(true);
             break;
 
         case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_DISCONNECTED:
@@ -323,6 +329,7 @@ void MainWindow::_onJoinSessionEvent(
     const QString& session_parameters,
     const QString& service_uuid)
 {
+    m_ui.hangUpButton->setEnabled(true);
 }
 
 void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString& service_uuid)
@@ -340,6 +347,8 @@ void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString&
 
     // Put back full size self camera
     m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+    m_ui.hangUpButton->setEnabled(false);
+    m_ui.hangUpButton->setChecked(false);
 }
 
 void MainWindow::_onLeaveSessionEvent(
@@ -349,6 +358,8 @@ void MainWindow::_onLeaveSessionEvent(
     QList<QString> leaving_users,
     QList<QString> leaving_devices)
 {
+    m_ui.hangUpButton->setEnabled(false);
+    m_ui.hangUpButton->setChecked(false);
 }
 
 void MainWindow::_onRobotStatus(
@@ -484,7 +495,10 @@ void MainWindow::setLocalCameraStyle(CameraStyle style)
 
 void MainWindow::setupButtons()
 {
-    m_ui.hangUpButton->setIcon(QIcon(":/phone-call-end.png"));
+    QIcon phoneIcon;
+    phoneIcon.addFile(QStringLiteral(":/phone-call-start.png"), QSize(), QIcon::Normal, QIcon::Off);
+    phoneIcon.addFile(QStringLiteral(":/phone-call-end.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_ui.hangUpButton->setIcon(phoneIcon);
     m_ui.hangUpButton->setText("");
 
     m_ui.configButton->setIcon(QIcon(":/settings-gear.png"));
@@ -537,6 +551,27 @@ QRect MainWindow::getCameraSpace()
     QRect camRect = m_ui.imageWidget->geometry();
     camRect.moveTo(camRect.x() + this->pos().x(), camRect.y() + this->pos().y() + taskbarHeight);
     return camRect;
+}
+
+void MainWindow::_onHangUpButtonClicked()
+{
+    if (m_ui.hangUpButton->isChecked())
+    {
+        std_msgs::Empty msg;
+        m_callAllPublisher.publish(msg);
+    }
+    else
+    {
+        endCall();
+    }
+}
+
+void MainWindow::endCall()
+{
+    std_msgs::String msg;
+    msg.data = "stop";
+    m_manageSessionPublisher.publish(msg);
+    m_ui.hangUpButton->setEnabled(false);
 }
 
 void MainWindow::_onConfigButtonClicked()

@@ -4,6 +4,7 @@
 #include <opencv2/core.hpp>
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/Float32.h>
 #include <RosVideoSource.h>
 #include <RosAudioSource.h>
@@ -31,6 +32,7 @@ namespace opentera
         ros::Publisher m_audioPublisher;
         ros::Publisher m_mixedAudioPublisher;
 
+        ros::Subscriber m_callAllSubscriber;
         ros::Subscriber m_micVolumeSubscriber;
         ros::Subscriber m_enableCameraSubscriber;
         ros::Subscriber m_volumeSubscriber;
@@ -75,6 +77,7 @@ namespace opentera
         void audioCallback(const audio_utils::AudioFrameConstPtr& msg);
         void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
+        void callAllCallBack(const std_msgs::Empty& msg);
         void micVolumeCallback(const std_msgs::Float32& msg);
         void enableCameraCallback(const std_msgs::Bool& msg);
         void volumeCallback(const std_msgs::Float32& msg);

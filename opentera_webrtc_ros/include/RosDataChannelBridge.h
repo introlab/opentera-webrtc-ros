@@ -4,6 +4,7 @@
 #include <OpenteraWebrtcNativeClient/DataChannelClient.h>
 #include <ros/subscriber.h>
 #include <ros/publisher.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/String.h>
 #include <RosWebRTCBridge.h>
 
@@ -17,6 +18,7 @@ namespace opentera
     {
         ros::Subscriber m_dataSubscriber;
         ros::Publisher m_dataPublisher;
+        ros::Subscriber m_callAllSubscriber;
 
         void initSignalingClient(const opentera::SignalingServerConfiguration& signalingServerConfiguration);
         void initAdvertiseTopics();
@@ -31,6 +33,7 @@ namespace opentera
         void onSignalingConnectionError(const std::string& msg) override;
 
         void onRosData(const std_msgs::StringConstPtr& msg);
+        void callAllCallBack(const std_msgs::Empty& msg);
 
     public:
         RosDataChannelBridge(const ros::NodeHandle& nh);

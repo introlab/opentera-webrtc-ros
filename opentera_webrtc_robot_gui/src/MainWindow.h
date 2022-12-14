@@ -18,7 +18,9 @@
 #include <QMap>
 #include <QToolButton>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/String.h>
 
 
 struct DeviceProperties
@@ -72,6 +74,7 @@ public:
     QRect getCameraSpace();
     void onMicVolumeSliderValueChanged();
     void onVolumeSliderValueChanged();
+    void endCall();
     void onOpacitySliderValueChanged();
     void closeCameraWindow();
     DeviceProperties m_deviceProperties;
@@ -158,6 +161,7 @@ private slots:
         bool is_camera_on,
         float volume);
 
+    void _onHangUpButtonClicked();
     void _onConfigButtonClicked();
     void _onCameraVisibilityButtonClicked();
     void _onBatteryButtonClicked();
@@ -213,6 +217,8 @@ private:
     ros::Publisher m_micVolumePublisher;
     ros::Publisher m_enableCameraPublisher;
     ros::Publisher m_volumePublisher;
+    ros::Publisher m_callAllPublisher;
+    ros::Publisher m_manageSessionPublisher;
 };
 
 

@@ -38,6 +38,7 @@ The project is licensed with:
 * Gabriel Lauzier (@G-Lauz)
 * Jérémie Bourque (@JeremieBourque1)
 * Philippe Warren (@philippewarren)
+* Ian-Mathieu Joly (@joli-1801)
 
 ## Dependencies / Requirements
 

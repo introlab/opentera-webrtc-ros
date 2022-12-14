@@ -36,12 +36,12 @@ Parameters::Parameters(ros::NodeHandle& nodeHandle)
 
     m_isPeerImage = getParam<bool>("is_peer_image", false);
 
-    std::string name = getParam<std::string>("name", "face_cropping");
     m_haarCascadePath = getParam<std::string>(
         "haar_cascade_path",
-        ros::package::getPath(name) + "/models/haarcascade_frontalface_default.xml");
-    m_lbpCascadePath =
-        getParam<std::string>("lbp_cascade_path", ros::package::getPath(name) + "/models/lbpcascade_frontalface.xml");
+        ros::package::getPath("face_cropping") + "/models/haarcascade_frontalface_default.xml");
+    m_lbpCascadePath = getParam<std::string>(
+        "lbp_cascade_path",
+        ros::package::getPath("face_cropping") + "/models/lbpcascade_frontalface.xml");
 
     m_useLbp = getParam<bool>("use_lbp", false);
 
