@@ -36,7 +36,6 @@ namespace opentera
 
     private:
         ros::Subscriber m_eventSubscriber;
-        bool m_hasMultipleDevices;
 
     protected:
         std::string nodeName;
@@ -224,13 +223,6 @@ namespace opentera
 
         if (!msg->join_session_events.empty())
         {
-            for (auto i = 0; i < msg->join_session_events.size(); i++)
-            {
-                if (msg->join_session_events[i].session_devices.size() > 1)
-                {
-                    m_hasMultipleDevices = true;
-                }
-            }
             onJoinSessionEvents(msg->join_session_events);
         }
 
@@ -448,10 +440,9 @@ namespace opentera
                 clientNotConnected = true;
             }
         }
-        if (clientNotConnected && m_hasMultipleDevices)
+        if (clientNotConnected)
         {
             m_signalingClient->callAll();
-            m_hasMultipleDevices = false;
         }
         ROS_INFO_STREAM(log);
     }

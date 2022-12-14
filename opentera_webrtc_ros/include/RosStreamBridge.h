@@ -15,7 +15,7 @@
 
 namespace opentera
 {
-    
+
     /**
      * @brief A ros node that bridges streams with ROS topics
      *
