@@ -181,6 +181,7 @@ private:
     void moveEvent(QMoveEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
+    bool m_inSession;
 
     // Main View
     Ui::MainWindow m_ui;

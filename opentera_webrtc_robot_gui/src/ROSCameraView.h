@@ -23,6 +23,7 @@ protected:
 private:
     QImage m_image;
     QVBoxLayout* m_layout;
+    QWidget* m_parent;
 };
 
 

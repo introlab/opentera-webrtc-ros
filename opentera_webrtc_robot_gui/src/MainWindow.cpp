@@ -5,7 +5,8 @@
 
 MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
     : QMainWindow{parent},
-      m_deviceProperties{devicePropertiesPath}
+      m_deviceProperties{devicePropertiesPath},
+      m_inSession{false}
 {
     m_ui.setupUi(this);
 
@@ -201,22 +202,25 @@ void MainWindow::_onLocalImage(const QImage& image)
 
 void MainWindow::_onPeerImage(const QString& id, const QString& name, const QImage& image)
 {
-    if (m_remoteViews.empty())
+    if (m_inSession)
     {
-        setLocalCameraStyle(CameraStyle::window);
-    }
+        if (m_remoteViews.empty())
+        {
+            setLocalCameraStyle(CameraStyle::window);
+        }
 
-    if (!m_remoteViews.contains(id))
-    {
-        ROSCameraView* camera = new ROSCameraView(name, nullptr);
-        camera->setImage(image);
-        m_ui.imageWidgetLayout->addWidget(camera);
-        m_remoteViews[id] = camera;
-    }
-    else
-    {
-        m_remoteViews[id]->setImage(image);
-        m_remoteViews[id]->setText(name);
+        if (!m_remoteViews.contains(id))
+        {
+            ROSCameraView* camera = new ROSCameraView(name, nullptr);
+            camera->setImage(image);
+            m_ui.imageWidgetLayout->addWidget(camera);
+            m_remoteViews[id] = camera;
+        }
+        else
+        {
+            m_remoteViews[id]->setImage(image);
+            m_remoteViews[id]->setText(name);
+        }
     }
 }
 
@@ -330,6 +334,7 @@ void MainWindow::_onJoinSessionEvent(
     const QString& service_uuid)
 {
     m_ui.hangUpButton->setEnabled(true);
+    m_inSession = true;
 }
 
 void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString& service_uuid)
@@ -337,6 +342,7 @@ void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString&
     qDebug() << "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)";
     ROS_DEBUG("_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)");
 
+    m_inSession = false;
     // Remove all remote views
     foreach (QString key, m_remoteViews.keys())
     {
@@ -476,20 +482,23 @@ void MainWindow::setNetworkStrength(float wifiStrength)
 
 void MainWindow::setLocalCameraStyle(CameraStyle style)
 {
-    if (style == CameraStyle::window)
+    if (style != m_cameraView->getCurrentStyle())
     {
-        m_ui.imageWidgetLayout->removeWidget(m_cameraView);
-        m_localCameraWindow->addCamera(m_cameraView);
-        m_cameraView->useWindowStyle();
-        m_ui.cameraVisibilityButton->setVisible(true);
-    }
-    else
-    {
-        m_localCameraWindow->removeCamera(m_cameraView);
-        m_ui.imageWidgetLayout->addWidget(m_cameraView);
-        m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-        m_cameraView->useWidgetStyle();
-        m_ui.cameraVisibilityButton->setVisible(false);
+        if (style == CameraStyle::window)
+        {
+            m_ui.imageWidgetLayout->removeWidget(m_cameraView);
+            m_localCameraWindow->addCamera(m_cameraView);
+            m_cameraView->useWindowStyle();
+            m_ui.cameraVisibilityButton->setVisible(true);
+        }
+        else
+        {
+            m_localCameraWindow->removeCamera(m_cameraView);
+            m_ui.imageWidgetLayout->addWidget(m_cameraView);
+            m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            m_cameraView->useWidgetStyle();
+            m_ui.cameraVisibilityButton->setVisible(false);
+        }
     }
 }
 
