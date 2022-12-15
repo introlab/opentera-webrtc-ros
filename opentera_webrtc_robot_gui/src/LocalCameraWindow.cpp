@@ -81,26 +81,28 @@ void LocalCameraWindow::mouseMoveEvent(QMouseEvent* event)
 QPoint LocalCameraWindow::adjustPositionToBorders(QPoint pos)
 {
     QRect mainWindowRect = m_parent->getCameraSpace();
-    if (pos.x() < mainWindowRect.left())
+    if (mainWindowRect.right() - width() >= 0 && mainWindowRect.bottom() - height() >= 0)
     {
-        pos.setX(mainWindowRect.left());
-    }
-    else if (pos.x() > mainWindowRect.right() - width())
-    {
-        pos.setX(mainWindowRect.right() - width());
-    }
+        if (pos.x() < mainWindowRect.left())
+        {
+            pos.setX(mainWindowRect.left());
+        }
+        else if (pos.x() > mainWindowRect.right() - width())
+        {
+            pos.setX(mainWindowRect.right() - width());
+        }
 
-    if (pos.y() < mainWindowRect.top())
-    {
-        pos.setY(mainWindowRect.top());
-    }
-    else if (pos.y() > mainWindowRect.bottom() - height())
-    {
-        pos.setY(mainWindowRect.bottom() - height());
-    }
+        if (pos.y() < mainWindowRect.top())
+        {
+            pos.setY(mainWindowRect.top());
+        }
+        else if (pos.y() > mainWindowRect.bottom() - height())
+        {
+            pos.setY(mainWindowRect.bottom() - height());
+        }
 
-    setMaximumWidth(mainWindowRect.right() - pos.x());
-    setMaximumHeight(mainWindowRect.bottom() - pos.y());
-
+        setMaximumWidth(mainWindowRect.right() - pos.x());
+        setMaximumHeight(mainWindowRect.bottom() - pos.y());
+    }
     return pos;
 }
