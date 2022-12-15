@@ -4,7 +4,7 @@
 #include <QColor>
 #include <QDebug>
 
-GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget{parent} {}
+GLCameraWidget::GLCameraWidget(QWidget* parent) : QGLWidget{parent}, m_parent{parent} {}
 
 void GLCameraWidget::setImage(const QImage& image)
 {
@@ -16,6 +16,7 @@ void GLCameraWidget::setImage(const QImage& image)
 
 void GLCameraWidget::paintEvent(QPaintEvent* event)
 {
+    resize(m_parent->size());
     QPainter p(this);
 
     // Set the painter to use a smooth scaling algorithm.
