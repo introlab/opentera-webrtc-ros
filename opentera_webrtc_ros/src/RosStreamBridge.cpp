@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <RosStreamBridge.h>
 #include <RosSignalingServerconfiguration.h>
+#include <RosVideoStreamConfiguration.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opentera_webrtc_ros_msgs/PeerImage.h>
 #include <opentera_webrtc_ros_msgs/PeerAudio.h>
@@ -27,7 +28,7 @@ RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh)
 {
     if (RosNodeParameters::isStandAlone())
     {
-        init(RosSignalingServerConfiguration::fromRosParam());
+        init(RosSignalingServerConfiguration::fromRosParam(), RosVideoStreamConfiguration::fromRosParam());
         connect();
     }
 }
@@ -37,7 +38,8 @@ RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh)
  *
  * @param signalingServerConfiguration Signaling server configuration
  */
-void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signalingServerConfiguration)
+void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signalingServerConfiguration,
+        const opentera::VideoStreamConfiguration& videoStreamConfiguration)
 {
     bool needsDenoising, isScreencast;
     unsigned int soundCardTotalDelayMs;
@@ -94,6 +96,7 @@ void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signali
     m_signalingClient = make_unique<StreamClient>(
         signalingServerConfiguration,
         WebrtcConfiguration::create(iceServers),
+        videoStreamConfiguration,
         (m_canReceiveVideoStream || m_canSendVideoStream ? m_videoSource : nullptr),
         (m_canReceiveAudioStream || m_canSendAudioStream ? m_audioSource : nullptr));
 
@@ -180,7 +183,7 @@ void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_
     ROS_INFO_STREAM(nodeName << " onJoinSessionEvents " << events[0].session_url);
 
     // TODO: Handle each item of the vector
-    init(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
+    init(RosSignalingServerConfiguration::fromUrl(events[0].session_url), RosVideoStreamConfiguration::fromRosParam());
     connect();
 }
 
