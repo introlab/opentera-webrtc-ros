@@ -111,7 +111,8 @@ void RosNodeParameters::loadVideoCodecParams(
 
     vector<string> forcedCodecStrings;
     pnh.getParam("video_codecs/forced_codecs", forcedCodecStrings);
-    transform(forcedCodecStrings.begin(),
+    transform(
+        forcedCodecStrings.begin(),
         forcedCodecStrings.end(),
         inserter(forcedCodecs, forcedCodecs.begin()),
         [](const string& codecString)

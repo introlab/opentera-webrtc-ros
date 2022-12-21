@@ -38,8 +38,9 @@ RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh)
  *
  * @param signalingServerConfiguration Signaling server configuration
  */
-void RosStreamBridge::init(const opentera::SignalingServerConfiguration& signalingServerConfiguration,
-        const opentera::VideoStreamConfiguration& videoStreamConfiguration)
+void RosStreamBridge::init(
+    const opentera::SignalingServerConfiguration& signalingServerConfiguration,
+    const opentera::VideoStreamConfiguration& videoStreamConfiguration)
 {
     bool needsDenoising, isScreencast;
     unsigned int soundCardTotalDelayMs;

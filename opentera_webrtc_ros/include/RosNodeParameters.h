@@ -38,8 +38,7 @@ namespace opentera
         static void loadVideoCodecParams(
             std::unordered_set<opentera::VideoStreamCodec>& forcedCodecs,
             bool& forceGStreamerHardwareAcceleration,
-            bool& useGStreamerSoftwareEncoderDecoder
-        );
+            bool& useGStreamerSoftwareEncoderDecoder);
 
         static void loadAudioStreamParams(
             bool& canSendAudioStream,

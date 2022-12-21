@@ -18,7 +18,13 @@ VideoStreamConfiguration RosVideoStreamConfiguration::fromRosParam()
     unordered_set<VideoStreamCodec> forcedCodecs;
     bool forceGStreamerHardwareAcceleration, useGStreamerSoftwareEncoderDecoder;
 
-    RosNodeParameters::loadVideoCodecParams(forcedCodecs, forceGStreamerHardwareAcceleration, useGStreamerSoftwareEncoderDecoder);
+    RosNodeParameters::loadVideoCodecParams(
+        forcedCodecs,
+        forceGStreamerHardwareAcceleration,
+        useGStreamerSoftwareEncoderDecoder);
 
-    return VideoStreamConfiguration::create(forcedCodecs, forceGStreamerHardwareAcceleration, useGStreamerSoftwareEncoderDecoder);
+    return VideoStreamConfiguration::create(
+        forcedCodecs,
+        forceGStreamerHardwareAcceleration,
+        useGStreamerSoftwareEncoderDecoder);
 }
