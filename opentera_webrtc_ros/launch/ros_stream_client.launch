@@ -12,6 +12,11 @@
     <arg name="is_screen_cast" default="false"/>
     <arg name="needs_denoising" default="false"/>
 
+    <!-- Codec -->
+    <arg name="forced_video_codecs" default="[]"/>
+    <arg name="force_gstreamer_video_hardware_acceleration" default="false"/>
+    <arg name="use_gstreamer_video_software_encoder_decoder" default="false"/>
+
     <!-- Audio -->
     <arg name="can_send_audio_stream" default="false"/>
     <arg name="can_receive_audio_stream" default="false"/>
@@ -37,9 +42,9 @@
     <arg name="output_audio_mixed_topic" default="audio_mixed"/>
     <arg name="output_webrtc_audio_topic" default="webrtc_audio"/>
 
-    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="$(arg output)" respawn="true">
+    <node name="$(arg name)" pkg="opentera_webrtc_ros" type="topic_streamer" output="$(arg output)" respawn="false">
         <rosparam param="is_stand_alone" subst_value="true">$(arg is_stand_alone)</rosparam>
-        <rosparam param="videoStream" subst_value="true">
+        <rosparam param="video_stream" subst_value="true">
             {
                 can_send_video_stream: $(arg can_send_video_stream),        # Can send video stream to the signaling server
                 can_receive_video_stream: $(arg can_receive_video_stream),  # Can receive video stream from the signaling server
@@ -47,7 +52,14 @@
                 needs_denoising: $(arg needs_denoising)         # Does the image source needs denoising?
             }
         </rosparam>
-        <rosparam param="audioStream" subst_value="true">
+        <rosparam param="video_codecs" subst_value="true">
+            {
+                forced_codecs: $(arg forced_video_codecs),
+                force_gstreamer_hardware_acceleration: $(arg force_gstreamer_video_hardware_acceleration),
+                use_gstreamer_software_encoder_decoder: $(arg use_gstreamer_video_software_encoder_decoder)
+            }
+        </rosparam>
+        <rosparam param="audio_stream" subst_value="true">
             {
                 can_send_audio_stream: $(arg can_send_audio_stream),        # Can send audio stream to the signaling server
                 can_receive_audio_stream: $(arg can_receive_audio_stream),  # Can receive audio stream from the signaling server

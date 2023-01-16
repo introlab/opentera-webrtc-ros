@@ -2,6 +2,8 @@
 #include <RosNodeParameters.h>
 #include <RosParamUtils.h>
 
+#include <stdexcept>
+
 using namespace opentera;
 using namespace ros;
 using namespace std;
@@ -85,12 +87,49 @@ void RosNodeParameters::loadVideoStreamParams(
     NodeHandle pnh("~");
 
     std::map<std::string, bool> dict;
-    opentera::param::getParam(pnh, "videoStream", dict);
+    opentera::param::getParam(pnh, "video_stream", dict);
 
     canSendVideoStream = isInParams("can_send_video_stream", dict) ? dict["can_send_video_stream"] : false;
     canReceiveVideoStream = isInParams("can_receive_video_stream", dict) ? dict["can_receive_video_stream"] : false;
     denoise = isInParams("needs_denoising", dict) ? dict["needs_denoising"] : false;
     screencast = isInParams("is_screen_cast", dict) ? dict["is_screen_cast"] : false;
+}
+
+/**
+ * @brief Load video codec parameters from ROS parameter server
+ *
+ * @param forcedCodecs The codecs that must be used, an empty set means all codecs.
+ * @param forceGStreamerHardwareAcceleration whether to force GStreamer hardware acceleration
+ * @param useGStreamerSoftwareEncoderDecoder whether to use GStreamer software encoders/decoders
+ */
+void RosNodeParameters::loadVideoCodecParams(
+    unordered_set<VideoStreamCodec>& forcedCodecs,
+    bool& forceGStreamerHardwareAcceleration,
+    bool& useGStreamerSoftwareEncoderDecoder)
+{
+    NodeHandle pnh("~");
+
+    vector<string> forcedCodecStrings;
+    pnh.getParam("video_codecs/forced_codecs", forcedCodecStrings);
+    transform(
+        forcedCodecStrings.begin(),
+        forcedCodecStrings.end(),
+        inserter(forcedCodecs, forcedCodecs.begin()),
+        [](const string& codecString)
+        {
+            auto codec = stringToVideoStreamCodec(codecString);
+            if (codec.has_value())
+            {
+                return *codec;
+            }
+            else
+            {
+                throw runtime_error("Invalid codec: " + codecString);
+            }
+        });
+
+    forceGStreamerHardwareAcceleration = pnh.param<bool>("video_codecs/force_gstreamer_hardware_acceleration", false);
+    useGStreamerSoftwareEncoderDecoder = pnh.param<bool>("video_codecs/use_gstreamer_software_encoder_decoder", false);
 }
 
 /**
@@ -113,10 +152,10 @@ void RosNodeParameters::loadAudioStreamParams(
     NodeHandle pnh("~");
 
     std::map<std::string, bool> dict;
-    opentera::param::getParam(pnh, "audioStream", dict);
+    opentera::param::getParam(pnh, "audio_stream", dict);
 
     std::map<std::string, int> dictInt;
-    opentera::param::getParam(pnh, "audioStream", dictInt);
+    opentera::param::getParam(pnh, "audio_stream", dictInt);
 
 
     canSendAudioStream = isInParams("can_send_audio_stream", dict) ? dict["can_send_audio_stream"] : false;

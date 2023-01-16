@@ -9,7 +9,7 @@ namespace opentera
     /**
      * @brief Utility to build signaling server configuration from ROS parameter server
      */
-    class RosSignalingServerConfiguration : public SignalingServerConfiguration
+    class RosSignalingServerConfiguration
     {
         static std::string getQueryFrom(const std::string& query, const std::string& queries);
 

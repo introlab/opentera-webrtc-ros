@@ -42,7 +42,9 @@ namespace opentera
         bool m_canReceiveAudioStream;
         bool m_canReceiveVideoStream;
 
-        void init(const opentera::SignalingServerConfiguration& signalingServerConfiguration);
+        void init(
+            const opentera::SignalingServerConfiguration& signalingServerConfiguration,
+            const opentera::VideoStreamConfiguration& videoStreamConfiguration);
 
         void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events) override;
         void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events) override;

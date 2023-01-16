@@ -60,6 +60,8 @@ catkin_package(CATKIN_DEPENDS message_runtime)
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
 # Disable examples
 set(OPENTERA_WEBRTC_ENABLE_EXAMPLES OFF)
+# Enable GStreamer
+set(OPENTERA_WEBRTC_ENABLE_GSTREAMER ON)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
@@ -122,6 +124,7 @@ add_executable(${PROJECT_NAME}_topic_streamer
     src/RosVideoSource.cpp
     src/RosAudioSource.cpp
     src/RosSignalingServerConfiguration.cpp
+    src/RosVideoStreamConfiguration.cpp
     src/RosStreamBridge.cpp
     src/RosNodeParameters.cpp
     src/RosParamUtils.cpp

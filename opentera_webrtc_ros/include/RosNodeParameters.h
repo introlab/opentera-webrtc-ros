@@ -1,7 +1,11 @@
 #ifndef OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_NODE_PARAMETERS_H
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_NODE_PARAMETERS_H
 
+#include <OpenteraWebrtcNativeClient/Configurations/VideoStreamConfiguration.h>
+
 #include <ros/ros.h>
+
+#include <unordered_set>
 
 namespace opentera
 {
@@ -30,6 +34,11 @@ namespace opentera
             bool& canReceiveVideoStream,
             bool& denoise,
             bool& screencast);
+
+        static void loadVideoCodecParams(
+            std::unordered_set<opentera::VideoStreamCodec>& forcedCodecs,
+            bool& forceGStreamerHardwareAcceleration,
+            bool& useGStreamerSoftwareEncoderDecoder);
 
         static void loadAudioStreamParams(
             bool& canSendAudioStream,
