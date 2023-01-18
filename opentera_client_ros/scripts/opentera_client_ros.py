@@ -76,7 +76,7 @@ class OpenTeraROSClient:
 
     def manage_session_callback(self, msg: String):
         asyncio.run_coroutine_threadsafe(self._opentera_send_manage_session(msg.data), self.__eventLoop)
-    
+
     def __set_stop_session(self, session_uuid):
         self.__stop_session_json = {
             'session_uuid': session_uuid,
@@ -147,12 +147,12 @@ class OpenTeraROSClient:
             try:
                 # Every 10 seconds
                 await asyncio.sleep(10)
-                params = {'token': self.__token}
 
-                async with self.__client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
-                    if response.status != 200:
-                        rospy.logwarn('Send status failed')
-                        break
+                if len(self.__robot_status) > 0:
+                    params = {'token': self.__token}
+                    async with self.__client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
+                        if response.status != 200:
+                            rospy.logwarn('Send status failed')
             except asyncio.CancelledError as e:
                 rospy.logerr('_opentera_send_device_status', e)
                 # Exit loop
@@ -162,7 +162,7 @@ class OpenTeraROSClient:
         params = {'token': self.__token}
         if (action == 'stop'):
             try:
-                async with self.__client.post(self.__base_url + OpenTeraROSClient.stop_session_endpoint, 
+                async with self.__client.post(self.__base_url + OpenTeraROSClient.stop_session_endpoint,
                     params=params, json=self.__stop_session_json, verify_ssl=False) as response:
                         if response.status != 200:
                             rospy.logwarn('Send stop session failed')
