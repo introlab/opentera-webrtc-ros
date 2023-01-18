@@ -51,7 +51,6 @@ class OpenTeraROSClient:
         self.__eventLoop = {}
 
     def robot_status_callback(self, status: RobotStatus):
-        rospy.loginfo('robot_status_callback')
         # Update internal status
         # Will be sent by _opentera_send_device_status task as json
         self.__robot_status = {
