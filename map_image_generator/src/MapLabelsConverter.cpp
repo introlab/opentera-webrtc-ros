@@ -3,7 +3,7 @@
 #include "map_image_generator/utils.h"
 
 #include <algorithm>
-#include <rtabmap_ros/ListLabels.h>
+#include <rtabmap_msgs/ListLabels.h>
 
 using namespace map_image_generator;
 using namespace std;
@@ -15,7 +15,7 @@ MapLabelsConverter::MapLabelsConverter(const Parameters& parameters, ros::NodeHa
     m_mapLabelsSubscriber = m_nodeHandle.subscribe("map_labels", 1, &MapLabelsConverter::mapLabelsCallback, this);
     m_mapLabelsPublisher = m_nodeHandle.advertise<visualization_msgs::MarkerArray>("map_image_labels", 1);
     m_rtabmapListLabelsServiceClient =
-        m_nodeHandle.serviceClient<rtabmap_ros::ListLabels>("rtabmap_list_label_service");
+        m_nodeHandle.serviceClient<rtabmap_msgs::ListLabels>("rtabmap_list_label_service");
 }
 
 MapLabelsConverter::~MapLabelsConverter() = default;
@@ -46,7 +46,7 @@ void MapLabelsConverter::mapLabelsCallback(const visualization_msgs::MarkerArray
 
 std::vector<std::string> MapLabelsConverter::getDesiredLabels()
 {
-    rtabmap_ros::ListLabels service;
+    rtabmap_msgs::ListLabels service;
     if (m_rtabmapListLabelsServiceClient.call(service))
     {
         return service.response.labels;

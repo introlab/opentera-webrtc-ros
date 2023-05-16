@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
     sensor_msgs
     std_msgs
     tf
-    rtabmap_ros
+    rtabmap_msgs
     message_generation
     std_srvs
     odas_ros
