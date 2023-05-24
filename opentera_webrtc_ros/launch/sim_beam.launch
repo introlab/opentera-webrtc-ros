@@ -7,7 +7,7 @@
     <arg name="rviz"                default="true"/>
     <arg name="rviz_config_file"    default="rviz_cfg.rviz"/>
     <arg name="rviz_cfg"            default="-d $(find beam_control)/config/$(arg rviz_config_file)"/>
-    <arg name="rtabmapviz"          default="false"/>
+    <arg name="rtabmap_viz"          default="false"/>
     <arg name="localization"        default="false"/>
     <arg name="database_path"       default="~/.ros/rtabmap.db"/>
     <arg name="joystick_port"       default="js0"/>
@@ -89,7 +89,7 @@
     <!-- Rtabmap Launcher-->
     <include file="$(find beam_slam)/launch/rtab_map_slam.launch">
         <arg name="camera_name"             value="$(arg camera_name)"/>
-        <arg name="rtabmapviz"              value="$(arg rtabmapviz)"/>
+        <arg name="rtabmap_viz"              value="$(arg rtabmap_viz)"/>
         <arg name="localization"            value="$(arg localization)"/>
         <arg name="database_path"           value="$(arg database_path)"/>
         <arg name="camera_depth_topic"      value="aligned_depth_to_color"/>
