@@ -21,7 +21,7 @@ class HeadDetectorLoss(nn.Module):
             if target[n, TARGET_CONFIDENCE_INDEX] != 0:
                 loss += _calculate_ciou(prediction[n], target[n])
 
-        return loss
+        return loss / N
 
 
 def _calculate_ciou(box_a, box_b):
