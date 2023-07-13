@@ -9,7 +9,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
-from .open_images_head_detector_dataset import TARGET_CONFIDENCE_INDEX, TARGET_X_INDEX, TARGET_Y_INDEX, TARGET_W_INDEX
+from .open_images_head_detector_dataset import TARGET_CLASS_INDEX, TARGET_X_INDEX, TARGET_Y_INDEX, TARGET_W_INDEX
 from .open_images_head_detector_dataset import TARGET_H_INDEX
 
 
@@ -91,7 +91,7 @@ class HeadDetectorDatasetTrainingTransforms:
 
 
 def _hflip_target(target):
-    return torch.tensor([target[TARGET_CONFIDENCE_INDEX],
+    return torch.tensor([target[TARGET_CLASS_INDEX],
                          1.0 - target[TARGET_X_INDEX],
                          target[TARGET_Y_INDEX],
                          target[TARGET_W_INDEX],

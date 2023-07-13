@@ -9,13 +9,20 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-HEAD_CLASS_IDS = {'/m/04hgtk', '/m/0dzct'}
+HEAD_CLASS_ID = '/m/04hgtk'
+FACE_CLASS_ID = '/m/0dzct'
 
-TARGET_CONFIDENCE_INDEX = 0
+NO_HEAD_EXCLUDED_CLASS_IDS = {HEAD_CLASS_ID, FACE_CLASS_ID, '/m/0283dt1', '/m/014sv8', '/m/015h_t', '/m/0283dt1', '/m/02p0tk3', '/m/039xj_', '/m/03q69', '/m/0k0pj', '/m/04yx4', '/m/03bt1vf', '/m/01g317', '/m/05r655', '/m/01bl7v'}
+
+TARGET_CLASS_INDEX = 0
 TARGET_X_INDEX = 1
 TARGET_Y_INDEX = 2
 TARGET_W_INDEX = 3
 TARGET_H_INDEX = 4
+
+NO_HEAD_CLASS_INDEX = 0
+ONE_HEAD_CLASS_INDEX = 1
+MANY_HEAD_CLASS_INDEX = 2
 
 
 class OpenImagesHeadDetectorDataset(Dataset):
@@ -74,7 +81,7 @@ class OpenImagesHeadDetectorDataset(Dataset):
                 y_min = float(row[6])
                 y_max = float(row[7])
 
-                if class_id not in HEAD_CLASS_IDS:
+                if class_id != HEAD_CLASS_ID:
                     continue
 
                 image_ids.add(image_id)
@@ -86,7 +93,7 @@ class OpenImagesHeadDetectorDataset(Dataset):
                 })
 
         images = self._image_ids_to_images(image_ids)
-        return images, self._merge_heads(bboxes)
+        return images, self._convert_bboxes(bboxes)
 
     def _list_images_without_heads(self, count):
         image_ids = set()
@@ -100,7 +107,7 @@ class OpenImagesHeadDetectorDataset(Dataset):
                 image_id = row[0]
                 class_id = row[2]
 
-                if class_id in HEAD_CLASS_IDS:
+                if class_id in NO_HEAD_EXCLUDED_CLASS_IDS:
                     image_ids_with_head.add(image_id)
                 image_ids.add(image_id)
 
@@ -108,7 +115,7 @@ class OpenImagesHeadDetectorDataset(Dataset):
         image_ids = list(image_ids)[:count]
 
         images = self._image_ids_to_images(image_ids)
-        return images, {image_id:torch.zeros(5) for image_id in image_ids}
+        return images, {image_id:torch.tensor([NO_HEAD_CLASS_INDEX, 0.0, 0.0, 0.0, 0.0]) for image_id in image_ids}
 
     def _image_ids_to_images(self, image_ids):
         image_ids = list(image_ids)
@@ -134,22 +141,26 @@ class OpenImagesHeadDetectorDataset(Dataset):
         except:
             return False
 
-    def _merge_heads(self, all_bboxes):
+    def _convert_bboxes(self, all_bboxes):
         merged_bboxes = {}
         for image_id, bboxes in all_bboxes.items():
             if len(bboxes) == 0:
-                merged_bboxes[image_id] = torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0])
+                raise ValueError('No box')
             else:
-                x_min = min((b['x_min'] for b in bboxes))
-                x_max = max((b['x_max'] for b in bboxes))
-                y_min = min((b['y_min'] for b in bboxes))
-                y_max = max((b['y_max'] for b in bboxes))
+                biggest_head_index, _ = max(
+                    enumerate(((b['x_max'] - b['x_min']) * (b['y_max'] - b['y_min']) for b in bboxes)))
+
+                x_min = bboxes[biggest_head_index]['x_min']
+                x_max = bboxes[biggest_head_index]['x_max']
+                y_min = bboxes[biggest_head_index]['y_min']
+                y_max = bboxes[biggest_head_index]['y_max']
                 x_center = (x_min + x_max) / 2.0
                 y_center = (y_min + y_max) / 2.0
                 w = x_max - x_min
                 h = y_max - y_min
 
-                merged_bboxes[image_id] = torch.tensor([1.0, x_center, y_center, w, h])
+                class_index = ONE_HEAD_CLASS_INDEX if len(bboxes) == 1 else MANY_HEAD_CLASS_INDEX
+                merged_bboxes[image_id] = torch.tensor([class_index, x_center, y_center, w, h])
 
         return merged_bboxes
 
@@ -160,19 +171,19 @@ class OpenImagesHeadDetectorDataset(Dataset):
         if rotation == 0.0:
             return target
         elif rotation == 90.0:
-            return torch.tensor([target[TARGET_CONFIDENCE_INDEX],
+            return torch.tensor([target[TARGET_CLASS_INDEX],
                                  target[TARGET_Y_INDEX],
                                  1.0 - target[TARGET_X_INDEX],
                                  target[TARGET_H_INDEX],
                                  target[TARGET_W_INDEX]])
         elif rotation == 180.0:
-            return torch.tensor([target[TARGET_CONFIDENCE_INDEX],
+            return torch.tensor([target[TARGET_CLASS_INDEX],
                                  1.0 - target[TARGET_X_INDEX],
                                  1.0 - target[TARGET_Y_INDEX],
                                  target[TARGET_W_INDEX],
                                  target[TARGET_H_INDEX]])
         elif rotation == 270.0:
-            return torch.tensor([target[TARGET_CONFIDENCE_INDEX],
+            return torch.tensor([target[TARGET_CLASS_INDEX],
                                  1.0 - target[TARGET_Y_INDEX],
                                  target[TARGET_X_INDEX],
                                  target[TARGET_H_INDEX],

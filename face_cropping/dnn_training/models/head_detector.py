@@ -1,6 +1,17 @@
+import torch
 import torch.nn as nn
 
 import torchvision.models as models
+
+
+IMAGE_SIZE = (256, 256)
+
+OUTPUT_CLASS_INDEX_MIN = 0
+OUTPUT_CLASS_INDEX_MAX = 3
+OUTPUT_X_INDEX = 3
+OUTPUT_Y_INDEX = 4
+OUTPUT_W_INDEX = 5
+OUTPUT_H_INDEX = 6
 
 
 class EfficientNetBackbone(nn.Module):
@@ -27,9 +38,23 @@ class EfficientNetBackbone(nn.Module):
             raise ValueError('Invalid backbone type')
 
         self._features_layers = models.__dict__[type](weights=backbone_weights).features
+        self._features_layers[0] = nn.Sequential(
+            nn.Conv2d(in_channels=5, out_channels=32, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.SiLU(inplace=True)
+        )
+
         self._last_channel_count = self.LAST_CHANNEL_COUNT_BY_TYPE[type]
 
+        ys = torch.linspace(0.0, 1.0, steps=IMAGE_SIZE[0])
+        xs = torch.linspace(0.0, 1.0, steps=IMAGE_SIZE[1])
+        x_grid, y_grid = torch.meshgrid(xs, ys, indexing='xy')
+        self.register_buffer('_x_grid', x_grid.unsqueeze(0).unsqueeze(0).float().clone())
+        self.register_buffer('_y_grid', y_grid.unsqueeze(0).unsqueeze(0).float().clone())
+
     def forward(self, x):
+        N = x.size(0)
+        x = torch.cat([x, self._x_grid.repeat(N, 1, 1, 1), self._y_grid.repeat(N, 1, 1, 1)], dim=1)
         return self._features_layers(x)
 
     def last_channel_count(self):
@@ -41,10 +66,9 @@ class HeadDetector(nn.Module):
         super(HeadDetector, self).__init__()
 
         self._backbone = backbone
-        self._global_avg_pool = nn.AdaptiveAvgPool2d(8)
+        self._global_avg_pool = nn.AdaptiveAvgPool2d(1)
         self._detector = nn.Sequential(
-            nn.Linear(in_features=self._backbone.last_channel_count() * 64, out_features=5),
-            nn.Sigmoid()
+            nn.Linear(in_features=self._backbone.last_channel_count(), out_features=7),
         )
 
     def class_count(self):
@@ -52,4 +76,8 @@ class HeadDetector(nn.Module):
 
     def forward(self, x):
         features = self._global_avg_pool(self._backbone(x))
-        return self._detector(features.view(x.size()[0], -1)).clip(min=1e-6, max=0.999999)
+        y = self._detector(features.view(x.size()[0], -1))
+        class_scores = y[:, :3]
+        center = torch.sigmoid(y[:, 3:5]) * 2.0 - 0.5
+        size = 4.0 * torch.sigmoid(y[:, 5:7]) ** 2.0
+        return torch.cat([class_scores, center, size], dim=1)

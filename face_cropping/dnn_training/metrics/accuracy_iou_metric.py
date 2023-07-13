@@ -1,7 +1,8 @@
 import torch
 
-from datasets.open_images_head_detector_dataset import TARGET_CONFIDENCE_INDEX, TARGET_X_INDEX, TARGET_Y_INDEX
-from datasets.open_images_head_detector_dataset import TARGET_W_INDEX, TARGET_H_INDEX
+from datasets.open_images_head_detector_dataset import TARGET_CLASS_INDEX, TARGET_X_INDEX, NO_HEAD_CLASS_INDEX
+
+from models.head_detector import OUTPUT_CLASS_INDEX_MIN, OUTPUT_CLASS_INDEX_MAX, OUTPUT_X_INDEX
 
 
 class AccuracyIoUMetric:
@@ -18,17 +19,17 @@ class AccuracyIoUMetric:
         self._iou_count = 0
 
     def add(self, prediction, target):
-        prediction_presence = prediction[:, TARGET_CONFIDENCE_INDEX] > 0.5
-        target_presence = target[:, TARGET_CONFIDENCE_INDEX] > 0.5
+        prediction_class_index = prediction[:, OUTPUT_CLASS_INDEX_MIN:OUTPUT_CLASS_INDEX_MAX].argmax(dim=1)
+        target_class_index = target[:, TARGET_CLASS_INDEX].long()
 
         for i in range(prediction.size(0)):
-            if prediction_presence[i].item() and target_presence[i].item():
+            if prediction_class_index[i] == target_class_index[i]:
                 self._good += 1
-                self._iou += compute_iou(prediction[i], target[i]).item()
+
+            if target_class_index[i] != NO_HEAD_CLASS_INDEX:
+                self._iou += compute_iou(prediction[i, OUTPUT_X_INDEX:], target[i, TARGET_X_INDEX:]).item()
                 self._iou_count += 1
-            elif not prediction_presence[i].item() and not target_presence[i].item():
-                self._good += 1
-            elif not prediction_presence[i].item() and target_presence[i].item():
+            elif target_class_index[i] == NO_HEAD_CLASS_INDEX and prediction_class_index[i] != NO_HEAD_CLASS_INDEX:
                 self._iou_count += 1
 
             self._count += 1
@@ -46,12 +47,12 @@ class AccuracyIoUMetric:
 
 def compute_iou(box_a, box_b):
     """
-    :param box_a: (5) tensor confidence center_x, center_y, w, h
-    :param box_b: (5) tensor confidence center_x, center_y, w, h
+    :param box_a: (5) tensor center_x, center_y, w, h
+    :param box_b: (5) tensor center_x, center_y, w, h
     :return: iou
     """
-    areas_a = box_a[TARGET_W_INDEX] * box_a[TARGET_H_INDEX]
-    areas_b = box_b[TARGET_W_INDEX] * box_b[TARGET_H_INDEX]
+    areas_a = box_a[2] * box_a[3]
+    areas_b = box_b[2] * box_b[3]
 
     a_tl_x, a_tl_y, a_br_x, a_br_y = get_tl_br_points(box_a)
     b_tl_x, b_tl_y, b_br_x, b_br_y = get_tl_br_points(box_b)
@@ -71,9 +72,9 @@ def get_tl_br_points(bbox):
     :param bboxes: (4) tensor center_x, center_y, w, h
     :return: top left x, top left y, bottom right x and bottom right y
     """
-    tl_x = bbox[TARGET_X_INDEX] - bbox[TARGET_W_INDEX] / 2
-    tl_y = bbox[TARGET_Y_INDEX] - bbox[TARGET_H_INDEX] / 2
-    br_x = bbox[TARGET_X_INDEX] + bbox[TARGET_W_INDEX] / 2
-    br_y = bbox[TARGET_Y_INDEX] + bbox[TARGET_H_INDEX] / 2
+    tl_x = bbox[0] - bbox[2] / 2
+    tl_y = bbox[1] - bbox[3] / 2
+    br_x = bbox[0] + bbox[2] / 2
+    br_y = bbox[1] + bbox[3] / 2
 
     return tl_x, tl_y, br_x, br_y

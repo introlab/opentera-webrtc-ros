@@ -9,8 +9,7 @@ from datasets import OpenImagesHeadDetectorDataset
 from datasets import HeadDetectorDatasetTrainingTransforms, HeadDetectorDatasetValidationTransforms
 from metrics import LossMetric, AccuracyIoUMetric, LossAccuracyIouLearningCurves
 from criterions import HeadDetectorLoss
-
-IMAGE_SIZE = (256, 256)
+from models import IMAGE_SIZE
 
 
 class HeadDetectorTrainer(Trainer):
