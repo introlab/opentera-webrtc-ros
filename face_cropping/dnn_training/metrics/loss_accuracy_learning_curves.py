@@ -3,22 +3,18 @@ import json
 import matplotlib.pyplot as plt
 
 
-class LossAccuracyIouLearningCurves:
+class LossAccuracyLearningCurves:
     def __init__(self):
         self._training_loss_values = []
         self._validation_loss_values = []
         self._training_accuracy_values = []
         self._validation_accuracy_values = []
-        self._training_iou_values = []
-        self._validation_iou_values = []
 
     def clear(self):
         self._training_loss_values = []
         self._validation_loss_values = []
         self._training_accuracy_values = []
         self._validation_accuracy_values = []
-        self._training_iou_values = []
-        self._validation_iou_values = []
 
     def add_training_loss_value(self, value):
         self._training_loss_values.append(value)
@@ -32,21 +28,14 @@ class LossAccuracyIouLearningCurves:
     def add_validation_accuracy_value(self, value):
         self._validation_accuracy_values.append(value)
 
-    def add_training_iou_value(self, value):
-        self._training_iou_values.append(value)
-
-    def add_validation_iou_value(self, value):
-        self._validation_iou_values.append(value)
-
     def save(self, figure_path, data_path):
         self._save_figure(figure_path)
         self._save_data(data_path)
 
     def _save_figure(self, path):
-        fig = plt.figure(figsize=(15, 5), dpi=300)
-        ax1 = fig.add_subplot(131)
-        ax2 = fig.add_subplot(132)
-        ax3 = fig.add_subplot(133)
+        fig = plt.figure(figsize=(10, 5), dpi=300)
+        ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122)
 
         epochs = range(1, len(self._training_loss_values) + 1)
         ax1.plot(epochs, self._training_loss_values, '-o', color='tab:blue', label='Training')
@@ -66,15 +55,6 @@ class LossAccuracyIouLearningCurves:
         ax2.set_ylabel(u'Accuracy')
         ax2.legend()
 
-        epochs = range(1, len(self._training_iou_values) + 1)
-        ax3.plot(epochs, self._training_iou_values, '-o', color='tab:blue', label='Training')
-        epochs = range(1, len(self._validation_iou_values) + 1)
-        ax3.plot(epochs, self._validation_iou_values, '-o', color='tab:orange', label='Validation')
-        ax3.set_title(u'IoU')
-        ax3.set_xlabel(u'Epoch')
-        ax3.set_ylabel(u'IoU')
-        ax3.legend()
-
         fig.savefig(path)
         plt.close(fig)
 
@@ -84,8 +64,6 @@ class LossAccuracyIouLearningCurves:
                 'training_loss_values': self._training_loss_values,
                 'validation_loss_values': self._validation_loss_values,
                 'training_accuracy_values': self._training_accuracy_values,
-                'validation_accuracy_values': self._validation_accuracy_values,
-                'training_iou_values': self._training_iou_values,
-                'validation_iou_values': self._validation_iou_values
+                'validation_accuracy_values': self._validation_accuracy_values
             }
             json.dump(data, file, indent=4, sort_keys=True)

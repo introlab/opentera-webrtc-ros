@@ -1,16 +1,7 @@
-import random
-
 import numpy as np
 from PIL import ImageOps, ImageEnhance
 
-import torch
 import torch.nn as nn
-
-import torchvision.transforms as transforms
-import torchvision.transforms.functional as F
-
-from .open_images_head_detector_dataset import TARGET_CLASS_INDEX, TARGET_X_INDEX, TARGET_Y_INDEX, TARGET_W_INDEX
-from .open_images_head_detector_dataset import TARGET_H_INDEX
 
 
 class RandomSharpnessChange(nn.Module):
@@ -64,47 +55,3 @@ class RandomPosterize(nn.Module):
             return ImageOps.posterize(pil_image, bits)
         else:
             return pil_image
-
-
-class HeadDetectorDatasetTrainingTransforms:
-    def __init__(self, image_size):
-        self._horizontal_flip_p = 0.5
-
-        self._image_only_transform = transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ColorJitter(brightness=0.2, saturation=0.2, contrast=0.2, hue=0.2),
-            transforms.RandomGrayscale(p=0.1),
-            RandomSharpnessChange(),
-            RandomAutocontrast(),
-            RandomEqualize(),
-            RandomPosterize(),
-            transforms.ToTensor()
-        ])
-
-    def __call__(self, image, target):
-        if random.random() < self._horizontal_flip_p:
-            image = F.hflip(image)
-            target = _hflip_target(target)
-
-        image = self._image_only_transform(image)
-        return image, target
-
-
-def _hflip_target(target):
-    return torch.tensor([target[TARGET_CLASS_INDEX],
-                         1.0 - target[TARGET_X_INDEX],
-                         target[TARGET_Y_INDEX],
-                         target[TARGET_W_INDEX],
-                         target[TARGET_H_INDEX]])
-
-
-class HeadDetectorDatasetValidationTransforms:
-    def __init__(self, image_size):
-        self._image_only_transform = transforms.Compose([
-            transforms.Resize(image_size),
-            transforms.ToTensor()
-        ])
-
-    def __call__(self, image, target):
-        image = self._image_only_transform(image)
-        return image, target

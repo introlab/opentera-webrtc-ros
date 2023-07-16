@@ -1,16 +1,11 @@
 import argparse
 
 import torch
-import torch.nn.functional as F
 
 import cv2
 
 from modules import load_checkpoint
 from train_head_detector import create_model, BACKBONE_TYPES
-from datasets.open_images_head_detector_dataset import NO_HEAD_CLASS_INDEX
-from models.head_detector import OUTPUT_CLASS_INDEX_MIN, OUTPUT_CLASS_INDEX_MAX
-from models.head_detector import OUTPUT_X_INDEX, OUTPUT_Y_INDEX, OUTPUT_W_INDEX, OUTPUT_H_INDEX
-from trainers.head_detector_trainer import IMAGE_SIZE
 
 
 def main():
@@ -40,7 +35,6 @@ def test(model, device, video_device_id):
         if not ok:
             continue
 
-
         draw_head_box(frame, model, device)
 
         cv2.imshow('video_{}'.format(video_device_id), frame)
@@ -54,26 +48,7 @@ def test(model, device, video_device_id):
 
 
 def draw_head_box(frame, model, device):
-    with torch.no_grad():
-        input = torch.from_numpy(frame).to(device).permute(2, 0, 1).float() / 255
-        resized_input = F.interpolate(input.unsqueeze(0), size=IMAGE_SIZE)
-        output = model(resized_input)[0]
-
-        class_index = output[OUTPUT_CLASS_INDEX_MIN:OUTPUT_CLASS_INDEX_MAX].argmax()
-        if class_index == NO_HEAD_CLASS_INDEX:
-            return
-
-        cx = output[OUTPUT_X_INDEX].item() * frame.shape[1]
-        cy = output[OUTPUT_Y_INDEX].item() * frame.shape[0]
-        w = output[OUTPUT_W_INDEX].item() * frame.shape[1]
-        h = output[OUTPUT_H_INDEX].item() * frame.shape[0]
-
-    x0 = int(cx - w / 2)
-    y0 = int(cy - h / 2)
-    x1 = int(cx + w / 2)
-    y1 = int(cy + h / 2)
-
-    cv2.rectangle(frame, (x0, y0), (x1, y1), (0, 0, 255), 2)
+    pass  # TODO
 
 
 if __name__ == '__main__':

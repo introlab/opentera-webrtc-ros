@@ -1,1 +1,1 @@
-from .head_detector_loss import HeadDetectorLoss
+from .distillation_cross_entropy import DistillationCrossEntropyLoss

@@ -1,2 +1,4 @@
 from .trainer import Trainer
-from .head_detector_trainer import HeadDetectorTrainer
+from .distillation_trainer import DistillationTrainer
+from .backbone_trainer import BackboneTrainer
+from .backbone_distillation_trainer import BackboneDistillationTrainer
