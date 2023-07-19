@@ -1,11 +1,13 @@
 import torch.nn as nn
 
-from modules.yunet_modules import ConvHead, DWBlock
+from .backbone import Backbone
+from ..common.yunet_modules import ConvHead, DWBlock
 
 
-class YuNetBackbone(nn.Module):
+class YuNetBackbone(Backbone):
     def __init__(self, activation=nn.ReLU, channel_scale=1):
         super().__init__()
+        self._channel_scale = channel_scale
 
         self._stage0 = ConvHead(in_channels=3,
                                 mid_channels=16 * channel_scale,
@@ -29,6 +31,12 @@ class YuNetBackbone(nn.Module):
             DWBlock(in_channels=64 * channel_scale, out_channels=64 * channel_scale, activation=activation),
             nn.MaxPool2d(kernel_size=2)
         )
+
+    def output_channels(self):
+        return [64 * self._channel_scale] * 3
+
+    def output_strides(self):
+        return [8, 16, 32]
 
     def forward(self, x):
         y0 = self._stage0(x)

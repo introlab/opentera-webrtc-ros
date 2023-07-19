@@ -2,17 +2,21 @@ import torch.nn as nn
 
 
 class DWUnit(nn.Module):
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU, end_activation=True, kernel_size=3):
         super().__init__()
 
-        layers = [
-            nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
-                      kernel_size=1, stride=1, padding=0, bias=True, groups=1),
-            # TODO add BN + act
-            nn.Conv2d(in_channels=out_channels, out_channels=out_channels,
-                      kernel_size=3, stride=1, padding=1, bias=False, groups=out_channels)]
+        if activation is None:
+            raise ValueError('The activation is invalid.')
 
-        if activation is not None:
+        layers = [nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
+                            kernel_size=1, stride=1, padding=0, bias=False, groups=1),
+                  nn.BatchNorm2d(out_channels),
+                  activation(),
+                  nn.Conv2d(in_channels=out_channels, out_channels=out_channels,
+                            kernel_size=kernel_size, stride=1, padding=1, bias=not end_activation, groups=out_channels)
+                  ]
+
+        if end_activation:
             layers.append(nn.BatchNorm2d(out_channels))
             layers.append(activation())
 

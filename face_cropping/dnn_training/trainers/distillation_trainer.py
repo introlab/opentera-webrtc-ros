@@ -150,7 +150,10 @@ class DistillationTrainer:
                 target = self._move_target_to_device(data[1], self._device)
                 loss = self._criterion(student_model_output, target, teacher_model_output)
 
-                self._measure_validation_metrics(loss, student_model_output, target)
+                if torch.all(torch.isfinite(loss)):
+                    self._measure_validation_metrics(loss, student_model_output, target)
+                else:
+                    print('Warning the loss is not finite.')
 
     def _clear_between_validation_epoch(self):
         raise NotImplementedError()

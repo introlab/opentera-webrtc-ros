@@ -5,7 +5,8 @@ import torch
 import torch.nn as nn
 
 from datasets.classification_image_net import CLASS_COUNT
-from models.yunet_classifier import YuNetClassifier
+from models import Classifier
+from modules.backbones import YuNetBackbone
 from trainers import BackboneTrainer, BackboneDistillationTrainer
 from program_arguments import save_arguments, print_arguments
 
@@ -18,8 +19,7 @@ def main():
 
     parser.add_argument('--channel_scale', type=int, help='Choose the channel scale', required=True)
     parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
-    parser.add_argument('--image_height', type=int, help='Choose the image height', required=True)
-    parser.add_argument('--image_width', type=int, help='Choose the image width', required=True)
+    parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
     parser.add_argument('--learning_rate', type=float, help='Choose the learning rate', required=True)
     parser.add_argument('--weight_decay', type=float, help='Choose the weight decay', required=True)
@@ -39,7 +39,7 @@ def main():
 
     model = create_model(args.channel_scale, args.activation)
     device = torch.device('cuda' if torch.cuda.is_available() and args.use_gpu else 'cpu')
-    image_size = (args.image_height, args.image_width)
+    image_size = (args.image_size, args.image_size)
 
     output_path = os.path.join(args.output_path, 's' + str(args.channel_scale) + '_' + args.activation +
                                '_' + str(args.image_width) + 'x' + str(args.image_height) +
@@ -73,14 +73,14 @@ def main():
                                   weight_decay=args.weight_decay,
                                   batch_size=args.batch_size,
                                   image_size=image_size,
-                                  model_checkpoint=args.model_checkpoint
-                                  )
+                                  model_checkpoint=args.model_checkpoint)
         trainer.train()
 
 
 def create_model(channel_scale, activation_name):
     activation = activation_name_to_class(activation_name)
-    return YuNetClassifier(class_count=CLASS_COUNT, channel_scale=channel_scale, activation=activation)
+    backbone = YuNetBackbone(activation=activation, channel_scale=channel_scale)
+    return Classifier(backbone=backbone, class_count=CLASS_COUNT)
 
 
 def activation_name_to_class(name):

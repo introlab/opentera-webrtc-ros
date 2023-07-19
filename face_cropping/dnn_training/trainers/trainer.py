@@ -137,7 +137,10 @@ class Trainer:
                 target = self._move_target_to_device(data[1], self._device)
                 loss = self._criterion(model_output, target)
 
-                self._measure_validation_metrics(loss, model_output, target)
+                if torch.all(torch.isfinite(loss)):
+                    self._measure_validation_metrics(loss, model_output, target)
+                else:
+                    print('Warning the loss is not finite.')
 
     def _clear_between_validation_epoch(self):
         raise NotImplementedError()
@@ -157,3 +160,9 @@ class Trainer:
 
     def _evaluate(self, model, device, dataset_loader, output_path):
         raise NotImplementedError()
+
+    def model(self):
+        if isinstance(self._model, nn.DataParallel):
+            return self._model.module
+        else:
+            return self._model

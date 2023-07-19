@@ -46,11 +46,11 @@ class BackboneTrainer(Trainer):
 
     def _create_training_dataset_loader(self, dataset_root, batch_size, batch_size_division):
         transform = create_training_image_transform(self._image_size)
-        return create_dataset_loader(dataset_root, batch_size, batch_size_division, True, transform, shuffle=True)
+        return create_dataset_loader(dataset_root, batch_size, batch_size_division, True, transform)
 
     def _create_validation_dataset_loader(self, dataset_root, batch_size, batch_size_division):
         transform = create_validation_image_transform(self._image_size)
-        return create_dataset_loader(dataset_root, batch_size, batch_size_division, False, transform, shuffle=False)
+        return create_dataset_loader(dataset_root, batch_size, batch_size_division, False, transform)
 
     def _clear_between_training(self):
         self._learning_curves.clear()
@@ -116,9 +116,9 @@ def create_validation_image_transform(image_size):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
 
-def create_dataset_loader(dataset_root, batch_size, batch_size_division, train, transform, shuffle):
+def create_dataset_loader(dataset_root, batch_size, batch_size_division, train, transform):
     dataset = ClassificationImageNet(dataset_root, train=train, transform=transform)
-    return torch.utils.data.DataLoader(dataset, batch_size=batch_size // batch_size_division, shuffle=shuffle,
+    return torch.utils.data.DataLoader(dataset, batch_size=batch_size // batch_size_division, shuffle=train,
                                        num_workers=8)
 
 

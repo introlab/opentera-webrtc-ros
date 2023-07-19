@@ -1,2 +1,6 @@
 from .classification_image_net import ClassificationImageNet
+from .face_detection_wider import FaceDetectionWider
+from .head_detection_open_images import HeadDetectionOpenImages
+
 from .transforms import RandomSharpnessChange, RandomEqualize, RandomPosterize, RandomAutocontrast
+from .detection_transforms import detection_collate, DetectionTrainingTransform, DetectionValidationTransform
