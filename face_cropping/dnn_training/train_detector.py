@@ -3,7 +3,6 @@ import os
 
 import torch
 
-from datasets.classification_image_net import CLASS_COUNT
 from models import Detector
 from modules.backbones import YuNetBackbone
 from modules.necks import YunetFpn
@@ -23,6 +22,7 @@ def main():
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
     parser.add_argument('--channel_scale', type=int, help='Choose the channel scale', required=True)
+    parser.add_argument('--head_kernel_size', type=int, help='Choose the head kernel size', required=True)
     parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
@@ -35,11 +35,12 @@ def main():
 
     args = parser.parse_args()
 
-    model = create_model(args.channel_scale, args.activation)
+    model = create_model(args.channel_scale, args.head_kernel_size, args.activation)
     device = torch.device('cuda' if torch.cuda.is_available() and args.use_gpu else 'cpu')
     image_size = (args.image_size, args.image_size)
 
-    output_path = os.path.join(args.output_path, 's' + str(args.channel_scale) + '_' + args.activation +
+    output_path = os.path.join(args.output_path, args.dataset_type + '_s' + str(args.channel_scale) +
+                               '_hk'+ str(args.head_kernel_size) + '_' + args.activation +
                                '_' + str(image_size[0]) + 'x' + str(image_size[1]) +
                                '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay))
     save_arguments(output_path, args)
@@ -58,11 +59,12 @@ def main():
     trainer.train()
 
 
-def create_model(channel_scale, activation_name, output_decoded_predictions=False):
+def create_model(channel_scale, head_kernel_size, activation_name, output_decoded_predictions=False):
     activation = activation_name_to_class(activation_name)
     backbone = YuNetBackbone(activation=activation, channel_scale=channel_scale)
     neck = YunetFpn(backbone.output_channels(), activation=activation)
-    head = YunetHead(backbone.output_channels(), backbone.output_strides(), activation)
+    head = YunetHead(backbone.output_channels(), backbone.output_strides(),
+                     head_kernel_size=head_kernel_size, activation=activation)
     return Detector(backbone=backbone, neck=neck, head=head, output_decoded_predictions=output_decoded_predictions)
 
 

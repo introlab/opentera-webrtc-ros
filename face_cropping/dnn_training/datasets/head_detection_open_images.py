@@ -79,7 +79,8 @@ class HeadDetectionOpenImages(Dataset):
 
         return images
 
-    def _is_valid_image_path(self, path):
+    @staticmethod
+    def _is_valid_image_path(path):
         try:
             _ = Image.open(path).verify()
             return True
@@ -104,10 +105,12 @@ class HeadDetectionOpenImages(Dataset):
 
         return image, bboxes
 
-    def _rotate_image(self, image, rotation):
+    @staticmethod
+    def _rotate_image(image, rotation):
         return image.rotate(rotation, expand=True)
 
-    def _rotate_bboxes(self, bboxes, rotation):
+    @staticmethod
+    def _rotate_bboxes(bboxes, rotation):
         if rotation == 0.0:
             return bboxes
         elif rotation == 90.0:
@@ -128,7 +131,8 @@ class HeadDetectionOpenImages(Dataset):
         else:
             raise ValueError('Invalid rotation')
 
-    def _scale_bboxes(self, bboxes, initial_width, initial_height):
+    @staticmethod
+    def _scale_bboxes(bboxes, initial_width, initial_height):
         return torch.stack([bboxes[:, 0] * initial_width,
                             bboxes[:, 1] * initial_height,
                             bboxes[:, 2] * initial_width,

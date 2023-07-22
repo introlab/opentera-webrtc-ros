@@ -1,3 +1,7 @@
+import os
+
+import matplotlib.pyplot as plt
+
 import torch
 
 from modules.heads import filter_decoded_bboxes
@@ -11,6 +15,11 @@ class AveragePrecisionMetric:
 
         self._target_count = 0
         self._results = []
+
+        self._is_dirty = True
+        self._ap_cache = None
+        self._recalls_cache = None
+        self._precisions_cache = None
 
     def clear(self):
         self._target_count = 0
@@ -27,6 +36,9 @@ class AveragePrecisionMetric:
         for n in range(predictions.size(0)):
             self._add_single(predictions[n], targets[n])
 
+        self._is_dirty = True
+
+    # TODO optimize
     def _add_single(self, prediction, target):
         """
         :param prediction: tensor (M, 5) where the third dimension is [c, tl_x, tl_y, br_x, br_y]
@@ -64,7 +76,13 @@ class AveragePrecisionMetric:
                 'false_positive': false_positive,
             })
 
-    def get_value(self):
+    def get_value(self, output_curve=False):
+        if not self._is_dirty:
+            if output_curve:
+                return self._ap_cache, self._recalls_cache, self._precisions_cache
+            else:
+                return self._ap_cache
+
         sorted_results = sorted(self._results, key=lambda result: result['confidence'], reverse=True)
 
         recalls = [0]
@@ -88,7 +106,30 @@ class AveragePrecisionMetric:
         recalls = recalls[sorted_index]
         precisions = precisions[sorted_index]
 
-        return torch.trapz(y=precisions, x=recalls)
+        ap = torch.trapz(y=precisions, x=recalls)
+
+        self._is_dirty = False
+        self._ap_cache = ap
+        self._recalls_cache = recalls
+        self._precisions_cache = precisions
+
+        if output_curve:
+            return ap, recalls, precisions
+        else:
+            return ap
+
+    def save_curve(self, output_path):
+        ap, recalls, precisions = self.get_value(output_curve=True)
+        fig = plt.figure(figsize=(5, 5), dpi=300)
+        ax1 = fig.add_subplot(111)
+
+        ax1.plot(recalls, precisions)
+        ax1.set_title(u'PR curve {}'.format(ap))
+        ax1.set_xlabel(u'Recall')
+        ax1.set_ylabel(u'Precision')
+
+        fig.savefig(os.path.join(output_path, 'pr_curve.png'))
+        plt.close(fig)
 
 
 def calculate_iou(bboxes_a, bboxes_b):

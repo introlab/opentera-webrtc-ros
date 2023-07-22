@@ -21,7 +21,8 @@ class FaceDetectionWider(Dataset):
 
         self._transform = transform
 
-    def _list_images(self, root, image_folder, annotation_file):
+    @staticmethod
+    def _list_images(root, image_folder, annotation_file):
         images = []
 
         with open(annotation_file) as f:
@@ -61,23 +62,3 @@ class FaceDetectionWider(Dataset):
             image, bboxes = self._transform(image, bboxes)
 
         return image, bboxes
-
-
-# TODO remove after mosaic
-if __name__ == '__main__':
-    from PIL import ImageDraw
-
-    d = FaceDetectionWider('/home/marc-antoine/Bureau/Maitrîse/dataset_data/WIDER')
-
-    image, bboxes = d[4]
-
-    draw = ImageDraw.Draw(image)
-
-    for bbox in bboxes:
-        draw.rectangle(bbox.tolist(), outline=(255, 0, 0))
-
-    print(bboxes)
-
-    image.show()
-
-

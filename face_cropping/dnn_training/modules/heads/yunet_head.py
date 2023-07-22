@@ -1,15 +1,12 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from .head import Head
 from ..common.yunet_modules import DWUnit
 
-from mmdet.sim_ota_assigner import SimOTAAssigner
-
 
 class YunetHead(Head):
-    def __init__(self, channels, strides, activation=nn.ReLU):
+    def __init__(self, channels, strides, head_kernel_size=3, activation=nn.ReLU):
         super().__init__(strides)
         if len(channels) == 0:
             raise ValueError('The channels list is empty.')
@@ -19,9 +16,17 @@ class YunetHead(Head):
             raise ValueError('All channels must be equals')
 
         self._convs = nn.ModuleList([DWUnit(in_channels=c, out_channels=c, activation=activation) for c in channels])
-        self._confidence_heads = nn.ModuleList([DWUnit(in_channels=c, out_channels=1, activation=activation)
+        self._confidence_heads = nn.ModuleList([DWUnit(in_channels=c,
+                                                       out_channels=1,
+                                                       activation=activation,
+                                                       kernel_size=head_kernel_size,
+                                                       end_activation=False)
                                                 for c in channels])
-        self._bbox_heads = nn.ModuleList([DWUnit(in_channels=c, out_channels=4, activation=activation)
+        self._bbox_heads = nn.ModuleList([DWUnit(in_channels=c,
+                                                 out_channels=4,
+                                                 activation=activation,
+                                                 kernel_size=head_kernel_size,
+                                                 end_activation=False)
                                           for c in channels])
 
     def forward(self, in_feature_maps):
@@ -35,7 +40,7 @@ class YunetHead(Head):
         mid_feature_maps = [conv(x) for conv, x in zip(self._convs, in_feature_maps)]
 
         predictions = []
-        priors = self.generate_prior_grids(mid_feature_maps)
+        priors = self.generate_prior_grids(mid_feature_maps, offset=0.0)
         priors = [self.prior_grid_to_list(p) for p in priors]
         for i in range(len(mid_feature_maps)):
             confidences = self._confidence_heads[i](mid_feature_maps[i])
@@ -62,41 +67,3 @@ class YunetHead(Head):
         br_y = cy + h / 2
 
         return torch.stack([c, tl_x, tl_y, br_x, br_y], dim=2)
-
-    def loss(self, model_output, targets):
-        assigner = SimOTAAssigner()
-
-        predictions, priors = model_output
-        decoded_bboxes = self.decode_predictions(predictions, priors)
-
-        N = predictions.size(0)
-        loss = 0
-        for n in range(N):
-            loss += self._loss_single(assigner, predictions[n], priors, decoded_bboxes[n], targets[n])
-
-        return loss / N
-
-    def _loss_single(self, assigner, prediction, priors, decoded_bboxes, targets):
-        with torch.no_grad():
-            assign_result = assigner.assign(decoded_bboxes[:, 0:1],
-                                            priors,
-                                            decoded_bboxes[:, 1:],
-                                            targets,
-                                            torch.zeros(targets.size(0), dtype=torch.long, device=targets.device))
-
-            # From https://github.com/ShiqiYu/libfacedetection.train/blob/master/mmdet/core/bbox/samplers/pseudo_sampler.py
-            positive_indexes = torch.nonzero(assign_result.gt_inds > 0, as_tuple=False).unique()
-            negative_indexes = torch.nonzero(assign_result.gt_inds == 0, as_tuple=False).unique()
-
-            #positive_ious = assign_result.max_overlaps[positive_indexes]
-            positive_target_indexes = assign_result.gt_inds[positive_indexes] - 1
-
-        loss = F.binary_cross_entropy_with_logits(prediction[positive_indexes, 0],
-                                                  torch.ones_like(prediction[positive_indexes, 0]))
-        loss += F.binary_cross_entropy_with_logits(prediction[negative_indexes, 0],
-                                                   torch.zeros_like(prediction[negative_indexes, 0]))
-        loss += 5 * self._bboxes_loss(decoded_bboxes, positive_indexes, positive_target_indexes, targets)
-        return loss
-
-    def _bboxes_loss(self, decoded_bboxes, positive_indexes, positive_target_indexes, targets):
-        return F.mse_loss(decoded_bboxes[positive_indexes, 1:], targets[positive_target_indexes, :])

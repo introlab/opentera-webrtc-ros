@@ -68,4 +68,4 @@ def filter_decoded_bboxes(bboxes, confidence_threshold=0.5, nms_threshold=0.45):
     indexes = torchvision.ops.nms(confident_bboxes[:, TL_X_INDEX:],
                                   confident_bboxes[:, CONFIDENCE_INDEX],
                                   iou_threshold=nms_threshold)
-    return bboxes[indexes, :]
+    return confident_bboxes[indexes, :]
