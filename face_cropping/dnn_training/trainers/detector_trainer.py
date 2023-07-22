@@ -12,7 +12,7 @@ from criterions import SingleClassDetectionLoss
 from datasets import FaceDetectionWider, HeadDetectionOpenImages
 from datasets import detection_collate, DetectionValidationTransform, DetectionMosaicDataset
 from datasets import BeforeMosaicDetectionTrainingTransform, AfterMosaicDetectionTrainingTransform
-from metrics import AveragePrecisionMetric, LossMetric, LossLearningCurves
+from metrics import AveragePrecisionMetric, LossMetric, LossAveragePrecisionLearningCurves
 from modules.heads import filter_decoded_bboxes, CONFIDENCE_INDEX, TL_X_INDEX, TL_Y_INDEX, BR_X_INDEX, BR_Y_INDEX
 
 
@@ -35,10 +35,11 @@ class DetectorTrainer(Trainer):
 
         self._dataset_root = dataset_root
 
-        self._learning_curves = LossLearningCurves()
+        self._learning_curves = LossAveragePrecisionLearningCurves()
 
         self._training_loss_metric = LossMetric()
         self._validation_loss_metric = LossMetric()
+        self._validation_ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.1)
 
     def _create_criterion(self, model):
         detection_loss = SingleClassDetectionLoss(confidence_loss_type='focal_loss', bbox_loss_type='eiou_loss')
@@ -99,31 +100,39 @@ class DetectorTrainer(Trainer):
 
     def _clear_between_validation_epoch(self):
         self._validation_loss_metric.clear()
+        self._validation_ap_metric.clear()
 
     def _measure_validation_metrics(self, loss, model_output, targets):
         self._validation_loss_metric.add(loss.item())
 
+        predictions, priors = model_output
+        decode_bboxes = self.model().decode_predictions(predictions, priors)
+        self._validation_ap_metric.add(decode_bboxes, targets)
+
     def _print_performances(self):
         print('\nTraining : Loss={}'.format(self._training_loss_metric.get_loss()))
-        print('Validation : Loss={}\n'.format(self._validation_loss_metric.get_loss()))
+        print('Validation : Loss={} AP@0.5={}\n'.format(self._validation_loss_metric.get_loss(),
+                                                        self._validation_ap_metric.get_value()))
 
     def _save_learning_curves(self):
         self._learning_curves.add_training_loss_value(self._training_loss_metric.get_loss())
         self._learning_curves.add_validation_loss_value(self._validation_loss_metric.get_loss())
+        self._learning_curves.add_validation_ap_value(self._validation_ap_metric.get_value())
 
         self._learning_curves.save(os.path.join(self._output_path, 'learning_curves.png'),
                                    os.path.join(self._output_path, 'learning_curves.json'))
 
     def _evaluate(self, model, device, dataset_loader, output_path):
-        print('Evaluation - Detection', flush=True)
+        _evaluate_all_datasets(model, device, dataset_loader, output_path)
+
         if self._dataset_type == 'wider_face':
             _write_wider_face_val_results(self._dataset_root, self._image_size, self.model(), device, output_path)
 
-        _evaluate_all_datasets(model, device, dataset_loader, output_path)
-
 
 def _evaluate_all_datasets(model, device, dataset_loader, output_path):
-    ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.1)
+    print('Evaluation - Detection', flush=True)
+
+    ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.01)
 
     for data in tqdm(dataset_loader):
         predictions, priors = model(data[0].to(device))
@@ -137,6 +146,8 @@ def _evaluate_all_datasets(model, device, dataset_loader, output_path):
 
 
 def _write_wider_face_val_results(dataset_root, image_size, model, device, output_path):
+    print('Evaluation - WiderFace Results', flush=True)
+
     test_root_path = os.path.join(dataset_root, 'WIDER_val', 'images')
     output_root_path = os.path.join(output_path, 'wider_results')
 

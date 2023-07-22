@@ -14,16 +14,15 @@ class AveragePrecisionMetric:
         self._nms_threshold = nms_threshold
 
         self._target_count = 0
-        self._results = []
-
-        self._is_dirty = True
-        self._ap_cache = None
-        self._recalls_cache = None
-        self._precisions_cache = None
+        self._confidences = []
+        self._true_positives = []
+        self._false_positives = []
 
     def clear(self):
         self._target_count = 0
-        self._results = []
+        self._confidences = []
+        self._true_positives = []
+        self._false_positives = []
 
     def add(self, predictions, targets):
         """
@@ -36,9 +35,6 @@ class AveragePrecisionMetric:
         for n in range(predictions.size(0)):
             self._add_single(predictions[n], targets[n])
 
-        self._is_dirty = True
-
-    # TODO optimize
     def _add_single(self, prediction, target):
         """
         :param prediction: tensor (M, 5) where the third dimension is [c, tl_x, tl_y, br_x, br_y]
@@ -54,11 +50,13 @@ class AveragePrecisionMetric:
         M = sorted_prediction.size(0)
         K = target.size(0)
 
+        all_ious = calculate_iou(sorted_prediction[:, 1:].repeat_interleave(K, dim=0), target.repeat(M, 1))
+
         found_target = set()
         for m in range(M):
             confidence = sorted_prediction[m, 0]
 
-            ious = calculate_iou(sorted_prediction[m:m + 1, 1:].repeat(K, 1), target)
+            ious = all_ious[m * K: (m + 1) * K]
             target_index = torch.argmax(ious)
             iou = ious[target_index]
 
@@ -68,53 +66,35 @@ class AveragePrecisionMetric:
                 false_positive = 1
             elif iou > self._iou_threshold:
                 true_positive = 1
-            found_target.add(target_index)
+                found_target.add(target_index)
 
-            self._results.append({
-                'confidence': confidence,
-                'true_positive': true_positive,
-                'false_positive': false_positive,
-            })
+            self._confidences.append(confidence)
+            self._true_positives.append(true_positive)
+            self._false_positives.append(false_positive)
 
-    def get_value(self, output_curve=False):
-        if not self._is_dirty:
-            if output_curve:
-                return self._ap_cache, self._recalls_cache, self._precisions_cache
-            else:
-                return self._ap_cache
+    def get_value(self, output_curve=False, eps=1e-7):
+        confidences = torch.tensor(self._confidences)
+        true_positives = torch.tensor(self._true_positives)
+        false_positives = torch.tensor(self._false_positives)
 
-        sorted_results = sorted(self._results, key=lambda result: result['confidence'], reverse=True)
+        sorted_index = torch.argsort(confidences, descending=True)
+        true_positives = true_positives[sorted_index]
+        false_positives = false_positives[sorted_index]
 
-        recalls = [0]
-        precisions = [1]
+        cum_true_positives = torch.cumsum(true_positives, dim=0)
+        cum_false_positives = torch.cumsum(false_positives, dim=0)
 
-        true_positive = 0
-        false_positive = 0
-        for result in sorted_results:
-            true_positive += result['true_positive']
-            false_positive += result['false_positive']
-
-            recalls.append(true_positive / self._target_count if self._target_count > 0 else 0)
-
-            precision_denominator = true_positive + false_positive
-            precisions.append(true_positive / precision_denominator if precision_denominator > 0 else 1)
-
-        recalls = torch.tensor(recalls)
-        precisions = torch.tensor(precisions)
+        recalls = cum_true_positives / (self._target_count + eps)
+        precisions = cum_true_positives / (cum_true_positives + cum_false_positives + eps)
 
         sorted_index = torch.argsort(recalls)
         recalls = recalls[sorted_index]
         precisions = precisions[sorted_index]
 
-        ap = torch.trapz(y=precisions, x=recalls)
-
-        self._is_dirty = False
-        self._ap_cache = ap
-        self._recalls_cache = recalls
-        self._precisions_cache = precisions
+        ap = torch.trapz(y=precisions, x=recalls).item()
 
         if output_curve:
-            return ap, recalls, precisions
+            return ap, recalls.tolist(), precisions.tolist()
         else:
             return ap
 
