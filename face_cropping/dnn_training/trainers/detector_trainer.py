@@ -10,7 +10,7 @@ from tqdm import tqdm
 from .trainer import Trainer
 from criterions import SingleClassDetectionLoss
 from datasets import FaceDetectionWider, HeadDetectionOpenImages
-from datasets import detection_collate, DetectionValidationTransform, DetectionMosaicDataset
+from datasets import detection_collate, DetectionTrainingTransform, DetectionValidationTransform, DetectionMosaicDataset
 from datasets import BeforeMosaicDetectionTrainingTransform, AfterMosaicDetectionTrainingTransform
 from metrics import AveragePrecisionMetric, LossMetric, LossAveragePrecisionLearningCurves
 from modules.heads import filter_decoded_bboxes, CONFIDENCE_INDEX, TL_X_INDEX, TL_Y_INDEX, BR_X_INDEX, BR_Y_INDEX
@@ -19,10 +19,11 @@ from modules.heads import filter_decoded_bboxes, CONFIDENCE_INDEX, TL_X_INDEX, T
 class DetectorTrainer(Trainer):
     def __init__(self, device, model, dataset_root='', dataset_type='', output_path='',
                  epoch_count=10, learning_rate=0.01, weight_decay=0.0, batch_size=128,
-                 image_size=(224, 224),
+                 image_size=(224, 224), use_mosaic=False,
                  model_checkpoint=None):
         self._dataset_type = dataset_type
         self._image_size = image_size
+        self._use_mosaic = use_mosaic
         super(DetectorTrainer, self).__init__(device, model,
                                               dataset_root=dataset_root,
                                               output_path=output_path,
@@ -52,39 +53,16 @@ class DetectorTrainer(Trainer):
         return loss
 
     def _create_training_dataset_loader(self, dataset_root, batch_size, batch_size_division):
-        transform = BeforeMosaicDetectionTrainingTransform()
-        dataset = self._create_dataset(dataset_root, 'training', transform)
-
-        transform = AfterMosaicDetectionTrainingTransform()
-        mosaic_dataset = DetectionMosaicDataset(dataset, self._image_size, transform=transform)
-        return self._create_dataset_loader(mosaic_dataset, batch_size, batch_size_division, shuffle=True)
+        return create_training_dataset_loader(self._dataset_type, dataset_root,
+                                              self._image_size, self._use_mosaic, batch_size, batch_size_division)
 
     def _create_validation_dataset_loader(self, dataset_root, batch_size, batch_size_division):
-        transform = DetectionValidationTransform(self._image_size)
-        dataset = self._create_dataset(dataset_root, 'validation', transform)
-        return self._create_dataset_loader(dataset, batch_size, batch_size_division, shuffle=False)
+        return create_validation_dataset_loader(self._dataset_type, dataset_root,
+                                                self._image_size, batch_size, batch_size_division)
 
     def _create_testing_dataset_loader(self, dataset_root, batch_size, batch_size_division):
-        transform = DetectionValidationTransform(self._image_size)
-        dataset = self._create_dataset(dataset_root, 'testing', transform)
-        return self._create_dataset_loader(dataset, batch_size, batch_size_division, shuffle=False)
-
-    def _create_dataset(self, dataset_root, split, transform):
-        if self._dataset_type == 'wider_face':
-            return FaceDetectionWider(dataset_root,
-                                         split=split if split != 'testing' else 'validation',
-                                         transform=transform)
-        elif self._dataset_type == 'open_images_head':
-            return HeadDetectionOpenImages(dataset_root, split=split, transform=transform)
-        else:
-            raise ValueError('Invalid dataset type')
-
-    def _create_dataset_loader(self, dataset, batch_size, batch_size_division, shuffle):
-        return torch.utils.data.DataLoader(dataset,
-                                           batch_size=batch_size // batch_size_division,
-                                           shuffle=shuffle,
-                                           num_workers=8,
-                                           collate_fn=detection_collate)
+        return create_testing_dataset_loader(self._dataset_type, dataset_root,
+                                             self._image_size, batch_size, batch_size_division)
 
     def _clear_between_training(self):
         self._learning_curves.clear()
@@ -93,7 +71,7 @@ class DetectorTrainer(Trainer):
         self._training_loss_metric.clear()
 
     def _move_target_to_device(self, targets, device):
-        return _move_target_to_device(targets, device)
+        return move_target_to_device(targets, device)
 
     def _measure_training_metrics(self, loss, model_output, targets):
         self._training_loss_metric.add(loss.item())
@@ -111,8 +89,8 @@ class DetectorTrainer(Trainer):
 
     def _print_performances(self):
         print('\nTraining : Loss={}'.format(self._training_loss_metric.get_loss()))
-        print('Validation : Loss={} AP@0.5={}\n'.format(self._validation_loss_metric.get_loss(),
-                                                        self._validation_ap_metric.get_value()))
+        print('Validation : Loss={}, AP@0.5={}\n'.format(self._validation_loss_metric.get_loss(),
+                                                         self._validation_ap_metric.get_value()))
 
     def _save_learning_curves(self):
         self._learning_curves.add_training_loss_value(self._training_loss_metric.get_loss())
@@ -123,10 +101,60 @@ class DetectorTrainer(Trainer):
                                    os.path.join(self._output_path, 'learning_curves.json'))
 
     def _evaluate(self, model, device, dataset_loader, output_path):
-        _evaluate_all_datasets(model, device, dataset_loader, output_path)
+        evaluate(model, self.model(), device, dataset_loader, output_path,
+                 self._dataset_type, self._dataset_root, self._image_size)
 
-        if self._dataset_type == 'wider_face':
-            _write_wider_face_val_results(self._dataset_root, self._image_size, self.model(), device, output_path)
+
+def create_training_dataset_loader(dataset_type, dataset_root, image_size, use_mosaic, batch_size, batch_size_division):
+    if use_mosaic:
+        transform = BeforeMosaicDetectionTrainingTransform()
+        dataset = _create_dataset(dataset_type, dataset_root, 'training', transform)
+
+        transform = AfterMosaicDetectionTrainingTransform()
+        dataset = DetectionMosaicDataset(dataset, image_size, transform=transform)
+    else:
+        transform = DetectionTrainingTransform(image_size)
+        dataset = _create_dataset(dataset_type, dataset_root, 'training', transform)
+
+    return _create_dataset_loader(dataset, batch_size, batch_size_division, shuffle=True)
+
+
+def create_validation_dataset_loader(dataset_type, dataset_root, image_size, batch_size, batch_size_division):
+    transform = DetectionValidationTransform(image_size)
+    dataset = _create_dataset(dataset_type, dataset_root, 'validation', transform)
+    return _create_dataset_loader(dataset, batch_size, batch_size_division, shuffle=False)
+
+
+def create_testing_dataset_loader(dataset_type, dataset_root, image_size, batch_size, batch_size_division):
+    transform = DetectionValidationTransform(image_size)
+    dataset = _create_dataset(dataset_type, dataset_root, 'testing', transform)
+    return _create_dataset_loader(dataset, batch_size, batch_size_division, shuffle=False)
+
+
+def _create_dataset(dataset_type, dataset_root, split, transform):
+    if dataset_type == 'wider_face':
+        return FaceDetectionWider(dataset_root,
+                                     split=split if split != 'testing' else 'validation',
+                                     transform=transform)
+    elif dataset_type == 'open_images_head':
+        return HeadDetectionOpenImages(dataset_root, split=split, transform=transform)
+    else:
+        raise ValueError('Invalid dataset type')
+
+
+def _create_dataset_loader(dataset, batch_size, batch_size_division, shuffle):
+    return torch.utils.data.DataLoader(dataset,
+                                       batch_size=batch_size // batch_size_division,
+                                       shuffle=shuffle,
+                                       num_workers=8,
+                                       collate_fn=detection_collate)
+
+
+def evaluate(model, single_gpu_model, device, dataset_loader, output_path, dataset_type, dataset_root, image_size):
+    _evaluate_all_datasets(model, device, dataset_loader, output_path)
+
+    if dataset_type == 'wider_face':
+        _write_wider_face_val_results(dataset_root, image_size, single_gpu_model, device, output_path)
 
 
 def _evaluate_all_datasets(model, device, dataset_loader, output_path):
@@ -136,7 +164,7 @@ def _evaluate_all_datasets(model, device, dataset_loader, output_path):
 
     for data in tqdm(dataset_loader):
         predictions, priors = model(data[0].to(device))
-        targets = _move_target_to_device(data[1], device)
+        targets = move_target_to_device(data[1], device)
 
         bboxes = model.decode_predictions(predictions, priors)
         ap_metric.add(bboxes, targets)
@@ -183,5 +211,5 @@ def _write_wider_face_val_results(dataset_root, image_size, model, device, outpu
                     f.write(f'{tl_x} {tl_y} {br_x - tl_x} {br_y - tl_y} {c}\n')
 
 
-def _move_target_to_device(targets, device):
+def move_target_to_device(targets, device):
     return [t.to(device) for t in targets]

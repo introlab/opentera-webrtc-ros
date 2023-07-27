@@ -113,6 +113,35 @@ class AfterMosaicDetectionTrainingTransform(nn.Module):
         return normalize(image_tensor), bboxes
 
 
+class DetectionTrainingTransform(nn.Module):
+    def __init__(self, image_size, horizontal_flip_p=0.5):
+        super().__init__()
+        self._image_size = image_size
+
+        self._image_only_transform = transforms.Compose([
+            transforms.ColorJitter(brightness=0.2, saturation=0.2, contrast=0.2, hue=0.2),
+            transforms.RandomGrayscale(p=0.1),
+            RandomSharpnessChange(),
+            RandomAutocontrast(),
+            RandomEqualize(),
+            RandomPosterize(),
+        ])
+
+        self._horizontal_flip_p = horizontal_flip_p
+
+    def forward(self, image, bboxes):
+        image = self._image_only_transform(image)
+        image, bboxes = _random_crop(image, bboxes)
+
+        if random.random() < self._horizontal_flip_p:
+            image, bboxes = _horizontal_flip(image, bboxes)
+
+        resized_image, scale = resize_image(image, self._image_size)
+
+        resized_image_tensor = F.to_tensor(resized_image)
+        return normalize(resized_image_tensor), bboxes * scale
+
+
 class DetectionValidationTransform(nn.Module):
     def __init__(self, image_size):
         super().__init__()

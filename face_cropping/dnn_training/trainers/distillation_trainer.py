@@ -173,3 +173,9 @@ class DistillationTrainer:
 
     def _evaluate(self, model, device, dataset_loader, output_path):
         raise NotImplementedError()
+
+    def student_model(self):
+        if isinstance(self._student_model, nn.DataParallel):
+            return self._student_model.module
+        else:
+            return self._student_model

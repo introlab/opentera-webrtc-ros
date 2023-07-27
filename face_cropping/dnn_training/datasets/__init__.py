@@ -6,4 +6,4 @@ from .detection_mosaic_dataset import DetectionMosaicDataset
 from .transforms import RandomSharpnessChange, RandomEqualize, RandomPosterize, RandomAutocontrast
 from .detection_transforms import detection_collate
 from .detection_transforms import BeforeMosaicDetectionTrainingTransform, AfterMosaicDetectionTrainingTransform
-from .detection_transforms import DetectionValidationTransform
+from .detection_transforms import DetectionTrainingTransform, DetectionValidationTransform

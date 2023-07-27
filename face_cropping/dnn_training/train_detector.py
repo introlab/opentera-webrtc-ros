@@ -7,7 +7,7 @@ from models import Detector
 from modules.backbones import YuNetBackbone
 from modules.necks import YunetFpn
 from modules.heads import YunetHead
-from trainers import DetectorTrainer
+from trainers import DetectorTrainer, DetectorDistillationTrainer
 
 from train_backbone import activation_name_to_class
 from program_arguments import save_arguments, print_arguments
@@ -26,12 +26,21 @@ def main():
     parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
+    parser.add_argument('--use_mosaic', action='store_true', help='Use the GPU')
+
     parser.add_argument('--learning_rate', type=float, help='Choose the learning rate', required=True)
     parser.add_argument('--weight_decay', type=float, help='Choose the weight decay', required=True)
     parser.add_argument('--batch_size', type=int, help='Set the batch size for the training', required=True)
     parser.add_argument('--epoch_count', type=int, help='Choose the epoch count', required=True)
 
     parser.add_argument('--model_checkpoint', type=str, help='Choose the model checkpoint file', default=None)
+
+    parser.add_argument('--teacher_channel_scale', type=int, help='Choose the teacher channel scale',
+                        default=None)
+    parser.add_argument('--teacher_model_checkpoint', type=str, help='Choose the teacher model checkpoint file',
+                        default=None)
+    parser.add_argument('--distillation_loss_alpha', type=float, help='Choose the alpha for the distillation loss',
+                        default=0.25)
 
     args = parser.parse_args()
 
@@ -42,20 +51,41 @@ def main():
     output_path = os.path.join(args.output_path, args.dataset_type + '_s' + str(args.channel_scale) +
                                '_hk'+ str(args.head_kernel_size) + '_' + args.activation +
                                '_' + str(image_size[0]) + 'x' + str(image_size[1]) +
-                               '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay))
+                               '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay) +
+                               ('_mosaic' if args.use_mosaic else '') +
+                               '_ts' + str(args.teacher_channel_scale) + '_a' + str(args.distillation_loss_alpha))
     save_arguments(output_path, args)
     print_arguments(args)
 
-    trainer = DetectorTrainer(device, model,
-                              dataset_root=args.dataset_root,
-                              dataset_type=args.dataset_type,
-                              output_path=output_path,
-                              epoch_count=args.epoch_count,
-                              learning_rate=args.learning_rate,
-                              weight_decay=args.weight_decay,
-                              batch_size=args.batch_size,
-                              image_size=image_size,
-                              model_checkpoint=args.model_checkpoint)
+    if args.teacher_channel_scale is not None and args.teacher_model_checkpoint is not None:
+        teacher_model = create_model(args.teacher_channel_scale, args.head_kernel_size, args.activation)
+        trainer = DetectorDistillationTrainer(device, model, teacher_model,
+                                              dataset_root=args.dataset_root,
+                                              dataset_type=args.dataset_type,
+                                              output_path=output_path,
+                                              epoch_count=args.epoch_count,
+                                              learning_rate=args.learning_rate,
+                                              weight_decay=args.weight_decay,
+                                              batch_size=args.batch_size,
+                                              image_size=image_size,
+                                              use_mosaic=args.use_mosaic,
+                                              student_model_checkpoint=args.model_checkpoint,
+                                              teacher_model_checkpoint=args.teacher_model_checkpoint,
+                                              loss_alpha=args.distillation_loss_alpha)
+    elif args.teacher_channel_scale is not None or args.teacher_model_checkpoint is not None:
+        raise ValueError('teacher_channel_scale and teacher_model_checkpoint must be set.')
+    else:
+        trainer = DetectorTrainer(device, model,
+                                  dataset_root=args.dataset_root,
+                                  dataset_type=args.dataset_type,
+                                  output_path=output_path,
+                                  epoch_count=args.epoch_count,
+                                  learning_rate=args.learning_rate,
+                                  weight_decay=args.weight_decay,
+                                  batch_size=args.batch_size,
+                                  image_size=image_size,
+                                  use_mosaic=args.use_mosaic,
+                                  model_checkpoint=args.model_checkpoint)
     trainer.train()
 
 
