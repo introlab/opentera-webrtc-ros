@@ -17,7 +17,7 @@ def main():
     parser.add_argument('--dataset_root', type=str, help='Choose the dataset root path', required=True)
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
-    parser.add_argument('--channel_scale', type=int, help='Choose the channel scale', required=True)
+    parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
     parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
@@ -42,7 +42,7 @@ def main():
     image_size = (args.image_size, args.image_size)
 
     output_path = os.path.join(args.output_path, 's' + str(args.channel_scale) + '_' + args.activation +
-                               '_' + str(args.image_width) + 'x' + str(args.image_height) +
+                               '_' + str(image_size[1]) + 'x' + str(image_size[0]) +
                                '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay) +
                                '_ts' + str(args.teacher_channel_scale) + '_a' + str(args.distillation_loss_alpha))
     save_arguments(output_path, args)

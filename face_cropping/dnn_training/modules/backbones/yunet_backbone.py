@@ -10,30 +10,30 @@ class YuNetBackbone(Backbone):
         self._channel_scale = channel_scale
 
         self._stage0 = ConvHead(in_channels=3,
-                                mid_channels=16 * channel_scale,
-                                out_channels=16 * channel_scale,
+                                mid_channels=int(16 * channel_scale),
+                                out_channels=int(16 * channel_scale),
                                 activation=activation)
 
         self._stage1 = nn.Sequential(
             nn.MaxPool2d(kernel_size=2),
-            DWBlock(in_channels=16 * channel_scale, out_channels=16 * channel_scale, activation=activation),
-            DWBlock(in_channels=16 * channel_scale, out_channels=64 * channel_scale, activation=activation)
+            DWBlock(in_channels=int(16 * channel_scale), out_channels=int(16 * channel_scale), activation=activation),
+            DWBlock(in_channels=int(16 * channel_scale), out_channels=int(64 * channel_scale), activation=activation)
         )
         self._stage2 = nn.Sequential(
-            DWBlock(in_channels=64 * channel_scale, out_channels=64 * channel_scale, activation=activation),
+            DWBlock(in_channels=int(64 * channel_scale), out_channels=int(64 * channel_scale), activation=activation),
             nn.MaxPool2d(kernel_size=2)
         )
         self._stage3 = nn.Sequential(
-            DWBlock(in_channels=64 * channel_scale, out_channels=64 * channel_scale, activation=activation),
+            DWBlock(in_channels=int(64 * channel_scale), out_channels=int(64 * channel_scale), activation=activation),
             nn.MaxPool2d(kernel_size=2)
         )
         self._stage4 = nn.Sequential(
-            DWBlock(in_channels=64 * channel_scale, out_channels=64 * channel_scale, activation=activation),
+            DWBlock(in_channels=int(64 * channel_scale), out_channels=int(64 * channel_scale), activation=activation),
             nn.MaxPool2d(kernel_size=2)
         )
 
     def output_channels(self):
-        return [64 * self._channel_scale] * 3
+        return [int(64 * self._channel_scale)] * 3
 
     def output_strides(self):
         return [8, 16, 32]

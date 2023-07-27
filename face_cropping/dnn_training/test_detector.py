@@ -14,7 +14,7 @@ from train_detector import create_model
 def main():
     parser = argparse.ArgumentParser(description='Train Backbone')
     parser.add_argument('--use_gpu', action='store_true', help='Use the GPU')
-    parser.add_argument('--channel_scale', type=int, help='Choose the channel scale', required=True)
+    parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
     parser.add_argument('--head_kernel_size', type=int, help='Choose the head kernel size', required=True)
     parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
