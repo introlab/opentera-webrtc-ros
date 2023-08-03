@@ -160,17 +160,25 @@ def evaluate(model, single_gpu_model, device, dataset_loader, output_path, datas
 def _evaluate_all_datasets(model, device, dataset_loader, output_path):
     print('Evaluation - Detection', flush=True)
 
-    ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.01)
+    ap50_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.01)
+    ap75_metric = AveragePrecisionMetric(iou_threshold=0.75, confidence_threshold=0.01)
+    ap90_metric = AveragePrecisionMetric(iou_threshold=0.90, confidence_threshold=0.01)
 
     for data in tqdm(dataset_loader):
         predictions, priors = model(data[0].to(device))
         targets = move_target_to_device(data[1], device)
 
         bboxes = model.decode_predictions(predictions, priors)
-        ap_metric.add(bboxes, targets)
+        ap50_metric.add(bboxes, targets)
+        ap75_metric.add(bboxes, targets)
+        ap90_metric.add(bboxes, targets)
 
-    print('\nTest : Top 1 AP@0.5={}'.format(ap_metric.get_value()))
-    ap_metric.save_curve(output_path)
+    print('\nTest : AP@0.5={}, AP@0.75={}, AP@0.9={}'.format(ap50_metric.get_value(),
+                                                             ap75_metric.get_value(),
+                                                             ap90_metric.get_value()))
+    ap50_metric.save_curve(output_path, suffix='_50')
+    ap75_metric.save_curve(output_path, suffix='_75')
+    ap90_metric.save_curve(output_path, suffix='_90')
 
 
 def _write_wider_face_val_results(dataset_root, image_size, model, device, output_path):

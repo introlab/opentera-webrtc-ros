@@ -18,7 +18,8 @@ def main():
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
     parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
-    parser.add_argument('--activation', choices=['relu', 'silu'], help='Choose the activation', required=True)
+    parser.add_argument('--activation', choices=['relu', 'leaky_relu', 'silu'], help='Choose the activation',
+                        required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
     parser.add_argument('--learning_rate', type=float, help='Choose the learning rate', required=True)
@@ -86,6 +87,8 @@ def create_model(channel_scale, activation_name):
 def activation_name_to_class(name):
     if name == 'relu':
         return nn.ReLU
+    elif name == 'leaky_relu':
+        return nn.LeakyReLU
     elif name == 'silu':
         return nn.SiLU
     else:

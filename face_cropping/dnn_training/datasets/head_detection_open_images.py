@@ -12,7 +12,7 @@ HEAD_CLASS_ID = '/m/04hgtk'
 
 
 class HeadDetectionOpenImages(Dataset):
-    def __init__(self, root, split='training', transform=None):
+    def __init__(self, root, split='training', transform=None, min_head_face_ratio=0.25, max_head_face_ratio=0.75):
         if split == 'training':
             self._root = os.path.join(root, 'train')
         elif split == 'validation':
@@ -25,7 +25,7 @@ class HeadDetectionOpenImages(Dataset):
         self._transform = transform
 
         self._rotation_by_image_id = self._list_rotations()
-        self._images = self._list_images()
+        self._images = self._list_images(min_head_face_ratio, max_head_face_ratio)
 
     def _list_rotations(self):
         rotation_by_image_id = {}
@@ -41,7 +41,7 @@ class HeadDetectionOpenImages(Dataset):
 
         return rotation_by_image_id
 
-    def _list_images(self):
+    def _list_images(self, min_head_face_ratio, max_head_face_ratio):
         bboxes = defaultdict(list)
 
         with open(os.path.join(self._root, 'labels', 'detections.csv'), newline='') as detection_file:
@@ -56,7 +56,14 @@ class HeadDetectionOpenImages(Dataset):
                 y_min = float(row[6])
                 y_max = float(row[7])
 
-                if class_id != HEAD_CLASS_ID:
+                width = x_max - x_min
+                height = y_max - y_min
+
+                if (class_id != HEAD_CLASS_ID or
+                        width < min_head_face_ratio or
+                        width > max_head_face_ratio or
+                        height < min_head_face_ratio or
+                        height > max_head_face_ratio):
                     continue
 
                 bboxes[image_id].append([x_min, y_min, x_max, y_max])

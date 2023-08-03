@@ -33,10 +33,10 @@ class YuNetBackbone(Backbone):
         )
 
     def output_channels(self):
-        return [int(64 * self._channel_scale)] * 3
+        return [int(64 * self._channel_scale)] * 1
 
     def output_strides(self):
-        return [8, 16, 32]
+        return [32]
 
     def forward(self, x):
         y0 = self._stage0(x)
@@ -45,4 +45,4 @@ class YuNetBackbone(Backbone):
         y3 = self._stage3(y2)
         y4 = self._stage4(y3)
 
-        return [y2, y3, y4]
+        return [y4]

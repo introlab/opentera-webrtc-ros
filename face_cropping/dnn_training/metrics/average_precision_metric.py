@@ -98,7 +98,7 @@ class AveragePrecisionMetric:
         else:
             return ap
 
-    def save_curve(self, output_path):
+    def save_curve(self, output_path, suffix=''):
         ap, recalls, precisions = self.get_value(output_curve=True)
         fig = plt.figure(figsize=(5, 5), dpi=300)
         ax1 = fig.add_subplot(111)
@@ -108,7 +108,7 @@ class AveragePrecisionMetric:
         ax1.set_xlabel(u'Recall')
         ax1.set_ylabel(u'Precision')
 
-        fig.savefig(os.path.join(output_path, 'pr_curve.png'))
+        fig.savefig(os.path.join(output_path, f'pr_curve{suffix}.png'))
         plt.close(fig)
 
 
