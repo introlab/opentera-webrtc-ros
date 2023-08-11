@@ -1,85 +1,32 @@
 <launch>
-    <arg name="name" default="face_cropping"/>
+    <arg name="name" default="face_cropping_node"/>
     <arg name="output" default="log"/>
 
     <arg name="input_camera_topic" default="/camera1/image_raw"/>
     <arg name="output_camera_topic" default="/face_camera/image_raw"/>
 
-    <arg name="refresh_rate" default="30.0"/>
-    <arg name="width" default="480"/>
-    <arg name="height" default="720"/>
+    <arg name="face_detection_model"/> <!-- TODO haarcascade, lbpcascade, ... or  -->
+    <arg name="use_gpu_if_available" default="false"/>
 
-    <arg name="seconds_without_detection" default="5"/>
+    <arg name="min_face_width" default="100"/>
+    <arg name="min_face_height" default="100"/>
+    <arg name="output_width" default="480"/>
+    <arg name="output_height" default="720"/>
 
-    <arg name="frames_used_for_stabilizer" default="15"/>
+    <arg name="adjust_brightness" default="true"/>
 
-    <arg name="min_width_change" default="0.15"/>
-    <arg name="min_height_change" default="0.15"/>
-    <arg name="min_x_change" default="0.15"/>
-    <arg name="min_y_change" default="0.15"/>
-
-    <arg name="right_margin" default="0.1"/>
-    <arg name="left_margin" default="0.1"/>
-    <arg name="top_margin" default="0.1"/>
-    <arg name="bottom_margin" default="0.2"/>
-
-    <arg name="is_peer_image" default="false"/>
-
-    <arg name="haar_cascade_path" default="$(find face_cropping)/models/haarcascade_frontalface_default.xml"/>
-    <arg name="lbp_cascade_path" default="$(find face_cropping)/models/lbpcascade_frontalface_improved.xml"/>
-
-    <arg name="use_lbp" default="false"/>
-
-    <arg name="detection_frames" default="1"/>
-    <arg name="detection_scale" default="1"/>
-    <arg name="min_face_width" default="75"/>
-    <arg name="min_face_height" default="75"/>
-
-    <arg name="max_position_step" default="0.15"/>
-    <arg name="max_size_step" default="0.15"/>
-
-    <arg name="face_storing_frames" default="15"/>
-    <arg name="valid_face_min_time" default="0.8"/>
-
-    <arg name="highlight_detections" default="false"/>
-
-    <node name="$(arg name)" pkg="face_cropping" type="face_cropping" respawn="true" output="$(arg output)">
+    <node name="$(arg name)" pkg="face_cropping" type="face_cropping_node" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 
-        <param name="refresh_rate" type="double" value="$(arg refresh_rate)"/>
-        <param name="width" type="int" value="$(arg width)"/>
-        <param name="height" type="int" value="$(arg height)"/>
+        <param name="face_detection_model" value="$(arg face_detection_model)"/>
+        <param name="use_gpu_if_available" value="$(arg use_gpu_if_available)"/>
 
-        <param name="seconds_without_detection" type="int" value="$(arg seconds_without_detection)"/>
+        <param name="min_face_width" value="$(arg min_face_width)"/>
+        <param name="min_face_height" value="$(arg min_face_height)"/>
+        <param name="output_width" value="$(arg output_width)"/>
+        <param name="output_height" value="$(arg output_height)"/>
 
-        <param name="frames_used_for_stabilizer" type="int" value="$(arg frames_used_for_stabilizer)"/>
-
-        <param name="min_width_change" type="double" value="$(arg min_width_change)"/>
-        <param name="min_height_change" type="double" value="$(arg min_height_change)"/>
-        <param name="min_x_change" type="double" value="$(arg min_x_change)"/>
-        <param name="min_y_change" type="double" value="$(arg min_y_change)"/>
-
-        <param name="right_margin" type="double" value="$(arg right_margin)"/>
-        <param name="left_margin" type="double" value="$(arg left_margin)"/>
-        <param name="top_margin" type="double" value="$(arg top_margin)"/>
-        <param name="bottom_margin" type="double" value="$(arg bottom_margin)"/>
-
-        <param name="is_peer_image" type="bool" value="$(arg is_peer_image)"/>
-
-        <param name="haar_cascade_path" type="string" value="$(arg haar_cascade_path)"/>
-        <param name="lbp_cascade_path" type="string" value="$(arg lbp_cascade_path)"/>
-
-        <param name="use_lbp" type="bool" value="$(arg use_lbp)"/>
-
-        <param name="detection_frames" type="int" value="$(arg detection_frames)"/>
-        <param name="detection_scale" type="double" value="$(arg detection_scale)"/>
-        <param name="min_face_width" type="int" value="$(arg min_face_width)"/>
-        <param name="min_face_height" type="int" value="$(arg min_face_height)"/>
-
-        <param name="max_position_step" type="double" value="$(arg max_position_step)"/>
-        <param name="max_size_step" type="double" value="$(arg max_size_step)"/>
-
-        <param name="highlight_detections" type="bool" value="$(arg highlight_detections)"/>
+        <param name="adjust_brightness" value="$(arg adjust_brightness)"/>
     </node>
 </launch>
