@@ -41,11 +41,11 @@ class BackboneDistillationTrainer(DistillationTrainer):
 
     def _create_training_dataset_loader(self, dataset_root, batch_size, batch_size_division):
         transform = create_training_image_transform(self._image_size)
-        return create_dataset_loader(dataset_root, batch_size, batch_size_division, True, transform, shuffle=True)
+        return create_dataset_loader(dataset_root, batch_size, batch_size_division, True, transform)
 
     def _create_validation_dataset_loader(self, dataset_root, batch_size, batch_size_division):
         transform = create_validation_image_transform(self._image_size)
-        return create_dataset_loader(dataset_root, batch_size, batch_size_division, False, transform, shuffle=False)
+        return create_dataset_loader(dataset_root, batch_size, batch_size_division, False, transform)
 
     def _clear_between_training(self):
         self._learning_curves.clear()
