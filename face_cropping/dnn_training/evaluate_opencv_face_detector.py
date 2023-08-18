@@ -37,9 +37,10 @@ def main():
 
 
 def _create_dataset(dataset_type, dataset_root):
-    def transform(image, bboxes):
-        resized_image, scale = resize_image(image, IMAGE_SIZE)
-        return resized_image, bboxes * scale
+    def transform(pil_image, bboxes):
+        resized_pil_image, scale = resize_image(pil_image, IMAGE_SIZE)
+        resized_cv_image = cv2.cvtColor(np.array(resized_pil_image), cv2.COLOR_RGB2BGR)
+        return resized_cv_image, bboxes * scale
 
     if dataset_type == 'wider_face':
         return FaceDetectionWider(dataset_root, split='validation', transform=transform)
@@ -55,11 +56,11 @@ def _evaluate(dataset, face_detector, output_path, face_width_scale, face_height
     ap75_metric = AveragePrecisionMetric(iou_threshold=0.75, confidence_threshold=0.0)
     ap90_metric = AveragePrecisionMetric(iou_threshold=0.90, confidence_threshold=0.0)
 
-    for pil_image, bboxes in tqdm(dataset):
-        cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-        cv2.imwrite("test.png", cv_image)
-
-        faces, num_detections = face_detector.detectMultiScale2(cv_image, minNeighbors=1)
+    for cv_image, bboxes in tqdm(dataset):
+        faces, num_detections = face_detector.detectMultiScale2(cv_image,
+                                                                minNeighbors=1,
+                                                                flags=cv2.CASCADE_SCALE_IMAGE,
+                                                                minSize=(IMAGE_SIZE[0] // 10, IMAGE_SIZE[1] // 10))
 
         if len(faces) == 0:
             predictions = torch.zeros(1, 0, 5)

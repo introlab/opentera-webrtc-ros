@@ -102,7 +102,7 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")
     include_directories(${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1/)
     set(TORCHVISION_LIBRARIES torchvision)
 else()
-    message(WARNING "Torch is not support for the CPU architecture.")
+    message(WARNING "Torch is not supported for the CPU architecture.")
     add_compile_definitions(NO_TORCH)
 endif()
 

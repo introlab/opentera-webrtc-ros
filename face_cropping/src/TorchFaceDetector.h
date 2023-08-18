@@ -74,7 +74,7 @@ class SmallYunet05Silu160FaceDetector : public TorchFaceDetector
 public:
     explicit SmallYunet05Silu160FaceDetector(bool useGpuIfAvailable);
 
-    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet025Silu160FaceDetector); }
+    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet05Silu160FaceDetector); }
 };
 
 class SmallYunet05Silu320FaceDetector : public TorchFaceDetector
@@ -82,7 +82,7 @@ class SmallYunet05Silu320FaceDetector : public TorchFaceDetector
 public:
     explicit SmallYunet05Silu320FaceDetector(bool useGpuIfAvailable);
 
-    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet025Silu160FaceDetector); }
+    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet05Silu320FaceDetector); }
 };
 
 class SmallYunet05Silu640FaceDetector : public TorchFaceDetector
@@ -90,7 +90,7 @@ class SmallYunet05Silu640FaceDetector : public TorchFaceDetector
 public:
     explicit SmallYunet05Silu640FaceDetector(bool useGpuIfAvailable);
 
-    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet025Silu160FaceDetector); }
+    [[nodiscard]] std::type_index type() const override { return typeid(SmallYunet05Silu640FaceDetector); }
 };
 
 #endif  // NO_TORCH

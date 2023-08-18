@@ -111,6 +111,7 @@ private:
     {
         if (!m_enabled)
         {
+            m_outputImagePublisher.publish(msg);
             return;
         }
 

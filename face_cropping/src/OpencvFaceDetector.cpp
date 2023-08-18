@@ -22,7 +22,7 @@ std::vector<FaceDetection> OpencvFaceDetector::detect(const cv::Mat& bgrImage)
         faceRects,
         1.1,
         3,
-        0 | cv::CASCADE_SCALE_IMAGE,
+        cv::CASCADE_SCALE_IMAGE,
         cv::Size(m_maxWidth / 20, m_maxHeight / 20));
 
     std::vector<FaceDetection> faceDetections;
