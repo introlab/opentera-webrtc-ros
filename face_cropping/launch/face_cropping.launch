@@ -5,7 +5,10 @@
     <arg name="input_camera_topic" default="/camera1/image_raw"/>
     <arg name="output_camera_topic" default="/face_camera/image_raw"/>
 
-    <arg name="face_detection_model" default="lbpcascade"/> <!-- TODO haarcascade, lbpcascade, ... or  -->
+    <!-- haarcascade, lbpcascade,
+         small_yunet_0.25_160, small_yunet_0.25_320, small_yunet_0.25_640,
+         small_yunet_0.5_160, small_yunet_0.5_320 or small_yunet_0.5_640 -->
+    <arg name="face_detection_model" default="lbpcascade"/>
     <arg name="use_gpu_if_available" default="false"/>
 
     <arg name="min_face_width" default="100"/>

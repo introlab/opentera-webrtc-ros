@@ -214,6 +214,8 @@ add_executable(face_cropping_node
     src/FaceDetector.h
     src/OpencvFaceDetector.h
     src/OpencvFaceDetector.cpp
+    src/TorchFaceDetector.h
+    src/TorchFaceDetector.cpp
     src/SinglePositionKalmanFilter.h
     src/SinglePositionKalmanFilter.cpp
     src/FaceCropper.h
@@ -224,6 +226,7 @@ add_executable(face_cropping_node
 target_link_libraries(face_cropping_node
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
+    ${TORCH_LIBRARIES}
     ${TORCHVISION_LIBRARIES}
 )
 
