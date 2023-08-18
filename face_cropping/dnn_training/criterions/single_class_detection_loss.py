@@ -6,7 +6,6 @@ from .eiou_loss import EiouLoss
 
 from mmdet.sim_ota_assigner import SimOTAAssigner
 
-
 BBOX_LOSS_SCALE = 5.0
 
 

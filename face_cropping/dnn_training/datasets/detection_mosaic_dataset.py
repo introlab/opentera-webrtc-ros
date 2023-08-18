@@ -51,7 +51,7 @@ class DetectionMosaicDataset(Dataset):
         mosaic_image.paste(image1, offset1)
 
         bboxes01 = torch.cat([self._transform_bboxes(bboxes0, scale0, offset0),
-                               self._transform_bboxes(bboxes1, scale1, offset1)], dim=0)
+                              self._transform_bboxes(bboxes1, scale1, offset1)], dim=0)
 
         image2_max_size = (mosaic_image.width, mosaic_image.height - min(image0.height, image1.height))
         image2, bboxes2 = self._dataset[random.randrange(0, len(self._dataset))]

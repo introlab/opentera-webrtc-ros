@@ -13,7 +13,7 @@ class DWUnit(nn.Module):
                   nn.BatchNorm2d(out_channels),
                   activation(),
                   nn.Conv2d(in_channels=out_channels, out_channels=out_channels,
-                            kernel_size=kernel_size, stride=1, padding= kernel_size // 2,
+                            kernel_size=kernel_size, stride=1, padding=kernel_size // 2,
                             bias=not end_activation, groups=out_channels)
                   ]
 

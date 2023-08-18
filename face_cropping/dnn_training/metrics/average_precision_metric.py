@@ -57,8 +57,8 @@ class AveragePrecisionMetric:
             confidence = sorted_prediction[m, 0]
 
             ious = all_ious[m * K: (m + 1) * K]
-            target_index = torch.argmax(ious)
-            iou = ious[target_index]
+            target_index = torch.argmax(ious).item()
+            iou = ious[target_index].item()
 
             true_positive = 0
             false_positive = 0

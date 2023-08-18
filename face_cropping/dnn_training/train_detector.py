@@ -14,7 +14,7 @@ from program_arguments import save_arguments, print_arguments
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Train Backbone')
+    parser = argparse.ArgumentParser(description='Train Detector')
     parser.add_argument('--use_gpu', action='store_true', help='Use the GPU')
     parser.add_argument('--dataset_root', type=str, help='Choose the dataset root path', required=True)
     parser.add_argument('--dataset_type', choices=['wider_face', 'open_images_head'],
@@ -50,7 +50,7 @@ def main():
     image_size = (args.image_size, args.image_size)
 
     output_path = os.path.join(args.output_path, args.dataset_type + '_s' + str(args.channel_scale) +
-                               '_hk'+ str(args.head_kernel_size) + '_' + args.activation +
+                               '_hk' + str(args.head_kernel_size) + '_' + args.activation +
                                '_' + str(image_size[0]) + 'x' + str(image_size[1]) +
                                '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay) +
                                ('_mosaic' if args.use_mosaic else '') +

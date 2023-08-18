@@ -122,7 +122,7 @@ class SimOTAAssigner:
         num_bboxes = decoded_bboxes.size(0)
 
         # assign 0 by default
-        assigned_gt_inds = decoded_bboxes.new_full((num_bboxes, ),
+        assigned_gt_inds = decoded_bboxes.new_full((num_bboxes,),
                                                    0,
                                                    dtype=torch.long)
         valid_mask, is_in_boxes_and_center = self.get_in_gt_and_in_center_info(
@@ -133,14 +133,14 @@ class SimOTAAssigner:
 
         if num_gt == 0 or num_bboxes == 0 or num_valid == 0:
             # No ground truth or boxes, return empty assignment
-            max_overlaps = decoded_bboxes.new_zeros((num_bboxes, ))
+            max_overlaps = decoded_bboxes.new_zeros((num_bboxes,))
             if num_gt == 0:
                 # No truth, assign everything to background
                 assigned_gt_inds[:] = 0
             if gt_labels is None:
                 assigned_labels = None
             else:
-                assigned_labels = decoded_bboxes.new_full((num_bboxes, ),
+                assigned_labels = decoded_bboxes.new_full((num_bboxes,),
                                                           -1,
                                                           dtype=torch.long)
             return AssignResult(
@@ -152,7 +152,7 @@ class SimOTAAssigner:
         gt_onehot_label = (
             F.one_hot(gt_labels.to(torch.int64),
                       pred_scores.shape[-1]).float().unsqueeze(0).repeat(
-                          num_valid, 1, 1))
+                num_valid, 1, 1))
 
         valid_pred_scores = valid_pred_scores.unsqueeze(1).repeat(1, num_gt, 1)
         cls_cost = (
@@ -163,8 +163,8 @@ class SimOTAAssigner:
             ).sum(-1).to(dtype=valid_pred_scores.dtype))
 
         cost_matrix = (
-            cls_cost * self.cls_weight + iou_cost * self.iou_weight +
-            (~is_in_boxes_and_center) * INF)
+                cls_cost * self.cls_weight + iou_cost * self.iou_weight +
+                (~is_in_boxes_and_center) * INF)
 
         matched_pred_ious, matched_gt_inds = \
             self.dynamic_k_matching(
@@ -172,9 +172,9 @@ class SimOTAAssigner:
 
         # convert to AssignResult format
         assigned_gt_inds[valid_mask] = matched_gt_inds + 1
-        assigned_labels = assigned_gt_inds.new_full((num_bboxes, ), -1)
+        assigned_labels = assigned_gt_inds.new_full((num_bboxes,), -1)
         assigned_labels[valid_mask] = gt_labels[matched_gt_inds].long()
-        max_overlaps = assigned_gt_inds.new_full((num_bboxes, ),
+        max_overlaps = assigned_gt_inds.new_full((num_bboxes,),
                                                  -INF,
                                                  dtype=torch.float32)
         max_overlaps[valid_mask] = matched_pred_ious
@@ -221,8 +221,8 @@ class SimOTAAssigner:
 
         # both in boxes and centers, shape: [num_fg, num_gt]
         is_in_boxes_and_centers = (
-            is_in_gts[is_in_gts_or_centers, :]
-            & is_in_cts[is_in_gts_or_centers, :])
+                is_in_gts[is_in_gts_or_centers, :]
+                & is_in_cts[is_in_gts_or_centers, :])
         return is_in_gts_or_centers, is_in_boxes_and_centers
 
     def dynamic_k_matching(self, cost, pairwise_ious, num_gt, valid_mask):

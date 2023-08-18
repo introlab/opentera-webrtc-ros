@@ -3,7 +3,6 @@ import torch.nn as nn
 
 import torchvision
 
-
 CONFIDENCE_INDEX = 0
 TL_X_INDEX = 1
 TL_Y_INDEX = 2

@@ -8,7 +8,7 @@ from modules import load_checkpoint
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Train Backbone')
+    parser = argparse.ArgumentParser(description='Export Detector')
     parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
     parser.add_argument('--head_kernel_size', type=int, help='Choose the head kernel size', required=True)
     parser.add_argument('--activation', choices=['relu', 'leaky_relu', 'silu'], help='Choose the activation',
@@ -29,8 +29,8 @@ def main():
     jit_model.save(args.output_path)
 
     if torch.cuda.is_available():
-        jit_model = torch.jit.trace(model.cuda().half(), x.cuda().half())
-        jit_model.save(args.output_path + '.cuda.half')
+        jit_model = torch.jit.trace(model.cuda(), x.cuda())
+        jit_model.save(args.output_path + '.cuda')
 
 
 if __name__ == '__main__':

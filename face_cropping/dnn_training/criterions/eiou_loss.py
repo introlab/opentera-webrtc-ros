@@ -53,4 +53,4 @@ class EiouLoss(nn.Module):
         if not torch.all(torch.isfinite(loss)):
             print()
 
-        return  loss
+        return loss

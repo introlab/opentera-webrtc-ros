@@ -134,8 +134,8 @@ def create_testing_dataset_loader(dataset_type, dataset_root, image_size, batch_
 def _create_dataset(dataset_type, dataset_root, split, transform):
     if dataset_type == 'wider_face':
         return FaceDetectionWider(dataset_root,
-                                     split=split if split != 'testing' else 'validation',
-                                     transform=transform)
+                                  split=split if split != 'testing' else 'validation',
+                                  transform=transform)
     elif dataset_type == 'open_images_head':
         return HeadDetectionOpenImages(dataset_root, split=split, transform=transform)
     else:
@@ -160,6 +160,7 @@ def evaluate(model, single_gpu_model, device, dataset_loader, output_path, datas
 def _evaluate_all_datasets(model, device, dataset_loader, output_path):
     print('Evaluation - Detection', flush=True)
 
+    ap25_metric = AveragePrecisionMetric(iou_threshold=0.25, confidence_threshold=0.01)
     ap50_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.01)
     ap75_metric = AveragePrecisionMetric(iou_threshold=0.75, confidence_threshold=0.01)
     ap90_metric = AveragePrecisionMetric(iou_threshold=0.90, confidence_threshold=0.01)
@@ -169,13 +170,16 @@ def _evaluate_all_datasets(model, device, dataset_loader, output_path):
         targets = move_target_to_device(data[1], device)
 
         bboxes = model.decode_predictions(predictions, priors)
+        ap25_metric.add(bboxes, targets)
         ap50_metric.add(bboxes, targets)
         ap75_metric.add(bboxes, targets)
         ap90_metric.add(bboxes, targets)
 
-    print('\nTest : AP@0.5={}, AP@0.75={}, AP@0.9={}'.format(ap50_metric.get_value(),
-                                                             ap75_metric.get_value(),
-                                                             ap90_metric.get_value()))
+    print('\nTest : AP@25={}, AP@0.5={}, AP@0.75={}, AP@0.9={}'.format(ap25_metric.get_value(),
+                                                                       ap50_metric.get_value(),
+                                                                       ap75_metric.get_value(),
+                                                                       ap90_metric.get_value()))
+    ap25_metric.save_curve(output_path, suffix='_25')
     ap50_metric.save_curve(output_path, suffix='_50')
     ap75_metric.save_curve(output_path, suffix='_75')
     ap90_metric.save_curve(output_path, suffix='_90')

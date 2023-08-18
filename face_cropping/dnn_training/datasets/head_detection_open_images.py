@@ -7,7 +7,6 @@ from PIL import Image
 
 from torch.utils.data import Dataset
 
-
 HEAD_CLASS_ID = '/m/04hgtk'
 
 
