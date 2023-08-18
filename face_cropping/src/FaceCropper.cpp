@@ -188,7 +188,7 @@ void FaceCropKalmanFilter::update(const FaceCrop& crop, const FaceCropperParamet
 
 
 FaceCropper::FaceCropper(
-    std::unique_ptr<FaceDetector> faceDetector,
+    std::shared_ptr<FaceDetector> faceDetector,
     float minFaceWidth,
     float minFaceHeight,
     int outputWidth,

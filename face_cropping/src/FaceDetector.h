@@ -1,10 +1,12 @@
-#ifndef FILE_DETECTOR_H
-#define FILE_DETECTOR_H
+#ifndef FACE_DETECTOR_H
+#define FACE_DETECTOR_H
 
 #include <opencv4/opencv2/core.hpp>
 #include <typeindex>
 
 #include <ros/package.h>
+
+#include <memory>
 
 
 inline std::string getPackagePath()
@@ -39,5 +41,7 @@ public:
     virtual std::vector<FaceDetection> detect(const cv::Mat& bgrImage) = 0;
     [[nodiscard]] virtual std::type_index type() const = 0;
 };
+
+std::shared_ptr<FaceDetector> createFaceDetector(const std::string& name, bool useGpuIfAvailable);
 
 #endif

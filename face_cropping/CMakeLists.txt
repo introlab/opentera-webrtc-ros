@@ -10,9 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
+  opentera_webrtc_ros_msgs
   roscpp
   image_transport
   sensor_msgs
+  rospy
 )
 
 ## System dependencies are found with CMake's conventions
@@ -210,8 +212,8 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(face_cropping_node
-    src/FaceDetector.h
+set(COMMON_FILES src/FaceDetector.h
+    src/FaceDetector.cpp
     src/OpencvFaceDetector.h
     src/OpencvFaceDetector.cpp
     src/TorchFaceDetector.h
@@ -220,10 +222,29 @@ add_executable(face_cropping_node
     src/SinglePositionKalmanFilter.cpp
     src/FaceCropper.h
     src/FaceCropper.cpp
+    src/FaceCroppingNodeConfiguration.h
+    src/FaceCroppingNodeConfiguration.cpp
+    src/OpencvUtils.h
+)
+
+add_executable(face_cropping_node
+    ${COMMON_FILES}
     src/face_cropping_node.cpp
 )
 
 target_link_libraries(face_cropping_node
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${TORCH_LIBRARIES}
+    ${TORCHVISION_LIBRARIES}
+)
+
+add_executable(face_cropping_webrtc_node
+    ${COMMON_FILES}
+    src/face_cropping_webrtc_node.cpp
+)
+
+target_link_libraries(face_cropping_webrtc_node
     ${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${TORCH_LIBRARIES}
@@ -269,10 +290,11 @@ target_link_libraries(face_cropping_node
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+  scripts/peer_image_display.py
+  scripts/peer_image_mock.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html

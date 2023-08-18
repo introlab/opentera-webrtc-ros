@@ -73,7 +73,7 @@ public:
 
 class FaceCropper
 {
-    std::unique_ptr<FaceDetector> m_faceDetector;
+    std::shared_ptr<FaceDetector> m_faceDetector;
     FaceCropperParameters m_parameters;
 
     int m_frameCounter;
@@ -82,7 +82,7 @@ class FaceCropper
 
 public:
     FaceCropper(
-        std::unique_ptr<FaceDetector> faceDetector,
+        std::shared_ptr<FaceDetector> faceDetector,
         float minFaceWidth,
         float minFaceHeight,
         int outputWidth,

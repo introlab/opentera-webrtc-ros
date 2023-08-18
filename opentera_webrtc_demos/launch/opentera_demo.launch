@@ -10,6 +10,7 @@
     <arg name="is_stand_alone" default="false"/>
     <arg name="camera_id" default="0"/>
     <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
 
     <arg name="output" default="screen"/>
 
@@ -34,6 +35,13 @@
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/camera1/image_raw"/>
         <arg name="output_camera_topic" value="/face_camera/image_raw"/>
+    </include>
+
+        <!-- Face cropper webrtc -->
+    <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping_webrtc.launch" >
+        <arg name="output" value="$(arg output)"/>
+        <arg name="input_camera_topic" value="/webrtc_image"/>
+        <arg name="output_camera_topic" value="/face_webrtc_image"/>
     </include>
 
     <!-- Front camera -->
@@ -121,6 +129,7 @@
     </node>
 
     <node pkg="opentera_webrtc_robot_gui" type="opentera_webrtc_robot_gui_node" name="robot_gui" output="$(arg output)" respawn="true">
+        <remap if="$(arg use_incoming_face_cropping)" from="webrtc_image" to="face_webrtc_image"/>
         <remap if="$(arg use_outgoing_face_cropping)" from="/front_camera/image_raw" to="/face_camera/image_raw"/>
     </node>
 
