@@ -1,5 +1,5 @@
 <launch>
-    <arg name="name" default="face_cropping_node"/>
+    <arg name="name" default="face_cropping_webrtc_node"/>
     <arg name="output" default="log"/>
 
     <arg name="input_camera_topic" default="/camera1/image_raw"/>

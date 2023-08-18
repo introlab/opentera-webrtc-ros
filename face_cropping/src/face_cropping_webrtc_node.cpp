@@ -107,7 +107,7 @@ private:
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "face_cropping_node");
+    ros::init(argc, argv, "face_cropping_webrtc_node");
 
     ros::NodeHandle privateNodeHandle("~");
 
