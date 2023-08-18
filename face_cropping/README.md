@@ -16,7 +16,6 @@ To use the GPU, you need to set the option FACE_CROPPER_USE_CUDA to ON.
 The CPU and memory usage is measured on an AMD RYZEN 7 3700X at 30 Hz.
 The APs are measured on a subset of WIDER FACE. The subset includes faces ocupying at least 10% of the width and the height of the image.
 
-| -------------------- | ----------------- | ---------------------- | ----------- | ------- | ------- | ------- |
 | Model                | LibTorch Required | CPU (%, 100% = 1 core) | Memory (MB) | AP@0.25 | AP@0.50 | AP@0.75 |
 | -------------------- | ----------------- | ---------------------- | ----------- | ------- | ------- | ------- |
 | haarcascade          | No                | 220.4                  | 299.7       | 0.5605  | 0.5379  | 0.0337  |
