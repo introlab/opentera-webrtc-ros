@@ -1,5 +1,5 @@
 <launch>
-    <arg name="name" default="face_cropping_node"/>
+    <arg name="name" default="face_cropping_webrtc_node"/>
     <arg name="output" default="log"/>
 
     <arg name="input_camera_topic" default="/camera1/image_raw"/>
@@ -18,7 +18,7 @@
 
     <arg name="adjust_brightness" default="true"/>
 
-    <node name="$(arg name)" pkg="face_cropping" type="face_cropping_node" output="$(arg output)">
+    <node name="$(arg name)" pkg="face_cropping" type="face_cropping_webrtc_node" output="$(arg output)">
         <remap from="input_image" to="$(arg input_camera_topic)"/>
         <remap from="output_image" to="$(arg output_camera_topic)"/>
 

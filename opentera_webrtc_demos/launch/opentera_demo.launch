@@ -38,12 +38,10 @@
     </include>
 
     <!-- Face cropper webrtc -->
-    <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping.launch" >
-        <arg name="name" value="face_cropping_webrtc"/>
+    <include if="$(arg use_incoming_face_cropping)" file="$(find face_cropping)/launch/face_cropping_webrtc.launch" >
         <arg name="output" value="$(arg output)"/>
         <arg name="input_camera_topic" value="/webrtc_image"/>
         <arg name="output_camera_topic" value="/face_webrtc_image"/>
-        <arg name="is_peer_image" value="true"/>
     </include>
 
     <!-- Front camera -->
