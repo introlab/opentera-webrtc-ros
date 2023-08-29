@@ -26,6 +26,8 @@ public:
 
 class HaarFaceDetector : public OpencvFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/haarcascade_frontalface_default.xml";
+
 public:
     HaarFaceDetector();
 
@@ -35,6 +37,8 @@ public:
 
 class LbpFaceDetector : public OpencvFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/lbpcascade_frontalface_improved.xml";
+
 public:
     LbpFaceDetector();
 

@@ -11,7 +11,8 @@ OpencvFaceDetector::OpencvFaceDetector(int maxWidth, int maxHeight, const std::s
 
 std::vector<FaceDetection> OpencvFaceDetector::detect(const cv::Mat& bgrImage)
 {
-    float scale = std::min(float(m_maxWidth) / float(bgrImage.cols), float(m_maxHeight) / float(bgrImage.rows));
+    float scale = std::min(static_cast<float>(m_maxWidth) / static_cast<float>(bgrImage.cols),
+        static_cast<float>(m_maxHeight) / static_cast<float>(bgrImage.rows));
     cv::resize(bgrImage, m_resizedImage, cv::Size(), scale, scale, cv::INTER_LINEAR);
     cv::cvtColor(m_resizedImage, m_resizedGrayImage, cv::COLOR_BGR2GRAY, 0);
 
@@ -31,8 +32,8 @@ std::vector<FaceDetection> OpencvFaceDetector::detect(const cv::Mat& bgrImage)
     for (cv::Rect& r : faceRects)
     {
         faceDetections.emplace_back(
-            (float(r.x) + float(r.width) / 2) / scale,
-            (float(r.y) + float(r.height) / 2) / scale,
+            (static_cast<float>(r.x) + static_cast<float>(r.width) / 2.f) / scale,
+            (static_cast<float>(r.y) + static_cast<float>(r.height) / 2.f) / scale,
             float(r.width) / scale,
             float(r.height) / scale);
     }
@@ -45,7 +46,7 @@ HaarFaceDetector::HaarFaceDetector()
     : OpencvFaceDetector(
           640,
           640,
-          getPackagePath() + "/models/haarcascade_frontalface_default.xml")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -54,6 +55,6 @@ LbpFaceDetector::LbpFaceDetector()
     : OpencvFaceDetector(
           640,
           640,
-          getPackagePath() + "/models/lbpcascade_frontalface_improved.xml")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }

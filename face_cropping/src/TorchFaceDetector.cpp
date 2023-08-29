@@ -58,7 +58,8 @@ std::vector<FaceDetection> TorchFaceDetector::detect(const cv::Mat& bgrImage)
 {
     torch::InferenceMode inferenceModeGuard;
 
-    float scale = std::min(float(m_maxWidth) / float(bgrImage.cols), float(m_maxHeight) / float(bgrImage.rows));
+    float scale = std::min(static_cast<float>(m_maxWidth) / static_cast<float>(bgrImage.cols),
+        static_cast<float>(m_maxHeight) / static_cast<float>(bgrImage.rows));
     cv::resize(bgrImage, m_resizedImage, cv::Size(), scale, scale, cv::INTER_LINEAR);
     cv::cvtColor(m_resizedImage, m_resizedImage, cv::COLOR_BGR2RGB);
 
@@ -71,7 +72,7 @@ std::vector<FaceDetection> TorchFaceDetector::detect(const cv::Mat& bgrImage)
                         torch::kByte)
                         .permute({2, 0, 1})
                         .to(m_device, m_scalarType);
-    m_inputTensor.mul_(0.00392156862f);  // Div 255
+    m_inputTensor.mul_(ONE_OVER_255);
     m_inputTensor[0].sub_(m_normalizationMean[0]).mul_(m_normalizationStdInv[0]);
     m_inputTensor[1].sub_(m_normalizationMean[1]).mul_(m_normalizationStdInv[1]);
     m_inputTensor[2].sub_(m_normalizationMean[2]).mul_(m_normalizationStdInv[2]);
@@ -119,7 +120,7 @@ SmallYunet025Silu160FaceDetector::SmallYunet025Silu160FaceDetector(bool useGpuIf
           160,
           0.3,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.25_silu_160.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -130,7 +131,7 @@ SmallYunet025Silu320FaceDetector::SmallYunet025Silu320FaceDetector(bool useGpuIf
           320,
           0.4,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.25_silu_320.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -141,7 +142,7 @@ SmallYunet025Silu640FaceDetector::SmallYunet025Silu640FaceDetector(bool useGpuIf
           640,
           0.4,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.25_silu_640.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -153,7 +154,7 @@ SmallYunet05Silu160FaceDetector::SmallYunet05Silu160FaceDetector(bool useGpuIfAv
           160,
           0.4,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.5_silu_160.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -164,7 +165,7 @@ SmallYunet05Silu320FaceDetector::SmallYunet05Silu320FaceDetector(bool useGpuIfAv
           320,
           0.4,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.5_silu_320.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 
@@ -175,7 +176,7 @@ SmallYunet05Silu640FaceDetector::SmallYunet05Silu640FaceDetector(bool useGpuIfAv
           640,
           0.4,
           0.3,
-          getPackagePath() + "/models/small_yunet_0.5_silu_640.pt")
+          getPackagePath() + MODEL_SUBPATH)
 {
 }
 

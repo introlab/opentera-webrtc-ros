@@ -114,6 +114,7 @@ int main(int argc, char** argv)
     auto configuration = FaceCroppingNodeConfiguration::fromRosParameters(privateNodeHandle);
     if (configuration == std::nullopt)
     {
+        ROS_ERROR("Configuration creation failed");
         return -1;
     }
 

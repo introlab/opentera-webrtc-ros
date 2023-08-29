@@ -25,6 +25,8 @@ class TorchFaceDetector : public FaceDetector
     cv::Mat m_inputImage;
     torch::Tensor m_inputTensor;
 
+    constexpr static float ONE_OVER_255 = 1.0f / 255.0f;
+
 protected:
     TorchFaceDetector(
         bool useGpuIfAvailable,
@@ -46,6 +48,8 @@ private:
 
 class SmallYunet025Silu160FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.25_silu_160.pt";
+
 public:
     explicit SmallYunet025Silu160FaceDetector(bool useGpuIfAvailable);
 
@@ -54,6 +58,8 @@ public:
 
 class SmallYunet025Silu320FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.25_silu_320.pt";
+
 public:
     explicit SmallYunet025Silu320FaceDetector(bool useGpuIfAvailable);
 
@@ -62,6 +68,8 @@ public:
 
 class SmallYunet025Silu640FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.25_silu_640.pt";
+
 public:
     explicit SmallYunet025Silu640FaceDetector(bool useGpuIfAvailable);
 
@@ -71,6 +79,8 @@ public:
 
 class SmallYunet05Silu160FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.5_silu_160.pt";
+
 public:
     explicit SmallYunet05Silu160FaceDetector(bool useGpuIfAvailable);
 
@@ -79,6 +89,8 @@ public:
 
 class SmallYunet05Silu320FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.5_silu_320.pt";
+
 public:
     explicit SmallYunet05Silu320FaceDetector(bool useGpuIfAvailable);
 
@@ -87,6 +99,8 @@ public:
 
 class SmallYunet05Silu640FaceDetector : public TorchFaceDetector
 {
+    constexpr static const char* MODEL_SUBPATH = "/models/small_yunet_0.5_silu_640.pt";
+
 public:
     explicit SmallYunet05Silu640FaceDetector(bool useGpuIfAvailable);
 
