@@ -5,13 +5,16 @@ from PIL import Image
 
 from torch.utils.data import Dataset
 
+from utils.path import to_path
+
 CLASS_COUNT = 1000
 
 
 class ClassificationImageNet(Dataset):
     def __init__(self, root, train=True, transform=None):
-        train_path = os.path.join(root, 'Data/CLS-LOC/train')
-        self._class_names = [o for o in os.listdir(train_path) if os.path.isdir(os.path.join(train_path, o))]
+        root = to_path(root)
+        train_path = root / 'Data' / 'CLS-LOC' / 'train'
+        self._class_names = [o.name for o in train_path.iterdir() if (train_path / o).is_dir()]
         self._class_names.sort()
         self._class_index_by_class_name = {c: i for i, c in enumerate(self._class_names)}
 
@@ -25,24 +28,24 @@ class ClassificationImageNet(Dataset):
     def _list_train_images(self, train_path):
         paths = []
 
-        for i in range(len(self._class_names)):
-            class_path = os.path.join(train_path, self._class_names[i])
+        for i, class_name in enumerate(self._class_names):
+            class_path = train_path / class_name
 
             for image in os.listdir(class_path):
                 if _is_jpeg(image):
-                    paths.append({'path': os.path.join(class_path, image), 'class_index': i})
+                    paths.append({'path': class_path / image, 'class_index': i})
 
         return paths
 
     def _list_validation_images(self, root):
-        validation_path = os.path.join(root, 'Data/CLS-LOC/val')
-        annotation_path = os.path.join(root, 'Annotations/CLS-LOC/val')
+        validation_path = root / 'Data' / 'CLS-LOC' / 'val'
+        annotation_path = root / 'Annotations' / 'CLS-LOC' / 'val'
         paths = []
 
-        for image in os.listdir(validation_path):
-            if _is_jpeg(image):
-                xml_file = os.path.join(annotation_path, os.path.splitext(image)[0] + '.xml')
-                paths.append({'path': os.path.join(validation_path, image), 'class_index': self._read_class(xml_file)})
+        for image in validation_path.iterdir():
+            if _is_jpeg(image.name):
+                xml_file = annotation_path / (image.stem + '.xml')
+                paths.append({'path': validation_path / image, 'class_index': self._read_class(xml_file)})
 
         return paths
 

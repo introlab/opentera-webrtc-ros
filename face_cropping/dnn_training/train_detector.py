@@ -1,5 +1,5 @@
 import argparse
-import os
+from pathlib import Path
 
 import torch
 
@@ -8,8 +8,9 @@ from modules.backbones import YuNetBackbone
 from modules.necks import YunetFpn
 from modules.heads import YunetHead
 from trainers import DetectorTrainer, DetectorDistillationTrainer
+from trainers.detector_trainer import DatasetType
 
-from train_backbone import activation_name_to_class
+from train_backbone import ActivationName
 from program_arguments import save_arguments, print_arguments
 
 
@@ -17,13 +18,13 @@ def main():
     parser = argparse.ArgumentParser(description='Train Detector')
     parser.add_argument('--use_gpu', action='store_true', help='Use the GPU')
     parser.add_argument('--dataset_root', type=str, help='Choose the dataset root path', required=True)
-    parser.add_argument('--dataset_type', choices=['wider_face', 'open_images_head'],
-                        help='Choose the dataset type', required=True)
+    parser.add_argument('--dataset_type', type=DatasetType, choices=list(DatasetType), help='Choose the dataset type',
+                        required=True)
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
     parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
     parser.add_argument('--head_kernel_size', type=int, help='Choose the head kernel size', required=True)
-    parser.add_argument('--activation', choices=['relu', 'leaky_relu', 'silu'], help='Choose the activation',
+    parser.add_argument('--activation', type=ActivationName, choices=list(ActivationName), help='Choose the activation',
                         required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
@@ -49,12 +50,11 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() and args.use_gpu else 'cpu')
     image_size = (args.image_size, args.image_size)
 
-    output_path = os.path.join(args.output_path, args.dataset_type + '_s' + str(args.channel_scale) +
-                               '_hk' + str(args.head_kernel_size) + '_' + args.activation +
-                               '_' + str(image_size[0]) + 'x' + str(image_size[1]) +
-                               '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay) +
-                               ('_mosaic' if args.use_mosaic else '') +
-                               '_ts' + str(args.teacher_channel_scale) + '_a' + str(args.distillation_loss_alpha))
+    output_directory = (f'{args.dataset_type}_s{args.channel_scale}_hk{args.head_kernel_size}_{args.activation}'
+                        f'_{image_size[1]}x{image_size[0]}_lr{args.learning_rate}_wd{args.weight_decay}'
+                        f'{"_mosaic" if args.use_mosaic else ""}_ts{args.teacher_channel_scale}'
+                        f'_a{args.distillation_loss_alpha}')
+    output_path = Path(args.output_path) / output_directory
     save_arguments(output_path, args)
     print_arguments(args)
 
@@ -91,7 +91,7 @@ def main():
 
 
 def create_model(channel_scale, head_kernel_size, activation_name, output_decoded_predictions=False):
-    activation = activation_name_to_class(activation_name)
+    activation = activation_name.to_class()
     backbone = YuNetBackbone(activation=activation, channel_scale=channel_scale)
     neck = YunetFpn(backbone.output_channels(), activation=activation)
     head = YunetHead(backbone.output_channels(), backbone.output_strides(),

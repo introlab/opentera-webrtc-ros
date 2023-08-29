@@ -1,3 +1,5 @@
+from typing import Callable
+
 import torch.nn as nn
 
 
@@ -5,7 +7,7 @@ class DWUnit(nn.Module):
     def __init__(self, in_channels, out_channels, activation=nn.ReLU, end_activation=True, kernel_size=3):
         super().__init__()
 
-        if activation is None:
+        if not isinstance(activation, Callable):
             raise ValueError('The activation is invalid.')
 
         layers = [nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
@@ -31,7 +33,7 @@ class DWBlock(nn.Module):
     def __init__(self, in_channels, out_channels, activation=nn.ReLU):
         super().__init__()
 
-        if activation is None:
+        if not isinstance(activation, Callable):
             raise ValueError('The activation is invalid.')
 
         self._layers = nn.Sequential(
@@ -47,7 +49,7 @@ class ConvHead(nn.Module):
     def __init__(self, in_channels, mid_channels, out_channels, activation=nn.ReLU):
         super().__init__()
 
-        if activation is None:
+        if not isinstance(activation, Callable):
             raise ValueError('The activation is invalid.')
 
         self._layers = nn.Sequential(

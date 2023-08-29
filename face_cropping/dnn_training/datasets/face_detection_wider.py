@@ -1,23 +1,26 @@
-import os
+from pathlib import Path
 
 import torch
 from PIL import Image
 
 from torch.utils.data import Dataset
 
+from utils.path import to_path
+
 
 class FaceDetectionWider(Dataset):
     def __init__(self, root, split='training', transform=None, min_head_face_ratio=0.1, max_head_face_ratio=1.0):
+        root = to_path(root)
         if split == 'training':
             self._images = self._list_images(root,
                                              'WIDER_train',
-                                             os.path.join(root, 'wider_face_split', 'wider_face_train_bbx_gt.txt'),
+                                             root / 'wider_face_split' / 'wider_face_train_bbx_gt.txt',
                                              min_head_face_ratio,
                                              max_head_face_ratio)
         elif split == 'validation':
             self._images = self._list_images(root,
                                              'WIDER_val',
-                                             os.path.join(root, 'wider_face_split', 'wider_face_val_bbx_gt.txt'),
+                                             root / 'wider_face_split' / 'wider_face_val_bbx_gt.txt',
                                              min_head_face_ratio,
                                              max_head_face_ratio)
         else:
@@ -31,8 +34,8 @@ class FaceDetectionWider(Dataset):
 
         with open(annotation_file) as f:
             while True:
-                image_path = f.readline().strip().replace('/', os.path.sep)
-                if image_path == '':
+                image_path = Path(f.readline().strip())
+                if image_path == Path('.'):
                     break
 
                 bbox_count = int(f.readline().strip())
@@ -40,7 +43,7 @@ class FaceDetectionWider(Dataset):
                     f.readline()
                     continue
 
-                full_image_path = os.path.join(root, image_folder, 'images', image_path)
+                full_image_path = root / image_folder / 'images' / image_path
                 image = Image.open(full_image_path)
 
                 bboxes = []

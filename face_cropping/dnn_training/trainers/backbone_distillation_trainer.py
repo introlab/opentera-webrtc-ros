@@ -1,5 +1,3 @@
-import os
-
 from .distillation_trainer import DistillationTrainer
 from criterions import DistillationCrossEntropyLoss
 from metrics import ClassificationAccuracyMetric, LossMetric, LossAccuracyLearningCurves
@@ -70,10 +68,10 @@ class BackboneDistillationTrainer(DistillationTrainer):
         self._validation_accuracy_metric.add(model_output, target)
 
     def _print_performances(self):
-        print('\nTraining : Loss={}, Accuracy={}'.format(self._training_loss_metric.get_loss(),
-                                                         self._training_accuracy_metric.get_accuracy()))
-        print('Validation : Loss={}, Accuracy={}\n'.format(self._validation_loss_metric.get_loss(),
-                                                           self._validation_accuracy_metric.get_accuracy()))
+        print(f'\nTraining : Loss={self._training_loss_metric.get_loss()}, '
+              f'Accuracy={self._training_accuracy_metric.get_accuracy()}')
+        print(f'Validation : Loss={self._validation_loss_metric.get_loss()},'
+              f' Accuracy={self._validation_accuracy_metric.get_accuracy()}\n')
 
     def _save_learning_curves(self):
         self._learning_curves.add_training_loss_value(self._training_loss_metric.get_loss())
@@ -81,8 +79,8 @@ class BackboneDistillationTrainer(DistillationTrainer):
         self._learning_curves.add_training_accuracy_value(self._training_accuracy_metric.get_accuracy())
         self._learning_curves.add_validation_accuracy_value(self._validation_accuracy_metric.get_accuracy())
 
-        self._learning_curves.save(os.path.join(self._output_path, 'learning_curves.png'),
-                                   os.path.join(self._output_path, 'learning_curves.json'))
+        self._learning_curves.save(self._output_path / 'learning_curves.png',
+                                   self._output_path / 'learning_curves.json')
 
     def _evaluate(self, model, device, dataset_loader, output_path):
         evaluate(model, device, dataset_loader)

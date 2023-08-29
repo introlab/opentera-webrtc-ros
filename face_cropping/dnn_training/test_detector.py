@@ -8,6 +8,7 @@ from PIL import Image
 from datasets.detection_transforms import DetectionValidationTransform
 from modules import load_checkpoint
 from modules.heads import filter_decoded_bboxes, CONFIDENCE_INDEX, TL_X_INDEX, TL_Y_INDEX, BR_X_INDEX, BR_Y_INDEX
+from train_backbone import ActivationName
 from train_detector import create_model
 
 
@@ -16,7 +17,7 @@ def main():
     parser.add_argument('--use_gpu', action='store_true', help='Use the GPU')
     parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
     parser.add_argument('--head_kernel_size', type=int, help='Choose the head kernel size', required=True)
-    parser.add_argument('--activation', choices=['relu', 'leaky_relu', 'silu'], help='Choose the activation',
+    parser.add_argument('--activation', type=ActivationName, choices=list(ActivationName), help='Choose the activation',
                         required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
     parser.add_argument('--model_checkpoint', type=str, help='Choose the model checkpoint file', required=True)
@@ -39,19 +40,20 @@ def main():
 def test(model, device, transform, video_device_id):
     video_capture = cv2.VideoCapture(video_device_id)
 
-    while True:
-        ok, frame = video_capture.read()
-        if not ok:
-            continue
-        draw_head_box(frame, model, device, transform)
-        cv2.imshow('video_{}'.format(video_device_id), frame)
+    try:
+        while True:
+            ok, frame = video_capture.read()
+            if not ok:
+                continue
+            draw_head_box(frame, model, device, transform)
+            cv2.imshow('video_{}'.format(video_device_id), frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
-    # After the loop release the cap object
-    video_capture.release()
-    cv2.destroyAllWindows()
+    finally:
+        video_capture.release()
+        cv2.destroyAllWindows()
 
 
 def draw_head_box(cv_image, model, device, transform):

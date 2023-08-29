@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 
 import torch
@@ -7,6 +8,7 @@ from PIL import Image
 
 from tqdm import tqdm
 
+from utils.path import to_path
 from .trainer import Trainer
 from criterions import SingleClassDetectionLoss
 from datasets import FaceDetectionWider, HeadDetectionOpenImages
@@ -14,6 +16,14 @@ from datasets import detection_collate, DetectionTrainingTransform, DetectionVal
 from datasets import BeforeMosaicDetectionTrainingTransform, AfterMosaicDetectionTrainingTransform
 from metrics import AveragePrecisionMetric, LossMetric, LossAveragePrecisionLearningCurves
 from modules.heads import filter_decoded_bboxes, CONFIDENCE_INDEX, TL_X_INDEX, TL_Y_INDEX, BR_X_INDEX, BR_Y_INDEX
+
+
+class DatasetType(str, Enum):
+    WIDER_FACE = 'wider_face'
+    OPEN_IMAGES_HEADS = 'open_images_head'
+
+    def __str__(self):
+        return self.value
 
 
 class DetectorTrainer(Trainer):
@@ -34,7 +44,7 @@ class DetectorTrainer(Trainer):
                                               batch_size_division=1,
                                               model_checkpoint=model_checkpoint)
 
-        self._dataset_root = dataset_root
+        self._dataset_root = to_path(dataset_root)
 
         self._learning_curves = LossAveragePrecisionLearningCurves()
 
@@ -43,7 +53,7 @@ class DetectorTrainer(Trainer):
         self._validation_ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.1)
 
     def _create_criterion(self, model):
-        detection_loss = SingleClassDetectionLoss(confidence_loss_type='focal_loss', bbox_loss_type='eiou_loss')
+        detection_loss = SingleClassDetectionLoss()
 
         def loss(model_output, targets):
             predictions, priors = model_output
@@ -88,17 +98,17 @@ class DetectorTrainer(Trainer):
         self._validation_ap_metric.add(decode_bboxes, targets)
 
     def _print_performances(self):
-        print('\nTraining : Loss={}'.format(self._training_loss_metric.get_loss()))
-        print('Validation : Loss={}, AP@0.5={}\n'.format(self._validation_loss_metric.get_loss(),
-                                                         self._validation_ap_metric.get_value()))
+        print(f'\nTraining : Loss={self._training_loss_metric.get_loss()}')
+        print(f'Validation : Loss={self._validation_loss_metric.get_loss()}, '
+              f'AP@0.5={self._validation_ap_metric.get_value()}\n')
 
     def _save_learning_curves(self):
         self._learning_curves.add_training_loss_value(self._training_loss_metric.get_loss())
         self._learning_curves.add_validation_loss_value(self._validation_loss_metric.get_loss())
         self._learning_curves.add_validation_ap_value(self._validation_ap_metric.get_value())
 
-        self._learning_curves.save(os.path.join(self._output_path, 'learning_curves.png'),
-                                   os.path.join(self._output_path, 'learning_curves.json'))
+        self._learning_curves.save(self._output_path / 'learning_curves.png',
+                                   self._output_path / 'learning_curves.json')
 
     def _evaluate(self, model, device, dataset_loader, output_path):
         evaluate(model, self.model(), device, dataset_loader, output_path,
@@ -132,11 +142,11 @@ def create_testing_dataset_loader(dataset_type, dataset_root, image_size, batch_
 
 
 def _create_dataset(dataset_type, dataset_root, split, transform):
-    if dataset_type == 'wider_face':
+    if dataset_type == DatasetType.WIDER_FACE:
         return FaceDetectionWider(dataset_root,
                                   split=split if split != 'testing' else 'validation',
                                   transform=transform)
-    elif dataset_type == 'open_images_head':
+    elif dataset_type == DatasetType.OPEN_IMAGES_HEADS:
         return HeadDetectionOpenImages(dataset_root, split=split, transform=transform)
     else:
         raise ValueError('Invalid dataset type')
@@ -153,7 +163,7 @@ def _create_dataset_loader(dataset, batch_size, batch_size_division, shuffle):
 def evaluate(model, single_gpu_model, device, dataset_loader, output_path, dataset_type, dataset_root, image_size):
     _evaluate_all_datasets(model, device, dataset_loader, output_path)
 
-    if dataset_type == 'wider_face':
+    if dataset_type == DatasetType.WIDER_FACE:
         _write_wider_face_val_results(dataset_root, image_size, single_gpu_model, device, output_path)
 
 
@@ -175,10 +185,8 @@ def _evaluate_all_datasets(model, device, dataset_loader, output_path):
         ap75_metric.add(bboxes, targets)
         ap90_metric.add(bboxes, targets)
 
-    print('\nTest : AP@25={}, AP@0.5={}, AP@0.75={}, AP@0.9={}'.format(ap25_metric.get_value(),
-                                                                       ap50_metric.get_value(),
-                                                                       ap75_metric.get_value(),
-                                                                       ap90_metric.get_value()))
+    print(f'\nTest : AP@25={ap25_metric.get_value()}, AP@0.5={ap50_metric.get_value()}, '
+          f'AP@0.75={ap75_metric.get_value()}, AP@0.9={ap90_metric.get_value()}')
     ap25_metric.save_curve(output_path, suffix='_25')
     ap50_metric.save_curve(output_path, suffix='_50')
     ap75_metric.save_curve(output_path, suffix='_75')
@@ -188,30 +196,29 @@ def _evaluate_all_datasets(model, device, dataset_loader, output_path):
 def _write_wider_face_val_results(dataset_root, image_size, model, device, output_path):
     print('Evaluation - WiderFace Results', flush=True)
 
-    test_root_path = os.path.join(dataset_root, 'WIDER_val', 'images')
-    output_root_path = os.path.join(output_path, 'wider_results')
+    test_root_path = dataset_root / 'WIDER_val' / 'images'
+    output_root_path = output_path / 'wider_results'
 
     transform = DetectionValidationTransform(image_size)
 
     categories = os.listdir(test_root_path)
 
     for category in tqdm(categories):
-        category_input_path = os.path.join(test_root_path, category)
-        category_output_path = os.path.join(output_root_path, category)
-        image_filenames = os.listdir(category_input_path)
+        category_input_path = test_root_path / category
+        category_output_path = output_root_path / category
 
         os.makedirs(category_output_path, exist_ok=True)
 
-        for image_filename in image_filenames:
-            image = Image.open(os.path.join(category_input_path, image_filename)).convert('RGB')
+        for image_filename in category_input_path.iterdir():
+            image = Image.open(image_filename).convert('RGB')
 
             input_tensor, scale = transform(image)
             predictions, priors = model(input_tensor.unsqueeze(0).to(device))
             bboxes = model.decode_predictions(predictions, priors)[0]
             bboxes = filter_decoded_bboxes(bboxes, confidence_threshold=0.01, nms_threshold=0.45)
 
-            with open(os.path.join(category_output_path, os.path.splitext(image_filename)[0] + '.txt'), 'w') as f:
-                f.write(image_filename + '\n')
+            with open(category_output_path / (image_filename.stem + '.txt'), 'w') as f:
+                f.write(image_filename.name + '\n')
                 f.write(f'{bboxes.size(0)}\n')
 
                 for bbox in bboxes:

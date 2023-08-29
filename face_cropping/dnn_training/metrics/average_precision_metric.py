@@ -1,10 +1,9 @@
-import os
-
 import matplotlib.pyplot as plt
 
 import torch
 
 from modules.heads import filter_decoded_bboxes
+from utils.path import to_path
 
 
 class AveragePrecisionMetric:
@@ -56,7 +55,7 @@ class AveragePrecisionMetric:
         for m in range(M):
             confidence = sorted_prediction[m, 0]
 
-            ious = all_ious[m * K: (m + 1) * K]
+            ious = all_ious[m * K:(m + 1) * K]
             target_index = torch.argmax(ious).item()
             iou = ious[target_index].item()
 
@@ -108,7 +107,7 @@ class AveragePrecisionMetric:
         ax1.set_xlabel(u'Recall')
         ax1.set_ylabel(u'Precision')
 
-        fig.savefig(os.path.join(output_path, f'pr_curve{suffix}.png'))
+        fig.savefig(to_path(output_path) / f'pr_curve{suffix}.png')
         plt.close(fig)
 
 

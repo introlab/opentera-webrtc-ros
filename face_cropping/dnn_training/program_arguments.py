@@ -1,10 +1,14 @@
 import os
 import json
 
+from utils.path import to_path
+
 
 def save_arguments(output_path, args):
+    output_path = to_path(output_path)
+
     os.makedirs(output_path, exist_ok=True)
-    with open(os.path.join(output_path, 'arguments.json'), 'w') as file:
+    with open(output_path / 'arguments.json', 'w') as file:
         json.dump(args.__dict__, file, indent=4, sort_keys=True)
 
 

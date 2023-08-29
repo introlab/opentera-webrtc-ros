@@ -33,7 +33,7 @@ class YuNetBackbone(Backbone):
         )
 
     def output_channels(self):
-        return [int(64 * self._channel_scale)] * 1
+        return [int(64 * self._channel_scale)]
 
     def output_strides(self):
         return [32]

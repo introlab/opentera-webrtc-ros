@@ -10,21 +10,10 @@ BBOX_LOSS_SCALE = 5.0
 
 
 class SingleClassDetectionLoss(nn.Module):
-    def __init__(self, confidence_loss_type='bce_loss', bbox_loss_type='mse_loss'):
+    def __init__(self,):
         super(SingleClassDetectionLoss, self).__init__()
-        if confidence_loss_type == 'bce_loss':
-            self._confidence_loss = nn.BCEWithLogitsLoss()
-        elif confidence_loss_type == 'focal_loss':
-            self._confidence_loss = SigmoidFocalLossWithLogits()
-        else:
-            raise ValueError('Invalid confidence_loss_type')
-
-        if bbox_loss_type == 'mse_loss':
-            self._bbox_loss = nn.MSELoss()
-        elif bbox_loss_type == 'eiou_loss':
-            self._bbox_loss = EiouLoss()
-        else:
-            raise ValueError('Invalid bbox_loss_type')
+        self._confidence_loss = SigmoidFocalLossWithLogits()
+        self._bbox_loss = EiouLoss()
 
     def forward(self, predictions, priors, decoded_bboxes, targets):
         assigner = SimOTAAssigner()
@@ -55,21 +44,10 @@ class SingleClassDetectionLoss(nn.Module):
 
 
 class DistillationSingleClassDetectionLoss(nn.Module):
-    def __init__(self, confidence_loss_type='bce_loss', bbox_loss_type='mse_loss', alpha=0.25):
+    def __init__(self, alpha=0.25):
         super(DistillationSingleClassDetectionLoss, self).__init__()
-        if confidence_loss_type == 'bce_loss':
-            self._confidence_loss = nn.BCEWithLogitsLoss()
-        elif confidence_loss_type == 'focal_loss':
-            self._confidence_loss = SigmoidFocalLossWithLogits()
-        else:
-            raise ValueError('Invalid confidence_loss_type')
-
-        if bbox_loss_type == 'mse_loss':
-            self._bbox_loss = nn.MSELoss()
-        elif bbox_loss_type == 'eiou_loss':
-            self._bbox_loss = EiouLoss()
-        else:
-            raise ValueError('Invalid bbox_loss_type')
+        self._confidence_loss = SigmoidFocalLossWithLogits()
+        self._bbox_loss = EiouLoss()
 
         self._alpha = alpha
 
@@ -110,11 +88,11 @@ class DistillationSingleClassDetectionLoss(nn.Module):
                 targets,
                 torch.zeros(targets.size(0), dtype=torch.long, device=targets.device))
 
-            student_positive_indexes, student_positive_target_indexes, student_confidence_target = \
-                _process_assign_result(student_assign_result, student_prediction)
+            student_positive_indexes, student_positive_target_indexes, student_confidence_target = (
+                _process_assign_result(student_assign_result, student_prediction))
 
-            teacher_positive_indexes, _, _ = \
-                _process_assign_result(teacher_assign_result, teacher_prediction)
+            teacher_positive_indexes, _, _ = (
+                _process_assign_result(teacher_assign_result, teacher_prediction))
 
         target_confidence_loss = self._confidence_loss(student_prediction[:, 0], student_confidence_target)
         target_bbox_loss = self._bbox_loss(student_decoded_bboxes[student_positive_indexes, 1:],

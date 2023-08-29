@@ -1,23 +1,27 @@
-import os
 import csv
 from collections import defaultdict
+from pathlib import Path
 
 import torch
 from PIL import Image
 
 from torch.utils.data import Dataset
 
+from utils.path import to_path
+
 HEAD_CLASS_ID = '/m/04hgtk'
 
 
 class HeadDetectionOpenImages(Dataset):
     def __init__(self, root, split='training', transform=None, min_head_face_ratio=0.25, max_head_face_ratio=0.75):
+        root = to_path(root)
+
         if split == 'training':
-            self._root = os.path.join(root, 'train')
+            self._root = root / 'train'
         elif split == 'validation':
-            self._root = os.path.join(root, 'validation')
+            self._root = root / 'validation'
         elif split == 'testing':
-            self._root = os.path.join(root, 'test')
+            self._root = root / 'test'
         else:
             raise ValueError('Invalid split')
 
@@ -29,7 +33,7 @@ class HeadDetectionOpenImages(Dataset):
     def _list_rotations(self):
         rotation_by_image_id = {}
 
-        with open(os.path.join(self._root, 'metadata', 'image_ids.csv'), newline='') as image_id_file:
+        with open(self._root / 'metadata' / 'image_ids.csv', newline='') as image_id_file:
             image_id_reader = csv.reader(image_id_file, delimiter=',', quotechar='"')
             next(image_id_reader)
             for row in image_id_reader:
@@ -43,7 +47,7 @@ class HeadDetectionOpenImages(Dataset):
     def _list_images(self, min_head_face_ratio, max_head_face_ratio):
         bboxes = defaultdict(list)
 
-        with open(os.path.join(self._root, 'labels', 'detections.csv'), newline='') as detection_file:
+        with open(self._root / 'labels' / 'detections.csv', newline='') as detection_file:
             detection_reader = csv.reader(detection_file, delimiter=',', quotechar='"')
             next(detection_reader)
 
@@ -73,8 +77,8 @@ class HeadDetectionOpenImages(Dataset):
         images = []
 
         for image_id, bboxes in all_bboxes.items():
-            path = os.path.join('data', '{}.jpg'.format(image_id))
-            if not self._is_valid_image_path(os.path.join(self._root, path)):
+            path = Path('data') / f'{image_id}.jpg'
+            if not self._is_valid_image_path(self._root / path):
                 continue
 
             images.append({
@@ -97,7 +101,7 @@ class HeadDetectionOpenImages(Dataset):
         return len(self._images)
 
     def __getitem__(self, index):
-        image = Image.open(os.path.join(self._root, self._images[index]['path'])).convert('RGB')
+        image = Image.open(self._root / self._images[index]['path']).convert('RGB')
         bboxes = self._images[index]['bboxes'].clone()
 
         image = self._rotate_image(image, self._images[index]['rotation'])

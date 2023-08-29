@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 import torch
 import torch.nn as nn
 
@@ -10,7 +12,7 @@ BR_X_INDEX = 3
 BR_Y_INDEX = 4
 
 
-class Head(nn.Module):
+class Head(nn.Module, ABC):
     def __init__(self, strides):
         super().__init__()
         self._strides = strides
@@ -40,6 +42,7 @@ class Head(nn.Module):
         C, H, W = x.size()
         return x.view(C, -1).permute(1, 0)
 
+    @abstractmethod
     def forward(self, feature_maps):
         """
         :param in_feature_maps: List of features maps from low to high level
@@ -47,6 +50,7 @@ class Head(nn.Module):
         """
         raise NotImplementedError
 
+    @abstractmethod
     def decode_predictions(self, predictions, priors):
         """
         :param predictions: tensor (N, 5)

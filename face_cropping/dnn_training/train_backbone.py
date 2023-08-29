@@ -1,5 +1,6 @@
 import argparse
-import os
+from enum import Enum
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,26 @@ from trainers import BackboneTrainer, BackboneDistillationTrainer
 from program_arguments import save_arguments, print_arguments
 
 
+class ActivationName(str, Enum):
+    RELU = 'relu'
+    LEAKY_RELU = 'leaky_relu'
+    SILU = 'silu'
+
+    def __str__(self):
+        return self.value
+
+    def to_class(self):
+        if self == ActivationName.RELU:
+            return nn.ReLU
+        elif self == ActivationName.LEAKY_RELU:
+            return nn.LeakyReLU
+        elif self == ActivationName.SILU:
+            return nn.SiLU
+        else:
+            raise ValueError('Invalid activation name')
+
+
+
 def main():
     parser = argparse.ArgumentParser(description='Train Backbone')
     parser.add_argument('--use_gpu', action='store_true', help='Use the GPU')
@@ -18,7 +39,7 @@ def main():
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
     parser.add_argument('--channel_scale', type=float, help='Choose the channel scale', required=True)
-    parser.add_argument('--activation', choices=['relu', 'leaky_relu', 'silu'], help='Choose the activation',
+    parser.add_argument('--activation', type=ActivationName, choices=list(ActivationName), help='Choose the activation',
                         required=True)
     parser.add_argument('--image_size', type=int, help='Choose the image width and height', required=True)
 
@@ -42,10 +63,9 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() and args.use_gpu else 'cpu')
     image_size = (args.image_size, args.image_size)
 
-    output_path = os.path.join(args.output_path, 's' + str(args.channel_scale) + '_' + args.activation +
-                               '_' + str(image_size[1]) + 'x' + str(image_size[0]) +
-                               '_' + str(args.learning_rate) + '_wd' + str(args.weight_decay) +
-                               '_ts' + str(args.teacher_channel_scale) + '_a' + str(args.distillation_loss_alpha))
+    output_directory = (f's{args.channel_scale}_{args.activation}_{image_size[1]}x{image_size[0]}_lr{args.learning_rate}'
+                        f'_wd{args.weight_decay}_ts{args.teacher_channel_scale}_a{args.distillation_loss_alpha}')
+    output_path = Path(args.output_path) / output_directory
     save_arguments(output_path, args)
     print_arguments(args)
 
@@ -79,20 +99,9 @@ def main():
 
 
 def create_model(channel_scale, activation_name):
-    activation = activation_name_to_class(activation_name)
+    activation = activation_name.to_class()
     backbone = YuNetBackbone(activation=activation, channel_scale=channel_scale)
     return Classifier(backbone=backbone, class_count=CLASS_COUNT)
-
-
-def activation_name_to_class(name):
-    if name == 'relu':
-        return nn.ReLU
-    elif name == 'leaky_relu':
-        return nn.LeakyReLU
-    elif name == 'silu':
-        return nn.SiLU
-    else:
-        raise ValueError('Invalid activation name')
 
 
 if __name__ == '__main__':

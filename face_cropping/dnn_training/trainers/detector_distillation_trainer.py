@@ -1,5 +1,3 @@
-import os
-
 from .detector_trainer import create_training_dataset_loader, create_validation_dataset_loader
 from .detector_trainer import create_testing_dataset_loader, move_target_to_device, evaluate
 from .distillation_trainer import DistillationTrainer
@@ -36,9 +34,7 @@ class DetectorDistillationTrainer(DistillationTrainer):
         self._validation_ap_metric = AveragePrecisionMetric(iou_threshold=0.5, confidence_threshold=0.1)
 
     def _create_criterion(self, student_model, teacher_model):
-        detection_loss = DistillationSingleClassDetectionLoss(confidence_loss_type='focal_loss',
-                                                              bbox_loss_type='eiou_loss',
-                                                              alpha=self._loss_alpha)
+        detection_loss = DistillationSingleClassDetectionLoss(alpha=self._loss_alpha)
 
         def loss(student_model_output, targets, teacher_model_output):
             student_predictions, student_priors = student_model_output
@@ -89,17 +85,17 @@ class DetectorDistillationTrainer(DistillationTrainer):
         self._validation_ap_metric.add(decode_bboxes, targets)
 
     def _print_performances(self):
-        print('\nTraining : Loss={}'.format(self._training_loss_metric.get_loss()))
-        print('Validation : Loss={}, AP@0.5={}\n'.format(self._validation_loss_metric.get_loss(),
-                                                         self._validation_ap_metric.get_value()))
+        print(f'\nTraining : Loss={self._training_loss_metric.get_loss()}')
+        print(f'Validation : Loss={self._validation_loss_metric.get_loss()}, '
+              f'AP@0.5={self._validation_ap_metric.get_value()}\n')
 
     def _save_learning_curves(self):
         self._learning_curves.add_training_loss_value(self._training_loss_metric.get_loss())
         self._learning_curves.add_validation_loss_value(self._validation_loss_metric.get_loss())
         self._learning_curves.add_validation_ap_value(self._validation_ap_metric.get_value())
 
-        self._learning_curves.save(os.path.join(self._output_path, 'learning_curves.png'),
-                                   os.path.join(self._output_path, 'learning_curves.json'))
+        self._learning_curves.save(self._output_path / 'learning_curves.png',
+                                   self._output_path / 'learning_curves.json')
 
     def _evaluate(self, student_model, device, dataset_loader, output_path):
         evaluate(student_model, self.student_model(), device, dataset_loader, output_path,

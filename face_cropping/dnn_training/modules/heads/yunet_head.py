@@ -42,9 +42,9 @@ class YunetHead(Head):
         predictions = []
         priors = self.generate_prior_grids(mid_feature_maps, offset=0.0)
         priors = [self.prior_grid_to_list(p) for p in priors]
-        for i in range(len(mid_feature_maps)):
-            confidences = self._confidence_heads[i](mid_feature_maps[i])
-            bboxes = self._bbox_heads[i](mid_feature_maps[i])
+        for i, mid_feature_map in enumerate(mid_feature_maps):
+            confidences = self._confidence_heads[i](mid_feature_map)
+            bboxes = self._bbox_heads[i](mid_feature_map)
             predictions.append(self.feature_map_grid_to_list(torch.cat([confidences, bboxes], dim=1)))
 
         return torch.cat(predictions, dim=1), torch.cat(priors, dim=0)

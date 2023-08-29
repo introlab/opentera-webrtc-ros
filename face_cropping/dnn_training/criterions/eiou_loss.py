@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class EiouLoss(nn.Module):
     def __init__(self, smooth_point=0.1, eps=1e-7):
-        super().__init__()
+        super(EiouLoss, self).__init__()
         self._smooth_point = smooth_point
         self._eps = eps
 
@@ -49,8 +49,5 @@ class EiouLoss(nn.Module):
         smooth_mask = (iou < self._smooth_point).detach().float()
         loss = (0.5 * smooth_mask * iou ** 2 / self._smooth_point +
                 (1 - smooth_mask) * (iou - 0.5 * self._smooth_point)).mean()
-
-        if not torch.all(torch.isfinite(loss)):
-            print()
 
         return loss
