@@ -181,7 +181,7 @@ class DistillationTrainer(ABC):
         raise NotImplementedError()
 
     def _save_states(self, epoch):
-        torch.save(self._student_model.state_dict(), self._output_path / 'model_checkpoint_epoch_{}.pth'.format(epoch))
+        torch.save(self._student_model.state_dict(), self._output_path / f'model_checkpoint_epoch_{epoch}.pth')
 
     @abstractmethod
     def _evaluate(self, model, device, dataset_loader, output_path):

@@ -10,7 +10,7 @@ BBOX_LOSS_SCALE = 5.0
 
 
 class SingleClassDetectionLoss(nn.Module):
-    def __init__(self,):
+    def __init__(self):
         super(SingleClassDetectionLoss, self).__init__()
         self._confidence_loss = SigmoidFocalLossWithLogits()
         self._bbox_loss = EiouLoss()
