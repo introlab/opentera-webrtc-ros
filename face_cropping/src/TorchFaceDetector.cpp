@@ -7,7 +7,12 @@
 #ifndef NO_TORCH
 
 #include <torch/script.h>
+
+#ifdef TORCHVISION_CSRC_INCLUDE
 #include <torchvision/csrc/ops/nms.h>
+#else
+#include <torchvision/ops/nms.h>
+#endif
 
 constexpr int CONFIDENCE_INDEX = 0;
 constexpr int TL_X_INDEX = 1;
