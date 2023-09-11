@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(OpenMP REQUIRED)
 
 option(FACE_CROPPER_USE_CUDA "Add the support of CUDA" OFF)
 
@@ -239,6 +239,7 @@ target_link_libraries(face_cropping_node
     ${OpenCV_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${TORCHVISION_LIBRARIES}
+    OpenMP::OpenMP_CXX
 )
 
 add_executable(face_cropping_webrtc_node
@@ -251,6 +252,7 @@ target_link_libraries(face_cropping_webrtc_node
     ${OpenCV_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${TORCHVISION_LIBRARIES}
+    OpenMP::OpenMP_CXX
 )
 
 ## Declare a C++ library

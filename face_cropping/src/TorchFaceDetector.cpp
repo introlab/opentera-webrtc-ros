@@ -6,6 +6,7 @@
 
 #ifndef NO_TORCH
 
+#include <omp.h>
 #include <torch/script.h>
 
 #ifdef TORCHVISION_CSRC_INCLUDE
@@ -50,7 +51,10 @@ TorchFaceDetector::TorchFaceDetector(
         m_device = torch::kCPU;
     }
 
+    omp_set_num_threads(1);
     torch::set_num_threads(1);
+    torch::set_num_interop_threads(1);
+
     m_detector = torch::jit::load(modelPath + suffix);
     m_detector.to(m_device, m_scalarType);
     m_detector.eval();
