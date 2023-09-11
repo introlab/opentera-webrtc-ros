@@ -61,7 +61,7 @@ set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
 # Disable examples
 set(OPENTERA_WEBRTC_ENABLE_EXAMPLES OFF)
 # Enable GStreamer
-set(OPENTERA_WEBRTC_ENABLE_GSTREAMER OFF)
+set(OPENTERA_WEBRTC_ENABLE_GSTREAMER ON)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
