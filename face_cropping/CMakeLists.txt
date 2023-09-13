@@ -18,7 +18,13 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(OpenMP REQUIRED)
+find_package(OpenMP QUIET)
+if (OpenMP_FOUND)
+    set(OpenMP_LIBRARIES OpenMP::OpenMP_CXX)
+else()
+    message(WARNING "OpenMP is not found.")
+    add_compile_definitions(NO_TORCH)
+endif()
 
 option(FACE_CROPPER_USE_CUDA "Add the support of CUDA" OFF)
 
@@ -33,7 +39,7 @@ if (EXISTS "/etc/nv_tegra_release")
                 OUTPUT_VARIABLE CMAKE_PREFIX_PATH)
 
         find_package(Torch REQUIRED)
-	find_package (Python3 REQUIRED COMPONENTS Interpreter Development)
+        find_package (Python3 REQUIRED COMPONENTS Interpreter Development)
         find_package(TorchVision QUIET)
         if (TorchVision_FOUND)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
@@ -239,7 +245,7 @@ target_link_libraries(face_cropping_node
     ${OpenCV_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${TORCHVISION_LIBRARIES}
-    OpenMP::OpenMP_CXX
+    ${OpenMP_LIBRARIES}
 )
 
 add_executable(face_cropping_webrtc_node
@@ -252,7 +258,7 @@ target_link_libraries(face_cropping_webrtc_node
     ${OpenCV_LIBRARIES}
     ${TORCH_LIBRARIES}
     ${TORCHVISION_LIBRARIES}
-    OpenMP::OpenMP_CXX
+    ${OpenMP_LIBRARIES}
 )
 
 ## Declare a C++ library
