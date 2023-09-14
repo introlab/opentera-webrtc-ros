@@ -31,5 +31,7 @@
         <param name="output_height" value="$(arg output_height)"/>
 
         <param name="adjust_brightness" value="$(arg adjust_brightness)"/>
+
+        <env name="OMP_NUM_THREADS" value="1"/>
     </node>
 </launch>

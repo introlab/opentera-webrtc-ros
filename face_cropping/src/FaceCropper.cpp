@@ -86,8 +86,8 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
 
     parameters.initialPositionVariance = 1.f;
     parameters.initialVelocityVariance = 5.f;
-    parameters.qPosition = 0.01f;
-    parameters.qVelocity = 2.f;
+    parameters.qPosition = 0.0005f;
+    parameters.qVelocity = 0.2f;
 
     parameters.minFaceWidth = minFaceWidth;
     parameters.minFaceHeight = minFaceHeight;
