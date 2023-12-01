@@ -200,7 +200,7 @@ void MainWindow::_onLocalImage(const QImage& image)
 {
     m_cameraView->setImage(image, NO_REPAINT);
     repaint();
-    if (m_localCameraWindow.isVisible())
+    if (m_localCameraWindow->isVisible())
     {
         m_localCameraWindow->repaint();
     }
