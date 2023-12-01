@@ -43,7 +43,7 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
         faceDetector.type() == typeid(SmallYunet025Silu160FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet05Silu160FaceDetector))
     {
-        parameters.detectionInterval = 1;
+        parameters.detectionInterval = 2;
         parameters.xOffsetRatio = 0.f;
         parameters.yOffsetRatio = 0.f;
         parameters.widthScale = 1.25f;
@@ -56,7 +56,7 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
         faceDetector.type() == typeid(SmallYunet025Silu320FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet05Silu320FaceDetector))
     {
-        parameters.detectionInterval = 1;
+        parameters.detectionInterval = 2;
         parameters.xOffsetRatio = 0.f;
         parameters.yOffsetRatio = 0.f;
         parameters.widthScale = 1.5f;
@@ -69,7 +69,7 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
         faceDetector.type() == typeid(SmallYunet025Silu640FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet05Silu640FaceDetector))
     {
-        parameters.detectionInterval = 1;
+        parameters.detectionInterval = 2;
         parameters.xOffsetRatio = 0.f;
         parameters.yOffsetRatio = 0.f;
         parameters.widthScale = 1.5f;
