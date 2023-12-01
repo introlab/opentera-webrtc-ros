@@ -3,6 +3,8 @@
 #include <QThread>
 #include <QDebug>
 
+constexpr bool NO_REPAINT = false;
+
 MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
     : QMainWindow{parent},
       m_deviceProperties{devicePropertiesPath},
@@ -196,7 +198,8 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraE
 
 void MainWindow::_onLocalImage(const QImage& image)
 {
-    m_cameraView->setImage(image);
+    m_cameraView->setImage(image, NO_REPAINT);
+    repaint();
 }
 
 
@@ -212,13 +215,13 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
         if (!m_remoteViews.contains(id))
         {
             ROSCameraView* camera = new ROSCameraView(name, nullptr);
-            camera->setImage(image);
+            camera->setImage(image, NO_REPAINT);
             m_ui.imageWidgetLayout->addWidget(camera);
             m_remoteViews[id] = camera;
         }
         else
         {
-            m_remoteViews[id]->setImage(image);
+            m_remoteViews[id]->setImage(image, NO_REPAINT);
             m_remoteViews[id]->setText(name);
         }
     }
