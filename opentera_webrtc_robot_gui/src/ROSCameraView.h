@@ -1,21 +1,21 @@
 #ifndef _ROS_CAMERA_VIEW_H_
 #define _ROS_CAMERA_VIEW_H_
 
-#include <QGLWidget>
+#include <QWidget>
 #include <QImage>
 #include <QPaintEvent>
 #include <QLabel>
 #include <QVBoxLayout>
 
 
-class GLCameraWidget : public QGLWidget
+class CameraWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    GLCameraWidget(QWidget* parent = nullptr);
+    CameraWidget(QWidget* parent = nullptr);
 
-    void setImage(const QImage& image);
+    void setImage(const QImage& image, bool repaintNow = true);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -46,7 +46,7 @@ public:
 
 public slots:
     void setText(const QString& text);
-    void setImage(const QImage& image);
+    void setImage(const QImage& image, bool repaintNow = true);
     void useWindowStyle();
     void useWidgetStyle();
 
@@ -55,7 +55,7 @@ private:
 
     QVBoxLayout* m_layout;
     QVBoxLayout* m_widgetStyleLayout;
-    GLCameraWidget* m_cameraWidget;
+    CameraWidget* m_cameraWidget;
     QLabel* m_label;
 };
 
