@@ -67,10 +67,6 @@ jobs:
         run: |
           python3 -m pip install -r requirements.txt
           
-      - name: Fix em Problem 
-        run: |
-          python3 -m pip uninstall em
-
       - name: Install the VUE.js frontend
         working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
         run: |
