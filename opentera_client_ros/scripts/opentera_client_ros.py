@@ -50,6 +50,9 @@ class OpenTeraROSClient:
         self.__client = {}
         self.__eventLoop = {}
 
+        self.__current_device_uuid = ''
+        self.__current_device_name = ''
+
     def robot_status_callback(self, status: RobotStatus):
         # Update internal status
         # Will be sent by _opentera_send_device_status task as json
@@ -123,6 +126,13 @@ class OpenTeraROSClient:
                 status_task.cancel()
                 await status_task
 
+            if 'device_info' in login_info:
+                device_info = login_info['device_info']
+                if 'device_uuid' in device_info:
+                    self.__current_device_uuid = device_info['device_uuid']
+                if 'device_name' in device_info:
+                    self.__current_device_name = device_info['device_name']
+
             rospy.logwarn('cancel task')
 
     def run(self):
@@ -179,6 +189,8 @@ class OpenTeraROSClient:
 
                 # All events in same message
                 opentera_events = OpenTeraEvent()
+                opentera_events.current_device_uuid = self.__current_device_uuid
+                opentera_events.current_device_name = self.__current_device_name
 
                 for any_msg in message.events:
                     # Test for DeviceEvent
