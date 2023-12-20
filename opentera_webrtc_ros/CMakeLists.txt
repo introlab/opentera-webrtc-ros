@@ -100,7 +100,9 @@ catkin_package(
     LIBRARIES
         opencv_core
         opencv_imgproc
+        sioclient
         OpenteraWebrtcNativeClient
+        OpenteraWebrtcNativeGStreamer
         ${webrtc_native_LIBRARY}
         ${boringssl_LIBRARY}
     CATKIN_DEPENDS message_runtime
