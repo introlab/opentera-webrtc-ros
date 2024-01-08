@@ -1,4 +1,8 @@
 Header header
+
+string current_device_uuid
+string current_device_name
+
 opentera_webrtc_ros_msgs/DatabaseEvent[] database_events
 opentera_webrtc_ros_msgs/DeviceEvent[] device_events
 opentera_webrtc_ros_msgs/JoinSessionEvent[] join_session_events
