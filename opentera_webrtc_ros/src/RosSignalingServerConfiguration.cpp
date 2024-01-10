@@ -7,6 +7,45 @@ using namespace opentera;
 using namespace std;
 using namespace ros;
 
+std::string replaceProtocol(
+    const std::string& url,
+    const char* from0,
+    const char* to0,
+    const char* from1,
+    const char* to1)
+{
+    size_t p = url.find("://");
+    if (p == std::string::npos)
+    {
+        return url;
+    }
+
+    std::string protocol = url.substr(0, p);
+    transform(protocol.begin(), protocol.end(), protocol.begin(), ptr_fun<int, int>(tolower));
+    if (protocol == from0)
+    {
+        return to0 + url.substr(p);
+    }
+    else if (protocol == from1)
+    {
+        return to1 + url.substr(p);
+    }
+    else
+    {
+        return url;
+    }
+}
+
+std::string httpToWs(const std::string& url)
+{
+    return replaceProtocol(url, "http", "ws", "https", "wss");
+}
+
+std::string wsToHttp(const std::string& url)
+{
+    return replaceProtocol(url, "ws", "http", "wss", "https");
+}
+
 /**
  * @brief Build a signaling server configuration from the ROS parameter server
  * Parameters are retrieved from the signaling namespace under the node private namespace
@@ -19,7 +58,7 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam()
     string serverUrl, clientName, room, password;
     RosNodeParameters::loadSignalingParams(serverUrl, clientName, room, password);
 
-    return SignalingServerConfiguration::create(serverUrl, clientName, room, password);
+    return SignalingServerConfiguration::create(httpToWs(serverUrl) + "/signaling", clientName, room, password);
 }
 
 /**
@@ -32,7 +71,7 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam()
  */
 SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(const std::string& url)
 {
-    string address = RosSignalingServerConfiguration::getBaseUrl(url) + "/socket.io";
+    string address = httpToWs(RosSignalingServerConfiguration::getBaseUrl(url)) + "/signaling";
 
     size_t pos1 = url.find("?");
     string queries = url.substr(pos1);
@@ -74,7 +113,7 @@ std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& que
 std::string RosSignalingServerConfiguration::getIceServerUrl(const std::string& url)
 {
     ROS_INFO_STREAM("getIceServerUrl from url:" << url);
-    return RosSignalingServerConfiguration::getBaseUrl(url) + "/iceservers";
+    return wsToHttp(RosSignalingServerConfiguration::getBaseUrl(url)) + "/iceservers";
 }
 
 /**
