@@ -9,8 +9,8 @@
     <arg name="room_password" default="abc"/>
     <arg name="verify_ssl" default="true"/>
 
-    <arg name="input_topic" value="webrtc_data_incoming"/>
-    <arg name="output_topic" value="webrtc_data_outgoing"/>
+    <arg name="input_topic" default="webrtc_data_incoming"/>
+    <arg name="output_topic" default="webrtc_data_outgoing"/>
 
     <arg name="output" default="log"/>
 
