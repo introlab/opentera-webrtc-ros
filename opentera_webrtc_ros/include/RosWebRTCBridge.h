@@ -6,7 +6,7 @@
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 #include <OpenteraWebrtcNativeClient/Utils/Client.h>
-#include <OpenteraWebrtcNativeClient/SignalingClient.h>
+#include <OpenteraWebrtcNativeClient/WebrtcClient.h>
 
 #include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
 #include <opentera_webrtc_ros_msgs/DatabaseEvent.h>
@@ -32,7 +32,7 @@ namespace opentera
     template<typename T>
     class RosWebRTCBridge
     {
-        static_assert(std::is_base_of<SignalingClient, T>::value, "T must inherit from opentera::SignalingClient");
+        static_assert(std::is_base_of<WebrtcClient, T>::value, "T must inherit from opentera::WebrtcClient");
 
     private:
         ros::Subscriber m_eventSubscriber;
