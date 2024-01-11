@@ -9,6 +9,9 @@
     <arg name="room_password" default="abc"/>
     <arg name="verify_ssl" default="true"/>
 
+    <arg name="input_topic" value="webrtc_data_incoming"/>
+    <arg name="output_topic" value="webrtc_data_outgoing"/>
+
     <arg name="output" default="log"/>
 
     <node name="$(arg name)" pkg="opentera_webrtc_ros" type="data_channel_bridge" output="$(arg output)" respawn="true">
@@ -22,5 +25,8 @@
                 verify_ssl: $(arg verify_ssl)         # SSL peer verification
             }
         </rosparam>
+
+        <remap from="webrtc_data_incoming" to="$(arg input_topic)"/>
+        <remap from="webrtc_data_outgoing" to="$(arg output_topic)"/>
     </node>
 </launch>
