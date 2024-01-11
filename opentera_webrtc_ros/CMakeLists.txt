@@ -97,12 +97,10 @@ catkin_package(
         ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
         ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
         ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/json/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/IXWebSocket
         ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/cpp-httplib
     LIBRARIES
         opencv_core
         opencv_imgproc
-        ixwebsocket
         OpenteraWebrtcNativeClient
         OpenteraWebrtcNativeGStreamer
         ${webrtc_native_LIBRARY}
