@@ -91,20 +91,6 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_VERSION "${OPENTERA_WEBRTC_ROS_PYTHON_V
 add_subdirectory(opentera-webrtc)
 
 catkin_package(
-    INCLUDE_DIRS
-        ${webrtc_native_INCLUDE}
-        ${boringssl_INCLUDE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
-        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/json/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/cpp-httplib
-    LIBRARIES
-        opencv_core
-        opencv_imgproc
-        OpenteraWebrtcNativeClient
-        OpenteraWebrtcNativeGStreamer
-        ${webrtc_native_LIBRARY}
-        ${boringssl_LIBRARY}
     CATKIN_DEPENDS message_runtime
 )
 

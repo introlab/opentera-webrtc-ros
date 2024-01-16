@@ -127,7 +127,7 @@ SmallYunet025Silu160FaceDetector::SmallYunet025Silu160FaceDetector(bool useGpuIf
           useGpuIfAvailable,
           160,
           160,
-          0.3,
+          0.2,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
@@ -138,7 +138,7 @@ SmallYunet025Silu320FaceDetector::SmallYunet025Silu320FaceDetector(bool useGpuIf
           useGpuIfAvailable,
           320,
           320,
-          0.4,
+          0.3,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
@@ -149,7 +149,7 @@ SmallYunet025Silu640FaceDetector::SmallYunet025Silu640FaceDetector(bool useGpuIf
           useGpuIfAvailable,
           640,
           640,
-          0.4,
+          0.3,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
@@ -161,7 +161,7 @@ SmallYunet05Silu160FaceDetector::SmallYunet05Silu160FaceDetector(bool useGpuIfAv
           useGpuIfAvailable,
           160,
           160,
-          0.4,
+          0.3,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
@@ -172,7 +172,7 @@ SmallYunet05Silu320FaceDetector::SmallYunet05Silu320FaceDetector(bool useGpuIfAv
           useGpuIfAvailable,
           320,
           320,
-          0.4,
+          0.3,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
@@ -183,7 +183,7 @@ SmallYunet05Silu640FaceDetector::SmallYunet05Silu640FaceDetector(bool useGpuIfAv
           useGpuIfAvailable,
           640,
           640,
-          0.4,
+          0.3,
           0.3,
           getPackagePath() + MODEL_SUBPATH)
 {
