@@ -101,6 +101,14 @@ class OpenTeraROSClient:
             params = {'token': self.__token}
             login_info = await self._fetch(self.__client, self.__base_url + OpenTeraROSClient.login_api_endpoint, params)
             rospy.loginfo(login_info)
+
+            if 'device_info' in login_info:
+                device_info = login_info['device_info']
+                if 'device_uuid' in device_info:
+                    self.__current_device_uuid = device_info['device_uuid']
+                if 'device_name' in device_info:
+                    self.__current_device_name = device_info['device_name']
+
             if 'websocket_url' in login_info:
                 websocket_url = login_info['websocket_url']
 
@@ -125,13 +133,6 @@ class OpenTeraROSClient:
 
                 status_task.cancel()
                 await status_task
-
-            if 'device_info' in login_info:
-                device_info = login_info['device_info']
-                if 'device_uuid' in device_info:
-                    self.__current_device_uuid = device_info['device_uuid']
-                if 'device_name' in device_info:
-                    self.__current_device_name = device_info['device_name']
 
             rospy.logwarn('cancel task')
 
