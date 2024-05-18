@@ -1,21 +1,20 @@
 ################################################################################
 # Set minimum required version of cmake, project name and compile options
 ################################################################################
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 
 if (POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
-
 project(turtlebot3_beam_description)
 
 ################################################################################
-# Find catkin packages and libraries for catkin and system dependencies
+# Find ament packages and libraries for ament and system dependencies
 ################################################################################
-find_package(catkin REQUIRED COMPONENTS
-    urdf
-    xacro
-)
+find_package(ament_cmake REQUIRED)
+
+find_package(urdf REQUIRED)
+find_package(xacro REQUIRED)
 
 ################################################################################
 # Setup for python modules and scripts
@@ -30,26 +29,26 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################################################
 
 ################################################################################
-# Declare catkin specific configuration to be passed to dependent projects
+# Declare ament specific configuration to be passed to dependent projects
 ################################################################################
-catkin_package(
-    CATKIN_DEPENDS urdf xacro
-)
+ament_export_dependencies(urdf xacro)
 
 ################################################################################
 # Build
 ################################################################################
-include_directories(
-    ${catkin_INCLUDE_DIRS}
-)
 
 ################################################################################
 # Install
 ################################################################################
 install(DIRECTORY meshes rviz urdf
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    DESTINATION "share/${PROJECT_NAME}"
 )
 
 ################################################################################
 # Test
 ################################################################################
+
+################################################################################
+# Declare ament package
+################################################################################
+ament_package()
