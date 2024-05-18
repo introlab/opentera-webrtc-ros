@@ -1,5 +1,5 @@
 # The header will keep the timestamp
-Header header
+std_msgs/Header header
 # Fields
 bool is_charging
 float32 battery_voltage

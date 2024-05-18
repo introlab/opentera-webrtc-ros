@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 
 string current_device_uuid
 string current_device_name
