@@ -1,2 +1,2 @@
-src/opentera_protobuf_messages/__init__.py
-src/opentera_protobuf_messages/*_pb2.py
+opentera_protobuf_messages/__init__.py
+opentera_protobuf_messages/*_pb2.py
