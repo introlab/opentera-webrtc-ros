@@ -2,53 +2,30 @@
 # Set minimum required version of cmake, project name and compile options
 ################################################################################
 cmake_minimum_required(VERSION 3.8)
-
-if (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-endif (POLICY CMP0048)
 project(turtlebot3_beam_description)
+
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 ################################################################################
 # Find ament packages and libraries for ament and system dependencies
 ################################################################################
 find_package(ament_cmake REQUIRED)
-
 find_package(urdf REQUIRED)
-find_package(xacro REQUIRED)
-
-################################################################################
-# Setup for python modules and scripts
-################################################################################
-
-################################################################################
-# Declare ROS messages, services and actions
-################################################################################
-
-################################################################################
-# Declare ROS dynamic reconfigure parameters
-################################################################################
-
-################################################################################
-# Declare ament specific configuration to be passed to dependent projects
-################################################################################
-ament_export_dependencies(urdf xacro)
-
-################################################################################
-# Build
-################################################################################
 
 ################################################################################
 # Install
 ################################################################################
 install(DIRECTORY meshes rviz urdf
-    DESTINATION "share/${PROJECT_NAME}"
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ################################################################################
-# Test
-################################################################################
-
-################################################################################
-# Declare ament package
+# Macro for ament package
 ################################################################################
 ament_package()
