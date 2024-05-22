@@ -1,16 +1,13 @@
 #include "map_image_generator/drawers/RobotImageDrawer.h"
 
 #include <cmath>
-#include <tf/tf.h>
+#include <tf2/utils.h>
 
 using namespace map_image_generator;
 using namespace std;
 
-RobotImageDrawer::RobotImageDrawer(
-    const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener)
+RobotImageDrawer::RobotImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer)
 {
 }
 
@@ -25,13 +22,13 @@ void RobotImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void RobotImageDrawer::drawRobot(cv::Mat& image, tf::Transform& robotTransform)
+void RobotImageDrawer::drawRobot(cv::Mat& image, tf2::Transform& robotTransform)
 {
     const cv::Scalar& color = m_parameters.robotColor();
     int size = m_parameters.robotSize();
 
     adjustTransformForRobotRef(robotTransform);
-    double yaw = tf::getYaw(robotTransform.getRotation());
+    double yaw = tf2::getYaw(robotTransform.getRotation());
 
     int startX, startY;
     convertTransformToMapCoordinates(robotTransform, startX, startY);

@@ -2,13 +2,15 @@
 #define PARAMETERS_H
 
 #include <opencv2/opencv.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 
 namespace map_image_generator
 {
     class Parameters
     {
+        rclcpp::Node& m_node;
+
         double m_refreshRate;
         int m_resolution;  // pixel/m
         int m_width;  // m
@@ -53,7 +55,7 @@ namespace map_image_generator
         int m_soundSourceSize;  // pixel
 
     public:
-        explicit Parameters(ros::NodeHandle& nodeHandle);
+        explicit Parameters(rclcpp::Node& node);
         virtual ~Parameters();
 
         double refreshRate() const;
@@ -106,17 +108,35 @@ namespace map_image_generator
         void validateParameters();
     };
 
-    inline double Parameters::refreshRate() const { return m_refreshRate; }
+    inline double Parameters::refreshRate() const
+    {
+        return m_refreshRate;
+    }
 
-    inline int Parameters::resolution() const { return m_resolution; }
+    inline int Parameters::resolution() const
+    {
+        return m_resolution;
+    }
 
-    inline int Parameters::width() const { return m_width; }
+    inline int Parameters::width() const
+    {
+        return m_width;
+    }
 
-    inline int Parameters::height() const { return m_height; }
+    inline int Parameters::height() const
+    {
+        return m_height;
+    }
 
-    inline int Parameters::xOrigin() const { return m_xOrigin; }
+    inline int Parameters::xOrigin() const
+    {
+        return m_xOrigin;
+    }
 
-    inline int Parameters::yOrigin() const { return m_yOrigin; }
+    inline int Parameters::yOrigin() const
+    {
+        return m_yOrigin;
+    }
 
     inline int Parameters::robotVerticalOffset() const
     {
@@ -130,66 +150,159 @@ namespace map_image_generator
         }
     }
 
-    inline float Parameters::soundSourceRange() const { return m_soundSourceRange; }
+    inline float Parameters::soundSourceRange() const
+    {
+        return m_soundSourceRange;
+    }
 
-    inline float Parameters::soundSourceMaxRange() const { return m_soundSourceMaxRange; }
+    inline float Parameters::soundSourceMaxRange() const
+    {
+        return m_soundSourceMaxRange;
+    }
 
-    inline double Parameters::scaleFactor() const { return m_scaleFactor; }
+    inline double Parameters::scaleFactor() const
+    {
+        return m_scaleFactor;
+    }
 
-    inline void Parameters::setScaleFactor(double scaleFactor) { m_scaleFactor = scaleFactor; }
+    inline void Parameters::setScaleFactor(double scaleFactor)
+    {
+        m_scaleFactor = scaleFactor;
+    }
 
-    inline const std::string& Parameters::robotFrameId() const { return m_robotFrameId; }
+    inline const std::string& Parameters::robotFrameId() const
+    {
+        return m_robotFrameId;
+    }
 
-    inline const std::string& Parameters::mapFrameId() const { return m_mapFrameId; }
+    inline const std::string& Parameters::mapFrameId() const
+    {
+        return m_mapFrameId;
+    }
 
-    inline bool Parameters::centeredRobot() const { return m_centeredRobot; }
+    inline bool Parameters::centeredRobot() const
+    {
+        return m_centeredRobot;
+    }
 
-    inline bool Parameters::drawOccupancyGrid() const { return m_drawOccupancyGrid; }
+    inline bool Parameters::drawOccupancyGrid() const
+    {
+        return m_drawOccupancyGrid;
+    }
 
-    inline bool Parameters::drawGlobalPath() const { return m_drawGlobalPath; }
+    inline bool Parameters::drawGlobalPath() const
+    {
+        return m_drawGlobalPath;
+    }
 
-    inline bool Parameters::drawRobot() const { return m_drawRobot; }
+    inline bool Parameters::drawRobot() const
+    {
+        return m_drawRobot;
+    }
 
-    inline bool Parameters::drawGoals() const { return m_drawGoals; }
+    inline bool Parameters::drawGoals() const
+    {
+        return m_drawGoals;
+    }
 
-    inline bool Parameters::drawLaserScan() const { return m_drawLaserScan; }
+    inline bool Parameters::drawLaserScan() const
+    {
+        return m_drawLaserScan;
+    }
 
-    inline bool Parameters::drawLabels() const { return m_drawLabels; }
+    inline bool Parameters::drawLabels() const
+    {
+        return m_drawLabels;
+    }
 
-    inline bool Parameters::drawSoundSources() const { return m_drawSoundSources; }
+    inline bool Parameters::drawSoundSources() const
+    {
+        return m_drawSoundSources;
+    }
 
-    inline const cv::Vec3b& Parameters::wallColor() const { return m_wallColor; }
+    inline const cv::Vec3b& Parameters::wallColor() const
+    {
+        return m_wallColor;
+    }
 
-    inline const cv::Vec3b& Parameters::freeSpaceColor() const { return m_freeSpaceColor; }
+    inline const cv::Vec3b& Parameters::freeSpaceColor() const
+    {
+        return m_freeSpaceColor;
+    }
 
-    inline const cv::Vec3b& Parameters::unknownSpaceColor() const { return m_unknownSpaceColor; }
+    inline const cv::Vec3b& Parameters::unknownSpaceColor() const
+    {
+        return m_unknownSpaceColor;
+    }
 
-    inline const cv::Scalar& Parameters::globalPathColor() const { return m_globalPathColor; }
+    inline const cv::Scalar& Parameters::globalPathColor() const
+    {
+        return m_globalPathColor;
+    }
 
-    inline const cv::Scalar& Parameters::robotColor() const { return m_robotColor; }
+    inline const cv::Scalar& Parameters::robotColor() const
+    {
+        return m_robotColor;
+    }
 
-    inline const cv::Scalar& Parameters::goalColor() const { return m_goalColor; }
+    inline const cv::Scalar& Parameters::goalColor() const
+    {
+        return m_goalColor;
+    }
 
-    inline const cv::Scalar& Parameters::laserScanColor() const { return m_laserScanColor; }
+    inline const cv::Scalar& Parameters::laserScanColor() const
+    {
+        return m_laserScanColor;
+    }
 
-    inline const cv::Scalar& Parameters::textColor() const { return m_textColor; }
+    inline const cv::Scalar& Parameters::textColor() const
+    {
+        return m_textColor;
+    }
 
-    inline const cv::Scalar& Parameters::labelColor() const { return m_labelColor; }
+    inline const cv::Scalar& Parameters::labelColor() const
+    {
+        return m_labelColor;
+    }
 
-    inline const cv::Scalar& Parameters::soundSourceColorFull() const { return m_soundSourceColorFull; }
+    inline const cv::Scalar& Parameters::soundSourceColorFull() const
+    {
+        return m_soundSourceColorFull;
+    }
 
-    inline const cv::Scalar& Parameters::soundSourceColorDim() const { return m_soundSourceColorDim; }
+    inline const cv::Scalar& Parameters::soundSourceColorDim() const
+    {
+        return m_soundSourceColorDim;
+    }
 
-    inline int Parameters::globalPathThickness() const { return m_globalPathThickness; }
+    inline int Parameters::globalPathThickness() const
+    {
+        return m_globalPathThickness;
+    }
 
-    inline int Parameters::robotSize() const { return m_robotSize; }
+    inline int Parameters::robotSize() const
+    {
+        return m_robotSize;
+    }
 
-    inline int Parameters::goalSize() const { return m_goalSize; }
+    inline int Parameters::goalSize() const
+    {
+        return m_goalSize;
+    }
 
-    inline int Parameters::laserScanSize() const { return m_laserScanSize; }
+    inline int Parameters::laserScanSize() const
+    {
+        return m_laserScanSize;
+    }
 
-    inline int Parameters::labelSize() const { return m_labelSize; }
+    inline int Parameters::labelSize() const
+    {
+        return m_labelSize;
+    }
 
-    inline int Parameters::soundSourceSize() const { return m_soundSourceSize; }
+    inline int Parameters::soundSourceSize() const
+    {
+        return m_soundSourceSize;
+    }
 }
 #endif

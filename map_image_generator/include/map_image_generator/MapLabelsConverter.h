@@ -3,27 +3,28 @@
 
 #include "map_image_generator/Parameters.h"
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 #include <vector>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <rtabmap_msgs/srv/list_labels.hpp>
 
 namespace map_image_generator
 {
     class MapLabelsConverter
     {
         const Parameters& m_parameters;
-        ros::NodeHandle& m_nodeHandle;
-        ros::Subscriber m_mapLabelsSubscriber;
-        ros::Publisher m_mapLabelsPublisher;
-        ros::ServiceClient m_rtabmapListLabelsServiceClient;
+        rclcpp::Node& m_node;
+        rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr m_mapLabelsSubscriber;
+        rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr m_mapLabelsPublisher;
+        rclcpp::Client<rtabmap_msgs::srv::ListLabels>::SharedPtr m_rtabmapListLabelsServiceClient;
 
     public:
-        MapLabelsConverter(const Parameters& parameters, ros::NodeHandle& nodeHandle);
+        MapLabelsConverter(const Parameters& parameters, rclcpp::Node& node);
         virtual ~MapLabelsConverter();
 
     private:
-        void mapLabelsCallback(const visualization_msgs::MarkerArray::ConstPtr& mapLabels);
+        void mapLabelsCallback(const visualization_msgs::msg::MarkerArray::ConstSharedPtr mapLabels);
         std::vector<std::string> getDesiredLabels();
     };
 }

@@ -1,17 +1,22 @@
 #include "map_image_generator/drawers/ImageDrawer.h"
 
+#include <tf2/utils.h>
+#include <tf2/transform_datatypes.h>
+
+#include "map_image_generator/utils.h"
+
 using namespace map_image_generator;
 
-ImageDrawer::ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener)
+ImageDrawer::ImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
     : m_parameters(parameters),
-      m_nodeHandle(nodeHandle),
-      m_tfListener(tfListener)
+      m_node(node),
+      m_tfBuffer(tfBuffer)
 {
 }
 
 ImageDrawer::~ImageDrawer() = default;
 
-void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transform, int& x, int& y) const
+void ImageDrawer::convertTransformToMapCoordinates(const tf2::Transform& transform, int& x, int& y) const
 {
     x = static_cast<int>(
         transform.getOrigin().getX() * m_parameters.resolution() * m_parameters.scaleFactor() + m_parameters.xOrigin());
@@ -21,8 +26,8 @@ void ImageDrawer::convertTransformToMapCoordinates(const tf::Transform& transfor
 }
 
 void ImageDrawer::convertTransformToInputMapCoordinates(
-    const tf::Transform& transform,
-    const nav_msgs::MapMetaData& mapInfo,
+    const tf2::Transform& transform,
+    const nav_msgs::msg::MapMetaData& mapInfo,
     int& x,
     int& y) const
 {
@@ -33,33 +38,34 @@ void ImageDrawer::convertTransformToInputMapCoordinates(
 void ImageDrawer::convertInputMapCoordinatesToTransform(
     int x,
     int y,
-    const nav_msgs::MapMetaData& mapInfo,
-    tf::Transform& transform) const
+    const nav_msgs::msg::MapMetaData& mapInfo,
+    tf2::Transform& transform) const
 {
-    transform.setOrigin(tf::Vector3(
+    transform.setOrigin(tf2::Vector3(
         static_cast<double>(x) / m_parameters.resolution() + mapInfo.origin.position.x,
         static_cast<double>(y) / m_parameters.resolution() + mapInfo.origin.position.y,
         0.0));
 }
 
-std::optional<tf::Transform> ImageDrawer::getTransformInRef(const std::string& frameId) const
+std::optional<tf2::Transform> ImageDrawer::getTransformInRef(const std::string& frameId) const
 {
-    tf::StampedTransform transform;
+    tf2::Stamped<tf2::Transform> transform;
 
     try
     {
-        m_tfListener.lookupTransform(m_parameters.refFrameId(), frameId, ros::Time(0), transform);
+        auto transformMsg = m_tfBuffer.lookupTransform(m_parameters.refFrameId(), frameId, tf2::TimePointZero);
+        tf2::fromMsg(transformMsg, transform);
     }
-    catch (tf::TransformException& ex)
+    catch (const tf2::TransformException& ex)
     {
-        ROS_ERROR("%s", ex.what());
+        RCLCPP_ERROR(m_node.get_logger(), "%s", ex.what());
         return {};
     }
 
     return transform;
 }
 
-void ImageDrawer::adjustTransformForRobotRef(tf::Transform& transform) const
+void ImageDrawer::adjustTransformForRobotRef(tf2::Transform& transform) const
 {
     transform.getOrigin().setX(transform.getOrigin().getX() * -1);
     flipYawOnY(transform);
@@ -68,13 +74,13 @@ void ImageDrawer::adjustTransformForRobotRef(tf::Transform& transform) const
 }
 
 
-void ImageDrawer::adjustTransformAngleForRobotRef(tf::Transform& transform) const
+void ImageDrawer::adjustTransformAngleForRobotRef(tf2::Transform& transform) const
 {
     if (m_parameters.centeredRobot())
     {
-        double yaw = tf::getYaw(transform.getRotation());
+        double yaw = tf2::getYaw(transform.getRotation());
         yaw += M_PI_2;
-        transform.setRotation(tf::createQuaternionFromYaw(yaw));
+        transform.setRotation(createQuaternionFromYaw(yaw));
 
         auto x = transform.getOrigin().getX();
         auto y = transform.getOrigin().getY();
