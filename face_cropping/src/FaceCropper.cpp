@@ -14,7 +14,7 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
     int outputWidth,
     int outputHeight)
 {
-    FaceCropperParameters parameters = {0};
+    FaceCropperParameters parameters = {};
 
     if (faceDetector.type() == typeid(HaarFaceDetector))
     {

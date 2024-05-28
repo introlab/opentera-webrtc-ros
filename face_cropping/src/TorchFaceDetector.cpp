@@ -2,7 +2,7 @@
 
 #include <opencv4/opencv2/imgproc.hpp>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #ifndef NO_TORCH
 
@@ -23,6 +23,7 @@ constexpr int BR_Y_INDEX = 4;
 
 
 TorchFaceDetector::TorchFaceDetector(
+    rclcpp::Node& nodeHandle,
     bool useGpuIfAvailable,
     int maxWidth,
     int maxHeight,
@@ -33,8 +34,8 @@ TorchFaceDetector::TorchFaceDetector(
       m_maxHeight(maxHeight),
       m_confidenceThreshold(confidenceThreshold),
       m_nmsThreshold(nmsThreshold),
-      m_inputImage(m_maxHeight, m_maxWidth, CV_8UC3),
-      m_scalarType(torch::kFloat)
+      m_scalarType(torch::kFloat),
+      m_inputImage(m_maxHeight, m_maxWidth, CV_8UC3)
 {
     std::string suffix;
     if (useGpuIfAvailable && torch::cuda::is_available())
@@ -46,7 +47,7 @@ TorchFaceDetector::TorchFaceDetector(
     {
         if (useGpuIfAvailable)
         {
-            ROS_WARN("CUDA is not supported.");
+            RCLCPP_WARN(nodeHandle.get_logger(), "CUDA is not supported.");
         }
         m_device = torch::kCPU;
     }
@@ -67,7 +68,8 @@ std::vector<FaceDetection> TorchFaceDetector::detect(const cv::Mat& bgrImage)
 {
     torch::InferenceMode inferenceModeGuard;
 
-    float scale = std::min(static_cast<float>(m_maxWidth) / static_cast<float>(bgrImage.cols),
+    float scale = std::min(
+        static_cast<float>(m_maxWidth) / static_cast<float>(bgrImage.cols),
         static_cast<float>(m_maxHeight) / static_cast<float>(bgrImage.rows));
     cv::resize(bgrImage, m_resizedImage, cv::Size(), scale, scale, cv::INTER_LINEAR);
     cv::cvtColor(m_resizedImage, m_resizedImage, cv::COLOR_BGR2RGB);
@@ -122,70 +124,34 @@ torch::Tensor TorchFaceDetector::filterFaces(const torch::Tensor& faces)
 }
 
 
-SmallYunet025Silu160FaceDetector::SmallYunet025Silu160FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          160,
-          160,
-          0.2,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet025Silu160FaceDetector::SmallYunet025Silu160FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 160, 160, 0.2, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 
-SmallYunet025Silu320FaceDetector::SmallYunet025Silu320FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          320,
-          320,
-          0.3,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet025Silu320FaceDetector::SmallYunet025Silu320FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 320, 320, 0.3, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 
-SmallYunet025Silu640FaceDetector::SmallYunet025Silu640FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          640,
-          640,
-          0.3,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet025Silu640FaceDetector::SmallYunet025Silu640FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 640, 640, 0.3, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 
 
-SmallYunet05Silu160FaceDetector::SmallYunet05Silu160FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          160,
-          160,
-          0.3,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet05Silu160FaceDetector::SmallYunet05Silu160FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 160, 160, 0.3, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 
-SmallYunet05Silu320FaceDetector::SmallYunet05Silu320FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          320,
-          320,
-          0.3,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet05Silu320FaceDetector::SmallYunet05Silu320FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 320, 320, 0.3, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 
-SmallYunet05Silu640FaceDetector::SmallYunet05Silu640FaceDetector(bool useGpuIfAvailable)
-    : TorchFaceDetector(
-          useGpuIfAvailable,
-          640,
-          640,
-          0.3,
-          0.3,
-          getPackagePath() + MODEL_SUBPATH)
+SmallYunet05Silu640FaceDetector::SmallYunet05Silu640FaceDetector(rclcpp::Node& nodeHandle, bool useGpuIfAvailable)
+    : TorchFaceDetector(nodeHandle, useGpuIfAvailable, 640, 640, 0.3, 0.3, getPackagePath() + MODEL_SUBPATH)
 {
 }
 

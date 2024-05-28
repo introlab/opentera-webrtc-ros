@@ -1,39 +1,46 @@
 #include "FaceCroppingNodeConfiguration.h"
 
-std::optional<FaceCroppingNodeConfiguration>
-    FaceCroppingNodeConfiguration::fromRosParameters(const ros::NodeHandle& privateNodeHandle)
+std::optional<FaceCroppingNodeConfiguration> FaceCroppingNodeConfiguration::fromRosParameters(rclcpp::Node& nodeHandle)
 {
     FaceCroppingNodeConfiguration configuration;
 
-    if (!privateNodeHandle.getParam("face_detection_model", configuration.faceDetectionModel))
+    // TODO in Galactic, replace with this format:
+    // nodeHandle.declare_parameter("face_detection_model", rclcpp::PARAMETER_STRING);
+    nodeHandle.declare_parameter("face_detection_model");
+    nodeHandle.declare_parameter("min_face_width");
+    nodeHandle.declare_parameter("min_face_height");
+    nodeHandle.declare_parameter("output_width");
+    nodeHandle.declare_parameter("output_height");
+
+    if (!nodeHandle.get_parameter("face_detection_model", configuration.faceDetectionModel))
     {
-        ROS_ERROR("The parameter face_detection_model is required.");
+        RCLCPP_ERROR(nodeHandle.get_logger(), "The parameter face_detection_model is required.");
         return std::nullopt;
     }
-    privateNodeHandle.param("use_gpu_if_available", configuration.useGpuIfAvailable, false);
+    configuration.useGpuIfAvailable = nodeHandle.declare_parameter("use_gpu_if_available", false);
 
 
-    if (!privateNodeHandle.getParam("min_face_width", configuration.minFaceWidth))
+    if (!nodeHandle.get_parameter("min_face_width", configuration.minFaceWidth))
     {
-        ROS_ERROR("The parameter min_face_width is required.");
+        RCLCPP_ERROR(nodeHandle.get_logger(), "The parameter min_face_width is required.");
         return std::nullopt;
     }
-    if (!privateNodeHandle.getParam("min_face_height", configuration.minFaceHeight))
+    if (!nodeHandle.get_parameter("min_face_height", configuration.minFaceHeight))
     {
-        ROS_ERROR("The parameter min_face_height is required.");
+        RCLCPP_ERROR(nodeHandle.get_logger(), "The parameter min_face_height is required.");
         return std::nullopt;
     }
-    if (!privateNodeHandle.getParam("output_width", configuration.outputWidth))
+    if (!nodeHandle.get_parameter("output_width", configuration.outputWidth))
     {
-        ROS_ERROR("The parameter output_width is required.");
+        RCLCPP_ERROR(nodeHandle.get_logger(), "The parameter output_width is required.");
         return std::nullopt;
     }
-    if (!privateNodeHandle.getParam("output_height", configuration.outputHeight))
+    if (!nodeHandle.get_parameter("output_height", configuration.outputHeight))
     {
-        ROS_ERROR("The parameter output_height is required.");
+        RCLCPP_ERROR(nodeHandle.get_logger(), "The parameter output_height is required.");
         return std::nullopt;
     }
-    privateNodeHandle.param("adjust_brightness", configuration.adjustBrightness, true);
+    configuration.adjustBrightness = nodeHandle.declare_parameter("adjust_brightness", true);
 
     return configuration;
 }
