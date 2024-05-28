@@ -25,8 +25,8 @@ namespace map_image_generator
         void draw(cv::Mat& image) override;
 
     protected:
-        void soundSourcesCallback(const odas_ros::msg::OdasSstArrayStamped::ConstSharedPtr soundSources);
-        void laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr laserScan);
+        void soundSourcesCallback(const odas_ros::msg::OdasSstArrayStamped::ConstSharedPtr& soundSources);
+        void laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan);
 
     private:
         void drawWithLidar(cv::Mat& image);

@@ -25,12 +25,12 @@ GoalImageDrawer::GoalImageDrawer(const Parameters& parameters, rclcpp::Node& nod
 
 GoalImageDrawer::~GoalImageDrawer() = default;
 
-void GoalImageDrawer::addGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr goal)
+void GoalImageDrawer::addGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal)
 {
     m_activeGoals.emplace_back(*goal);
 }
 
-void GoalImageDrawer::removeGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr goal)
+void GoalImageDrawer::removeGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal)
 {
     if (!m_activeGoals.empty() &&
         std::round(m_activeGoals.front().pose.position.z) == std::round(goal->pose.position.z))
@@ -44,8 +44,8 @@ void GoalImageDrawer::removeGoalCallback(const geometry_msgs::msg::PoseStamped::
 }
 
 void GoalImageDrawer::clearGoals(
-    const std_srvs::srv::SetBool::Request::ConstSharedPtr req,
-    const std_srvs::srv::SetBool::Response::SharedPtr res)
+    const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+    const std_srvs::srv::SetBool::Response::SharedPtr& res)
 {
     if (req->data)
     {

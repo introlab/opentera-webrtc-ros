@@ -21,16 +21,16 @@ namespace map_image_generator
         GoalImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer);
         ~GoalImageDrawer() override;
 
-        void addGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr goal);
-        void removeGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr goal);
+        void addGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal);
+        void removeGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal);
 
         void draw(cv::Mat& image) override;
 
     private:
         void drawGoal(const geometry_msgs::msg::PoseStamped& goal, cv::Mat& image, tf2::Transform& transform);
         void clearGoals(
-            const std_srvs::srv::SetBool::Request::ConstSharedPtr req,
-            const std_srvs::srv::SetBool::Response::SharedPtr res);
+            const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+            const std_srvs::srv::SetBool::Response::SharedPtr& res);
     };
 }
 #endif

@@ -15,8 +15,8 @@ GoalConverter::GoalConverter(const Parameters& parameters, rclcpp::Node& node, t
 GoalConverter::~GoalConverter() = default;
 
 void GoalConverter::mapImageGoalCallback(
-    const srv::ImageGoalToMapGoal::Request::ConstSharedPtr req,
-    const srv::ImageGoalToMapGoal::Response::SharedPtr res)
+    const srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
+    const srv::ImageGoalToMapGoal::Response::SharedPtr& res)
 {
     if (m_parameters.centeredRobot())
     {

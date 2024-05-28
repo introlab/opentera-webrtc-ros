@@ -17,7 +17,7 @@ LabelImageDrawer::LabelImageDrawer(const Parameters& parameters, rclcpp::Node& n
 
 LabelImageDrawer::~LabelImageDrawer() = default;
 
-void LabelImageDrawer::labelArrayCallback(const opentera_webrtc_ros_msgs::msg::LabelArray::ConstSharedPtr labelArray)
+void LabelImageDrawer::labelArrayCallback(const opentera_webrtc_ros_msgs::msg::LabelArray::ConstSharedPtr& labelArray)
 {
     m_lastLabelArray = labelArray;
 }

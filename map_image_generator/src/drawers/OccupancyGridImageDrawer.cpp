@@ -46,14 +46,14 @@ void OccupancyGridImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void OccupancyGridImageDrawer::occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr occupancyGrid)
+void OccupancyGridImageDrawer::occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr& occupancyGrid)
 {
     m_lastOccupancyGrid = occupancyGrid;
 }
 
 void OccupancyGridImageDrawer::changeMapViewCallback(
-    const srv::ChangeMapView::Request::ConstSharedPtr req,
-    const srv::ChangeMapView::Response::SharedPtr res)
+    const srv::ChangeMapView::Request::ConstSharedPtr& req,
+    const srv::ChangeMapView::Response::SharedPtr& res)
 {
     res->success = true;
     if (req->view_new == srv::ChangeMapView::Request::VIEW_CENTERED_ROBOT)

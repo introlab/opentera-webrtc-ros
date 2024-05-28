@@ -24,7 +24,7 @@ namespace map_image_generator
         virtual ~MapLabelsConverter();
 
     private:
-        void mapLabelsCallback(const visualization_msgs::msg::MarkerArray::ConstSharedPtr mapLabels);
+        void mapLabelsCallback(const visualization_msgs::msg::MarkerArray::ConstSharedPtr& mapLabels);
         std::vector<std::string> getDesiredLabels();
     };
 }

@@ -29,11 +29,11 @@ namespace map_image_generator
         void draw(cv::Mat& image) override;
 
     private:
-        void occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr occupancyGrid);
+        void occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr& occupancyGrid);
 
         void changeMapViewCallback(
-            const srv::ChangeMapView::Request::ConstSharedPtr req,
-            const srv::ChangeMapView::Response::SharedPtr res);
+            const srv::ChangeMapView::Request::ConstSharedPtr& req,
+            const srv::ChangeMapView::Response::SharedPtr& res);
 
         void drawNotScaledOccupancyGridImage();
         void changeNotScaledOccupancyGridImageIfNeeded();

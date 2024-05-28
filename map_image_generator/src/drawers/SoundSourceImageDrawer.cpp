@@ -26,12 +26,13 @@ SoundSourceImageDrawer::SoundSourceImageDrawer(
 
 SoundSourceImageDrawer::~SoundSourceImageDrawer() = default;
 
-void SoundSourceImageDrawer::soundSourcesCallback(const odas_ros::msg::OdasSstArrayStamped::ConstSharedPtr soundSources)
+void SoundSourceImageDrawer::soundSourcesCallback(
+    const odas_ros::msg::OdasSstArrayStamped::ConstSharedPtr& soundSources)
 {
     m_lastSoundSourcesArray = soundSources;
 }
 
-void SoundSourceImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr laserScan)
+void SoundSourceImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }

@@ -20,7 +20,7 @@ namespace map_image_generator
         void draw(cv::Mat& image) override;
 
     private:
-        void laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr laserScan);
+        void laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan);
 
         void drawLaserScan(cv::Mat& image, tf2::Transform& transform);
         void drawRange(cv::Mat& image, tf2::Transform& transform, float range, float angle);

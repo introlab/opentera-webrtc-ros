@@ -29,8 +29,8 @@ namespace map_image_generator
 
     private:
         void mapImageGoalCallback(
-            const srv::ImageGoalToMapGoal::Request::ConstSharedPtr req,
-            const srv::ImageGoalToMapGoal::Response::SharedPtr res);
+            const srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
+            const srv::ImageGoalToMapGoal::Response::SharedPtr& res);
     };
 }
 #endif

@@ -33,7 +33,7 @@ void GlobalPathImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr globalPath)
+void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr& globalPath)
 {
     m_lastGlobalPath = globalPath ? std::make_unique<nav_msgs::msg::Path>(*globalPath) : std::move(m_lastGlobalPath);
 }
@@ -65,8 +65,8 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf2::Transform& trans
 }
 
 void GlobalPathImageDrawer::clearGlobalPath(
-    const std_srvs::srv::SetBool::Request::ConstSharedPtr req,
-    const std_srvs::srv::SetBool::Response::SharedPtr res)
+    const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+    const std_srvs::srv::SetBool::Response::SharedPtr& res)
 {
     if (req->data)
     {

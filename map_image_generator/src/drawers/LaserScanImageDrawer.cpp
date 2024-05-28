@@ -31,7 +31,7 @@ void LaserScanImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr laserScan)
+void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }

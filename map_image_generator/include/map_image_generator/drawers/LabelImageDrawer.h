@@ -23,7 +23,7 @@ namespace map_image_generator
     private:
         void drawLabel(const opentera_webrtc_ros_msgs::msg::Label& label, cv::Mat& image, tf2::Transform& transform);
 
-        void labelArrayCallback(const opentera_webrtc_ros_msgs::msg::LabelArray::ConstSharedPtr labelArray);
+        void labelArrayCallback(const opentera_webrtc_ros_msgs::msg::LabelArray::ConstSharedPtr& labelArray);
     };
 }
 #endif

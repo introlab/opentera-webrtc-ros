@@ -22,11 +22,11 @@ namespace map_image_generator
         void draw(cv::Mat& image) override;
 
     private:
-        void globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr globalPath);
+        void globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr& globalPath);
         void drawGlobalPath(cv::Mat& image, tf2::Transform& transform);
         void clearGlobalPath(
-            const std_srvs::srv::SetBool::Request::ConstSharedPtr req,
-            const std_srvs::srv::SetBool::Response::SharedPtr res);
+            const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+            const std_srvs::srv::SetBool::Response::SharedPtr& res);
     };
 }
 #endif

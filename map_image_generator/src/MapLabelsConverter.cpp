@@ -22,7 +22,7 @@ MapLabelsConverter::MapLabelsConverter(const Parameters& parameters, rclcpp::Nod
 
 MapLabelsConverter::~MapLabelsConverter() = default;
 
-void MapLabelsConverter::mapLabelsCallback(const visualization_msgs::msg::MarkerArray::ConstSharedPtr mapLabels)
+void MapLabelsConverter::mapLabelsCallback(const visualization_msgs::msg::MarkerArray::ConstSharedPtr& mapLabels)
 {
     std::vector<std::string> desiredLabels = getDesiredLabels();
 
