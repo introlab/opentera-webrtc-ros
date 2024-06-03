@@ -5,7 +5,7 @@
 #include <algorithm>
 
 using namespace map_image_generator;
-using namespace std;
+using namespace std::chrono_literals;
 
 MapLabelsConverter::MapLabelsConverter(const Parameters& parameters, rclcpp::Node& node)
     : m_parameters(parameters),
@@ -47,10 +47,13 @@ void MapLabelsConverter::mapLabelsCallback(const visualization_msgs::msg::Marker
 
 std::vector<std::string> MapLabelsConverter::getDesiredLabels()
 {
+    static constexpr auto service_call_timeout = 2s;
+
     auto request = std::make_shared<rtabmap_msgs::srv::ListLabels::Request>();
 
     auto result = m_rtabmapListLabelsServiceClient->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(m_node.shared_from_this(), result) == rclcpp::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(m_node.shared_from_this(), result, service_call_timeout) ==
+        rclcpp::FutureReturnCode::SUCCESS)
     {
         return result.get()->labels;
     }

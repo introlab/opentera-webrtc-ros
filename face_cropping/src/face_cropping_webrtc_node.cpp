@@ -1,5 +1,3 @@
-#include "OpencvFaceDetector.h"
-#include "TorchFaceDetector.h"
 #include "FaceCropper.h"
 #include "FaceCroppingNodeConfiguration.h"
 #include "OpencvUtils.h"
