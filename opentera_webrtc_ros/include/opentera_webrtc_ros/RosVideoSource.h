@@ -2,7 +2,7 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_VIDEO_SOURCE_H
 
 #include <OpenteraWebrtcNativeClient/Sources/VideoSource.h>
-#include <sensor_msgs/Image.h>
+#include <sensor_msgs/msg/image.hpp>
 
 namespace opentera
 {
@@ -15,7 +15,7 @@ namespace opentera
     {
     public:
         RosVideoSource(bool needsDenoising, bool isScreenCast);
-        void sendFrame(const sensor_msgs::ImageConstPtr& msg);
+        void sendFrame(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
     };
 }
 

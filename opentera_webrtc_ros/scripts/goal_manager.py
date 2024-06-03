@@ -1,32 +1,42 @@
 #!/usr/bin/env python3
 
-import rospy
-from opentera_webrtc_ros_msgs.msg import WaypointArray
-from std_msgs.msg import Bool
+import rclpy
+import rclpy.exceptions
+import rclpy.node
+from typing import List
 from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose
 from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
+from opentera_webrtc_ros_msgs.msg import WaypointArray
+import rclpy.qos
+from std_msgs.msg import Bool
+from geometry_msgs.msg import PoseStamped
 
 
-class GoalManager():
+class GoalManager(rclpy.node.Node):
     def __init__(self):
+        super().__init__("goal_manager")  # type: ignore
+
         self.nav_client = WaypointNavigationClient(
-            stop_cb=self.__stop_cb, stop_token=self.__stop_token)
+            stop_cb=self.__stop_cb, stop_token=self.__stop_token
+        )
 
         self.should_stop = False
-        self.pose_goals = []
+        self.pose_goals: List[PoseStamped] = []
 
         # Subscribers and publishers
-        self.waypoints_sub = rospy.Subscriber(
-            "waypoints", WaypointArray, self.waypoints_cb)
-        self.start_sub = rospy.Subscriber(
-            "start", Bool, self.start_cb, queue_size=1)
+        self.waypoints_sub = self.create_subscription(
+            WaypointArray, "waypoints", self.waypoints_cb, 1
+        )
+        self.start_sub = self.create_subscription(
+            Bool, "start", self.start_cb, 1
+        )
 
-        rospy.loginfo("Goal manager ready")
+        self.get_logger().info("Goal manager ready")
 
     def __stop_token(self, *_, **__):
         return self.should_stop
 
-    def waypoints_cb(self, msg):
+    def waypoints_cb(self, msg: WaypointArray):
         for waypoint in msg.waypoints:
             pose_goal = convert_waypoint_to_pose(waypoint)
             if pose_goal is not None:
@@ -35,14 +45,14 @@ class GoalManager():
                 self.pose_goals.append(pose_goal)
 
     def __stop_cb(self, _):
-        rospy.loginfo("Stopping")
+        self.get_logger().info("Stopping")
         self.should_stop = True
         yield
         self.pose_goals.clear()
         yield
 
-    def start_cb(self, msg):
-        rospy.loginfo("Starting")
+    def start_cb(self, msg: Bool):
+        self.get_logger().info("Starting")
         if msg.data == True:
             self.nav_client.cancel_all_goals(False)
             self.nav_client.clear_global_path()
@@ -50,7 +60,8 @@ class GoalManager():
 
             for pose_goal in self.pose_goals:
                 self.nav_client.navigate_to_goal(
-                    pose_goal, round(pose_goal.pose.position.z))
+                    pose_goal, round(pose_goal.pose.position.z)
+                )
                 if self.should_stop:
                     break
             self.nav_client.clear_global_path()
@@ -58,9 +69,9 @@ class GoalManager():
 
 
 if __name__ == '__main__':
-    rospy.init_node("goal_manager")
+    rclpy.init()
     try:
         goal_manager = GoalManager()
-        rospy.spin()
-    except rospy.ROSInterruptException:
+        rclpy.spin(goal_manager)
+    except rclpy.exceptions.ROSInterruptException:
         pass

@@ -1,27 +1,28 @@
 #ifndef OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_WEBRTC_BRIDGE_H
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_ROS_WEBRTC_BRIDGE_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <signal.h>
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 #include <OpenteraWebrtcNativeClient/Utils/Client.h>
 #include <OpenteraWebrtcNativeClient/WebrtcClient.h>
 
-#include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
-#include <opentera_webrtc_ros_msgs/DatabaseEvent.h>
-#include <opentera_webrtc_ros_msgs/DeviceEvent.h>
-#include <opentera_webrtc_ros_msgs/JoinSessionEvent.h>
-#include <opentera_webrtc_ros_msgs/JoinSessionReplyEvent.h>
-#include <opentera_webrtc_ros_msgs/LeaveSessionEvent.h>
-#include <opentera_webrtc_ros_msgs/LogEvent.h>
-#include <opentera_webrtc_ros_msgs/ParticipantEvent.h>
-#include <opentera_webrtc_ros_msgs/StopSessionEvent.h>
-#include <opentera_webrtc_ros_msgs/UserEvent.h>
-#include <opentera_webrtc_ros_msgs/PeerStatus.h>
+#include <opentera_webrtc_ros_msgs/msg/open_tera_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/database_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/device_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/join_session_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/join_session_reply_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/leave_session_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/log_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/participant_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/stop_session_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/user_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/peer_status.hpp>
 
-#include <RosNodeParameters.h>
-#include <RosSignalingServerconfiguration.h>
+#include <opentera_webrtc_ros/RosNodeParameters.h>
+#include <opentera_webrtc_ros/RosSignalingServerConfiguration.h>
+#include <opentera_webrtc_ros/utils.h>
 
 namespace opentera
 {
@@ -30,33 +31,31 @@ namespace opentera
      * @brief Interface a ROS node to bridge WebRTC to ROS topics
      */
     template<typename T>
-    class RosWebRTCBridge
+    class RosWebRTCBridge : public rclcpp::Node
     {
         static_assert(std::is_base_of<WebrtcClient, T>::value, "T must inherit from opentera::WebrtcClient");
 
     private:
-        ros::Subscriber m_eventSubscriber;
+        rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>::SharedPtr m_eventSubscriber;
 
     protected:
-        std::string nodeName;
-        ros::NodeHandle m_nh;
-        ros::Publisher m_peerStatusPublisher;
+        rclcpp::Publisher<opentera_webrtc_ros_msgs::msg::PeerStatus>::SharedPtr m_peerStatusPublisher;
         std::unique_ptr<T> m_signalingClient;
 
         virtual void connect();
         virtual void disconnect();
 
-        virtual void onEvent(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
-        virtual void onDataBaseEvents(const std::vector<opentera_webrtc_ros_msgs::DatabaseEvent>& events);
-        virtual void onDeviceEvents(const std::vector<opentera_webrtc_ros_msgs::DeviceEvent>& events);
-        virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events);
+        virtual void onEvent(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg);
+        virtual void onDataBaseEvents(const std::vector<opentera_webrtc_ros_msgs::msg::DatabaseEvent>& events);
+        virtual void onDeviceEvents(const std::vector<opentera_webrtc_ros_msgs::msg::DeviceEvent>& events);
+        virtual void onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionEvent>& events);
         virtual void
-            onJoinSessionReplyEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionReplyEvent>& events);
-        virtual void onLeaveSessionEvents(const std::vector<opentera_webrtc_ros_msgs::LeaveSessionEvent>& events);
-        virtual void onLogEvents(const std::vector<opentera_webrtc_ros_msgs::LogEvent>& events);
-        virtual void onParticipantEvents(const std::vector<opentera_webrtc_ros_msgs::ParticipantEvent>& events);
-        virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events);
-        virtual void onUserEvents(const std::vector<opentera_webrtc_ros_msgs::UserEvent>& events);
+            onJoinSessionReplyEvents(const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionReplyEvent>& events);
+        virtual void onLeaveSessionEvents(const std::vector<opentera_webrtc_ros_msgs::msg::LeaveSessionEvent>& events);
+        virtual void onLogEvents(const std::vector<opentera_webrtc_ros_msgs::msg::LogEvent>& events);
+        virtual void onParticipantEvents(const std::vector<opentera_webrtc_ros_msgs::msg::ParticipantEvent>& events);
+        virtual void onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::msg::StopSessionEvent>& events);
+        virtual void onUserEvents(const std::vector<opentera_webrtc_ros_msgs::msg::UserEvent>& events);
 
         virtual void connectSignalingClientEvents();
         virtual void onSignalingConnectionOpened();
@@ -70,11 +69,14 @@ namespace opentera
         virtual void onError(const std::string& error);
 
         template<typename PeerMsg>
-        void publishPeerFrame(ros::Publisher& publisher, const Client& client, const decltype(PeerMsg::frame)& frame);
+        void publishPeerFrame(
+            rclcpp::Publisher<PeerMsg>& publisher,
+            const Client& client,
+            const decltype(PeerMsg::frame)& frame);
         void publishPeerStatus(const Client& client, int status);
 
     public:
-        RosWebRTCBridge(const ros::NodeHandle& nh);
+        RosWebRTCBridge(const std::string& nodeName);
         virtual ~RosWebRTCBridge() = 0;
 
         void run();
@@ -86,20 +88,29 @@ namespace opentera
      * @param nh node handle.
      */
     template<typename T>
-    RosWebRTCBridge<T>::RosWebRTCBridge(const ros::NodeHandle& nh) : m_signalingClient(nullptr),
-                                                                     m_nh(nh)
+    RosWebRTCBridge<T>::RosWebRTCBridge(const std::string& nodeName)
+        : rclcpp::Node(nodeName),
+          m_signalingClient(nullptr)
     {
         // On CTRL+C exit
-        signal(SIGINT, [](int sig) { ros::requestShutdown(); });
+        signal(
+            SIGINT,
+            [](int sig)
+            {
+                (void)sig;
+                rclcpp::shutdown();
+            });
 
-        nodeName = ros::this_node::getName();
-
-        if (!RosNodeParameters::isStandAlone())
+        if (!RosNodeParameters::isStandAlone(*this))
         {
-            m_eventSubscriber = m_nh.subscribe("events", 10, &RosWebRTCBridge::onEvent, this);
+            m_eventSubscriber = this->create_subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(
+                "events",
+                10,
+                bind_this<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(this, &RosWebRTCBridge::onEvent));
         }
 
-        m_peerStatusPublisher = m_nh.advertise<opentera_webrtc_ros_msgs::PeerStatus>("webrtc_peer_status", 10, false);
+        m_peerStatusPublisher =
+            this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerStatus>("webrtc_peer_status", 10);
     }
 
     /**
@@ -108,9 +119,9 @@ namespace opentera
     template<typename T>
     RosWebRTCBridge<T>::~RosWebRTCBridge()
     {
-        ROS_INFO("ROS is shutting down, closing signaling client connection.");
+        RCLCPP_INFO(this->get_logger(), "ROS is shutting down, closing signaling client connection.");
         disconnect();
-        ROS_INFO("Signaling client disconnected, goodbye.");
+        RCLCPP_INFO(this->get_logger(), "Signaling client disconnected, goodbye.");
     }
 
     /**
@@ -122,16 +133,12 @@ namespace opentera
         connectSignalingClientEvents();
         if (m_signalingClient != nullptr)
         {
-            ROS_INFO_STREAM(
-                nodeName << " --> "
-                         << "Connecting to signaling server...");
+            RCLCPP_INFO(this->get_logger(), " --> Connecting to signaling server...");
             m_signalingClient->connect();
         }
         else
         {
-            ROS_ERROR_STREAM(
-                nodeName << " --> "
-                         << "Signaling client is nullptr, cannot connect.");
+            RCLCPP_ERROR(this->get_logger(), " --> Signaling client is nullptr, cannot connect.");
         }
     }
 
@@ -143,9 +150,7 @@ namespace opentera
     {
         if (m_signalingClient != nullptr)
         {
-            ROS_INFO_STREAM(
-                nodeName << " --> "
-                         << "Disconnecting from signaling server...");
+            RCLCPP_INFO(this->get_logger(), " --> Disconnecting from signaling server...");
             m_signalingClient->closeSync();
 
             // Reset client
@@ -153,9 +158,7 @@ namespace opentera
         }
         else
         {
-            ROS_ERROR_STREAM(
-                nodeName << " --> "
-                         << "Signaling client is nullptr, cannot disconnect.");
+            RCLCPP_ERROR(this->get_logger(), " --> Signaling client is nullptr, cannot disconnect.");
         }
     }
 
@@ -169,7 +172,7 @@ namespace opentera
     template<typename T>
     template<typename PeerMsg>
     void RosWebRTCBridge<T>::publishPeerFrame(
-        ros::Publisher& publisher,
+        rclcpp::Publisher<PeerMsg>& publisher,
         const Client& client,
         const decltype(PeerMsg::frame)& frame)
     {
@@ -183,11 +186,11 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::publishPeerStatus(const Client& client, int status)
     {
-        opentera_webrtc_ros_msgs::PeerStatus msg;
+        opentera_webrtc_ros_msgs::msg::PeerStatus msg;
         msg.sender.id = client.id();
         msg.sender.name = client.name();
         msg.status = status;
-        m_peerStatusPublisher.publish(msg);
+        m_peerStatusPublisher->publish(msg);
     }
 
     /**
@@ -196,7 +199,7 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::run()
     {
-        ros::spin();
+        rclcpp::spin(this->shared_from_this());
     }
 
     /************************************************************************
@@ -209,7 +212,7 @@ namespace opentera
      * @param event The message received.
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onEvent(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg)
+    void RosWebRTCBridge<T>::onEvent(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg)
     {
         if (!msg->database_events.empty())
         {
@@ -263,8 +266,9 @@ namespace opentera
      * @param events A vector of database event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onDataBaseEvents(const std::vector<opentera_webrtc_ros_msgs::DatabaseEvent>& events)
+    void RosWebRTCBridge<T>::onDataBaseEvents(const std::vector<opentera_webrtc_ros_msgs::msg::DatabaseEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -273,8 +277,9 @@ namespace opentera
      * @param events A vector of device event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onDeviceEvents(const std::vector<opentera_webrtc_ros_msgs::DeviceEvent>& events)
+    void RosWebRTCBridge<T>::onDeviceEvents(const std::vector<opentera_webrtc_ros_msgs::msg::DeviceEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -283,8 +288,10 @@ namespace opentera
      * @param events A vector of join session event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)
+    void RosWebRTCBridge<T>::onJoinSessionEvents(
+        const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -294,8 +301,9 @@ namespace opentera
      */
     template<typename T>
     void RosWebRTCBridge<T>::onJoinSessionReplyEvents(
-        const std::vector<opentera_webrtc_ros_msgs::JoinSessionReplyEvent>& events)
+        const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionReplyEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -304,9 +312,10 @@ namespace opentera
      * @param events A vector of leave session event message
      */
     template<typename T>
-    void
-        RosWebRTCBridge<T>::onLeaveSessionEvents(const std::vector<opentera_webrtc_ros_msgs::LeaveSessionEvent>& events)
+    void RosWebRTCBridge<T>::onLeaveSessionEvents(
+        const std::vector<opentera_webrtc_ros_msgs::msg::LeaveSessionEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -315,8 +324,9 @@ namespace opentera
      * @param events A vector of log session event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onLogEvents(const std::vector<opentera_webrtc_ros_msgs::LogEvent>& events)
+    void RosWebRTCBridge<T>::onLogEvents(const std::vector<opentera_webrtc_ros_msgs::msg::LogEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -325,8 +335,10 @@ namespace opentera
      * @param events A vector of participant event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onParticipantEvents(const std::vector<opentera_webrtc_ros_msgs::ParticipantEvent>& events)
+    void RosWebRTCBridge<T>::onParticipantEvents(
+        const std::vector<opentera_webrtc_ros_msgs::msg::ParticipantEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -335,8 +347,10 @@ namespace opentera
      * @param events A vector of stop session event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events)
+    void RosWebRTCBridge<T>::onStopSessionEvents(
+        const std::vector<opentera_webrtc_ros_msgs::msg::StopSessionEvent>& events)
     {
+        (void)events;
     }
 
     /**
@@ -345,8 +359,9 @@ namespace opentera
      * @param events A vector of user event message
      */
     template<typename T>
-    void RosWebRTCBridge<T>::onUserEvents(const std::vector<opentera_webrtc_ros_msgs::UserEvent>& events)
+    void RosWebRTCBridge<T>::onUserEvents(const std::vector<opentera_webrtc_ros_msgs::msg::UserEvent>& events)
     {
+        (void)events;
     }
 
     /************************************************************************
@@ -391,9 +406,7 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onSignalingConnectionOpened()
     {
-        ROS_INFO_STREAM(
-            nodeName << " --> "
-                     << "Signaling connection opened, streaming topic...");
+        RCLCPP_INFO(this->get_logger(), " --> Signaling connection opened, streaming topic...");
     }
 
     /**
@@ -402,9 +415,7 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onSignalingConnectionClosed()
     {
-        ROS_WARN_STREAM(
-            nodeName << " --> "
-                     << "Signaling connection closed.");
+        RCLCPP_WARN(this->get_logger(), " --> Signaling connection closed.");
     }
 
     /**
@@ -415,10 +426,10 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onSignalingConnectionError(const std::string& msg)
     {
-        ROS_ERROR_STREAM(
-            nodeName << " --> "
-                     << "Signaling connection error " << msg.c_str() << ", shutting down...");
-        ros::requestShutdown();
+        RCLCPP_ERROR_STREAM(
+            this->get_logger(),
+            " --> Signaling connection error " << msg.c_str() << ", shutting down...");
+        rclcpp::shutdown();
     }
 
     /**
@@ -429,11 +440,12 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onRoomClientsChanged(const std::vector<RoomClient>& roomClients)
     {
-        ROS_INFO_STREAM(nodeName << " --> Signaling on room clients changed:\n");
+        RCLCPP_INFO(this->get_logger(), " --> Signaling on room clients changed:\n");
         bool allClientsConnected = true;
         for (const auto& client : roomClients)
         {
-            ROS_INFO_STREAM(
+            RCLCPP_INFO_STREAM(
+                this->get_logger(),
                 "\tid: " << client.id() << ", name: " << client.name() << ", isConnected: " << std::boolalpha
                          << client.isConnected() << "\n");
             allClientsConnected &= client.isConnected();
@@ -452,6 +464,7 @@ namespace opentera
     template<typename T>
     bool RosWebRTCBridge<T>::callAcceptor(const Client& client)
     {
+        (void)client;
         // TODO
         return true;
     }
@@ -464,6 +477,7 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onCallRejected(const Client& client)
     {
+        (void)client;
         // TODO
     }
 
@@ -475,11 +489,10 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onClientConnected(const Client& client)
     {
-        publishPeerStatus(client, opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_CONNECTED);
-        ROS_INFO_STREAM(
-            nodeName << " --> "
-                     << "Signaling on client connected: "
-                     << "id: " << client.id() << ", name: " << client.name());
+        publishPeerStatus(client, opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTED);
+        RCLCPP_INFO_STREAM(
+            this->get_logger(),
+            " --> Signaling on client connected: " << "id: " << client.id() << ", name: " << client.name());
     }
 
     /**
@@ -490,11 +503,10 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onClientDisconnected(const Client& client)
     {
-        publishPeerStatus(client, opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_DISCONNECTED);
-        ROS_INFO_STREAM(
-            nodeName << " --> "
-                     << "Signaling on client disconnected: "
-                     << "id: " << client.id() << ", name: " << client.name());
+        publishPeerStatus(client, opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_DISCONNECTED);
+        RCLCPP_INFO_STREAM(
+            this->get_logger(),
+            " --> Signaling on client disconnected: " << "id: " << client.id() << ", name: " << client.name());
     }
 
     /**
@@ -505,7 +517,7 @@ namespace opentera
     template<typename T>
     void RosWebRTCBridge<T>::onError(const std::string& error)
     {
-        ROS_ERROR_STREAM(nodeName << " --> " << error);
+        RCLCPP_ERROR_STREAM(this->get_logger(), " --> " << error);
     }
 }
 

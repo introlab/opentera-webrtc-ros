@@ -2,7 +2,8 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_AUDIO_SOURCE_H
 
 #include <OpenteraWebrtcNativeClient/Sources/AudioSource.h>
-#include <audio_utils/AudioFrame.h>
+#include <audio_utils/msg/audio_frame.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace opentera
 {
@@ -16,6 +17,7 @@ namespace opentera
     {
     public:
         RosAudioSource(
+            rclcpp::Node& node,
             unsigned int soundCardTotalDelayMs = 40,
             bool echoCancellation = true,
             bool autoGainControl = true,
@@ -24,7 +26,10 @@ namespace opentera
             bool stereoSwapping = false,
             bool transientSuppression = true);
 
-        void sendFrame(const audio_utils::AudioFrameConstPtr& msg);
+        void sendFrame(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg);
+
+    private:
+        rclcpp::Node& m_node;
     };
 }
 

@@ -3,6 +3,8 @@
 
 #include <OpenteraWebrtcNativeClient/Configurations/SignalingServerConfiguration.h>
 
+#include <rclcpp/rclcpp.hpp>
+
 namespace opentera
 {
 
@@ -14,10 +16,10 @@ namespace opentera
         static std::string getQueryFrom(const std::string& query, const std::string& queries);
 
     public:
-        static SignalingServerConfiguration fromRosParam();
-        static SignalingServerConfiguration fromUrl(const std::string& url);
-        static std::string getIceServerUrl(const std::string& url);
-        static std::string getBaseUrl(const std::string& url);
+        static SignalingServerConfiguration fromRosParam(rclcpp::Node& node);
+        static SignalingServerConfiguration fromUrl(rclcpp::Node& node, const std::string& url);
+        static std::string getIceServerUrl(rclcpp::Node& node, const std::string& url);
+        static std::string getBaseUrl(rclcpp::Node& node, const std::string& url);
     };
 }
 

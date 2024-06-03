@@ -3,6 +3,8 @@
 
 #include <OpenteraWebrtcNativeClient/Configurations/VideoStreamConfiguration.h>
 
+#include <rclcpp/rclcpp.hpp>
+
 namespace opentera
 {
 
@@ -12,7 +14,7 @@ namespace opentera
     class RosVideoStreamConfiguration
     {
     public:
-        static VideoStreamConfiguration fromRosParam();
+        static VideoStreamConfiguration fromRosParam(rclcpp::Node& node);
     };
 }
 

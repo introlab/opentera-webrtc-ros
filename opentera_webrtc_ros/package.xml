@@ -1,30 +1,39 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
     <name>opentera_webrtc_ros</name>
     <version>0.1.0</version>
     <description>Provides Nodes to join a WebRTC call from ROS</description>
-
-    <maintainer email="cedric.godin@usherbrooke.ca">Cédric Godin</maintainer>
+    <maintainer email="dominic.letourneau@usherbrooke.ca">Dominic Létourneau</maintainer>
     <license>Apache-2.0</license>
     <url type="repository">https://github.com/introlab/opentera-webrtc-ros</url>
     <author email="cedric.godin@usherbrooke.ca">Cédric Godin</author>
 
-    <buildtool_depend>catkin</buildtool_depend>
-    <build_depend>message_generation</build_depend>
-    <build_depend>audio_utils</build_depend>
-    <build_depend>opentera_webrtc_ros_msgs</build_depend>
-    <build_depend>rospy</build_depend>
-    <depend>roscpp</depend>
-    <depend>cv_bridge</depend>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <depend>rclcpp</depend>
+    <depend>rclpy</depend>
+
     <depend>std_msgs</depend>
-    <depend>sensor_msgs</depend>
-    <depend>message_runtime</depend>
     <depend>std_srvs</depend>
+    <depend>sensor_msgs</depend>
+    <depend>audio_utils</depend>
+    <depend>opentera_webrtc_ros_msgs</depend>
+
     <depend>map_image_generator</depend>
-    <depend>face_cropping</depend>
-    <depend>cv_camera</depend>
-    <exec_depend>rospy</exec_depend>
+    <depend>cv_bridge</depend>
+
+    <exec_depend>nav2_msgs</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
     <exec_depend>visualization_msgs</exec_depend>
+    <exec_depend>cv_camera</exec_depend>
+    <exec_depend>python-transforms3d-pip</exec_depend>
+
+    <test_depend>ament_lint_auto</test_depend>
+    <test_depend>ament_lint_common</test_depend>
+
     <export>
+        <build_type>ament_cmake</build_type>
     </export>
 </package>

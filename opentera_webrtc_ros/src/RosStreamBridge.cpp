@@ -1,34 +1,27 @@
-#include <ros/ros.h>
-#include <RosStreamBridge.h>
-#include <RosSignalingServerconfiguration.h>
-#include <RosVideoStreamConfiguration.h>
+#include <rclcpp/rclcpp.hpp>
+#include <opentera_webrtc_ros/RosStreamBridge.h>
+#include <opentera_webrtc_ros/RosSignalingServerConfiguration.h>
+#include <opentera_webrtc_ros/RosVideoStreamConfiguration.h>
 #include <cv_bridge/cv_bridge.h>
-#include <opentera_webrtc_ros_msgs/PeerImage.h>
-#include <opentera_webrtc_ros_msgs/PeerAudio.h>
-#include <opentera_webrtc_ros_msgs/PeerStatus.h>
-#include <audio_utils/AudioFrame.h>
-#include <RosNodeParameters.h>
+#include <opentera_webrtc_ros_msgs/msg/peer_image.hpp>
+#include <opentera_webrtc_ros_msgs/msg/peer_audio.hpp>
+#include <opentera_webrtc_ros_msgs/msg/peer_status.hpp>
+#include <audio_utils/msg/audio_frame.hpp>
+#include <opentera_webrtc_ros/RosNodeParameters.h>
 #include <vector>
 
-#include <RosWebRTCBridge.h>
+#include <opentera_webrtc_ros/RosWebRTCBridge.h>
 
 using namespace opentera;
-using namespace ros;
-using namespace std;
-using namespace opentera_webrtc_ros_msgs;
-using namespace audio_utils;
 
 /**
  * @brief construct a topic streamer node
  */
-RosStreamBridge::RosStreamBridge(const ros::NodeHandle& nh)
-    : RosWebRTCBridge(nh),
-      m_videoSource(nullptr),
-      m_audioSource(nullptr)
+RosStreamBridge::RosStreamBridge() : RosWebRTCBridge("stream_bridge"), m_videoSource(nullptr), m_audioSource(nullptr)
 {
-    if (RosNodeParameters::isStandAlone())
+    if (RosNodeParameters::isStandAlone(*this))
     {
-        init(RosSignalingServerConfiguration::fromRosParam(), RosVideoStreamConfiguration::fromRosParam());
+        init(RosSignalingServerConfiguration::fromRosParam(*this), RosVideoStreamConfiguration::fromRosParam(*this));
         connect();
     }
 }
@@ -53,6 +46,7 @@ void RosStreamBridge::init(
 
     // Load ROS parameters
     RosNodeParameters::loadAudioStreamParams(
+        *this,
         m_canSendAudioStream,
         m_canReceiveAudioStream,
         soundCardTotalDelayMs,
@@ -65,14 +59,16 @@ void RosStreamBridge::init(
 
 
     RosNodeParameters::loadVideoStreamParams(
+        *this,
         m_canSendVideoStream,
         m_canReceiveVideoStream,
         needsDenoising,
         isScreencast);
 
     // WebRTC video stream interfaces
-    m_videoSource = make_shared<RosVideoSource>(needsDenoising, isScreencast);
-    m_audioSource = make_shared<RosAudioSource>(
+    m_videoSource = std::make_shared<RosVideoSource>(needsDenoising, isScreencast);
+    m_audioSource = std::make_shared<RosAudioSource>(
+        *this,
         soundCardTotalDelayMs,
         echoCancellation,
         autoGainControl,
@@ -83,18 +79,19 @@ void RosStreamBridge::init(
 
 
     bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
+    RosNodeParameters::loadSignalingParamsVerifySSL(*this, verifySSL);
 
-    string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
-    ROS_INFO("RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());
-    vector<IceServer> iceServers;
+    std::string iceServersUrl =
+        RosSignalingServerConfiguration::getIceServerUrl(*this, signalingServerConfiguration.url());
+    RCLCPP_INFO(this->get_logger(), "RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());
+    std::vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
     {
-        ROS_ERROR("RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
+        RCLCPP_ERROR(this->get_logger(), "RosStreamBridge Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
     }
 
-    m_signalingClient = make_unique<StreamClient>(
+    m_signalingClient = std::make_unique<StreamClient>(
         signalingServerConfiguration,
         WebrtcConfiguration::create(iceServers),
         videoStreamConfiguration,
@@ -110,26 +107,26 @@ void RosStreamBridge::init(
         m_signalingClient->setOnAddRemoteStream(
             [this](const Client& client)
             {
-                publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_ADDED);
-                ROS_INFO_STREAM(
-                    nodeName << " --> "
-                             << "RosStreamBridge Signaling on add remote stream: "
-                             << "id: " << client.id() << ", name: " << client.name());
+                publishPeerStatus(client, opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_ADDED);
+                RCLCPP_INFO_STREAM(
+                    this->get_logger(),
+                    " --> RosStreamBridge Signaling on add remote stream: " << "id: " << client.id()
+                                                                            << ", name: " << client.name());
             });
         m_signalingClient->setOnRemoveRemoteStream(
             [this](const Client& client)
             {
-                publishPeerStatus(client, PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
-                ROS_INFO_STREAM(
-                    nodeName << " --> "
-                             << "RosStreamBridge Signaling on remove remote stream: "
-                             << "id: " << client.id() << ", name: " << client.name());
+                publishPeerStatus(client, opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_REMOVED);
+                RCLCPP_INFO_STREAM(
+                    this->get_logger(),
+                    " --> RosStreamBridge Signaling on remove remote stream: " << "id: " << client.id()
+                                                                               << ", name: " << client.name());
             });
 
         if (m_canReceiveAudioStream)
         {
-            m_audioPublisher = m_nh.advertise<PeerAudio>("webrtc_audio", 100, false);
-            m_mixedAudioPublisher = m_nh.advertise<AudioFrame>("audio_mixed", 100, false);
+            m_audioPublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerAudio>("webrtc_audio", 100);
+            m_mixedAudioPublisher = this->create_publisher<audio_utils::msg::AudioFrame>("audio_mixed", 100);
 
             m_signalingClient->setOnAudioFrameReceived(
                 [this](auto&& PH1, auto&& PH2, auto&& PH3, auto&& PH4, auto&& PH5, auto&& PH6)
@@ -157,7 +154,7 @@ void RosStreamBridge::init(
 
         if (m_canReceiveVideoStream)
         {
-            m_imagePublisher = m_nh.advertise<PeerImage>("webrtc_image", 10, false);
+            m_imagePublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerImage>("webrtc_image", 10);
             // Video and audio frame
             m_signalingClient->setOnVideoFrameReceived(
                 [this](auto&& PH1, auto&& PH2, auto&& PH3)
@@ -169,27 +166,42 @@ void RosStreamBridge::init(
                 });
         }
     }
-    m_callAllSubscriber = m_nh.subscribe("call_all", 10, &RosStreamBridge::callAllCallBack, this);
-    m_micVolumeSubscriber = m_nh.subscribe("mic_volume", 10, &RosStreamBridge::micVolumeCallback, this);
-    m_enableCameraSubscriber = m_nh.subscribe("enable_camera", 10, &RosStreamBridge::enableCameraCallback, this);
-    m_volumeSubscriber = m_nh.subscribe("volume", 10, &RosStreamBridge::volumeCallback, this);
+    m_callAllSubscriber = this->create_subscription<std_msgs::msg::Empty>(
+        "call_all",
+        10,
+        bind_this<std_msgs::msg::Empty>(this, &RosStreamBridge::callAllCallBack));
+    m_micVolumeSubscriber = this->create_subscription<std_msgs::msg::Float32>(
+        "mic_volume",
+        10,
+        bind_this<std_msgs::msg::Float32>(this, &RosStreamBridge::micVolumeCallback));
+    m_enableCameraSubscriber = this->create_subscription<std_msgs::msg::Bool>(
+        "enable_camera",
+        10,
+        bind_this<std_msgs::msg::Bool>(this, &RosStreamBridge::enableCameraCallback));
+    m_volumeSubscriber = this->create_subscription<std_msgs::msg::Float32>(
+        "volume",
+        10,
+        bind_this<std_msgs::msg::Float32>(this, &RosStreamBridge::volumeCallback));
 }
 
-void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)
+void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionEvent>& events)
 {
     // Already in a session ?
     // Should disconnect
     disconnect();
 
-    ROS_INFO_STREAM(nodeName << " onJoinSessionEvents " << events[0].session_url);
+    RCLCPP_INFO_STREAM(this->get_logger(), " onJoinSessionEvents " << events[0].session_url);
 
     // TODO: Handle each item of the vector
-    init(RosSignalingServerConfiguration::fromUrl(events[0].session_url), RosVideoStreamConfiguration::fromRosParam());
+    init(
+        RosSignalingServerConfiguration::fromUrl(*this, events[0].session_url),
+        RosVideoStreamConfiguration::fromRosParam(*this));
     connect();
 }
 
-void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events)
+void RosStreamBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::msg::StopSessionEvent>& events)
 {
+    (void)events;
     disconnect();
 }
 
@@ -200,32 +212,36 @@ void RosStreamBridge::onSignalingConnectionOpened()
     if (m_canSendAudioStream)
     {
         // Audio
-        m_audioSubscriber = m_nh.subscribe("audio_in", 10, &RosStreamBridge::audioCallback, this);
+        m_audioSubscriber = this->create_subscription<audio_utils::msg::AudioFrame>(
+            "audio_in",
+            10,
+            bind_this<audio_utils::msg::AudioFrame>(this, &RosStreamBridge::audioCallback));
     }
 
     if (m_canSendVideoStream)
     {
         // Video
-        m_imageSubscriber = m_nh.subscribe("ros_image", 5, &RosStreamBridge::imageCallback, this);
+        m_imageSubscriber = this->create_subscription<sensor_msgs::msg::Image>(
+            "ros_image",
+            10,
+            bind_this<sensor_msgs::msg::Image>(this, &RosStreamBridge::imageCallback));
     }
 }
 
 void RosStreamBridge::onSignalingConnectionClosed()
 {
     RosWebRTCBridge::onSignalingConnectionClosed();
-    ROS_ERROR_STREAM(
-        nodeName << " --> "
-                 << "RosStreamBridge Signaling connection closed, shutting down...");
-    ros::requestShutdown();
+    RCLCPP_ERROR(this->get_logger(), " --> RosStreamBridge Signaling connection closed, shutting down...");
+    rclcpp::shutdown();
 }
 
 void RosStreamBridge::onSignalingConnectionError(const std::string& msg)
 {
     RosWebRTCBridge::onSignalingConnectionError(msg);
-    ROS_ERROR_STREAM(
-        nodeName << " --> "
-                 << "RosStreamBridge Signaling connection error " << msg.c_str() << ", shutting down...");
-    ros::requestShutdown();
+    RCLCPP_ERROR_STREAM(
+        this->get_logger(),
+        " --> RosStreamBridge Signaling connection error " << msg.c_str() << ", shutting down...");
+    rclcpp::shutdown();
 }
 
 /**
@@ -237,12 +253,12 @@ void RosStreamBridge::onSignalingConnectionError(const std::string& msg)
  */
 void RosStreamBridge::onVideoFrameReceived(const Client& client, const cv::Mat& bgrImg, uint64_t timestampUs)
 {
-    std_msgs::Header imgHeader;
-    imgHeader.stamp.fromNSec(1000 * timestampUs);
+    std_msgs::msg::Header imgHeader;
+    imgHeader.stamp = from_microseconds(timestampUs);
 
-    sensor_msgs::ImagePtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
+    sensor_msgs::msg::Image::SharedPtr img = cv_bridge::CvImage(imgHeader, "bgr8", bgrImg).toImageMsg();
 
-    publishPeerFrame<PeerImage>(m_imagePublisher, client, *img);
+    publishPeerFrame(*m_imagePublisher, client, *img);
 }
 
 /**
@@ -263,9 +279,9 @@ void RosStreamBridge::onAudioFrameReceived(
     size_t numberOfChannels,
     size_t numberOfFrames)
 {
-    audio_utils::AudioFrame frame =
+    audio_utils::msg::AudioFrame frame =
         createAudioFrame(audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
-    publishPeerFrame<PeerAudio>(m_audioPublisher, client, frame);
+    publishPeerFrame(*m_audioPublisher, client, frame);
 }
 
 /**
@@ -283,31 +299,31 @@ void RosStreamBridge::onMixedAudioFrameReceived(
     size_t numberOfChannels,
     size_t numberOfFrames)
 {
-    m_mixedAudioPublisher.publish(
+    m_mixedAudioPublisher->publish(
         createAudioFrame(audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames));
 }
 
-audio_utils::AudioFrame RosStreamBridge::createAudioFrame(
+audio_utils::msg::AudioFrame RosStreamBridge::createAudioFrame(
     const void* audioData,
     int bitsPerSample,
     int sampleRate,
     size_t numberOfChannels,
     size_t numberOfFrames)
 {
-    audio_utils::AudioFrame frame;
-    frame.format = "signed_" + to_string(bitsPerSample);
+    audio_utils::msg::AudioFrame frame;
+    frame.format = "signed_" + std::to_string(bitsPerSample);
     frame.channel_count = numberOfChannels;
     frame.sampling_frequency = sampleRate;
     frame.frame_sample_count = numberOfFrames;
 
     const auto* buffer = reinterpret_cast<const uint8_t*>(audioData);
     size_t bufferSize = numberOfChannels * numberOfFrames * bitsPerSample / 8;
-    frame.data = vector<uint8_t>(buffer, buffer + bufferSize);
+    frame.data = std::vector<uint8_t>(buffer, buffer + bufferSize);
 
     return frame;
 }
 
-void RosStreamBridge::audioCallback(const audio_utils::AudioFrameConstPtr& msg)
+void RosStreamBridge::audioCallback(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg)
 {
     if (m_audioSource)
     {
@@ -315,7 +331,7 @@ void RosStreamBridge::audioCallback(const audio_utils::AudioFrameConstPtr& msg)
     }
 }
 
-void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
+void RosStreamBridge::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
 {
     if (m_videoSource)
     {
@@ -323,14 +339,15 @@ void RosStreamBridge::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 }
 
-void RosStreamBridge::callAllCallBack(const std_msgs::Empty& msg)
+void RosStreamBridge::callAllCallBack(const std_msgs::msg::Empty::ConstSharedPtr& msg)
 {
+    (void)msg;
     m_signalingClient->callAll();
 }
 
-void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg)
+void RosStreamBridge::micVolumeCallback(const std_msgs::msg::Float32::ConstSharedPtr& msg)
 {
-    if (msg.data != 0)
+    if (msg->data != 0)
     {
         m_signalingClient->setLocalAudioMuted(false);
     }
@@ -340,14 +357,14 @@ void RosStreamBridge::micVolumeCallback(const std_msgs::Float32& msg)
     }
 }
 
-void RosStreamBridge::enableCameraCallback(const std_msgs::Bool& msg)
+void RosStreamBridge::enableCameraCallback(const std_msgs::msg::Bool::ConstSharedPtr& msg)
 {
-    m_signalingClient->setLocalVideoMuted(!msg.data);
+    m_signalingClient->setLocalVideoMuted(!msg->data);
 }
 
-void RosStreamBridge::volumeCallback(const std_msgs::Float32& msg)
+void RosStreamBridge::volumeCallback(const std_msgs::msg::Float32::ConstSharedPtr& msg)
 {
-    if (msg.data != 0)
+    if (msg->data != 0)
     {
         m_signalingClient->setRemoteAudioMuted(false);
     }
@@ -368,15 +385,11 @@ RosStreamBridge::~RosStreamBridge() = default;
  */
 int main(int argc, char** argv)
 {
-    init(argc, argv, "stream_bridge");
-    ros::NodeHandle nh;
+    rclcpp::init(argc, argv);
 
-    ROS_INFO_STREAM(
-        ros::this_node::getName() << " --> "
-                                  << "starting...");
-    RosStreamBridge node(nh);
-    node.run();
-    ROS_INFO_STREAM(
-        ros::this_node::getName() << " --> "
-                                  << "done...");
+    auto node = std::make_shared<RosStreamBridge>();
+
+    RCLCPP_INFO(node->get_logger(), " --> starting...");
+    node->run();
+    RCLCPP_INFO(node->get_logger(), " --> done...");
 }

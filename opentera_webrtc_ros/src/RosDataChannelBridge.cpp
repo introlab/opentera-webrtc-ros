@@ -1,23 +1,19 @@
-#include <ros/ros.h>
-#include <RosDataChannelBridge.h>
-#include <RosSignalingServerconfiguration.h>
-#include <opentera_webrtc_ros_msgs/PeerData.h>
+#include <rclcpp/rclcpp.hpp>
+#include <opentera_webrtc_ros/RosDataChannelBridge.h>
+#include <opentera_webrtc_ros/RosSignalingServerConfiguration.h>
+#include <opentera_webrtc_ros_msgs/msg/peer_data.hpp>
 #include <vector>
 
 using namespace opentera;
-using namespace ros;
-using namespace std_msgs;
-using namespace std;
-using namespace opentera_webrtc_ros_msgs;
 
 /**
  * @brief Construct a data channel bridge
  */
-RosDataChannelBridge::RosDataChannelBridge(const ros::NodeHandle& nh) : RosWebRTCBridge(nh)
+RosDataChannelBridge::RosDataChannelBridge() : RosWebRTCBridge("data_channel_bridge")
 {
-    if (RosNodeParameters::isStandAlone())
+    if (RosNodeParameters::isStandAlone(*this))
     {
-        initSignalingClient(RosSignalingServerConfiguration::fromRosParam());
+        initSignalingClient(RosSignalingServerConfiguration::fromRosParam(*this));
         initAdvertiseTopics();
         initDataChannelCallback();
         connect();
@@ -29,7 +25,7 @@ RosDataChannelBridge::RosDataChannelBridge(const ros::NodeHandle& nh) : RosWebRT
  */
 RosDataChannelBridge::~RosDataChannelBridge()
 {
-    if (RosNodeParameters::isStandAlone())
+    if (RosNodeParameters::isStandAlone(*this))
     {
         m_signalingClient = nullptr;
         stopAdvertiseTopics();
@@ -46,19 +42,20 @@ RosDataChannelBridge::~RosDataChannelBridge()
 void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration& signalingServerConfiguration)
 {
     bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(verifySSL);
+    RosNodeParameters::loadSignalingParamsVerifySSL(*this, verifySSL);
 
-    string iceServersUrl = RosSignalingServerConfiguration::getIceServerUrl(signalingServerConfiguration.url());
-    ROS_INFO("Fetching ice servers from : %s", iceServersUrl.c_str());
-    vector<IceServer> iceServers;
+    std::string iceServersUrl =
+        RosSignalingServerConfiguration::getIceServerUrl(*this, signalingServerConfiguration.url());
+    RCLCPP_INFO(this->get_logger(), "Fetching ice servers from : %s", iceServersUrl.c_str());
+    std::vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
     {
-        ROS_ERROR("Error fetching ice servers from %s", iceServersUrl.c_str());
+        RCLCPP_ERROR(this->get_logger(), "Error fetching ice servers from %s", iceServersUrl.c_str());
         iceServers.clear();
     }
 
     // Create signaling client
-    m_signalingClient = make_unique<DataChannelClient>(
+    m_signalingClient = std::make_unique<DataChannelClient>(
         signalingServerConfiguration,
         WebrtcConfiguration::create(iceServers),
         DataChannelConfiguration::create());
@@ -71,9 +68,15 @@ void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguratio
  */
 void RosDataChannelBridge::initAdvertiseTopics()
 {
-    m_dataPublisher = m_nh.advertise<PeerData>("webrtc_data_incoming", 10);
-    m_dataSubscriber = m_nh.subscribe("webrtc_data_outgoing", 10, &RosDataChannelBridge::onRosData, this);
-    m_callAllSubscriber = m_nh.subscribe("call_all", 10, &RosDataChannelBridge::callAllCallBack, this);
+    m_dataPublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerData>("webrtc_data_incoming", 10);
+    m_dataSubscriber = this->create_subscription<std_msgs::msg::String>(
+        "webrtc_data_outgoing",
+        10,
+        bind_this<std_msgs::msg::String>(this, &RosDataChannelBridge::onRosData));
+    m_callAllSubscriber = this->create_subscription<std_msgs::msg::Empty>(
+        "call_all",
+        10,
+        bind_this<std_msgs::msg::Empty>(this, &RosDataChannelBridge::callAllCallBack));
 }
 
 /**
@@ -81,8 +84,8 @@ void RosDataChannelBridge::initAdvertiseTopics()
  */
 void RosDataChannelBridge::stopAdvertiseTopics()
 {
-    m_dataPublisher.shutdown();
-    m_dataSubscriber.shutdown();
+    m_dataPublisher.reset();
+    m_dataSubscriber.reset();
 }
 
 /**
@@ -92,15 +95,15 @@ void RosDataChannelBridge::initDataChannelCallback()
 {
     // Setup data channel callback
     m_signalingClient->setOnDataChannelMessageString(
-        [&](const Client& client, const string& data)
+        [&](const Client& client, const std::string& data)
         {
-            PeerData msg;
+            opentera_webrtc_ros_msgs::msg::PeerData msg;
             // TODO PeerData should have a json string sent by client.data()
             msg.data = data;
 
             msg.sender.id = client.id();
             msg.sender.name = client.name();
-            m_dataPublisher.publish(msg);
+            m_dataPublisher->publish(msg);
         });
 }
 
@@ -116,21 +119,25 @@ void RosDataChannelBridge::stopDataChannelCallback()
     }
 }
 
-void RosDataChannelBridge::callAllCallBack(const std_msgs::Empty& msg)
+void RosDataChannelBridge::callAllCallBack(const std_msgs::msg::Empty::ConstSharedPtr& msg)
 {
+    (void)msg;
     m_signalingClient->callAll();
 }
 
-void RosDataChannelBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_msgs::JoinSessionEvent>& events)
+void RosDataChannelBridge::onJoinSessionEvents(
+    const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionEvent>& events)
 {
-    initSignalingClient(RosSignalingServerConfiguration::fromUrl(events[0].session_url));
+    initSignalingClient(RosSignalingServerConfiguration::fromUrl(*this, events[0].session_url));
     initAdvertiseTopics();
     initDataChannelCallback();
     connect();
 }
 
-void RosDataChannelBridge::onStopSessionEvents(const std::vector<opentera_webrtc_ros_msgs::StopSessionEvent>& events)
+void RosDataChannelBridge::onStopSessionEvents(
+    const std::vector<opentera_webrtc_ros_msgs::msg::StopSessionEvent>& events)
 {
+    (void)events;
     stopAdvertiseTopics();
     stopDataChannelCallback();
     disconnect();
@@ -139,17 +146,15 @@ void RosDataChannelBridge::onStopSessionEvents(const std::vector<opentera_webrtc
 void RosDataChannelBridge::onSignalingConnectionClosed()
 {
     RosWebRTCBridge::onSignalingConnectionClosed();
-    ROS_WARN_STREAM(
-        nodeName << " --> "
-                 << "shutting down...");
-    ros::requestShutdown();
+    RCLCPP_WARN(this->get_logger(), " --> shutting down...");
+    rclcpp::shutdown();
 }
 
 void RosDataChannelBridge::onSignalingConnectionError(const std::string& msg)
 {
     RosWebRTCBridge::onSignalingConnectionError(msg);
-    ROS_ERROR_STREAM(nodeName << " --> " << msg << " shutting down...");
-    ros::requestShutdown();
+    RCLCPP_ERROR_STREAM(this->get_logger(), " --> " << msg << " shutting down...");
+    rclcpp::shutdown();
 }
 
 /**
@@ -160,7 +165,7 @@ void RosDataChannelBridge::onSignalingConnectionError(const std::string& msg)
  *
  * @param msg the received ROS message
  */
-void RosDataChannelBridge::onRosData(const StringConstPtr& msg)
+void RosDataChannelBridge::onRosData(const std_msgs::msg::String::ConstSharedPtr& msg)
 {
     if (m_signalingClient)
     {
@@ -177,14 +182,11 @@ void RosDataChannelBridge::onRosData(const StringConstPtr& msg)
  */
 int main(int argc, char** argv)
 {
-    init(argc, argv, "data_channel_bridge");
-    ros::NodeHandle nh;
-    ROS_INFO_STREAM(
-        ros::this_node::getName() << " --> "
-                                  << "starting...");
-    RosDataChannelBridge node(nh);
-    node.run();
-    ROS_INFO_STREAM(
-        ros::this_node::getName() << " --> "
-                                  << "done...");
+    rclcpp::init(argc, argv);
+
+    auto node = std::make_shared<RosDataChannelBridge>();
+
+    RCLCPP_INFO(node->get_logger(), " --> starting...");
+    node->run();
+    RCLCPP_INFO(node->get_logger(), " --> done...");
 }

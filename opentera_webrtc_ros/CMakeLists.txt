@@ -1,12 +1,24 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 include(ExternalProject)
 project(opentera_webrtc_ros)
 
-## Set compile options
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+    set(CMAKE_C_STANDARD 99)
+endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC")
+# Default to C++17
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE )
     MESSAGE(STATUS "not define build type, set to release" )
@@ -15,45 +27,25 @@ elseif(NOT (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQU
     message(FATAL_ERROR "CMAKE_BUILD_TYPE must be either Release or Debug")
 endif()
 
-## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    rospy
-    cv_bridge
-    message_generation
-    std_msgs
-    sensor_msgs
-    audio_utils
-    geometry_msgs
-    opentera_webrtc_ros_msgs
-    std_srvs
-    visualization_msgs
-    map_image_generator
-    cv_camera
-    face_cropping
-)
+# find dependencies
+find_package(ament_cmake REQUIRED)
 
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 
-# This is required for WebRTC
-add_definitions(-DWEBRTC_POSIX)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(audio_utils REQUIRED)
+find_package(opentera_webrtc_ros_msgs REQUIRED)
+find_package(map_image_generator REQUIRED)
+
+find_package(cv_bridge REQUIRED)
 
 find_package(OpenCV REQUIRED core imgproc)
 
-# Actually generate the language-specific message and service files
-# generate_messages(
-#   DEPENDENCIES
-#   opentera_webrtc_ros_msgs
-# )
-
-
-###################################
-## catkin specific configuration ##
-###################################
-
+add_definitions(-DWEBRTC_POSIX)
 
 # Disable tests because of conflicts with gtest with catkin
 set(OPENTERA_WEBRTC_ENABLE_TESTS OFF)
@@ -64,15 +56,9 @@ set(OPENTERA_WEBRTC_ENABLE_GSTREAMER ON)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD ON)
-
-## !! Needs to be after catkin_package !!
-# CATKIN_PACKAGE_PYTHON_DESTINATION and CATKIN_PACKAGE_BIN_DESTINATION are set by catkin_package
-# Install to develspace on build
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_DEVEL_PREFIX ${CATKIN_DEVEL_PREFIX} CACHE STRING "")
-# Install to installspace on install
+set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD OFF)
+# Install in ROS worksapce
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE STRING "")
-set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_PIP_PREFIX_USE_EXACT_LIB_SUBPATH "python3/dist-packages" CACHE STRING "")
 
 execute_process(
     COMMAND python3 --version
@@ -90,11 +76,7 @@ set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_VERSION "${OPENTERA_WEBRTC_ROS_PYTHON_V
 
 add_subdirectory(opentera-webrtc)
 
-catkin_package(
-    CATKIN_DEPENDS message_runtime
-)
-
-include_directories(
+include_directories(SYSTEM
     ${webrtc_native_INCLUDE}
     ${boringssl_INCLUDE}
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
@@ -112,19 +94,13 @@ set(opentera_webrtc_native_client_libs
     ${boringssl_LIBRARY}
 )
 
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
 include_directories(
     include
-    ${catkin_INCLUDE_DIRS}
+)
+include_directories(SYSTEM
     lib
 )
 
-
-## Declare a C++ executable
 add_executable(${PROJECT_NAME}_topic_streamer
     src/RosVideoSource.cpp
     src/RosAudioSource.cpp
@@ -132,63 +108,104 @@ add_executable(${PROJECT_NAME}_topic_streamer
     src/RosVideoStreamConfiguration.cpp
     src/RosStreamBridge.cpp
     src/RosNodeParameters.cpp
-    src/RosParamUtils.cpp
 )
+ament_target_dependencies(${PROJECT_NAME}_topic_streamer
+    rclcpp
+    map_image_generator
+    opentera_webrtc_ros_msgs
+    cv_bridge
+    std_msgs
+    std_srvs
+    sensor_msgs
+    geometry_msgs
+    audio_utils
+)
+target_link_libraries(${PROJECT_NAME}_topic_streamer
+    ${opentera_webrtc_native_client_libs}
+)
+install(TARGETS ${PROJECT_NAME}_topic_streamer DESTINATION lib/${PROJECT_NAME})
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
     src/RosSignalingServerConfiguration.cpp
     src/RosDataChannelBridge.cpp
     src/RosNodeParameters.cpp
-    src/RosParamUtils.cpp
 )
+ament_target_dependencies(${PROJECT_NAME}_data_channel_bridge
+    rclcpp
+    map_image_generator
+    opentera_webrtc_ros_msgs
+    cv_bridge
+    std_msgs
+    std_srvs
+    sensor_msgs
+    geometry_msgs
+    audio_utils
+)
+target_link_libraries(${PROJECT_NAME}_data_channel_bridge
+    ${opentera_webrtc_native_client_libs}
+)
+install(TARGETS ${PROJECT_NAME}_topic_streamer DESTINATION lib/${PROJECT_NAME})
+
 
 add_executable(${PROJECT_NAME}_json_data_handler
     src/RosJsonDataHandler.cpp
 )
+ament_target_dependencies(${PROJECT_NAME}_json_data_handler
+    rclcpp
+    map_image_generator
+    opentera_webrtc_ros_msgs
+    cv_bridge
+    std_msgs
+    std_srvs
+    sensor_msgs
+    geometry_msgs
+    audio_utils
+)
+install(TARGETS ${PROJECT_NAME}_json_data_handler DESTINATION lib/${PROJECT_NAME})
 
-## Rename C++ executable without prefix
-set_target_properties(${PROJECT_NAME}_topic_streamer PROPERTIES OUTPUT_NAME topic_streamer PREFIX "")
-set_target_properties(${PROJECT_NAME}_data_channel_bridge PROPERTIES OUTPUT_NAME data_channel_bridge PREFIX "")
-set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_topic_streamer
-    ${opentera_webrtc_native_client_libs}
-    ${catkin_LIBRARIES}
+install(
+    DIRECTORY
+        lib/lib
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
 
-target_link_libraries(${PROJECT_NAME}_data_channel_bridge
-    ${opentera_webrtc_native_client_libs}
-    ${catkin_LIBRARIES}
+install(DIRECTORY launch
+    DESTINATION share/${PROJECT_NAME}
 )
-
-target_link_libraries(${PROJECT_NAME}_json_data_handler
-    ${catkin_LIBRARIES}
-)
-
-## ROS message dependencies
-add_dependencies(${PROJECT_NAME}_topic_streamer ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_data_channel_bridge ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_json_data_handler ${catkin_EXPORTED_TARGETS})
-
-
-#############
-## Install ##
-#############
 
 install(
     PROGRAMS
         scripts/opentera_webrtc_audio_mixer.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        scripts/goal_manager.py
+        scripts/labels_manager.py
+    DESTINATION lib/${PROJECT_NAME}
 )
 
-# all install targets should use catkin DESTINATION variables
-
-## Mark executables for installation
-install(
-    TARGETS
-        ${PROJECT_NAME}_topic_streamer
-        ${PROJECT_NAME}_data_channel_bridge
-        ${PROJECT_NAME}_json_data_handler
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ament_export_include_directories(
+    ${webrtc_native_INCLUDE}
+    ${boringssl_INCLUDE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/json/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/IXWebSocket
+    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/cpp-httplib
 )
+# ament_export_libraries(
+# )
+
+ament_python_install_package(${PROJECT_NAME})
+
+if(BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    # the following line skips the linter which checks for copyrights
+    # uncomment the line when a copyright and license is not present in all source files
+    #set(ament_cmake_copyright_FOUND TRUE)
+    # the following line skips cpplint (only works in a git repo)
+    # uncomment the line when this package is not in a git repo
+    #set(ament_cmake_cpplint_FOUND TRUE)
+    ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

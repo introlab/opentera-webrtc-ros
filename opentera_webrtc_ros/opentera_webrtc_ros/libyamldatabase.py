@@ -3,14 +3,14 @@
 
 from pathlib import Path
 from ruamel.yaml import YAML
-from typing import TypeVar, Generic, Generator, Union, Dict
+from typing import TypeVar, Generic, Generator, Union, Dict, Optional
 
 
 T = TypeVar("T")
 
 
 class YamlDatabase(Generic[T]):
-    def __init__(self, path: Union[Path, str], contained_type: type = None) -> None:
+    def __init__(self, path: Union[Path, str], contained_type: Optional[type] = None) -> None:
         self.path = Path(path).expanduser()
         self.path.touch(exist_ok=True)
 
