@@ -10,7 +10,9 @@ from signal import SIGINT, SIGTERM
 from pathlib import Path
 
 # ROS
-import rospy
+import rclpy
+import rclpy.node
+import rclpy.parameter
 from std_msgs.msg import String
 from opentera_webrtc_ros_msgs.msg import OpenTeraEvent
 from opentera_webrtc_ros_msgs.msg import DatabaseEvent
@@ -30,21 +32,23 @@ from google.protobuf.json_format import ParseDict, ParseError
 from google.protobuf.json_format import MessageToJson
 
 
-class OpenTeraROSClient:
+class OpenTeraROSClient(rclpy.node.Node):
 
     login_api_endpoint = '/api/device/login'
     status_api_endpoint = '/api/device/status'
     stop_session_endpoint = '/robot/api/session/manager'
 
     def __init__(self, url: str, token: str):
+        super().__init__('opentera_client_ros')  # type: ignore
+
         self.__base_url = url
         self.__token = token
-        self.__event_publisher = rospy.Publisher(
-            'events', OpenTeraEvent, queue_size=10)
-        self.__robot_status_subscriber = rospy.Subscriber(
-            'robot_status', RobotStatus, self.robot_status_callback)
-        self.__manage_session_subscriber = rospy.Subscriber(
-            'manage_session', String, self.manage_session_callback)
+        self.__event_publisher = self.create_publisher(
+            OpenTeraEvent, 'events', 10)
+        self.__robot_status_subscriber = self.create_subscription(
+            RobotStatus, 'robot_status', self.robot_status_callback, 1)
+        self.__manage_session_subscriber = self.create_subscription(
+            String, 'manage_session', self.manage_session_callback, 10)
         self.__robot_status = {}
         self.__stop_session_json = {}
         self.__client = {}
@@ -57,7 +61,7 @@ class OpenTeraROSClient:
         # Update internal status
         # Will be sent by _opentera_send_device_status task as json
         self.__robot_status = {
-            'timestamp': status.header.stamp.secs,
+            'timestamp': status.header.stamp.sec,
             'status': {
                 'isCharging': status.is_charging,
                 'batteryVoltage': status.battery_voltage,
@@ -100,7 +104,7 @@ class OpenTeraROSClient:
         async with aiohttp.ClientSession() as self.__client:
             params = {'token': self.__token}
             login_info = await self._fetch(self.__client, self.__base_url + OpenTeraROSClient.login_api_endpoint, params)
-            rospy.loginfo(login_info)
+            self.get_logger().info(login_info)
 
             if 'device_info' in login_info:
                 device_info = login_info['device_info']
@@ -113,28 +117,28 @@ class OpenTeraROSClient:
                 websocket_url = login_info['websocket_url']
 
                 ws = await self.__client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
-                rospy.loginfo(ws)
+                self.get_logger().info(ws)
 
                 # Create alive publishing task
                 status_task = self.__eventLoop.create_task(
                     self._opentera_send_device_status(self.__base_url + OpenTeraROSClient.status_api_endpoint))
 
-                while not rospy.is_shutdown():
+                while rclpy.ok():
                     msg = await ws.receive()
 
                     if msg.type == aiohttp.WSMsgType.text:
                         await self._parse_message(self.__client, msg.json())
                     if msg.type == aiohttp.WSMsgType.closed:
-                        rospy.loginfo('websocket closed')
+                        self.get_logger().info('websocket closed')
                         break
                     if msg.type == aiohttp.WSMsgType.error:
-                        rospy.loginfo('websocket error')
+                        self.get_logger().info('websocket error')
                         break
 
                 status_task.cancel()
                 await status_task
 
-            rospy.logwarn('cancel task')
+            self.get_logger().warning('cancel task')
 
     def run(self):
         try:
@@ -149,12 +153,12 @@ class OpenTeraROSClient:
 
             self.__eventLoop.run_until_complete(main_task)
         except asyncio.CancelledError as e:
-            rospy.logerr('Main Task cancelled', e)
+            self.get_logger().error(f'Main Task cancelled: {e}')
             # Exit ROS loop
-            rospy.signal_shutdown('SIGINT/SIGTERM Detected')
+            rclpy.shutdown()
 
     async def _opentera_send_device_status(self, url: str):
-        while not rospy.is_shutdown():
+        while rclpy.ok():
             try:
                 # Every 10 seconds
                 await asyncio.sleep(10)
@@ -163,9 +167,9 @@ class OpenTeraROSClient:
                     params = {'token': self.__token}
                     async with self.__client.post(url, params=params, json=self.__robot_status, verify_ssl=False) as response:
                         if response.status != 200:
-                            rospy.logwarn('Send status failed')
+                            self.get_logger().warning('Send status failed')
             except asyncio.CancelledError as e:
-                rospy.logerr('_opentera_send_device_status', e)
+                self.get_logger().error('_opentera_send_device_status', e)
                 # Exit loop
                 break
 
@@ -176,9 +180,9 @@ class OpenTeraROSClient:
                 async with self.__client.post(self.__base_url + OpenTeraROSClient.stop_session_endpoint,
                     params=params, json=self.__stop_session_json, verify_ssl=False) as response:
                         if response.status != 200:
-                            rospy.logwarn('Send stop session failed')
+                            self.get_logger().warning('Send stop session failed')
             except asyncio.CancelledError as e:
-                    rospy.logerr('_opentera_send_manage_session', e)
+                    self.get_logger().error(f'_opentera_send_manage_session: {e}')
         else:
             raise NotImplementedError(f"Action {action} not implemented")
 
@@ -280,25 +284,41 @@ class OpenTeraROSClient:
                         continue
 
                     # TODO Handle other events if required.
-                    rospy.logerr(f"Unknown message type: {any_msg}")
+                    self.get_logger().error(f"Unknown message type: {any_msg}")
 
                 self.__event_publisher.publish(opentera_events)
 
         except ParseError as e:
-            rospy.logerr(e)
+            self.get_logger().error(e)
 
         return
 
 
+class ConfigFileParam(rclpy.node.Node):
+    @staticmethod
+    def get_config_path():
+        node = ConfigFileParam('__opentera_client_ros_config_file_param')  # type: ignore
+        config_file_param = node.declare_parameter('config_file').get_parameter_value()
+
+        if config_file_param.type == rclpy.parameter.Parameter.Type.NOT_SET:
+            node.get_logger().error('No config file provided')
+            node.destroy_node()
+            return None
+        
+        config_file_path = Path(config_file_param.string_value).expanduser().resolve()
+        node.destroy_node()
+
+        return config_file_path
+
+
 if __name__ == '__main__':
     # Init ROS
-    rospy.init_node('opentera_client_ros', anonymous=True)
+    rclpy.init()
+    
+    config_file_name = ConfigFileParam.get_config_path()
 
-    # Guessing config file path
-    base_folder = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(base_folder, '../config/client_config.json')
-    config_file_name = Path(rospy.get_param(
-        '~config_file', config_path)).expanduser().resolve()
+    if config_file_name is None:
+        exit(-1)
 
     # Read config file
     # Should be a param for this node
