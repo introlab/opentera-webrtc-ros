@@ -7,20 +7,20 @@
 #include "ConfigDialog.h"
 #include "ROSCameraView.h"
 #include "LocalCameraWindow.h"
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <opentera_webrtc_ros_msgs/PeerImage.h>
-#include <opentera_webrtc_ros_msgs/PeerStatus.h>
-#include <opentera_webrtc_ros_msgs/OpenTeraEvent.h>
-#include <opentera_webrtc_ros_msgs/RobotStatus.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <opentera_webrtc_ros_msgs/msg/peer_image.hpp>
+#include <opentera_webrtc_ros_msgs/msg/peer_status.hpp>
+#include <opentera_webrtc_ros_msgs/msg/open_tera_event.hpp>
+#include <opentera_webrtc_ros_msgs/msg/robot_status.hpp>
 #include <QImage>
 #include <QSharedPointer>
 #include <QMap>
 #include <QToolButton>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Empty.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/String.h>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
+#include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/string.hpp>
 
 
 struct DeviceProperties
@@ -34,7 +34,7 @@ struct DeviceProperties
     int defaultLocalCameraX = 10;
     int defaultLocalCameraY = -10;
 
-    explicit DeviceProperties(QString jsonFilePath)
+    explicit DeviceProperties(QString jsonFilePath, rclcpp::Node& node)
     {
         QFile file;
         file.setFileName(jsonFilePath);
@@ -58,7 +58,7 @@ struct DeviceProperties
         }
         else
         {
-            ROS_WARN("Device properties file not found, using default properties");
+            RCLCPP_WARN(node.get_logger(), "Device properties file not found, using default properties");
         }
     }
 };
@@ -68,7 +68,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QString devicePropertiesPath, QWidget* parent = nullptr);
+    MainWindow(QString devicePropertiesPath, rclcpp::Node& node, QWidget* parent = nullptr);
     ~MainWindow() = default;
     void setImage(const QImage& image);
     QRect getCameraSpace();
@@ -202,24 +202,24 @@ private:
     // ROS
 
     // ROS Callbacks
-    void localImageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg);
-    void peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg);
-    void openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg);
-    void robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg);
+    void localImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
+    void peerImageCallback(const opentera_webrtc_ros_msgs::msg::PeerImage::ConstSharedPtr& msg);
+    void peerStatusCallback(const opentera_webrtc_ros_msgs::msg::PeerStatus::ConstSharedPtr& msg);
+    void openteraEventCallback(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg);
+    void robotStatusCallback(const opentera_webrtc_ros_msgs::msg::RobotStatus::ConstSharedPtr& msg);
 
-    ros::NodeHandle m_nodeHandle;
-    ros::Subscriber m_peerImageSubscriber;
-    ros::Subscriber m_localImageSubscriber;
-    ros::Subscriber m_peerStatusSubscriber;
-    ros::Subscriber m_openteraEventSubscriber;
-    ros::Subscriber m_robotStatusSubscriber;
-    ros::Publisher m_enableFaceCroppingPublisher;
-    ros::Publisher m_micVolumePublisher;
-    ros::Publisher m_enableCameraPublisher;
-    ros::Publisher m_volumePublisher;
-    ros::Publisher m_callAllPublisher;
-    ros::Publisher m_manageSessionPublisher;
+    rclcpp::Node& m_node;
+    rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerImage>::SharedPtr m_peerImageSubscriber;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_localImageSubscriber;
+    rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerStatus>::SharedPtr m_peerStatusSubscriber;
+    rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>::SharedPtr m_openteraEventSubscriber;
+    rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::RobotStatus>::SharedPtr m_robotStatusSubscriber;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_enableFaceCroppingPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_micVolumePublisher;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_enableCameraPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_volumePublisher;
+    rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr m_callAllPublisher;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr m_manageSessionPublisher;
 };
 
 

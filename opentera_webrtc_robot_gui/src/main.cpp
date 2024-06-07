@@ -4,8 +4,8 @@
 #include <QImageReader>
 #include <QImage>
 #include <QDebug>
-#include <ros/ros.h>
-#include <ros/package.h>
+#include <rclcpp/rclcpp.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <QThread>
 #include <QFile>
 #include <initializer_list>
@@ -34,22 +34,42 @@ void catchUnixSignals(std::initializer_list<int> quitSignals)
     }
 }
 
+class AsyncSpinner
+{
+public:
+    template<typename... Nodes>
+    void start_spin(std::shared_ptr<Nodes>... nodes)
+    {
+        spinner = std::thread([nodes...] { rclcpp::spin(nodes...); });
+    }
+
+    void stop()
+    {
+        rclcpp::shutdown();
+        spinner.join();
+    }
+
+private:
+    std::thread spinner;
+};
+
 int main(int argc, char* argv[])
 {
-    ros::init(argc, argv, "opentera_webrtc_robot_gui_node");
-    ros::NodeHandle nh("~");
-    bool fullScreen = false;
-    nh.getParam("fullScreen", fullScreen);
+    rclcpp::init(argc, argv);
+    auto nh = std::make_shared<rclcpp::Node>("opentera_webrtc_robot_gui_node");
+    bool fullScreen = nh->declare_parameter("fullScreen", false);
 
+    // TODO in Galactic, replace with this format:
+    // nh->declare_parameter("device_properties_path", rclcpp::PARAMETER_STRING);
+    nh->declare_parameter("device_properties_path");
+    std::string jsonFilePath;
+    if (!nh->get_parameter("device_properties_path", jsonFilePath))
+    {
+        RCLCPP_ERROR(nh->get_logger(), "The parameter device_properties_path is required.");
+        return 1;
+    }
 
-    std::string packageName, jsonFilePath;
-    nh.param<std::string>("name", packageName, "opentera_webrtc_robot_gui");
-    nh.param<std::string>(
-        "device_properties_path",
-        jsonFilePath,
-        ros::package::getPath(packageName) + "/src/resources/DeviceProperties.json");
-
-    ros::AsyncSpinner spinner(1);
+    AsyncSpinner spinner;
 
     catchUnixSignals({SIGQUIT, SIGINT, SIGTERM, SIGHUP});
 
@@ -64,7 +84,7 @@ int main(int argc, char* argv[])
     app.setStyleSheet(stylesheet);
 
 
-    MainWindow w(QString::fromStdString(jsonFilePath));
+    MainWindow w(QString::fromStdString(jsonFilePath), *nh);
     if (fullScreen)
     {
         w.showFullScreen();
@@ -81,7 +101,7 @@ int main(int argc, char* argv[])
     w.setImage(testImage);
 
     // Will start ROS loop in background
-    spinner.start();
+    spinner.start_spin(nh);
 
     // will run app event loop (infinite)
     // qDebug() << "MainThread " << QThread::currentThread();

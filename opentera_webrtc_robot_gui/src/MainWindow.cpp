@@ -2,13 +2,15 @@
 #include <QGraphicsScene>
 #include <QThread>
 #include <QDebug>
+#include "utils.h"
 
 constexpr bool NO_REPAINT = false;
 
-MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
+MainWindow::MainWindow(QString devicePropertiesPath, rclcpp::Node& node, QWidget* parent)
     : QMainWindow{parent},
-      m_deviceProperties{devicePropertiesPath},
-      m_inSession{false}
+      m_deviceProperties{devicePropertiesPath, node},
+      m_inSession{false},
+      m_node{node}
 {
     m_ui.setupUi(this);
 
@@ -65,34 +67,46 @@ MainWindow::MainWindow(QString devicePropertiesPath, QWidget* parent)
 void MainWindow::setupROS()
 {
     // Setup subscribers
-    m_localImageSubscriber =
-        m_nodeHandle.subscribe("/front_camera/image_raw", 10, &MainWindow::localImageCallback, this);
+    m_localImageSubscriber = m_node.create_subscription<sensor_msgs::msg::Image>(
+        "/front_camera/image_raw",
+        10,
+        bind_this<sensor_msgs::msg::Image>(this, &MainWindow::localImageCallback));
 
+    m_peerImageSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::PeerImage>(
+        "/webrtc_image",
+        10,
+        bind_this<opentera_webrtc_ros_msgs::msg::PeerImage>(this, &MainWindow::peerImageCallback));
 
-    m_peerImageSubscriber = m_nodeHandle.subscribe("/webrtc_image", 10, &MainWindow::peerImageCallback, this);
+    m_peerStatusSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::PeerStatus>(
+        "/webrtc_peer_status",
+        10,
+        bind_this<opentera_webrtc_ros_msgs::msg::PeerStatus>(this, &MainWindow::peerStatusCallback));
 
-    m_peerStatusSubscriber = m_nodeHandle.subscribe("/webrtc_peer_status", 10, &MainWindow::peerStatusCallback, this);
+    m_openteraEventSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(
+        "/events",
+        10,
+        bind_this<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(this, &MainWindow::openteraEventCallback));
 
-
-    m_openteraEventSubscriber = m_nodeHandle.subscribe("/events", 10, &MainWindow::openteraEventCallback, this);
-
-    m_robotStatusSubscriber = m_nodeHandle.subscribe("/robot_status", 10, &MainWindow::robotStatusCallback, this);
+    m_robotStatusSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::RobotStatus>(
+        "/robot_status",
+        10,
+        bind_this<opentera_webrtc_ros_msgs::msg::RobotStatus>(this, &MainWindow::robotStatusCallback));
 
     // Setup publishers
-    m_enableFaceCroppingPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_face_cropping", 1);
+    m_enableFaceCroppingPublisher = m_node.create_publisher<std_msgs::msg::Bool>("enable_face_cropping", 1);
 
-    m_micVolumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("mic_volume", 1);
+    m_micVolumePublisher = m_node.create_publisher<std_msgs::msg::Float32>("mic_volume", 1);
 
-    m_enableCameraPublisher = m_nodeHandle.advertise<std_msgs::Bool>("enable_camera", 1);
+    m_enableCameraPublisher = m_node.create_publisher<std_msgs::msg::Bool>("enable_camera", 1);
 
-    m_volumePublisher = m_nodeHandle.advertise<std_msgs::Float32>("volume", 1);
+    m_volumePublisher = m_node.create_publisher<std_msgs::msg::Float32>("volume", 1);
 
-    m_callAllPublisher = m_nodeHandle.advertise<std_msgs::Empty>("call_all", 1);
+    m_callAllPublisher = m_node.create_publisher<std_msgs::msg::Empty>("call_all", 1);
 
-    m_manageSessionPublisher = m_nodeHandle.advertise<std_msgs::String>("manage_session", 1);
+    m_manageSessionPublisher = m_node.create_publisher<std_msgs::msg::String>("manage_session", 1);
 }
 
-void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
+void MainWindow::localImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
 {
     // WARNING THIS IS CALLED FROM ANOTHER THREAD (ROS SPINNER)
     // qDebug() << "localImageCallback thread" << QThread::currentThread();
@@ -117,11 +131,11 @@ void MainWindow::localImageCallback(const sensor_msgs::ImageConstPtr& msg)
     else
     {
         qDebug() << "Unhandled image encoding: " << QString::fromStdString(msg->encoding);
-        ROS_ERROR("Unhandled image encoding: %s", msg->encoding.c_str());
+        RCLCPP_ERROR(m_node.get_logger(), "Unhandled image encoding: %s", msg->encoding.c_str());
     }
 }
 
-void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::OpenTeraEventConstPtr& msg)
+void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg)
 {
     // WARNING THIS IS CALLED FROM ANOTHER THREAD (ROS SPINNER)
 
@@ -235,11 +249,11 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 {
     switch (status)
     {
-        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_CONNECTED:
+        case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTED:
             m_ui.hangUpButton->setChecked(true);
             break;
 
-        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_CLIENT_DISCONNECTED:
+        case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_DISCONNECTED:
             if (m_remoteViews.contains(id))
             {
                 m_remoteViews[id]->deleteLater();
@@ -252,15 +266,15 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
             }
             break;
 
-        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_REMOTE_STREAM_ADDED:
+        case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_ADDED:
             break;
 
-        case opentera_webrtc_ros_msgs::PeerStatus::STATUS_REMOTE_STREAM_REMOVED:
+        case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_REMOVED:
             break;
 
         default:
             qWarning() << "Status not handled " << status;
-            ROS_WARN("Status not handled : %i", status);
+            RCLCPP_WARN(m_node.get_logger(), "Status not handled : %i", status);
             break;
     }
 }
@@ -284,7 +298,7 @@ void MainWindow::closeCameraWindow()
     }
 }
 
-void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageConstPtr& msg)
+void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::msg::PeerImage::ConstSharedPtr& msg)
 {
     // Step #1 Transform ROS Image to QtImage
     QImage image(&msg->frame.data[0], msg->frame.width, msg->frame.height, QImage::Format_RGB888);
@@ -298,12 +312,12 @@ void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::PeerImageCons
         image.rgbSwapped());
 }
 
-void MainWindow::peerStatusCallback(const opentera_webrtc_ros_msgs::PeerStatusConstPtr& msg)
+void MainWindow::peerStatusCallback(const opentera_webrtc_ros_msgs::msg::PeerStatus::ConstSharedPtr& msg)
 {
     emit newPeerStatus(QString::fromStdString(msg->sender.id), QString::fromStdString(msg->sender.name), msg->status);
 }
 
-void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::RobotStatusConstPtr& msg)
+void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::msg::RobotStatus::ConstSharedPtr& msg)
 {
     /*
         void newRobotStatus(bool charging, float battery_voltage, float battery_current, float battery_level,
@@ -347,7 +361,7 @@ void MainWindow::_onJoinSessionEvent(
 void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString& service_uuid)
 {
     qDebug() << "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)";
-    ROS_DEBUG("_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)");
+    RCLCPP_DEBUG(m_node.get_logger(), "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)");
 
     m_inSession = false;
     // Remove all remote views
@@ -573,8 +587,8 @@ void MainWindow::_onHangUpButtonClicked()
 {
     if (m_ui.hangUpButton->isChecked())
     {
-        std_msgs::Empty msg;
-        m_callAllPublisher.publish(msg);
+        std_msgs::msg::Empty msg;
+        m_callAllPublisher->publish(msg);
     }
     else
     {
@@ -584,9 +598,9 @@ void MainWindow::_onHangUpButtonClicked()
 
 void MainWindow::endCall()
 {
-    std_msgs::String msg;
+    std_msgs::msg::String msg;
     msg.data = "stop";
-    m_manageSessionPublisher.publish(msg);
+    m_manageSessionPublisher->publish(msg);
     m_ui.hangUpButton->setEnabled(false);
 }
 
@@ -622,7 +636,7 @@ void MainWindow::_onNetworkButtonClicked()
 
 void MainWindow::_onCropFaceButtonClicked()
 {
-    std_msgs::Bool msg;
+    std_msgs::msg::Bool msg;
     if (m_ui.cropFaceButton->isChecked())
     {
         msg.data = false;
@@ -631,12 +645,12 @@ void MainWindow::_onCropFaceButtonClicked()
     {
         msg.data = true;
     }
-    m_enableFaceCroppingPublisher.publish(msg);
+    m_enableFaceCroppingPublisher->publish(msg);
 }
 
 void MainWindow::_onMicrophoneButtonClicked()
 {
-    std_msgs::Float32 msg;
+    std_msgs::msg::Float32 msg;
     if (m_ui.microphoneButton->isChecked())
     {
         msg.data = 0;
@@ -647,24 +661,24 @@ void MainWindow::_onMicrophoneButtonClicked()
         msg.data = 1;
         m_configDialog->setMicVolumeSliderValue(100);
     }
-    m_micVolumePublisher.publish(msg);
+    m_micVolumePublisher->publish(msg);
 }
 
 void MainWindow::_onCameraButtonClicked()
 {
-    std_msgs::Bool msg;
+    std_msgs::msg::Bool msg;
     msg.data = !m_ui.cameraButton->isChecked();
     m_localCameraWindow->setVisible(
         !m_ui.cameraButton->isChecked() && !m_ui.cameraVisibilityButton->isChecked() &&
         m_cameraView->getCurrentStyle() == CameraStyle::window);
     m_ui.cameraVisibilityButton->setVisible(
         !m_ui.cameraButton->isChecked() && m_cameraView->getCurrentStyle() == CameraStyle::window);
-    m_enableCameraPublisher.publish(msg);
+    m_enableCameraPublisher->publish(msg);
 }
 
 void MainWindow::_onSpeakerButtonClicked()
 {
-    std_msgs::Float32 msg;
+    std_msgs::msg::Float32 msg;
     if (m_ui.speakerButton->isChecked())
     {
         msg.data = 0;
@@ -675,7 +689,7 @@ void MainWindow::_onSpeakerButtonClicked()
         msg.data = 1;
         m_configDialog->setVolumeSliderValue(100);
     }
-    m_volumePublisher.publish(msg);
+    m_volumePublisher->publish(msg);
 }
 
 void MainWindow::onMicVolumeSliderValueChanged()
@@ -689,9 +703,9 @@ void MainWindow::onMicVolumeSliderValueChanged()
     {
         m_ui.microphoneButton->setChecked(false);
     }
-    std_msgs::Float32 msg;
+    std_msgs::msg::Float32 msg;
     msg.data = value / 100;
-    m_micVolumePublisher.publish(msg);
+    m_micVolumePublisher->publish(msg);
 }
 
 void MainWindow::onOpacitySliderValueChanged()
@@ -724,9 +738,9 @@ void MainWindow::onVolumeSliderValueChanged()
     {
         m_ui.speakerButton->setChecked(false);
     }
-    std_msgs::Float32 msg;
+    std_msgs::msg::Float32 msg;
     msg.data = value / 100;
-    m_volumePublisher.publish(msg);
+    m_volumePublisher->publish(msg);
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
