@@ -19,9 +19,11 @@ using namespace opentera;
  */
 RosStreamBridge::RosStreamBridge() : RosWebRTCBridge("stream_bridge"), m_videoSource(nullptr), m_audioSource(nullptr)
 {
-    if (RosNodeParameters::isStandAlone(*this))
+    if (m_nodeParameters.isStandAlone())
     {
-        init(RosSignalingServerConfiguration::fromRosParam(*this), RosVideoStreamConfiguration::fromRosParam(*this));
+        init(
+            RosSignalingServerConfiguration::fromRosParam(m_nodeParameters),
+            RosVideoStreamConfiguration::fromRosParam(m_nodeParameters));
         connect();
     }
 }
@@ -45,8 +47,7 @@ void RosStreamBridge::init(
     bool transientSuppression;
 
     // Load ROS parameters
-    RosNodeParameters::loadAudioStreamParams(
-        *this,
+    m_nodeParameters.loadAudioStreamParams(
         m_canSendAudioStream,
         m_canReceiveAudioStream,
         soundCardTotalDelayMs,
@@ -58,12 +59,7 @@ void RosStreamBridge::init(
         transientSuppression);
 
 
-    RosNodeParameters::loadVideoStreamParams(
-        *this,
-        m_canSendVideoStream,
-        m_canReceiveVideoStream,
-        needsDenoising,
-        isScreencast);
+    m_nodeParameters.loadVideoStreamParams(m_canSendVideoStream, m_canReceiveVideoStream, needsDenoising, isScreencast);
 
     // WebRTC video stream interfaces
     m_videoSource = std::make_shared<RosVideoSource>(needsDenoising, isScreencast);
@@ -79,10 +75,10 @@ void RosStreamBridge::init(
 
 
     bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(*this, verifySSL);
+    m_nodeParameters.loadSignalingParamsVerifySSL(verifySSL);
 
     std::string iceServersUrl =
-        RosSignalingServerConfiguration::getIceServerUrl(*this, signalingServerConfiguration.url());
+        RosSignalingServerConfiguration::getIceServerUrl(m_nodeParameters, signalingServerConfiguration.url());
     RCLCPP_INFO(this->get_logger(), "RosStreamBridge Fetching ice servers from : %s", iceServersUrl.c_str());
     std::vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
@@ -194,8 +190,8 @@ void RosStreamBridge::onJoinSessionEvents(const std::vector<opentera_webrtc_ros_
 
     // TODO: Handle each item of the vector
     init(
-        RosSignalingServerConfiguration::fromUrl(*this, events[0].session_url),
-        RosVideoStreamConfiguration::fromRosParam(*this));
+        RosSignalingServerConfiguration::fromUrl(m_nodeParameters, events[0].session_url),
+        RosVideoStreamConfiguration::fromRosParam(m_nodeParameters));
     connect();
 }
 

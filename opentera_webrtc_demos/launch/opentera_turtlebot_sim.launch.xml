@@ -1,0 +1,131 @@
+<launch>
+
+    <!-- Turtlebot base model and position -->
+    <arg name="model" default="waffle" description="model type [burger, waffle, waffle_pi]"/>
+    <arg name="x_pos" default="1.0"/>
+    <arg name="y_pos" default="0.5"/>
+    <arg name="z_pos" default="0.0"/>
+
+    <!-- RTAB-Map config -->
+    <arg name="use_rtabmap" default="true" />
+    <arg name="open_rviz" default="false"/>
+    <arg name="rtabmap_viz" default="false"/>
+    <arg name="move_forward_only" default="true"/>
+    <arg name="gazebo_gui" default="false"/>
+
+    <arg name="use_move_base" default="true" />
+
+    <arg name="with_camera" default="true"/>
+    <arg name="localization" default="false"/>
+    <arg name="database_path" default="~/.ros/rtabmap.db"/>
+    <arg if="$(var localization)" name="rtabmap_args" default=""/>
+    <arg unless="$(var localization)" name="rtabmap_args" default="-d"/>
+
+    <!-- Gazebo -->
+    <group><include file="$(find-pkg-share turtlebot3_gazebo)/launch/empty_world.launch.py">
+        <arg name="world_name" value="$(find-pkg-share opentera_webrtc_demos)/worlds/turtlebot3_house.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="$(var gazebo_gui)"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include></group>
+
+    <!-- Robot description and urdf-->
+    <!-- <param name="robot_description" command="$(find-pkg-share xacro)/xacro $(find-pkg-share turtlebot3_beam_description)/urdf/turtlebot3_$(var model).urdf.xacro" /> -->
+    <let name="robot_description_command" value="$(exec-in-pkg xacro xacro) '$(find-pkg-share turtlebot3_beam_description)/urdf/turtlebot3_$(var model).urdf.xacro'" />
+    <let name="robot_description" value="$(command '$(var robot_description_command)')" />
+
+    <!-- <node pkg="gazebo_ros" exec="spawn_entity.py" name="spawn_urdf" args="-urdf -model turtlebot3_$(var model) -x $(var x_pos) -y $(var y_pos) -z $(var z_pos) -param robot_description" /> -->
+    <node pkg="gazebo_ros" exec="spawn_entity.py" name="spawn_urdf" args="-file $(find-pkg-share turtlebot3_beam_description)/urdf/turtlebot3_$(var model).urdf.xacro -name turtlebot3_$(var model) -x $(var x_pos) -y $(var y_pos) -z $(var z_pos)" />
+
+    <node pkg="robot_state_publisher" exec="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" value="50.0" />
+        <param name="robot_description" value="$(var robot_description)" />
+    </node>
+
+    <group if="$(var use_rtabmap)">
+        <push-ros-namespace namespace="rtabmap"/>
+
+        <node if="$(eval '\'$(var model)\' == \'waffle\'')" pkg="rtabmap_sync" exec="rgbd_sync" name="rgbd_sync">
+            <remap from="rgb/image"         to="/r200/rgb/image_raw"/>
+            <remap from="depth/image"       to="/r200/depth/image_raw"/>
+            <remap from="rgb/camera_info"   to="/r200/rgb/camera_info"/>
+        </node>
+
+        <let name="subscribe_rgbd" if="$(eval '\'$(var model)\' == \'waffle\'')" value="true"/>
+        <let name="subscribe_rgbd" unless="$(eval '\'$(var model)\' == \'waffle\'')" value="false"/>
+
+        <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" args="$(var rtabmap_args)">
+            <param name="database_path"         value="$(var database_path)"/>
+            <param name="frame_id"              value="base_footprint"/>
+            <param name="subscribe_rgb"         value="false"/>
+            <param name="subscribe_depth"       value="false"/>
+            <param name="subscribe_rgbd"        value="$(eval '\'$(var model)\' == \'waffle\'')"/>
+            <!-- <param     if="$(eval '\'$(var model)\' == \'waffle\'')"  name="subscribe_rgbd"         value="true"/> -->
+            <!-- <param unless="$(eval '\'$(var model)\' == \'waffle\'')"  name="subscribe_rgbd"         value="false"/> -->
+            <param name="subscribe_scan"        value="true"/>
+            <param name="approx_sync"           value="true"/>
+            <param name="map_always_update"     value="true"/>
+            <param name="map_empty_ray_tracing" value="true"/>
+
+            <!-- use actionlib to send goals to move_base -->
+            <param name="use_action_for_goal" value="true"/>
+            <remap from="move_base"            to="/move_base"/>
+
+            <!-- inputs -->
+            <remap from="scan"            to="/scan"/>
+            <remap from="odom"            to="/odom"/>
+            <remap from="rgbd_image"       to="rgbd_image"/>
+
+            <!-- output -->
+            <remap from="grid_map" to="/map"/>
+
+            <!-- RTAB-Map's parameters -->
+            <param name="Reg/Strategy"                 value="1"/>
+            <param name="Reg/Force3DoF"                value="true"/>
+            <param name="GridGlobal/MinSize"           value="20"/>
+
+            <!-- localization mode -->
+            <param name="Mem/IncrementalMemory"        value="$(eval 'not \'$(var localization)\'')"/>
+            <!-- <param     if="$(var localization)" name="Mem/IncrementalMemory" value="false"/> -->
+            <!-- <param unless="$(var localization)" name="Mem/IncrementalMemory" value="true"/> -->
+        </node>
+
+        <!-- visualization with rtabmap_viz -->
+        <node if="$(var rtabmap_viz)" pkg="rtabmap_viz" exec="rtabmap_viz" name="rtabmap_viz" args="-d $(find-pkg-share rtabmap_demos)/launch/config/rgbd_gui.ini">
+            <param name="subscribe_scan"      value="true"/>
+            <param name="subscribe_odom"      value="true"/>
+            <param name="frame_id"            value="base_footprint"/>
+            <param name="approx_sync"         value="true"/>
+
+            <remap from="odom"            to="/odom"/>
+            <remap from="scan"            to="/scan"/>
+        </node>
+    </group>
+
+    <!-- move_base -->
+    <!-- <group><include if="$(var use_move_base)" file="$(find-pkg-share turtlebot3_navigation)/launch/move_base.launch.xml">
+        <arg name="model" value="$(var model)" />
+        <arg name="move_forward_only" value="$(var move_forward_only)"/>
+    </include></group> -->
+    <group><include if="$(var use_move_base)" file="$(find-pkg-share turtlebot3_navigation2)/launch/navigation2.launch.py">
+        <arg name="model" value="$(var model)" />
+        <arg name="move_forward_only" value="$(var move_forward_only)"/>
+    </include></group>
+
+    <!-- rviz -->
+    <group if="$(var open_rviz)">
+        <node pkg="rviz" exec="rviz" name="rviz"
+            args="-d $(find-pkg-share turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
+    </group>
+
+    <node name="goal_manager" exec="goal_manager.py" pkg="opentera_webrtc_ros">
+        <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
+    </node>
+
+    <node name="labels_manager" exec="labels_manager.py" pkg="opentera_webrtc_ros">
+        <remap from="waypoint_reached" to="webrtc_data_outgoing"/>
+        <remap from="stored_labels_text" to="webrtc_data_outgoing"/>
+    </node>
+</launch>

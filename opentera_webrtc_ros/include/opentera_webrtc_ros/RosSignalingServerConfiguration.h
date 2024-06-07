@@ -7,6 +7,7 @@
 
 namespace opentera
 {
+    class RosNodeParameters;
 
     /**
      * @brief Utility to build signaling server configuration from ROS parameter server
@@ -16,10 +17,10 @@ namespace opentera
         static std::string getQueryFrom(const std::string& query, const std::string& queries);
 
     public:
-        static SignalingServerConfiguration fromRosParam(rclcpp::Node& node);
-        static SignalingServerConfiguration fromUrl(rclcpp::Node& node, const std::string& url);
-        static std::string getIceServerUrl(rclcpp::Node& node, const std::string& url);
-        static std::string getBaseUrl(rclcpp::Node& node, const std::string& url);
+        static SignalingServerConfiguration fromRosParam(RosNodeParameters& nodeParameters);
+        static SignalingServerConfiguration fromUrl(RosNodeParameters& nodeParameters, const std::string& url);
+        static std::string getIceServerUrl(RosNodeParameters& nodeParameters, const std::string& url);
+        static std::string getBaseUrl(RosNodeParameters& nodeParameters, const std::string& url);
     };
 }
 

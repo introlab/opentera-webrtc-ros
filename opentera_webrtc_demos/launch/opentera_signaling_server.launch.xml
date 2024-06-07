@@ -1,0 +1,26 @@
+<launch>
+
+    <!-- Requirements for server must be installed first -->
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="signaling_server_robot_type" default="BEAM"/>
+
+    <arg name="python_executable" default="python3"/>
+
+    <arg name="use_tls" default="false"/>
+    <arg name="certificate" default=""/>
+    <arg name="key" default=""/>
+
+    <!-- The teleop frontend must be installed built first -->
+    <arg name="signaling_server_static_folder" default="$(find-pkg-share opentera_webrtc_demos)/opentera-webrtc-teleop-frontend/teleop-vue/dist"/>
+
+    <node if="$(var use_tls)" pkg="opentera_webrtc_demos" exec="start_signaling_server_tls.sh"
+        args="$(var signaling_server_port) $(var signaling_server_password) $(var signaling_server_static_folder) $(var signaling_server_robot_type) $(var python_executable) $(var certificate) $(var key)"
+        name="opentera_signaling_server">
+    </node>
+    <node unless="$(var use_tls)" pkg="opentera_webrtc_demos" exec="start_signaling_server.sh"
+        args="$(var signaling_server_port) $(var signaling_server_password) $(var signaling_server_static_folder) $(var signaling_server_robot_type) $(var python_executable)"
+        name="opentera_signaling_server">
+    </node>
+
+</launch>

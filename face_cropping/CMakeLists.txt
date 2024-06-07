@@ -55,7 +55,7 @@ if (EXISTS "/etc/nv_tegra_release")
         if (TorchVision_FOUND)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
             set(TORCHVISION_LIBRARIES TorchVision::TorchVision)
-            include_directories(${TorchVision_INCLUDE_DIR})
+            include_directories(SYSTEM ${TorchVision_INCLUDE_DIR})
         else()
             message(WARNING "TorchVision is not found.")
             add_compile_definitions(NO_TORCH)
@@ -118,8 +118,8 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")
     find_package(Torch REQUIRED)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-    add_subdirectory(${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1 torchvision)
-    include_directories(${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1/)
+    add_subdirectory(${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1 torchvision SYSTEM)
+    include_directories(SYSTEM ${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1/)
     set(TORCHVISION_LIBRARIES torchvision)
     add_compile_definitions(TORCHVISION_CSRC_INCLUDE)
 else()
@@ -155,6 +155,7 @@ target_link_libraries(face_cropping_node
 )
 target_include_directories(
     face_cropping_node
+    SYSTEM
     PUBLIC
         "${OpenCV_INCLUDE_DIRS}"
 )
@@ -173,6 +174,7 @@ target_link_libraries(face_cropping_webrtc_node
 )
 target_include_directories(
     face_cropping_webrtc_node
+    SYSTEM
     PUBLIC
         "${OpenCV_INCLUDE_DIRS}"
 )

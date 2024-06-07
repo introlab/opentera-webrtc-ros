@@ -49,10 +49,10 @@ std::string wsToHttp(const std::string& url)
  * @param defaultClientName Default name for the webrtc peer
  * @return The signaling server configuration
  */
-SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam(rclcpp::Node& node)
+SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam(RosNodeParameters& nodeParameters)
 {
     string serverUrl, clientName, room, password;
-    RosNodeParameters::loadSignalingParams(node, serverUrl, clientName, room, password);
+    nodeParameters.loadSignalingParams(serverUrl, clientName, room, password);
 
     return SignalingServerConfiguration::create(httpToWs(serverUrl) + "/signaling", clientName, room, password);
 }
@@ -65,16 +65,17 @@ SignalingServerConfiguration RosSignalingServerConfiguration::fromRosParam(rclcp
  *
  * @return The signaling server configuration.
  */
-SignalingServerConfiguration RosSignalingServerConfiguration::fromUrl(rclcpp::Node& node, const std::string& url)
+SignalingServerConfiguration
+    RosSignalingServerConfiguration::fromUrl(RosNodeParameters& nodeParameters, const std::string& url)
 {
-    string address = httpToWs(RosSignalingServerConfiguration::getBaseUrl(node, url)) + "/signaling";
+    string address = httpToWs(RosSignalingServerConfiguration::getBaseUrl(nodeParameters, url)) + "/signaling";
 
     size_t pos1 = url.find("?");
     string queries = url.substr(pos1);
     string password = getQueryFrom("pwd", queries);
     string clientName, roomName;
 
-    RosNodeParameters::loadSignalingParams(node, clientName, roomName);
+    nodeParameters.loadSignalingParams(clientName, roomName);
 
     return SignalingServerConfiguration::create(address, clientName, roomName, password);
 }
@@ -106,10 +107,10 @@ std::string RosSignalingServerConfiguration::getQueryFrom(const std::string& que
  * @param url The full url to extract from.
  * @return std::string The ice server url.
  */
-std::string RosSignalingServerConfiguration::getIceServerUrl(rclcpp::Node& node, const std::string& url)
+std::string RosSignalingServerConfiguration::getIceServerUrl(RosNodeParameters& nodeParameters, const std::string& url)
 {
-    RCLCPP_INFO_STREAM(node.get_logger(), "getIceServerUrl from url:" << url);
-    return wsToHttp(RosSignalingServerConfiguration::getBaseUrl(node, url)) + "/iceservers";
+    RCLCPP_INFO_STREAM(nodeParameters.node().get_logger(), "getIceServerUrl from url:" << url);
+    return wsToHttp(RosSignalingServerConfiguration::getBaseUrl(nodeParameters, url)) + "/iceservers";
 }
 
 /**
@@ -118,7 +119,7 @@ std::string RosSignalingServerConfiguration::getIceServerUrl(rclcpp::Node& node,
  * @param url The full url to extract from.
  * @return std::string The base url (up to the last / of the path).
  */
-std::string RosSignalingServerConfiguration::getBaseUrl(rclcpp::Node& node, const std::string& url)
+std::string RosSignalingServerConfiguration::getBaseUrl(RosNodeParameters& nodeParameters, const std::string& url)
 {
     const string prot_end("://");
     string::const_iterator prot_i = search(url.begin(), url.end(), prot_end.begin(), prot_end.end());
@@ -131,7 +132,7 @@ std::string RosSignalingServerConfiguration::getBaseUrl(rclcpp::Node& node, cons
 
     if (prot_i == url.end())
     {
-        RCLCPP_ERROR_STREAM(node.get_logger(), "No protocol defined in url: " << url);
+        RCLCPP_ERROR_STREAM(nodeParameters.node().get_logger(), "No protocol defined in url: " << url);
         return url;
     }
 

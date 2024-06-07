@@ -1,0 +1,13 @@
+<launch>
+    <arg name="signalling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="model" default="waffle" description="model type [burger, waffle, waffle_pi]"/>
+
+    <!-- Signaling server -->
+    <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_signaling_server.launch.xml">
+        <arg name="signaling_server_port" value="$(var signaling_server_port)" />
+        <arg name="signaling_server_password" value="$(var signaling_server_password)" />
+    </include></group>
+
+</launch>

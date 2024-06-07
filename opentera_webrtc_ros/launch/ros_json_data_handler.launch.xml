@@ -1,0 +1,17 @@
+<launch>
+
+    <!-- Arguments -->
+    <arg name="name" default="json_data_handler"/>
+    <arg name="input_topic" default="webrtc_data"/>
+    <arg name="linear_multiplier" default="1"/>
+    <arg name="angular_multiplier" default="1"/>
+    <arg name="cmd_vel_topic" default="cmd_vel"/>
+
+    <node name="$(var name)" pkg="opentera_webrtc_ros" exec="json_data_handler" respawn="true">
+        <remap from="webrtc_data" to="$(var input_topic)"/>
+        <remap from="cmd_vel" to="$(var cmd_vel_topic)"/>
+        <param name="linear_multiplier" value="$(var linear_multiplier)"/>
+        <param name="angular_multiplier" value="$(var angular_multiplier)"/>
+    </node>
+
+</launch>

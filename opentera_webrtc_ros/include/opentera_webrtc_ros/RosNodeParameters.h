@@ -15,36 +15,31 @@ namespace opentera
     class RosNodeParameters
     {
     public:
-        // template<typename T>
-        // static bool isInParams(rclcpp::Node& node, const std::string& key, const std::map<std::string, T>& dict);
+        RosNodeParameters(rclcpp::Node& node);
 
-        static bool isStandAlone(rclcpp::Node& node);
+        bool isStandAlone() const;
 
-        static void loadSignalingParams(rclcpp::Node& node, std::string& clientName, std::string& room);
-        static void loadSignalingParams(
-            rclcpp::Node& node,
+        void loadSignalingParams(std::string& clientName, std::string& room) const;
+        void loadSignalingParams(
             std::string& serverUrl,
             std::string& clientName,
             std::string& room,
-            std::string& password);
+            std::string& password) const;
 
-        static void loadSignalingParamsVerifySSL(rclcpp::Node& node, bool& verifySSL);
+        void loadSignalingParamsVerifySSL(bool& verifySSL) const;
 
-        static void loadVideoStreamParams(
-            rclcpp::Node& node,
+        void loadVideoStreamParams(
             bool& canSendVideoStream,
             bool& canReceiveVideoStream,
             bool& denoise,
-            bool& screencast);
+            bool& screencast) const;
 
-        static void loadVideoCodecParams(
-            rclcpp::Node& node,
+        void loadVideoCodecParams(
             std::unordered_set<opentera::VideoStreamCodec>& forcedCodecs,
             bool& forceGStreamerHardwareAcceleration,
-            bool& useGStreamerSoftwareEncoderDecoder);
+            bool& useGStreamerSoftwareEncoderDecoder) const;
 
-        static void loadAudioStreamParams(
-            rclcpp::Node& node,
+        void loadAudioStreamParams(
             bool& canSendAudioStream,
             bool& canReceiveAudioStream,
             unsigned int& soundCardTotalDelayMs,
@@ -53,21 +48,14 @@ namespace opentera
             bool& noiseSuppression,
             bool& highPassFilter,
             bool& stereoSwapping,
-            bool& transientSuppression);
-    };
+            bool& transientSuppression) const;
 
-    /**
-     * @brief Check if the key his in the parameters
-     *
-     * @param key Key value of the element to search
-     * @param dict Dictionary (std::map) to search in
-     * @return true if found otherwise false
-     */
-    // template<typename T>
-    // bool RosNodeParameters::isInParams(const std::string& key, const std::map<std::string, T>& dict)
-    // {
-    //     return dict.find(key) != dict.end();
-    // }
+        const rclcpp::Node& node() const {return m_node; }
+        rclcpp::Node& node() {return m_node; }
+
+    private:
+        rclcpp::Node& m_node;
+    };
 }
 
 #endif

@@ -39,6 +39,7 @@ namespace opentera
         rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>::SharedPtr m_eventSubscriber;
 
     protected:
+        RosNodeParameters m_nodeParameters;
         rclcpp::Publisher<opentera_webrtc_ros_msgs::msg::PeerStatus>::SharedPtr m_peerStatusPublisher;
         std::unique_ptr<T> m_signalingClient;
 
@@ -90,6 +91,7 @@ namespace opentera
     template<typename T>
     RosWebRTCBridge<T>::RosWebRTCBridge(const std::string& nodeName)
         : rclcpp::Node(nodeName),
+          m_nodeParameters(*this),
           m_signalingClient(nullptr)
     {
         // On CTRL+C exit
@@ -101,7 +103,7 @@ namespace opentera
                 rclcpp::shutdown();
             });
 
-        if (!RosNodeParameters::isStandAlone(*this))
+        if (!m_nodeParameters.isStandAlone())
         {
             m_eventSubscriber = this->create_subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(
                 "events",

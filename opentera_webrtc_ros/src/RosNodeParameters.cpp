@@ -5,9 +5,45 @@
 
 using namespace opentera;
 
-bool RosNodeParameters::isStandAlone(rclcpp::Node& node)
+RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
 {
-    return node.declare_parameter("is_stand_alone", true);
+    m_node.declare_parameter("is_stand_alone", true);
+
+    // Signaling params
+    m_node.declare_parameter("signaling.client_name", "streamer");
+    m_node.declare_parameter("signaling.room_name", "chat");
+    m_node.declare_parameter("signaling.server_url", "http://localhost:8080");
+    m_node.declare_parameter("signaling.client_name", "streamer");
+    m_node.declare_parameter("signaling.room_name", "chat");
+    m_node.declare_parameter("signaling.room_password", "abc");
+    m_node.declare_parameter("signaling.verify_ssl", true);
+
+    // Video stream params
+    m_node.declare_parameter("video_stream.can_send_video_stream", false);
+    m_node.declare_parameter("video_stream.can_receive_video_stream", false);
+    m_node.declare_parameter("video_stream.needs_denoising", false);
+    m_node.declare_parameter("video_stream.is_screen_cast", false);
+
+    // Video codec params
+    m_node.declare_parameter("video_codecs.forced_codecs", std::vector<std::string>());
+    m_node.declare_parameter("video_codecs.force_gstreamer_hardware_acceleration", false);
+    m_node.declare_parameter("video_codecs.use_gstreamer_software_encoder_decoder", false);
+
+    // Audio stream params
+    m_node.declare_parameter("audio_stream.can_send_audio_stream", false);
+    m_node.declare_parameter("audio_stream.can_receive_audio_stream", false);
+    m_node.declare_parameter("audio_stream.sound_card_total_delay_ms", 40);
+    m_node.declare_parameter("audio_stream.echo_cancellation", true);
+    m_node.declare_parameter("audio_stream.auto_gain_control", true);
+    m_node.declare_parameter("audio_stream.noise_suppression", true);
+    m_node.declare_parameter("audio_stream.high_pass_filter", false);
+    m_node.declare_parameter("audio_stream.stereo_swapping", false);
+    m_node.declare_parameter("audio_stream.transient_suppression", true);
+}
+
+bool RosNodeParameters::isStandAlone() const
+{
+    return m_node.get_parameter("is_stand_alone").as_bool();
 }
 
 /**
@@ -16,12 +52,10 @@ bool RosNodeParameters::isStandAlone(rclcpp::Node& node)
  * @param clientName Client's name
  * @param room Room's name
  */
-void RosNodeParameters::loadSignalingParams(rclcpp::Node& node, std::string& clientName, std::string& room)
+void RosNodeParameters::loadSignalingParams(std::string& clientName, std::string& room) const
 {
-    std::map<std::string, std::string> dict;
-
-    clientName = node.declare_parameter("signaling.client_name", "streamer");
-    room = node.declare_parameter("signaling.room_name", "chat");
+    clientName = m_node.get_parameter("signaling.client_name").as_string();
+    room = m_node.get_parameter("signaling.room_name").as_string();
 }
 
 /**
@@ -33,16 +67,15 @@ void RosNodeParameters::loadSignalingParams(rclcpp::Node& node, std::string& cli
  * @param password Room's password
  */
 void RosNodeParameters::loadSignalingParams(
-    rclcpp::Node& node,
     std::string& serverUrl,
     std::string& clientName,
     std::string& room,
-    std::string& password)
+    std::string& password) const
 {
-    serverUrl = node.declare_parameter("signaling.server_url", "http://localhost:8080");
-    clientName = node.declare_parameter("signaling.client_name", "streamer");
-    room = node.declare_parameter("signaling.room_name", "chat");
-    password = node.declare_parameter("signaling.room_password", "abc");
+    serverUrl = m_node.get_parameter("signaling.server_url").as_string();
+    clientName = m_node.get_parameter("signaling.client_name").as_string();
+    room = m_node.get_parameter("signaling.room_name").as_string();
+    password = m_node.get_parameter("signaling.room_password").as_string();
 }
 
 /**
@@ -50,9 +83,9 @@ void RosNodeParameters::loadSignalingParams(
  *
  * @param verifySSL Verify SSL peer
  */
-void RosNodeParameters::loadSignalingParamsVerifySSL(rclcpp::Node& node, bool& verifySSL)
+void RosNodeParameters::loadSignalingParamsVerifySSL(bool& verifySSL) const
 {
-    verifySSL = node.declare_parameter("signaling.verify_ssl", true);
+    verifySSL = m_node.get_parameter("signaling.verify_ssl").as_bool();
 }
 
 /**
@@ -64,16 +97,15 @@ void RosNodeParameters::loadSignalingParamsVerifySSL(rclcpp::Node& node, bool& v
  * @param screencast whether the images are a screen capture
  */
 void RosNodeParameters::loadVideoStreamParams(
-    rclcpp::Node& node,
     bool& canSendVideoStream,
     bool& canReceiveVideoStream,
     bool& denoise,
-    bool& screencast)
+    bool& screencast) const
 {
-    canSendVideoStream = node.declare_parameter("video_stream.can_send_video_stream", false);
-    canReceiveVideoStream = node.declare_parameter("video_stream.can_receive_video_stream", false);
-    denoise = node.declare_parameter("video_stream.needs_denoising", false);
-    screencast = node.declare_parameter("video_stream.is_screen_cast", false);
+    canSendVideoStream = m_node.get_parameter("video_stream.can_send_video_stream").as_bool();
+    canReceiveVideoStream = m_node.get_parameter("video_stream.can_receive_video_stream").as_bool();
+    denoise = m_node.get_parameter("video_stream.needs_denoising").as_bool();
+    screencast = m_node.get_parameter("video_stream.is_screen_cast").as_bool();
 }
 
 /**
@@ -84,13 +116,11 @@ void RosNodeParameters::loadVideoStreamParams(
  * @param useGStreamerSoftwareEncoderDecoder whether to use GStreamer software encoders/decoders
  */
 void RosNodeParameters::loadVideoCodecParams(
-    rclcpp::Node& node,
     std::unordered_set<VideoStreamCodec>& forcedCodecs,
     bool& forceGStreamerHardwareAcceleration,
-    bool& useGStreamerSoftwareEncoderDecoder)
+    bool& useGStreamerSoftwareEncoderDecoder) const
 {
-    std::vector<std::string> forcedCodecStrings =
-        node.declare_parameter("video_codecs.forced_codecs", std::vector<std::string>());
+    std::vector<std::string> forcedCodecStrings = m_node.get_parameter("video_codecs.forced_codecs").as_string_array();
 
     transform(
         forcedCodecStrings.begin(),
@@ -110,9 +140,9 @@ void RosNodeParameters::loadVideoCodecParams(
         });
 
     forceGStreamerHardwareAcceleration =
-        node.declare_parameter("video_codecs.force_gstreamer_hardware_acceleration", false);
+        m_node.get_parameter("video_codecs.force_gstreamer_hardware_acceleration").as_bool();
     useGStreamerSoftwareEncoderDecoder =
-        node.declare_parameter("video_codecs.use_gstreamer_software_encoder_decoder", false);
+        m_node.get_parameter("video_codecs.use_gstreamer_software_encoder_decoder").as_bool();
 }
 
 /**
@@ -122,7 +152,6 @@ void RosNodeParameters::loadVideoCodecParams(
  * @param canReceiveAudioStream whether the node can received audio stream from the signaling server
  */
 void RosNodeParameters::loadAudioStreamParams(
-    rclcpp::Node& node,
     bool& canSendAudioStream,
     bool& canReceiveAudioStream,
     unsigned int& soundCardTotalDelayMs,
@@ -131,15 +160,15 @@ void RosNodeParameters::loadAudioStreamParams(
     bool& noiseSuppression,
     bool& highPassFilter,
     bool& stereoSwapping,
-    bool& transientSuppression)
+    bool& transientSuppression) const
 {
-    canSendAudioStream = node.declare_parameter("audio_stream.can_send_audio_stream", false);
-    canReceiveAudioStream = node.declare_parameter("audio_stream.can_receive_audio_stream", false);
-    soundCardTotalDelayMs = node.declare_parameter("audio_stream.sound_card_total_delay_ms", 40);
-    echoCancellation = node.declare_parameter("audio_stream.echo_cancellation", true);
-    autoGainControl = node.declare_parameter("audio_stream.auto_gain_control", true);
-    noiseSuppression = node.declare_parameter("audio_stream.noise_suppression", true);
-    highPassFilter = node.declare_parameter("audio_stream.high_pass_filter", false);
-    stereoSwapping = node.declare_parameter("audio_stream.stereo_swapping", false);
-    transientSuppression = node.declare_parameter("audio_stream.transient_suppression", true);
+    canSendAudioStream = m_node.get_parameter("audio_stream.can_send_audio_stream").as_bool();
+    canReceiveAudioStream = m_node.get_parameter("audio_stream.can_receive_audio_stream").as_bool();
+    soundCardTotalDelayMs = m_node.get_parameter("audio_stream.sound_card_total_delay_ms").as_int();
+    echoCancellation = m_node.get_parameter("audio_stream.echo_cancellation").as_bool();
+    autoGainControl = m_node.get_parameter("audio_stream.auto_gain_control").as_bool();
+    noiseSuppression = m_node.get_parameter("audio_stream.noise_suppression").as_bool();
+    highPassFilter = m_node.get_parameter("audio_stream.high_pass_filter").as_bool();
+    stereoSwapping = m_node.get_parameter("audio_stream.stereo_swapping").as_bool();
+    transientSuppression = m_node.get_parameter("audio_stream.transient_suppression").as_bool();
 }

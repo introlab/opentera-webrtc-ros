@@ -11,9 +11,9 @@ using namespace opentera;
  */
 RosDataChannelBridge::RosDataChannelBridge() : RosWebRTCBridge("data_channel_bridge")
 {
-    if (RosNodeParameters::isStandAlone(*this))
+    if (m_nodeParameters.isStandAlone())
     {
-        initSignalingClient(RosSignalingServerConfiguration::fromRosParam(*this));
+        initSignalingClient(RosSignalingServerConfiguration::fromRosParam(m_nodeParameters));
         initAdvertiseTopics();
         initDataChannelCallback();
         connect();
@@ -25,7 +25,7 @@ RosDataChannelBridge::RosDataChannelBridge() : RosWebRTCBridge("data_channel_bri
  */
 RosDataChannelBridge::~RosDataChannelBridge()
 {
-    if (RosNodeParameters::isStandAlone(*this))
+    if (m_nodeParameters.isStandAlone())
     {
         m_signalingClient = nullptr;
         stopAdvertiseTopics();
@@ -42,10 +42,10 @@ RosDataChannelBridge::~RosDataChannelBridge()
 void RosDataChannelBridge::initSignalingClient(const SignalingServerConfiguration& signalingServerConfiguration)
 {
     bool verifySSL;
-    RosNodeParameters::loadSignalingParamsVerifySSL(*this, verifySSL);
+    m_nodeParameters.loadSignalingParamsVerifySSL(verifySSL);
 
     std::string iceServersUrl =
-        RosSignalingServerConfiguration::getIceServerUrl(*this, signalingServerConfiguration.url());
+        RosSignalingServerConfiguration::getIceServerUrl(m_nodeParameters, signalingServerConfiguration.url());
     RCLCPP_INFO(this->get_logger(), "Fetching ice servers from : %s", iceServersUrl.c_str());
     std::vector<IceServer> iceServers;
     if (!IceServer::fetchFromServer(iceServersUrl, signalingServerConfiguration.password(), iceServers, verifySSL))
@@ -128,7 +128,7 @@ void RosDataChannelBridge::callAllCallBack(const std_msgs::msg::Empty::ConstShar
 void RosDataChannelBridge::onJoinSessionEvents(
     const std::vector<opentera_webrtc_ros_msgs::msg::JoinSessionEvent>& events)
 {
-    initSignalingClient(RosSignalingServerConfiguration::fromUrl(*this, events[0].session_url));
+    initSignalingClient(RosSignalingServerConfiguration::fromUrl(m_nodeParameters, events[0].session_url));
     initAdvertiseTopics();
     initDataChannelCallback();
     connect();

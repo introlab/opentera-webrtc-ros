@@ -1,0 +1,8 @@
+<launch>
+    <arg name="opentera_client_config_file" default="$(find-pkg-share opentera_client_ros)/config/client_config.json"/>
+
+    <!-- OpenTera ROS Client -->
+    <node pkg="opentera_client_ros" exec="opentera_client_ros.py" name="opentera_client" respawn="true">
+        <param name="config_file" value="$(var opentera_client_config_file)"/>
+    </node>
+</launch>

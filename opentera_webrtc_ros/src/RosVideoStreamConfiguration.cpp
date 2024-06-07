@@ -13,13 +13,12 @@ using namespace rclcpp;
  *
  * @return The video stream configuration
  */
-VideoStreamConfiguration RosVideoStreamConfiguration::fromRosParam(rclcpp::Node& node)
+VideoStreamConfiguration RosVideoStreamConfiguration::fromRosParam(RosNodeParameters& nodeParameters)
 {
     unordered_set<VideoStreamCodec> forcedCodecs;
     bool forceGStreamerHardwareAcceleration, useGStreamerSoftwareEncoderDecoder;
 
-    RosNodeParameters::loadVideoCodecParams(
-        node,
+    nodeParameters.loadVideoCodecParams(
         forcedCodecs,
         forceGStreamerHardwareAcceleration,
         useGStreamerSoftwareEncoderDecoder);

@@ -7,6 +7,7 @@
 
 namespace opentera
 {
+    class RosNodeParameters;
 
     /**
      * @brief Utility to build a video stream configuration from ROS parameter server
@@ -14,7 +15,7 @@ namespace opentera
     class RosVideoStreamConfiguration
     {
     public:
-        static VideoStreamConfiguration fromRosParam(rclcpp::Node& node);
+        static VideoStreamConfiguration fromRosParam(RosNodeParameters& node);
     };
 }
 

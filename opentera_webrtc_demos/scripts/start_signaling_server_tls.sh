@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "Starting opentera signaling server from :" $1
-port=$2
-password=$3
-static_folder=$4
-robot_type=$5
-python_exec=$6
-certificate=$7
-key=$8
+echo "Starting opentera signaling server"
+port=$1
+password=$2
+static_folder=$3
+robot_type=$4
+python_exec=$5
+certificate=$6
+key=$7
 
 echo "port :" $port
 echo "password:" $password
@@ -19,4 +19,4 @@ echo "key:" $key
 echo "Client interface will be available at http://localhost:$port/index.html#/user?pwd=$password&robot=$robot_type"
 
 
-(cd $1; exec $python_exec opentera-signaling-server --port $port --password $password --static_folder $static_folder --certificate $certificate --key $key)
+(exec $python_exec $(which opentera-signaling-server) --port $port --password $password --static_folder $static_folder --certificate $certificate --key $key)

@@ -74,9 +74,9 @@ endif ()
 # Use the system (ROS) version of Python
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_VERSION "${OPENTERA_WEBRTC_ROS_PYTHON_VERSION}" CACHE STRING "")
 
-add_subdirectory(opentera-webrtc)
+add_subdirectory(opentera-webrtc SYSTEM)
 
-include_directories(SYSTEM
+set(opentera_webrtc_native_client_includes
     ${webrtc_native_INCLUDE}
     ${boringssl_INCLUDE}
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
@@ -85,14 +85,41 @@ include_directories(SYSTEM
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/IXWebSocket
     ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/cpp-httplib
 )
+set(opentera_webrtc_native_client_targets
+    OpenteraWebrtcNativeClient
+)
 
-set(opentera_webrtc_native_client_libs
+if(OPENTERA_WEBRTC_ENABLE_GSTREAMER)
+    list(APPEND opentera_webrtc_native_client_includes
+        ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeGStreamer/include
+    )
+    list(APPEND opentera_webrtc_native_client_targets
+        OpenteraWebrtcNativeGStreamer
+    )
+endif()
+
+set(opentera_webrtc_native_client_imported_libs
     opencv_core
     opencv_imgproc
-    OpenteraWebrtcNativeClient
     ${webrtc_native_LIBRARY}
     ${boringssl_LIBRARY}
 )
+
+set(opentera_webrtc_native_client_raw_libs ${opentera_webrtc_native_client_imported_libs})
+list(FILTER opentera_webrtc_native_client_raw_libs INCLUDE REGEX "\\/.*")  # Only keep full paths, the rest are system libraries
+
+set(opentera_webrtc_native_client_libs
+    ${opentera_webrtc_native_client_targets}
+    ${opentera_webrtc_native_client_imported_libs}
+)
+
+include_directories(SYSTEM
+    ${opentera_webrtc_native_client_includes}
+)
+
+install(DIRECTORY ${opentera_webrtc_native_client_includes} DESTINATION include)
+install(TARGETS ${opentera_webrtc_native_client_targets} DESTINATION lib)
+install(FILES ${opentera_webrtc_native_client_raw_libs} DESTINATION lib)
 
 include_directories(
     include
@@ -123,6 +150,7 @@ ament_target_dependencies(${PROJECT_NAME}_topic_streamer
 target_link_libraries(${PROJECT_NAME}_topic_streamer
     ${opentera_webrtc_native_client_libs}
 )
+set_target_properties(${PROJECT_NAME}_topic_streamer PROPERTIES OUTPUT_NAME topic_streamer PREFIX "")
 install(TARGETS ${PROJECT_NAME}_topic_streamer DESTINATION lib/${PROJECT_NAME})
 
 add_executable(${PROJECT_NAME}_data_channel_bridge
@@ -144,7 +172,8 @@ ament_target_dependencies(${PROJECT_NAME}_data_channel_bridge
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
     ${opentera_webrtc_native_client_libs}
 )
-install(TARGETS ${PROJECT_NAME}_topic_streamer DESTINATION lib/${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME}_data_channel_bridge PROPERTIES OUTPUT_NAME data_channel_bridge PREFIX "")
+install(TARGETS ${PROJECT_NAME}_data_channel_bridge DESTINATION lib/${PROJECT_NAME})
 
 
 add_executable(${PROJECT_NAME}_json_data_handler
@@ -161,8 +190,8 @@ ament_target_dependencies(${PROJECT_NAME}_json_data_handler
     geometry_msgs
     audio_utils
 )
+set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
 install(TARGETS ${PROJECT_NAME}_json_data_handler DESTINATION lib/${PROJECT_NAME})
-
 
 install(
     DIRECTORY
@@ -184,16 +213,11 @@ install(
 )
 
 ament_export_include_directories(
-    ${webrtc_native_INCLUDE}
-    ${boringssl_INCLUDE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/OpenteraWebrtcNativeClient/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/json/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/IXWebSocket
-    ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc/opentera-webrtc-native-client/3rdParty/cpp-httplib
+    ${opentera_webrtc_native_client_includes}
 )
-# ament_export_libraries(
-# )
+ament_export_libraries(
+    ${opentera_webrtc_native_client_libs}
+)
 
 ament_python_install_package(${PROJECT_NAME})
 
