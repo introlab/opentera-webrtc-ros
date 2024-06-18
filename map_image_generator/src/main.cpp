@@ -10,8 +10,10 @@
 
 using namespace map_image_generator;
 
-class Node : public rclcpp::Node
+class Node
 {
+    std::shared_ptr<rclcpp::Node> m_node;
+
     Parameters m_parameters;
     tf2_ros::Buffer m_tfBuffer;
     tf2_ros::TransformListener m_tfListener;
@@ -25,14 +27,14 @@ class Node : public rclcpp::Node
 
 public:
     explicit Node()
-        : rclcpp::Node{"map_image_generator"},
-          m_parameters{*this},
-          m_tfBuffer{get_clock()},
+        : m_node{std::make_shared<rclcpp::Node>("map_image_generator")},
+          m_parameters{*m_node},
+          m_tfBuffer{m_node->get_clock()},
           m_tfListener{m_tfBuffer},
-          m_mapImageGenerator{m_parameters, *this, m_tfBuffer},
-          m_goalConverter{m_parameters, *this, m_tfBuffer},
-          m_mapLabelsConverter{m_parameters, *this},
-          m_imageTransport{this->shared_from_this()},
+          m_mapImageGenerator{m_parameters, *m_node, m_tfBuffer},
+          m_goalConverter{m_parameters, *m_node, m_tfBuffer},
+          m_mapLabelsConverter{m_parameters, *m_node},
+          m_imageTransport{m_node},
           m_mapImagePublisher{m_imageTransport.advertise("map_image", 1)},
           m_mapImage{}
     {
@@ -40,13 +42,13 @@ public:
 
     void run()
     {
-        RCLCPP_INFO(this->get_logger(), "MapImage initialized, starting image generation after first cycle...");
+        RCLCPP_INFO(m_node->get_logger(), "MapImage initialized, starting image generation after first cycle...");
 
         rclcpp::Rate loop_rate{m_parameters.refreshRate()};
         if (rclcpp::ok())
         {
             loop_rate.sleep();
-            rclcpp::spin_some(this->shared_from_this());
+            rclcpp::spin_some(m_node);
         }
 
         while (rclcpp::ok())
@@ -55,7 +57,7 @@ public:
             m_mapImagePublisher.publish(m_mapImage);
 
             loop_rate.sleep();
-            rclcpp::spin_some(this->shared_from_this());
+            rclcpp::spin_some(m_node);
         }
     }
 };

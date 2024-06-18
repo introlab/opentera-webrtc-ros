@@ -12,7 +12,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
 
 find_package(rclcpp REQUIRED)
 
@@ -23,7 +22,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rtabmap_msgs REQUIRED)
 find_package(opentera_webrtc_ros_msgs REQUIRED)
-find_package(odas_ros REQUIRED)
+find_package(odas_ros_msgs REQUIRED)
 
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -32,13 +31,6 @@ find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 
 find_package(OpenCV REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}_msgs
-    "srv/ImageGoalToMapGoal.srv"
-    "srv/ChangeMapView.srv"
-
-    DEPENDENCIES geometry_msgs
-)
 
 add_executable(${PROJECT_NAME}
     include/map_image_generator/drawers/GlobalPathImageDrawer.h
@@ -70,12 +62,11 @@ add_executable(${PROJECT_NAME}
     src/utils.cpp
 )
 
-ament_target_dependencies(${PROJECT_NAME} rclcpp std_msgs nav_msgs sensor_msgs geometry_msgs visualization_msgs rtabmap_msgs odas_ros opentera_webrtc_ros_msgs tf2 tf2_ros tf2_geometry_msgs cv_bridge image_transport)
+ament_target_dependencies(${PROJECT_NAME} rclcpp std_msgs nav_msgs sensor_msgs geometry_msgs visualization_msgs rtabmap_msgs odas_ros_msgs opentera_webrtc_ros_msgs tf2 tf2_ros tf2_geometry_msgs cv_bridge image_transport)
 target_link_libraries(
     ${PROJECT_NAME}
     ${OpenCV_LIBRARIES}
 )
-rosidl_target_interfaces(${PROJECT_NAME} ${PROJECT_NAME}_msgs "rosidl_typesupport_cpp")
 target_include_directories(
     ${PROJECT_NAME}
     PUBLIC

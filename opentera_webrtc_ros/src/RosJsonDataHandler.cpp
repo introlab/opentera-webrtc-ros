@@ -33,7 +33,7 @@ RosJsonDataHandler::RosJsonDataHandler() : rclcpp::Node("json_data_handler")
     m_localizationModeClient = this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_localization");
     m_mappingModeClient = this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_mapping");
 
-    m_changeMapViewClient = this->create_client<map_image_generator::srv::ChangeMapView>("change_map_view");
+    m_changeMapViewClient = this->create_client<opentera_webrtc_ros_msgs::srv::ChangeMapView>("change_map_view");
 }
 
 RosJsonDataHandler::~RosJsonDataHandler() = default;
@@ -188,7 +188,7 @@ void RosJsonDataHandler::onWebRTCDataReceived(const opentera_webrtc_ros_msgs::ms
     }
     else if (serializedData["type"] == "changeMapView")
     {
-        auto request = std::make_shared<map_image_generator::srv::ChangeMapView::Request>();
+        auto request = std::make_shared<opentera_webrtc_ros_msgs::srv::ChangeMapView::Request>();
         request->view_new = serializedData["new"];
         request->view_old = serializedData["old"];
 

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <geometry_msgs/msg/twist.hpp>
 #include <lib/json.hpp>
-#include <map_image_generator/srv/change_map_view.hpp>
+#include <opentera_webrtc_ros_msgs/srv/change_map_view.hpp>
 #include <opentera_webrtc_ros_msgs/msg/label_simple.hpp>
 #include <opentera_webrtc_ros_msgs/msg/label_simple_edit.hpp>
 #include <opentera_webrtc_ros_msgs/msg/peer_data.hpp>
@@ -39,7 +39,7 @@ namespace opentera
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr m_dockingClient;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr m_localizationModeClient;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr m_mappingModeClient;
-        rclcpp::Client<map_image_generator::srv::ChangeMapView>::SharedPtr m_changeMapViewClient;
+        rclcpp::Client<opentera_webrtc_ros_msgs::srv::ChangeMapView>::SharedPtr m_changeMapViewClient;
         rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedPtr m_setMovementModeClient;
         rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedPtr m_doMovementClient;
 

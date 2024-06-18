@@ -13,10 +13,10 @@ SoundSourceImageDrawer::SoundSourceImageDrawer(
     rclcpp::Node& node,
     tf2_ros::Buffer& tfBuffer)
     : ImageDrawer(parameters, node, tfBuffer),
-      m_soundSourcesArraySubscriber{node.create_subscription<odas_ros::msg::OdasSstArrayStamped>(
+      m_soundSourcesArraySubscriber{node.create_subscription<odas_ros_msgs::msg::OdasSstArrayStamped>(
           "sound_sources",
           1,
-          bind_this<odas_ros::msg::OdasSstArrayStamped>(this, &SoundSourceImageDrawer::soundSourcesCallback))},
+          bind_this<odas_ros_msgs::msg::OdasSstArrayStamped>(this, &SoundSourceImageDrawer::soundSourcesCallback))},
       m_laserScanSubscriber{m_node.create_subscription<sensor_msgs::msg::LaserScan>(
           "laser_scan",
           1,
@@ -27,7 +27,7 @@ SoundSourceImageDrawer::SoundSourceImageDrawer(
 SoundSourceImageDrawer::~SoundSourceImageDrawer() = default;
 
 void SoundSourceImageDrawer::soundSourcesCallback(
-    const odas_ros::msg::OdasSstArrayStamped::ConstSharedPtr& soundSources)
+    const odas_ros_msgs::msg::OdasSstArrayStamped::ConstSharedPtr& soundSources)
 {
     m_lastSoundSourcesArray = soundSources;
 }
@@ -37,7 +37,7 @@ void SoundSourceImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan
     m_lastLaserScan = laserScan;
 }
 
-tf2::Transform SoundSourceImageDrawer::getPoseFromSst(const odas_ros::msg::OdasSst& sst)
+tf2::Transform SoundSourceImageDrawer::getPoseFromSst(const odas_ros_msgs::msg::OdasSst& sst)
 {
     tf2::Transform pose;
     pose.setOrigin({0, 0, 0});
@@ -135,7 +135,7 @@ void SoundSourceImageDrawer::drawSoundSourcesWithoutLidar(cv::Mat& image, const 
 
 void SoundSourceImageDrawer::drawSoundSource(
     cv::Mat& image,
-    const odas_ros::msg::OdasSst& source,
+    const odas_ros_msgs::msg::OdasSst& source,
     tf2::Transform poseInRef)
 {
     int size = m_parameters.soundSourceSize();

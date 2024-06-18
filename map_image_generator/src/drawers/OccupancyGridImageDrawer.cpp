@@ -18,9 +18,11 @@ OccupancyGridImageDrawer::OccupancyGridImageDrawer(
           "occupancy_grid",
           1,
           bind_this<nav_msgs::msg::OccupancyGrid>(this, &OccupancyGridImageDrawer::occupancyGridCallback))},
-      m_mapViewChangerService{m_node.create_service<srv::ChangeMapView>(
+      m_mapViewChangerService{m_node.create_service<opentera_webrtc_ros_msgs::srv::ChangeMapView>(
           "change_map_view",
-          bind_this<srv::ChangeMapView>(this, &OccupancyGridImageDrawer::changeMapViewCallback))}
+          bind_this<opentera_webrtc_ros_msgs::srv::ChangeMapView>(
+              this,
+              &OccupancyGridImageDrawer::changeMapViewCallback))}
 {
 }
 
@@ -52,15 +54,15 @@ void OccupancyGridImageDrawer::occupancyGridCallback(const nav_msgs::msg::Occupa
 }
 
 void OccupancyGridImageDrawer::changeMapViewCallback(
-    const srv::ChangeMapView::Request::ConstSharedPtr& req,
-    const srv::ChangeMapView::Response::SharedPtr& res)
+    const opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::ConstSharedPtr& req,
+    const opentera_webrtc_ros_msgs::srv::ChangeMapView::Response::SharedPtr& res)
 {
     res->success = true;
-    if (req->view_new == srv::ChangeMapView::Request::VIEW_CENTERED_ROBOT)
+    if (req->view_new == opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::VIEW_CENTERED_ROBOT)
     {
         m_mutableParameters.setCenteredRobot(true);
     }
-    else if (req->view_new == srv::ChangeMapView::Request::VIEW_STATIC_MAP)
+    else if (req->view_new == opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::VIEW_STATIC_MAP)
     {
         m_mutableParameters.setCenteredRobot(false);
     }

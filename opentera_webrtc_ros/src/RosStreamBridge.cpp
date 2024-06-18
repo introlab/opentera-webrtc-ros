@@ -6,7 +6,7 @@
 #include <opentera_webrtc_ros_msgs/msg/peer_image.hpp>
 #include <opentera_webrtc_ros_msgs/msg/peer_audio.hpp>
 #include <opentera_webrtc_ros_msgs/msg/peer_status.hpp>
-#include <audio_utils/msg/audio_frame.hpp>
+#include <audio_utils_msgs/msg/audio_frame.hpp>
 #include <opentera_webrtc_ros/RosNodeParameters.h>
 #include <vector>
 
@@ -122,7 +122,7 @@ void RosStreamBridge::init(
         if (m_canReceiveAudioStream)
         {
             m_audioPublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerAudio>("webrtc_audio", 100);
-            m_mixedAudioPublisher = this->create_publisher<audio_utils::msg::AudioFrame>("audio_mixed", 100);
+            m_mixedAudioPublisher = this->create_publisher<audio_utils_msgs::msg::AudioFrame>("audio_mixed", 100);
 
             m_signalingClient->setOnAudioFrameReceived(
                 [this](auto&& PH1, auto&& PH2, auto&& PH3, auto&& PH4, auto&& PH5, auto&& PH6)
@@ -208,10 +208,10 @@ void RosStreamBridge::onSignalingConnectionOpened()
     if (m_canSendAudioStream)
     {
         // Audio
-        m_audioSubscriber = this->create_subscription<audio_utils::msg::AudioFrame>(
+        m_audioSubscriber = this->create_subscription<audio_utils_msgs::msg::AudioFrame>(
             "audio_in",
             10,
-            bind_this<audio_utils::msg::AudioFrame>(this, &RosStreamBridge::audioCallback));
+            bind_this<audio_utils_msgs::msg::AudioFrame>(this, &RosStreamBridge::audioCallback));
     }
 
     if (m_canSendVideoStream)
@@ -275,7 +275,7 @@ void RosStreamBridge::onAudioFrameReceived(
     size_t numberOfChannels,
     size_t numberOfFrames)
 {
-    audio_utils::msg::AudioFrame frame =
+    audio_utils_msgs::msg::AudioFrame frame =
         createAudioFrame(audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames);
     publishPeerFrame(*m_audioPublisher, client, frame);
 }
@@ -299,14 +299,14 @@ void RosStreamBridge::onMixedAudioFrameReceived(
         createAudioFrame(audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames));
 }
 
-audio_utils::msg::AudioFrame RosStreamBridge::createAudioFrame(
+audio_utils_msgs::msg::AudioFrame RosStreamBridge::createAudioFrame(
     const void* audioData,
     int bitsPerSample,
     int sampleRate,
     size_t numberOfChannels,
     size_t numberOfFrames)
 {
-    audio_utils::msg::AudioFrame frame;
+    audio_utils_msgs::msg::AudioFrame frame;
     frame.format = "signed_" + std::to_string(bitsPerSample);
     frame.channel_count = numberOfChannels;
     frame.sampling_frequency = sampleRate;
@@ -319,7 +319,7 @@ audio_utils::msg::AudioFrame RosStreamBridge::createAudioFrame(
     return frame;
 }
 
-void RosStreamBridge::audioCallback(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg)
+void RosStreamBridge::audioCallback(const audio_utils_msgs::msg::AudioFrame::ConstSharedPtr& msg)
 {
     if (m_audioSource)
     {

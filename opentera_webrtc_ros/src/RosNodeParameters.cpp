@@ -5,6 +5,21 @@
 
 using namespace opentera;
 
+namespace
+{
+    std::vector<std::string> remove_empty_strings(const std::vector<std::string>& vec)
+    {
+        std::vector<std::string> out;
+        std::copy_if(
+            vec.begin(),
+            vec.end(),
+            std::back_inserter(out),
+            [](const std::string& codecString) { return !codecString.empty(); });
+
+        return out;
+    }
+}
+
 RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
 {
     m_node.declare_parameter("is_stand_alone", true);
@@ -13,8 +28,6 @@ RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
     m_node.declare_parameter("signaling.client_name", "streamer");
     m_node.declare_parameter("signaling.room_name", "chat");
     m_node.declare_parameter("signaling.server_url", "http://localhost:8080");
-    m_node.declare_parameter("signaling.client_name", "streamer");
-    m_node.declare_parameter("signaling.room_name", "chat");
     m_node.declare_parameter("signaling.room_password", "abc");
     m_node.declare_parameter("signaling.verify_ssl", true);
 
@@ -120,9 +133,10 @@ void RosNodeParameters::loadVideoCodecParams(
     bool& forceGStreamerHardwareAcceleration,
     bool& useGStreamerSoftwareEncoderDecoder) const
 {
-    std::vector<std::string> forcedCodecStrings = m_node.get_parameter("video_codecs.forced_codecs").as_string_array();
+    std::vector<std::string> forcedCodecStrings =
+        remove_empty_strings(m_node.get_parameter("video_codecs.forced_codecs").as_string_array());
 
-    transform(
+    std::transform(
         forcedCodecStrings.begin(),
         forcedCodecStrings.end(),
         inserter(forcedCodecs, forcedCodecs.begin()),

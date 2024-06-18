@@ -4,13 +4,11 @@ std::optional<FaceCroppingNodeConfiguration> FaceCroppingNodeConfiguration::from
 {
     FaceCroppingNodeConfiguration configuration;
 
-    // TODO in Galactic, replace with this format:
-    // nodeHandle.declare_parameter("face_detection_model", rclcpp::PARAMETER_STRING);
-    nodeHandle.declare_parameter("face_detection_model");
-    nodeHandle.declare_parameter("min_face_width");
-    nodeHandle.declare_parameter("min_face_height");
-    nodeHandle.declare_parameter("output_width");
-    nodeHandle.declare_parameter("output_height");
+    nodeHandle.declare_parameter("face_detection_model", rclcpp::PARAMETER_STRING);
+    nodeHandle.declare_parameter("min_face_width", rclcpp::PARAMETER_DOUBLE);
+    nodeHandle.declare_parameter("min_face_height", rclcpp::PARAMETER_DOUBLE);
+    nodeHandle.declare_parameter("output_width", rclcpp::PARAMETER_INTEGER);
+    nodeHandle.declare_parameter("output_height", rclcpp::PARAMETER_INTEGER);
 
     if (!nodeHandle.get_parameter("face_detection_model", configuration.faceDetectionModel))
     {

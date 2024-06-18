@@ -9,7 +9,7 @@
 
     <!-- Robot GUI-->
     <node pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui">
-
+        <param name="device_properties_path" value="$(find-pkg-share opentera_webrtc_robot_gui)/resources/DeviceProperties.json"/>
     </node>
 
 </launch>

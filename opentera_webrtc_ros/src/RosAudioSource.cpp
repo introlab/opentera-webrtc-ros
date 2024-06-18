@@ -30,7 +30,7 @@ RosAudioSource::RosAudioSource(
 {
 }
 
-void RosAudioSource::sendFrame(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg)
+void RosAudioSource::sendFrame(const audio_utils_msgs::msg::AudioFrame::ConstSharedPtr& msg)
 {
     // Checking if frame fits default configuration and send frame
     if (msg->channel_count == 1 && msg->sampling_frequency == 48000 && msg->format == "signed_16")

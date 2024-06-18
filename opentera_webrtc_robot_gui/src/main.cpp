@@ -14,7 +14,7 @@
 
 void catchUnixSignals(std::initializer_list<int> quitSignals)
 {
-    auto handler = [](int sig) -> void { QCoreApplication::quit(); };
+    auto handler = [](int /* sig */) -> void { QCoreApplication::quit(); };
 
     sigset_t blockingMask;
     sigemptyset(&blockingMask);
@@ -59,9 +59,7 @@ int main(int argc, char* argv[])
     auto nh = std::make_shared<rclcpp::Node>("opentera_webrtc_robot_gui_node");
     bool fullScreen = nh->declare_parameter("fullScreen", false);
 
-    // TODO in Galactic, replace with this format:
-    // nh->declare_parameter("device_properties_path", rclcpp::PARAMETER_STRING);
-    nh->declare_parameter("device_properties_path");
+    nh->declare_parameter("device_properties_path", rclcpp::PARAMETER_STRING);
     std::string jsonFilePath;
     if (!nh->get_parameter("device_properties_path", jsonFilePath))
     {

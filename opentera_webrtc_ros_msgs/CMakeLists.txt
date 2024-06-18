@@ -34,6 +34,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/Waypoint.msg"
     "msg/WaypointArray.msg"
 
+    "srv/ChangeMapView.srv"
+    "srv/ImageGoalToMapGoal.srv"
     "srv/SetString.srv"
 
     DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils

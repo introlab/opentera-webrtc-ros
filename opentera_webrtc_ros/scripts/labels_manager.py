@@ -13,8 +13,7 @@ import rclpy.timer
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
-from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose as wp2pose
-# from opentera_webrtc_ros.libmapimageconverter import convert_pose_to_waypoint as pose2wp
+from opentera_webrtc_ros.libmapimageconverter import PoseWaypointConverter
 from opentera_webrtc_ros.libyamldatabase import YamlDatabase
 from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
 
@@ -76,6 +75,8 @@ class LabelsManager(rclpy.node.Node):
     def __init__(self) -> None:
         super().__init__("labels_manager")  # type: ignore
 
+        self._pose_waypoint_converter = PoseWaypointConverter(self)
+
         self.add_label_simple_sub = self.create_subscription(
             LabelSimple, "add_label_simple", self.add_label_simple_callback, 1)
         self.remove_label_by_name_sub = self.create_subscription(
@@ -100,7 +101,7 @@ class LabelsManager(rclpy.node.Node):
         self.pub_timer_stored_labels_text = self.create_timer(1, self.publish_stored_labels_text)
         self.pub_timer_stored_labels_marker = self.create_timer(1, self.publish_stored_labels_marker)
 
-        self.nav_client = WaypointNavigationClient()
+        self.nav_client = WaypointNavigationClient(self)
 
         self.get_logger().info("Labels manager initialized")
 
@@ -124,7 +125,7 @@ class LabelsManager(rclpy.node.Node):
 
     def add_label_simple_callback(self, msg: LabelSimple) -> None:
         try:
-            label = LabelData(self.simple2label(msg))
+            label = LabelData(self._simple2label(msg))
             self.db.add(msg.name, label)
             self.db.commit()
         except (IndexError, ConversionError) as e:
@@ -142,7 +143,7 @@ class LabelsManager(rclpy.node.Node):
             if msg.current_name != msg.updated.name:
                 self.db.rename(msg.current_name, msg.updated.name)
 
-            updated = self.simple2label(msg.updated)
+            updated = self._simple2label(msg.updated)
             if msg.ignore_waypoint is True:
                 updated.pose = self.db[msg.updated.name].label.pose
             self.db.replace(msg.updated.name, LabelData(updated))
@@ -161,17 +162,15 @@ class LabelsManager(rclpy.node.Node):
         self.nav_client.add_to_image(label.pose)
         self.nav_client.navigate_to_goal(label.pose, 1)
 
-    # @staticmethod
-    # def label2simple(label: Label) -> LabelSimple:
-    #     waypoint = pose2wp(label.pose)
+    # def _label2simple(self, label: Label) -> LabelSimple:
+        # waypoint = self._pose_waypoint_converter.convert_pose_to_waypoint(label.pose)
     #     if waypoint is None:
     #         raise ConversionError(
     #             f"Conversion of pose to waypoint for label {label.name} failed")
     #     return LabelSimple(name=label.name, description=label.description, waypoint=waypoint)
 
-    @staticmethod
-    def simple2label(label_simple: LabelSimple) -> Label:
-        pose = wp2pose(label_simple.waypoint)
+    def _simple2label(self, label_simple: LabelSimple) -> Label:
+        pose = self._pose_waypoint_converter.convert_waypoint_to_pose(label_simple.waypoint)
         if pose is None:
             raise ConversionError(
                 f"Conversion of waypoint to pose for label {label_simple.name} failed")
@@ -200,5 +199,5 @@ if __name__ == '__main__':
     try:
         labels_manager = LabelsManager()
         rclpy.spin(labels_manager)
-    except rclpy.exceptions.ROSInterruptException:
+    except KeyboardInterrupt:
         pass

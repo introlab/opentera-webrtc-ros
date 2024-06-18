@@ -29,10 +29,10 @@ namespace opentera
         std::shared_ptr<RosAudioSource> m_audioSource;
 
         rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_imageSubscriber;
-        rclcpp::Subscription<audio_utils::msg::AudioFrame>::SharedPtr m_audioSubscriber;
+        rclcpp::Subscription<audio_utils_msgs::msg::AudioFrame>::SharedPtr m_audioSubscriber;
         rclcpp::Publisher<opentera_webrtc_ros_msgs::msg::PeerImage>::SharedPtr m_imagePublisher;
         rclcpp::Publisher<opentera_webrtc_ros_msgs::msg::PeerAudio>::SharedPtr m_audioPublisher;
-        rclcpp::Publisher<audio_utils::msg::AudioFrame>::SharedPtr m_mixedAudioPublisher;
+        rclcpp::Publisher<audio_utils_msgs::msg::AudioFrame>::SharedPtr m_mixedAudioPublisher;
 
         rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr m_callAllSubscriber;
         rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr m_micVolumeSubscriber;
@@ -71,14 +71,14 @@ namespace opentera
             size_t numberOfChannels,
             size_t numberOfFrames);
 
-        audio_utils::msg::AudioFrame createAudioFrame(
+        audio_utils_msgs::msg::AudioFrame createAudioFrame(
             const void* audioData,
             int bitsPerSample,
             int sampleRate,
             size_t numberOfChannels,
             size_t numberOfFrames);
 
-        void audioCallback(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg);
+        void audioCallback(const audio_utils_msgs::msg::AudioFrame::ConstSharedPtr& msg);
         void imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
 
         void callAllCallBack(const std_msgs::msg::Empty::ConstSharedPtr& msg);

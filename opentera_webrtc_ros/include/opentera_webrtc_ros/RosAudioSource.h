@@ -2,7 +2,7 @@
 #define OPENTERA_WEBRTC_NATIVE_CLIENT_SOURCES_ROS_AUDIO_SOURCE_H
 
 #include <OpenteraWebrtcNativeClient/Sources/AudioSource.h>
-#include <audio_utils/msg/audio_frame.hpp>
+#include <audio_utils_msgs/msg/audio_frame.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace opentera
@@ -26,7 +26,7 @@ namespace opentera
             bool stereoSwapping = false,
             bool transientSuppression = true);
 
-        void sendFrame(const audio_utils::msg::AudioFrame::ConstSharedPtr& msg);
+        void sendFrame(const audio_utils_msgs::msg::AudioFrame::ConstSharedPtr& msg);
 
     private:
         rclcpp::Node& m_node;

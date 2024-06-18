@@ -104,7 +104,7 @@ class OpenTeraROSClient(rclpy.node.Node):
         async with aiohttp.ClientSession() as self.__client:
             params = {'token': self.__token}
             login_info = await self._fetch(self.__client, self.__base_url + OpenTeraROSClient.login_api_endpoint, params)
-            self.get_logger().info(login_info)
+            self.get_logger().info(str(login_info))
 
             if 'device_info' in login_info:
                 device_info = login_info['device_info']
@@ -298,7 +298,7 @@ class ConfigFileParam(rclpy.node.Node):
     @staticmethod
     def get_config_path():
         node = ConfigFileParam('__opentera_client_ros_config_file_param')  # type: ignore
-        config_file_param = node.declare_parameter('config_file').get_parameter_value()
+        config_file_param = node.declare_parameter('config_file', rclpy.parameter.Parameter.Type.STRING).get_parameter_value()
 
         if config_file_param.type == rclpy.parameter.Parameter.Type.NOT_SET:
             node.get_logger().error('No config file provided')

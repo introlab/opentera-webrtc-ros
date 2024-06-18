@@ -7,8 +7,8 @@ import rclpy.exceptions
 import rclpy.node
 from geometry_msgs.msg import PoseStamped, Quaternion
 
-# from map_image_generator.srv import MapGoalToImageGoal
-from map_image_generator.srv import ImageGoalToMapGoal
+# from opentera_webrtc_ros_msgs.srv import MapGoalToImageGoal
+from opentera_webrtc_ros_msgs.srv import ImageGoalToMapGoal
 from opentera_webrtc_ros_msgs.msg import Waypoint
 from transforms3d.euler import euler2quat, quat2euler
 

@@ -96,7 +96,7 @@ install(PROGRAMS
 
 install(FILES
     src/resources/DeviceProperties.json
-    DESTINATION share/${PROJECT_NAME}/src/resources
+    DESTINATION share/${PROJECT_NAME}/resources
 )
 
 install(DIRECTORY

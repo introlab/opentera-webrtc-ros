@@ -24,13 +24,13 @@ class RobotStatusPublisher(rclpy.node.Node):
         self.pub_rate = 1
         self.mic_volume_sub = self.create_subscription(
             Float32, 'mic_volume', self._set_mic_volume_cb, 10)
-        self.mic_volume = 1
+        self.mic_volume = 1.0
         self.enable_camera_sub = self.create_subscription(
             Bool, 'enable_camera', self._set_enable_camera_cb, 10)
         self.camera_enabled = True
         self.volume_sub = self.create_subscription(
             Float32, 'volume', self._set_volume_cb, 10)
-        self.volume = 1
+        self.volume = 1.0
         self.io = psutil.net_io_counters(pernic=True)
         self.bytes_sent = 0
         self.bytes_recv = 0
@@ -44,7 +44,7 @@ class RobotStatusPublisher(rclpy.node.Node):
                                ifname).read().split("inet ")[1].split("/")[0]
         except Exception:
             address = '127.0.0.1'
-        
+
         return address
 
     def get_disk_usage(self, mount_point='/'):
@@ -64,7 +64,7 @@ class RobotStatusPublisher(rclpy.node.Node):
         self.volume = msg.data
 
     def _publish_status_callback(self):
-        self.status_webrtc_pub.publish(json.dumps(next(self._status_generator)))
+        self.status_webrtc_pub.publish(String(data=json.dumps(next(self._status_generator))))
 
     def get_status(self):
         while True:
@@ -110,12 +110,12 @@ class RobotStatusPublisher(rclpy.node.Node):
                         status.local_ip = self.get_ip_address(wifi_interface_name)
 
                         io_2 = psutil.net_io_counters(pernic=True)
-                        status.upload_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8
-                        status.download_speed = (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8
+                        status.upload_speed = (io_2[wifi_interface_name].bytes_sent - self.bytes_sent) * 8.0
+                        status.download_speed = (io_2[wifi_interface_name].bytes_recv - self.bytes_recv) * 8.0
                         self.bytes_sent = io_2[wifi_interface_name].bytes_sent
                         self.bytes_recv = io_2[wifi_interface_name].bytes_recv
                     else:
-                        status.wifi_strength = 0
+                        status.wifi_strength = 0.0
                         status.local_ip = '127.0.0.1'
 
                     # Publish for ROS
@@ -156,6 +156,5 @@ if __name__ == '__main__':
     try:
         robot_status = RobotStatusPublisher()
         robot_status.run()
-    except rclpy.exceptions.ROSInterruptException as e:
-        print(e)
+    except KeyboardInterrupt:
         pass

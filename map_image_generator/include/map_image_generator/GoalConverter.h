@@ -3,7 +3,7 @@
 
 #include "map_image_generator/Parameters.h"
 #include "map_image_generator/utils.h"
-#include "map_image_generator/srv/image_goal_to_map_goal.hpp"
+#include "opentera_webrtc_ros_msgs/srv/image_goal_to_map_goal.hpp"
 
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -21,7 +21,7 @@ namespace map_image_generator
         rclcpp::Node& m_node;
         tf2_ros::Buffer& m_tfBuffer;
 
-        rclcpp::Service<srv::ImageGoalToMapGoal>::SharedPtr image_goal_to_map_goal_service;
+        rclcpp::Service<opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal>::SharedPtr image_goal_to_map_goal_service;
 
     public:
         GoalConverter(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer);
@@ -29,8 +29,8 @@ namespace map_image_generator
 
     private:
         void mapImageGoalCallback(
-            const srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
-            const srv::ImageGoalToMapGoal::Response::SharedPtr& res);
+            const opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
+            const opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal::Response::SharedPtr& res);
     };
 }
 #endif

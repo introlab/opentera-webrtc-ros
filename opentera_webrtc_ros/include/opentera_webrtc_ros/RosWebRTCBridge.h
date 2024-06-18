@@ -77,7 +77,7 @@ namespace opentera
         void publishPeerStatus(const Client& client, int status);
 
     public:
-        RosWebRTCBridge(const std::string& nodeName);
+        explicit RosWebRTCBridge(const std::string& nodeName);
         virtual ~RosWebRTCBridge() = 0;
 
         void run();

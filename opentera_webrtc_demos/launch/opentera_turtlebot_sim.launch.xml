@@ -56,6 +56,9 @@
         <let name="subscribe_rgbd" if="$(eval '\'$(var model)\' == \'waffle\'')" value="true"/>
         <let name="subscribe_rgbd" unless="$(eval '\'$(var model)\' == \'waffle\'')" value="false"/>
 
+        <let     if="$(var localization)" name="Mem_IncrementalMemory" value="'false'"/>
+        <let unless="$(var localization)" name="Mem_IncrementalMemory" value="'true'"/>
+
         <node name="rtabmap" pkg="rtabmap_slam" exec="rtabmap" args="$(var rtabmap_args)">
             <param name="database_path"         value="$(var database_path)"/>
             <param name="frame_id"              value="base_footprint"/>
@@ -82,14 +85,12 @@
             <remap from="grid_map" to="/map"/>
 
             <!-- RTAB-Map's parameters -->
-            <param name="Reg/Strategy"                 value="1"/>
-            <param name="Reg/Force3DoF"                value="true"/>
-            <param name="GridGlobal/MinSize"           value="20"/>
+            <param name="Reg/Strategy"                 value="'1'"/>
+            <param name="Reg/Force3DoF"                value="'true'"/>
+            <param name="GridGlobal/MinSize"           value="'20'"/>
 
             <!-- localization mode -->
-            <param name="Mem/IncrementalMemory"        value="$(eval 'not \'$(var localization)\'')"/>
-            <!-- <param     if="$(var localization)" name="Mem/IncrementalMemory" value="false"/> -->
-            <!-- <param unless="$(var localization)" name="Mem/IncrementalMemory" value="true"/> -->
+            <param name="Mem/IncrementalMemory"        value="$(var Mem_IncrementalMemory)"/>
         </node>
 
         <!-- visualization with rtabmap_viz -->

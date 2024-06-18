@@ -2,7 +2,7 @@
 #define OCCUPANCY_GRID_IMAGE_DRAWER_H
 
 #include "map_image_generator/drawers/ImageDrawer.h"
-#include "map_image_generator/srv/change_map_view.hpp"
+#include "opentera_webrtc_ros_msgs/srv/change_map_view.hpp"
 
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <opencv2/opencv.hpp>
@@ -16,7 +16,7 @@ namespace map_image_generator
 
         rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr m_occupancyGridSubscriber;
         nav_msgs::msg::OccupancyGrid::ConstSharedPtr m_lastOccupancyGrid;
-        rclcpp::Service<srv::ChangeMapView>::SharedPtr m_mapViewChangerService;
+        rclcpp::Service<opentera_webrtc_ros_msgs::srv::ChangeMapView>::SharedPtr m_mapViewChangerService;
 
         cv::Mat m_notScaledOccupancyGridImage;
         cv::Mat m_scaledOccupancyGridImage;
@@ -32,8 +32,8 @@ namespace map_image_generator
         void occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr& occupancyGrid);
 
         void changeMapViewCallback(
-            const srv::ChangeMapView::Request::ConstSharedPtr& req,
-            const srv::ChangeMapView::Response::SharedPtr& res);
+            const opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::ConstSharedPtr& req,
+            const opentera_webrtc_ros_msgs::srv::ChangeMapView::Response::SharedPtr& res);
 
         void drawNotScaledOccupancyGridImage();
         void changeNotScaledOccupancyGridImageIfNeeded();

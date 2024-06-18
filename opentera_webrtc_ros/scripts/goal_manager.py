@@ -4,7 +4,7 @@ import rclpy
 import rclpy.exceptions
 import rclpy.node
 from typing import List
-from opentera_webrtc_ros.libmapimageconverter import convert_waypoint_to_pose
+from opentera_webrtc_ros.libmapimageconverter import PoseWaypointConverter
 from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
 from opentera_webrtc_ros_msgs.msg import WaypointArray
 import rclpy.qos
@@ -16,7 +16,9 @@ class GoalManager(rclpy.node.Node):
     def __init__(self):
         super().__init__("goal_manager")  # type: ignore
 
-        self.nav_client = WaypointNavigationClient(
+        self._pose_waypoint_converter = PoseWaypointConverter(self)
+
+        self.nav_client = WaypointNavigationClient(self,
             stop_cb=self.__stop_cb, stop_token=self.__stop_token
         )
 
@@ -38,7 +40,7 @@ class GoalManager(rclpy.node.Node):
 
     def waypoints_cb(self, msg: WaypointArray):
         for waypoint in msg.waypoints:
-            pose_goal = convert_waypoint_to_pose(waypoint)
+            pose_goal = self._pose_waypoint_converter.convert_waypoint_to_pose(waypoint)
             if pose_goal is not None:
                 pose_goal.pose.position.z = 1 + len(self.pose_goals)
                 self.nav_client.add_to_image(pose_goal)
@@ -73,5 +75,5 @@ if __name__ == '__main__':
     try:
         goal_manager = GoalManager()
         rclpy.spin(goal_manager)
-    except rclpy.exceptions.ROSInterruptException:
+    except KeyboardInterrupt:
         pass

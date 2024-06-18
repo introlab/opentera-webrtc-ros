@@ -6,17 +6,17 @@ GoalConverter::GoalConverter(const Parameters& parameters, rclcpp::Node& node, t
     : m_parameters(parameters),
       m_node(node),
       m_tfBuffer(tfBuffer),
-      image_goal_to_map_goal_service{m_node.create_service<srv::ImageGoalToMapGoal>(
+      image_goal_to_map_goal_service{m_node.create_service<opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal>(
           "image_goal_to_map_goal",
-          bind_this<srv::ImageGoalToMapGoal>(this, &GoalConverter::mapImageGoalCallback))}
+          bind_this<opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal>(this, &GoalConverter::mapImageGoalCallback))}
 {
 }
 
 GoalConverter::~GoalConverter() = default;
 
 void GoalConverter::mapImageGoalCallback(
-    const srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
-    const srv::ImageGoalToMapGoal::Response::SharedPtr& res)
+    const opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal::Request::ConstSharedPtr& req,
+    const opentera_webrtc_ros_msgs::srv::ImageGoalToMapGoal::Response::SharedPtr& res)
 {
     if (m_parameters.centeredRobot())
     {

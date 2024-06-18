@@ -1,2 +1,2 @@
 Peer sender
-audio_utils/AudioFrame frame
+audio_utils_msgs/AudioFrame frame
