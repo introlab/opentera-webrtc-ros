@@ -74,7 +74,7 @@ install(DIRECTORY
 
 install(DIRECTORY
     opentera-webrtc-teleop-frontend/teleop-vue/dist
-    DESTINATION share/${PROJECT_NAME}/opentera-webrtc-teleop-frontend/teleop-vue/dist
+    DESTINATION share/${PROJECT_NAME}/opentera-webrtc-teleop-frontend/teleop-vue
 )
 
 #######################

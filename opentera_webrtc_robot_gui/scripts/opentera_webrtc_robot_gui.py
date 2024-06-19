@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QLa
 from PyQt5.QtGui import QImage, QPixmap
 
 # ROS
-import rospy
+import rclpy
+import rclpy.node
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from opentera_webrtc_ros_msgs.msg import PeerImage
@@ -34,8 +35,11 @@ class ImageView(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(QMainWindow, self).__init__(parent)
-        self._peer_image_subscriber = rospy.Subscriber(
-            '/webrtc_image', PeerImage, self._on_peer_image, queue_size=10)
+
+        self._node = rclpy.node.Node('opentera_webrtc_robot_gui')
+
+        self._peer_image_subscriber = self._node.create_subscription(
+            PeerImage, '/webrtc_image', self._on_peer_image, 10)
         self._image_view = ImageView(self)
         self.setCentralWidget(self._image_view)
 
@@ -46,7 +50,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     # Init ROS
-    rospy.init_node('opentera_webrtc_robot_gui', anonymous=True)
+    rclpy.init()
 
     # Init Qt App
     # Create an instance of QApplication

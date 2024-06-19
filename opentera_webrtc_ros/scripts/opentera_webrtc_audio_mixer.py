@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 import queue
 
 # ROS
-import rospy
+import rclpy
+import rclpy.node
 from opentera_webrtc_ros_msgs.msg import PeerAudio
 
 p = pyaudio.PyAudio()
@@ -84,16 +85,18 @@ class AudioWriter:
             self._thread.join()
 
 
-class AudioMixerROS:
+class AudioMixerROS(rclpy.node.Node):
     def __init__(self):
-        self._subscriber = rospy.Subscriber(
-            '/webrtc_audio', PeerAudio, self._on_peer_audio, queue_size=100)
+        super().__init__('opentera_webrtc_audio_mixer')
+
+        self._subscriber = self.create_subscription(
+            PeerAudio, '/webrtc_audio', self._on_peer_audio, 100)
         self._writers = dict()
         # Cleanup timer every second
-        self._timer = rospy.Timer(rospy.Duration(1), self._on_cleanup_timeout)
+        self._timer = self.create_timer(1, self._on_cleanup_timeout)
 
     def shutdown(self):
-        self._timer.shutdown()
+        self._timer.destroy()
         for writer in self._writers:
             print('stopping writer', writer)
             self._writers[writer].stop()
@@ -123,15 +126,20 @@ class AudioMixerROS:
         self._writers[peer_id].push_audio(audio)
 
 
-if __name__ == '__main__':
-
+def main():
     for index in range(p.get_device_count()):
         info = p.get_device_info_by_index(index)
         if info['name'] == 'default':
             output_device_index = info['index']
 
     # Init ROS
-    rospy.init_node('opentera_webrtc_audio_mixer', anonymous=True)
+    rclpy.init()
     mixer = AudioMixerROS()
-    rospy.spin()
+    rclpy.spin(mixer)
     mixer.shutdown()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 import cv2
 
-import rospy
+import rclpy
+import rclpy.node
 from cv_bridge import CvBridge
 from opentera_webrtc_ros_msgs.msg import PeerImage
 
 
-class PeerImageDisplay:
+class PeerImageDisplay(rclpy.node.Node):
     def __init__(self):
+        super().__init__('peer_image_display')
+
         self._cv_bridge = CvBridge()
-        self._image_sub = rospy.Subscriber('peer_image', PeerImage, self._peer_image_cb, queue_size=10)
+        self._image_sub = self.create_subscription(PeerImage, 'peer_image', self._peer_image_cb, 10)
 
     def _peer_image_cb(self, msg):
         cv2.imshow(msg.sender.id, self._cv_bridge.imgmsg_to_cv2(msg.frame, 'bgr8'))
@@ -21,11 +24,11 @@ class PeerImageDisplay:
         msg.frame = image
 
     def run(self):
-        rospy.spin()
+        rclpy.spin(self)
 
 
 def main():
-    rospy.init_node('peer_image_display')
+    rclpy.init()
     peer_image_display = PeerImageDisplay()
     peer_image_display.run()
 
@@ -33,5 +36,5 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except rospy.ROSInterruptException:
+    except KeyboardInterrupt:
         pass

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import rospy
+import rclpy
+import rclpy.node
 from sensor_msgs.msg import Image
 from opentera_webrtc_ros_msgs.msg import PeerImage
 
@@ -7,10 +8,12 @@ from opentera_webrtc_ros_msgs.msg import PeerImage
 IMAGE_DELAY = 300
 
 
-class PeerImageMock:
+class PeerImageMock(rclpy.node.Node):
     def __init__(self):
-        self._image_sub = rospy.Subscriber('image', Image, self._image_cb, queue_size=10)
-        self._peer_image_pub = rospy.Publisher('peer_image', PeerImage, queue_size=10)
+        super().__init__('peer_image_mock')
+
+        self._image_sub = self.create_subscription(Image, 'image', self._image_cb, 10)
+        self._peer_image_pub = self.create_publisher(PeerImage, 'peer_image', 10)
         self._delayed_images = []
 
     def _image_cb(self, msg):
@@ -28,11 +31,11 @@ class PeerImageMock:
         self._peer_image_pub.publish(msg)
 
     def run(self):
-        rospy.spin()
+        rclpy.spin(self)
 
 
 def main():
-    rospy.init_node('peer_image_mock')
+    rclpy.init()
     peer_image_mock = PeerImageMock()
     peer_image_mock.run()
 
@@ -40,5 +43,5 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except rospy.ROSInterruptException:
+    except KeyboardInterrupt:
         pass
