@@ -5,6 +5,7 @@ from typing import Callable, Generator, Optional
 
 import rclpy
 import rclpy.action
+import rclpy.client
 import rclpy.exceptions
 import rclpy.node
 from geometry_msgs.msg import PoseStamped
@@ -59,9 +60,9 @@ class WaypointNavigationClient:
         self.stop = False
 
         self._navigate_future = self.move_base_client.send_goal_async(goal)
-        self._navigate_future.add_done_callback(lambda f: self._done_callback(pose_goal, reached_index, f))
+        self._navigate_future.add_done_callback(lambda f: self._goal_done_callback(pose_goal, reached_index, f))
 
-    def _done_callback(self, pose_goal, reached_index, future: Future):
+    def _goal_done_callback(self, pose_goal, reached_index, future: Future):
         if future.exception() is not None:
             print(f"Goal failed with exception: {future.exception()}")
         elif future.cancelled():
@@ -72,28 +73,41 @@ class WaypointNavigationClient:
                 self._publish_waypoint_reached(
                     reached_index, pose_goal)
 
+    def _make_service_callback(self, service_name: str) -> Callable:
+        def callback(future: Future):
+            try:
+                response: SetBool.Response = future.result()  # type: ignore
+                if response.success:
+                    self._node.get_logger().info(f"{service_name} service called: success")
+                else:
+                    self._node.get_logger().warn(f"{service_name} service called, returned failure: {response.message}")
+            except Exception as e:
+                self._node.get_logger().warn(f"{service_name} service call failed: {e}")
+        return callback
+
     def cancel_all_goals(self, clear_goals=True):
         if self._navigate_future is not None:
             self._navigate_future.cancel()
-            # FIXME: this calls a service in a callback
-        if (clear_goals):
-            self._clear_goals_client.wait_for_service(timeout_sec=2.0)
+
+        if clear_goals:
             try:
                 request = SetBool.Request()
                 request.data = True
-                self._clear_goals_client.call(request)
+                if self._clear_goals_client.service_is_ready():
+                    future = self._clear_goals_client.call_async(request)
+                    future.add_done_callback(self._make_service_callback(self._clear_goals_client.srv_name))
             except Exception as e:
-                self._node.get_logger().warn(f"Service call failed: {e}")
+                self._node.get_logger().warn(f"{self._clear_goals_client.srv_name} service call failed: {e}")
 
     def clear_global_path(self):
-        # FIXME: this calls a service in a callback
-        self._clear_global_path_client.wait_for_service(timeout_sec=2.0)
         try:
             request = SetBool.Request()
             request.data = True
-            self._clear_global_path_client.call(request)
+            if self._clear_global_path_client.service_is_ready():
+                future = self._clear_global_path_client.call_async(request)
+                future.add_done_callback(self._make_service_callback(self._clear_global_path_client.srv_name))
         except Exception as e:
-            self._node.get_logger().warn(f"Service call failed: {e}")
+            self._node.get_logger().warn(f"{self._clear_global_path_client.srv_name} service call failed: {e}")
 
     def _publish_waypoint_reached(self, waypoint_index, goal_pose):
         waypoint_reached_json_message = {
@@ -102,7 +116,7 @@ class WaypointNavigationClient:
         self.waypoint_reached_pub.publish(waypoint_reached_msg)
         self.remove_waypoint_from_image_pub.publish(goal_pose)
 
-    def _stop_callback(self, msg):
+    def _stop_callback(self, msg: Bool):
         if msg.data == True:
             self.stop = True
             cb = self.stop_cb(msg)

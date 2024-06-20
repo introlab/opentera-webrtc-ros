@@ -39,13 +39,13 @@ class GoalManager(rclpy.node.Node):
         return self.should_stop
 
     def waypoints_cb(self, msg: WaypointArray):
+        def cb(pose_goal: PoseStamped):
+            pose_goal.pose.position.z = 1 + len(self.pose_goals)
+            self.nav_client.add_to_image(pose_goal)
+            self.pose_goals.append(pose_goal)
+
         for waypoint in msg.waypoints:
-            # FIXME: this calls a service in a callback
-            pose_goal = self._pose_waypoint_converter.convert_waypoint_to_pose(waypoint)
-            if pose_goal is not None:
-                pose_goal.pose.position.z = 1 + len(self.pose_goals)
-                self.nav_client.add_to_image(pose_goal)
-                self.pose_goals.append(pose_goal)
+            self._pose_waypoint_converter.convert_waypoint_to_pose(waypoint, cb)
 
     def __stop_cb(self, _):
         self.get_logger().info("Stopping")

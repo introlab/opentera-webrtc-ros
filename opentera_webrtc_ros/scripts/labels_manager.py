@@ -16,6 +16,7 @@ from visualization_msgs.msg import MarkerArray, Marker
 from opentera_webrtc_ros.libmapimageconverter import PoseWaypointConverter
 from opentera_webrtc_ros.libyamldatabase import YamlDatabase
 from opentera_webrtc_ros.libnavigation import WaypointNavigationClient
+from typing import Callable
 
 
 class ConversionError(Exception):
@@ -124,11 +125,16 @@ class LabelsManager(rclpy.node.Node):
         self.stored_labels_pub.publish(labels)
 
     def add_label_simple_callback(self, msg: LabelSimple) -> None:
+        def cb(label: Label):
+            try:
+                self.db.add(msg.name, LabelData(label))
+                self.db.commit()
+            except IndexError as e:
+                self.get_logger().error(f"Adding label to database failed: {e}")
+
         try:
-            label = LabelData(self._simple2label(msg))
-            self.db.add(msg.name, label)
-            self.db.commit()
-        except (IndexError, ConversionError) as e:
+            self._simple2label(msg, cb)
+        except ConversionError as e:
             self.get_logger().error(f"Adding label to database failed: {e}")
 
     def remove_label_by_name_callback(self, msg: String) -> None:
@@ -139,17 +145,22 @@ class LabelsManager(rclpy.node.Node):
             self.get_logger().error(f"Removing label from database failed: {e}")
 
     def edit_label_simple_callback(self, msg: LabelSimpleEdit) -> None:
+        def update_label(label: Label):
+            try:
+                if msg.current_name != msg.updated.name:
+                    self.db.rename(msg.current_name, msg.updated.name)
+    
+                if msg.ignore_waypoint is True:
+                    label.pose = self.db[msg.updated.name].label.pose
+                self.db.replace(msg.updated.name, LabelData(label))
+
+                self.db.commit()
+            except IndexError as e:
+                self.get_logger().error(f"Editing label in database failed: {e}")
+        
         try:
-            if msg.current_name != msg.updated.name:
-                self.db.rename(msg.current_name, msg.updated.name)
-
-            updated = self._simple2label(msg.updated)
-            if msg.ignore_waypoint is True:
-                updated.pose = self.db[msg.updated.name].label.pose
-            self.db.replace(msg.updated.name, LabelData(updated))
-
-            self.db.commit()
-        except (IndexError, ConversionError) as e:
+            self._simple2label(msg.updated, update_label)
+        except ConversionError as e:
             self.get_logger().error(f"Editing label in database failed: {e}")
 
     def navigate_to_label_callback(self, msg: String) -> None:
@@ -162,19 +173,23 @@ class LabelsManager(rclpy.node.Node):
         self.nav_client.add_to_image(label.pose)
         self.nav_client.navigate_to_goal(label.pose, 1)
 
-    # def _label2simple(self, label: Label) -> LabelSimple:
-        # waypoint = self._pose_waypoint_converter.convert_pose_to_waypoint(label.pose)
-    #     if waypoint is None:
+    # def _label2simple(self, label: Label, callback: Callable) -> None:
+    #     def cb(waypoint: Waypoint):
+    #         label_simple = LabelSimple(name=label.name, description=label.description, waypoint=waypoint)
+    #         callback(label_simple)
+
+    #     if self._pose_waypoint_converter.convert_pose_to_waypoint(label.pose, cb) is None:
     #         raise ConversionError(
     #             f"Conversion of pose to waypoint for label {label.name} failed")
-    #     return LabelSimple(name=label.name, description=label.description, waypoint=waypoint)
 
-    def _simple2label(self, label_simple: LabelSimple) -> Label:
-        pose = self._pose_waypoint_converter.convert_waypoint_to_pose(label_simple.waypoint)
-        if pose is None:
+    def _simple2label(self, label_simple: LabelSimple, callback: Callable) -> None:
+        def cb(pose: PoseStamped):
+            label = Label(name=label_simple.name, description=label_simple.description, pose=pose)
+            callback(label)
+
+        if self._pose_waypoint_converter.convert_waypoint_to_pose(label_simple.waypoint, cb) is None:
             raise ConversionError(
                 f"Conversion of waypoint to pose for label {label_simple.name} failed")
-        return Label(name=label_simple.name, description=label_simple.description, pose=pose)
 
     def _get_marker_from_label(self, label: Label, id: int) -> Marker:
         marker = Marker()
