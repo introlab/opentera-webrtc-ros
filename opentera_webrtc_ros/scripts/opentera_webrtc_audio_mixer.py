@@ -130,6 +130,7 @@ def main():
     for index in range(p.get_device_count()):
         info = p.get_device_info_by_index(index)
         if info['name'] == 'default':
+            global output_device_index
             output_device_index = info['index']
 
     # Init ROS

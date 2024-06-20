@@ -1,7 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <rclcpp/rclcpp.hpp>
 #include <cstdint>
+#include <chrono>
 #include <type_traits>
 #include <functional>
 #include <builtin_interfaces/msg/time.hpp>
@@ -77,5 +79,49 @@ inline auto from_microseconds(std::uint64_t time) -> builtin_interfaces::msg::Ti
 {
     return from_nanoseconds(time * 1'000);
 }
+
+class ServiceClientPruner
+{
+public:
+    template<typename... Clients>
+    explicit ServiceClientPruner(rclcpp::Node& node, std::chrono::seconds timeout, Clients&... clients)
+        : m_prune_timer{node.create_wall_timer(
+              timeout,
+              [&node, timeout, clients...]()
+              {
+                  std::vector<std::int64_t> pruned_requests;
+
+                  const auto cb = [&node, timeout, &pruned_requests](auto client)
+                  {
+                      std::size_t n_pruned = client->prune_requests_older_than(
+                          std::chrono::system_clock::now() - timeout,
+                          &pruned_requests);
+
+                      if (n_pruned > 0)
+                      {
+                          RCLCPP_ERROR_STREAM(
+                              node.get_logger(),
+                              "Service call for " << client->get_service_name() << ": "
+                                                  << "the server hasn't replied for more than " << timeout.count()
+                                                  << "s, " << n_pruned
+                                                  << " requests were discarded, "
+                                                     "the discarded requests numbers are:");
+                          for (const auto& req_num : pruned_requests)
+                          {
+                              RCLCPP_ERROR_STREAM(node.get_logger(), "\t" << req_num);
+                          }
+                      }
+                      pruned_requests.clear();
+                  };
+
+                  (cb(clients), ...);
+              })}
+    {
+        static_assert(sizeof...(clients) >= 1, "Requires at least one service client");
+    }
+
+private:
+    rclcpp::TimerBase::SharedPtr m_prune_timer;
+};
 
 #endif

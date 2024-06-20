@@ -4,36 +4,41 @@
 using namespace opentera;
 using namespace std::chrono_literals;
 
-RosJsonDataHandler::RosJsonDataHandler() : rclcpp::Node("json_data_handler")
+RosJsonDataHandler::RosJsonDataHandler()
+    : rclcpp::Node("json_data_handler"),
+      m_linear_multiplier{static_cast<float>(this->declare_parameter("linear_multiplier", 0.15))},
+      m_angular_multiplier{static_cast<float>(this->declare_parameter("angular_multiplier", 0.15))},
+      m_stopPub{this->create_publisher<std_msgs::msg::Bool>("stop", 1)},
+      m_startPub{this->create_publisher<std_msgs::msg::Bool>("start", 1)},
+      m_cmdVelPublisher{this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 1)},
+      m_waypointsPub{this->create_publisher<opentera_webrtc_ros_msgs::msg::WaypointArray>("waypoints", 1)},
+      m_navigateToLabelPub{this->create_publisher<std_msgs::msg::String>("navigate_to_label", 1)},
+      m_removeLabelPub{this->create_publisher<std_msgs::msg::String>("remove_label_by_name", 1)},
+      m_addLabelPub{this->create_publisher<opentera_webrtc_ros_msgs::msg::LabelSimple>("add_label_simple", 1)},
+      m_editLabelPub{this->create_publisher<opentera_webrtc_ros_msgs::msg::LabelSimpleEdit>("edit_label_simple", 1)},
+      m_micVolumePub{this->create_publisher<std_msgs::msg::Float32>("mic_volume", 1)},
+      m_enableCameraPub{this->create_publisher<std_msgs::msg::Bool>("enable_camera", 1)},
+      m_volumePub{this->create_publisher<std_msgs::msg::Float32>("volume", 1)},
+      m_webrtcDataSubscriber{this->create_subscription<opentera_webrtc_ros_msgs::msg::PeerData>(
+          "webrtc_data",
+          20,
+          bind_this<opentera_webrtc_ros_msgs::msg::PeerData>(this, &RosJsonDataHandler::onWebRTCDataReceived))},
+      m_dockingClient{this->create_client<std_srvs::srv::SetBool>("do_docking")},
+      m_localizationModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_localization")},
+      m_mappingModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_mapping")},
+      m_changeMapViewClient{this->create_client<opentera_webrtc_ros_msgs::srv::ChangeMapView>("change_map_view")},
+      m_setMovementModeClient{this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("set_movement_mode")},
+      m_doMovementClient{this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("do_movement")},
+      m_pruner{
+          *this,
+          2s,
+          m_dockingClient,
+          m_localizationModeClient,
+          m_mappingModeClient,
+          m_changeMapViewClient,
+          m_setMovementModeClient,
+          m_doMovementClient}
 {
-    m_linear_multiplier = this->declare_parameter("linear_multiplier", 0.15);
-    m_angular_multiplier = this->declare_parameter("angular_multiplier", 0.15);
-
-    m_stopPub = this->create_publisher<std_msgs::msg::Bool>("stop", 1);
-    m_startPub = this->create_publisher<std_msgs::msg::Bool>("start", 1);
-    m_cmdVelPublisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 1);
-    m_waypointsPub = this->create_publisher<opentera_webrtc_ros_msgs::msg::WaypointArray>("waypoints", 1);
-    m_navigateToLabelPub = this->create_publisher<std_msgs::msg::String>("navigate_to_label", 1);
-    m_removeLabelPub = this->create_publisher<std_msgs::msg::String>("remove_label_by_name", 1);
-    m_addLabelPub = this->create_publisher<opentera_webrtc_ros_msgs::msg::LabelSimple>("add_label_simple", 1);
-    m_editLabelPub = this->create_publisher<opentera_webrtc_ros_msgs::msg::LabelSimpleEdit>("edit_label_simple", 1);
-    m_micVolumePub = this->create_publisher<std_msgs::msg::Float32>("mic_volume", 1);
-    m_enableCameraPub = this->create_publisher<std_msgs::msg::Bool>("enable_camera", 1);
-    m_volumePub = this->create_publisher<std_msgs::msg::Float32>("volume", 1);
-
-    m_webrtcDataSubscriber = this->create_subscription<opentera_webrtc_ros_msgs::msg::PeerData>(
-        "webrtc_data",
-        20,
-        bind_this<opentera_webrtc_ros_msgs::msg::PeerData>(this, &RosJsonDataHandler::onWebRTCDataReceived));
-
-    m_dockingClient = this->create_client<std_srvs::srv::SetBool>("do_docking");
-    m_setMovementModeClient = this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("set_movement_mode");
-    m_doMovementClient = this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("do_movement");
-
-    m_localizationModeClient = this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_localization");
-    m_mappingModeClient = this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_mapping");
-
-    m_changeMapViewClient = this->create_client<opentera_webrtc_ros_msgs::srv::ChangeMapView>("change_map_view");
 }
 
 RosJsonDataHandler::~RosJsonDataHandler() = default;
@@ -49,8 +54,6 @@ opentera_webrtc_ros_msgs::msg::Waypoint RosJsonDataHandler::getWpFromData(const 
 
 void RosJsonDataHandler::onWebRTCDataReceived(const opentera_webrtc_ros_msgs::msg::PeerData::ConstSharedPtr& event)
 {
-    static constexpr auto service_call_timeout = 2s;
-
     const opentera_webrtc_ros_msgs::msg::PeerData& msg = *event;
 
     nlohmann::json serializedData = nlohmann::json::parse(msg.data);
@@ -92,80 +95,66 @@ void RosJsonDataHandler::onWebRTCDataReceived(const opentera_webrtc_ros_msgs::ms
             auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
             request->data = serializedData["cmd"];
 
-            auto result = m_dockingClient->async_send_request(request);
-            if (rclcpp::spin_until_future_complete(this->shared_from_this(), result, service_call_timeout) !=
-                rclcpp::FutureReturnCode::SUCCESS)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Docking service call failed");
-            }
-
-            if (!result.get()->success)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Docking service call error: %s", result.get()->message.c_str());
-            }
+            auto result = m_dockingClient->async_send_request(
+                request,
+                [this](rclcpp::Client<std_srvs::srv::SetBool>::SharedFuture result)
+                {
+                    if (!result.get()->success)
+                    {
+                        RCLCPP_ERROR(
+                            this->get_logger(),
+                            "Docking service call error: %s",
+                            result.get()->message.c_str());
+                    }
+                });
         }
         else if (serializedData["action"] == "localizationMode")
         {
             std::cout << "Switching to localization mode" << std::endl;
             auto request = std::make_shared<std_srvs::srv::Empty::Request>();
 
-            if (rclcpp::spin_until_future_complete(
-                    this->shared_from_this(),
-                    m_localizationModeClient->async_send_request(request),
-                    service_call_timeout) != rclcpp::FutureReturnCode::SUCCESS)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Localization mode service call failed");
-            }
+            m_localizationModeClient->async_send_request(request);
         }
         else if (serializedData["action"] == "mappingMode")
         {
             std::cout << "Switching to mapping mode" << std::endl;
             auto request = std::make_shared<std_srvs::srv::Empty::Request>();
-
-            if (rclcpp::spin_until_future_complete(
-                    this->shared_from_this(),
-                    m_mappingModeClient->async_send_request(request),
-                    service_call_timeout) != rclcpp::FutureReturnCode::SUCCESS)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Mapping mode service call failed");
-            }
         }
         else if (serializedData["action"] == "setMovementMode")
         {
             auto request = std::make_shared<opentera_webrtc_ros_msgs::srv::SetString::Request>();
             request->data = serializedData["cmd"];
 
-            auto result = m_setMovementModeClient->async_send_request(request);
-            if (rclcpp::spin_until_future_complete(this->shared_from_this(), result, service_call_timeout) !=
-                rclcpp::FutureReturnCode::SUCCESS)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Set movement mode service call failed");
-            }
-
-            if (!result.get()->success)
-            {
-                RCLCPP_ERROR(
-                    this->get_logger(),
-                    "Set movement mode service call error: %s",
-                    result.get()->message.c_str());
-            }
+            auto result = m_setMovementModeClient->async_send_request(
+                request,
+                [this](rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedFuture result)
+                {
+                    if (!result.get()->success)
+                    {
+                        RCLCPP_ERROR(
+                            this->get_logger(),
+                            "Set movement mode service call error: %s",
+                            result.get()->message.c_str());
+                    }
+                });
         }
         else if (serializedData["action"] == "doMovement")
         {
             auto request = std::make_shared<opentera_webrtc_ros_msgs::srv::SetString::Request>();
             request->data = serializedData["cmd"];
 
-            auto result = m_doMovementClient->async_send_request(request);
-            if (rclcpp::spin_until_future_complete(this->shared_from_this(), result, service_call_timeout) !=
-                rclcpp::FutureReturnCode::SUCCESS)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Do movement service call failed");
-            }
-
-            if (!result.get()->success)
-            {
-                RCLCPP_ERROR(this->get_logger(), "Do movement service call error: %s", result.get()->message.c_str());
-            }
+            auto result = m_doMovementClient->async_send_request(
+                request,
+                [this](rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedFuture result)
+                {
+                    if (!result.get()->success)
+                    {
+                        RCLCPP_ERROR(
+                            this->get_logger(),
+                            "Do movement service call error: %s",
+                            result.get()->message.c_str());
+                    }
+                });
         }
     }
     else if (serializedData["type"] == "micVolume")
@@ -192,17 +181,18 @@ void RosJsonDataHandler::onWebRTCDataReceived(const opentera_webrtc_ros_msgs::ms
         request->view_new = serializedData["new"];
         request->view_old = serializedData["old"];
 
-        auto result = m_changeMapViewClient->async_send_request(request);
-        if (rclcpp::spin_until_future_complete(this->shared_from_this(), result, service_call_timeout) !=
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Change map view service call failed");
-        }
-
-        if (!result.get()->success)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Change map view service call error: %s", result.get()->message.c_str());
-        }
+        auto result = m_changeMapViewClient->async_send_request(
+            request,
+            [this](rclcpp::Client<opentera_webrtc_ros_msgs::srv::ChangeMapView>::SharedFuture result)
+            {
+                if (!result.get()->success)
+                {
+                    RCLCPP_ERROR(
+                        this->get_logger(),
+                        "Change map view service call error: %s",
+                        result.get()->message.c_str());
+                }
+            });
     }
     else if (serializedData["type"] == "goToLabel")
     {

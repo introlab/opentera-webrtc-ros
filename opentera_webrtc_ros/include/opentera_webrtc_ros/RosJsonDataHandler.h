@@ -17,12 +17,16 @@
 #include <std_srvs/srv/empty.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 
+#include "utils.h"
+
 namespace opentera
 {
     class RosJsonDataHandler : public rclcpp::Node
     {
     private:
-        rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerData>::SharedPtr m_webrtcDataSubscriber;
+        float m_linear_multiplier;
+        float m_angular_multiplier;
+
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_stopPub;
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_startPub;
         rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr m_cmdVelPublisher;
@@ -34,14 +38,17 @@ namespace opentera
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_micVolumePub;
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_enableCameraPub;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_volumePub;
-        float m_linear_multiplier;
-        float m_angular_multiplier;
+
+        rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerData>::SharedPtr m_webrtcDataSubscriber;
+
         rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr m_dockingClient;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr m_localizationModeClient;
         rclcpp::Client<std_srvs::srv::Empty>::SharedPtr m_mappingModeClient;
         rclcpp::Client<opentera_webrtc_ros_msgs::srv::ChangeMapView>::SharedPtr m_changeMapViewClient;
         rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedPtr m_setMovementModeClient;
         rclcpp::Client<opentera_webrtc_ros_msgs::srv::SetString>::SharedPtr m_doMovementClient;
+
+        ServiceClientPruner m_pruner;
 
     protected:
         virtual void onWebRTCDataReceived(const opentera_webrtc_ros_msgs::msg::PeerData::ConstSharedPtr& event);

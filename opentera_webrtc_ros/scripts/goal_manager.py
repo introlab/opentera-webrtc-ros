@@ -40,6 +40,7 @@ class GoalManager(rclpy.node.Node):
 
     def waypoints_cb(self, msg: WaypointArray):
         for waypoint in msg.waypoints:
+            # FIXME: this calls a service in a callback
             pose_goal = self._pose_waypoint_converter.convert_waypoint_to_pose(waypoint)
             if pose_goal is not None:
                 pose_goal.pose.position.z = 1 + len(self.pose_goals)

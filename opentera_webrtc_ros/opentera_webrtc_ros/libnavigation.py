@@ -75,6 +75,7 @@ class WaypointNavigationClient:
     def cancel_all_goals(self, clear_goals=True):
         if self._navigate_future is not None:
             self._navigate_future.cancel()
+            # FIXME: this calls a service in a callback
         if (clear_goals):
             self._clear_goals_client.wait_for_service(timeout_sec=2.0)
             try:
@@ -85,6 +86,7 @@ class WaypointNavigationClient:
                 self._node.get_logger().warn(f"Service call failed: {e}")
 
     def clear_global_path(self):
+        # FIXME: this calls a service in a callback
         self._clear_global_path_client.wait_for_service(timeout_sec=2.0)
         try:
             request = SetBool.Request()
