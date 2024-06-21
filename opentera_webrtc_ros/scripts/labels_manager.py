@@ -209,10 +209,19 @@ class LabelsManager(rclpy.node.Node):
         return marker
 
 
-if __name__ == '__main__':
+def main():
     rclpy.init()
+    labels_manager = LabelsManager()
+    
     try:
-        labels_manager = LabelsManager()
         rclpy.spin(labels_manager)
     except KeyboardInterrupt:
         pass
+
+    labels_manager.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

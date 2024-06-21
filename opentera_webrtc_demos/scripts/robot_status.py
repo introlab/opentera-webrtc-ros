@@ -150,11 +150,19 @@ class RobotStatusPublisher(rclpy.node.Node):
         rclpy.spin(self)
 
 
-if __name__ == '__main__':
+def main():
     print("Robot Status Publisher Starting")
     rclpy.init()
+    robot_status = RobotStatusPublisher()
+    
     try:
-        robot_status = RobotStatusPublisher()
         robot_status.run()
     except KeyboardInterrupt:
         pass
+
+    robot_status.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

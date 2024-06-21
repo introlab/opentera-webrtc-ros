@@ -95,11 +95,12 @@ class AudioMixerROS(rclpy.node.Node):
         # Cleanup timer every second
         self._timer = self.create_timer(1, self._on_cleanup_timeout)
 
-    def shutdown(self):
+    def destroy_node(self):
         self._timer.destroy()
         for writer in self._writers:
             print('stopping writer', writer)
             self._writers[writer].stop()
+        super().destroy_node()
 
     def _on_cleanup_timeout(self, event):
         # Cleanup old threads ...
@@ -136,11 +137,16 @@ def main():
     # Init ROS
     rclpy.init()
     mixer = AudioMixerROS()
-    rclpy.spin(mixer)
-    mixer.shutdown()
-
-if __name__ == '__main__':
+    
     try:
-        main()
+        rclpy.spin(mixer)
     except KeyboardInterrupt:
         pass
+
+    mixer.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

@@ -71,10 +71,19 @@ class GoalManager(rclpy.node.Node):
             self.pose_goals.clear()
 
 
-if __name__ == '__main__':
+def main():
     rclpy.init()
+    goal_manager = GoalManager()
+    
     try:
-        goal_manager = GoalManager()
         rclpy.spin(goal_manager)
     except KeyboardInterrupt:
         pass
+
+    goal_manager.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

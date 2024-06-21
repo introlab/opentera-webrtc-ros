@@ -37,11 +37,15 @@ class PeerImageMock(rclpy.node.Node):
 def main():
     rclpy.init()
     peer_image_mock = PeerImageMock()
-    peer_image_mock.run()
-
-
-if __name__ == '__main__':
+    
     try:
-        main()
+        peer_image_mock.run()
     except KeyboardInterrupt:
         pass
+
+    peer_image_mock.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

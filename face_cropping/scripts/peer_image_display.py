@@ -30,11 +30,16 @@ class PeerImageDisplay(rclpy.node.Node):
 def main():
     rclpy.init()
     peer_image_display = PeerImageDisplay()
-    peer_image_display.run()
+    
+    try:
+        peer_image_display.run()
+    except KeyboardInterrupt:
+        pass
+
+    peer_image_display.destroy_node()
+    if rclpy.ok():
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+    main()
