@@ -4,6 +4,7 @@
 # Asyncio
 import aiohttp
 import asyncio
+import threading
 import json
 import os
 from signal import SIGINT, SIGTERM
@@ -117,7 +118,7 @@ class OpenTeraROSClient(rclpy.node.Node):
                 websocket_url = login_info['websocket_url']
 
                 ws = await self.__client.ws_connect(url=websocket_url, ssl=False,  autoping=True, autoclose=True)
-                self.get_logger().info(ws)
+                self.get_logger().info(str(ws))
 
                 # Create alive publishing task
                 status_task = self.__eventLoop.create_task(
@@ -140,8 +141,17 @@ class OpenTeraROSClient(rclpy.node.Node):
 
             self.get_logger().warning('cancel task')
 
+    def ros_thread_run(self):
+        try:
+            rclpy.spin(self)
+        except rclpy.executors.ExternalShutdownException:
+            pass
+
     def run(self):
         try:
+
+            self.__ros_thread = threading.Thread(target=self.ros_thread_run, args=[])
+            self.__ros_thread.start()
 
             self.__eventLoop = asyncio.get_event_loop()
 
@@ -156,6 +166,7 @@ class OpenTeraROSClient(rclpy.node.Node):
             self.get_logger().error(f'Main Task cancelled: {e}')
             # Exit ROS loop
             rclpy.shutdown()
+            self.__ros_thread.join()
 
     async def _opentera_send_device_status(self, url: str):
         while rclpy.ok():
@@ -304,7 +315,7 @@ class ConfigFileParam(rclpy.node.Node):
             node.get_logger().error('No config file provided')
             node.destroy_node()
             return None
-        
+
         config_file_path = Path(config_file_param.string_value).expanduser().resolve()
         node.destroy_node()
 
@@ -314,7 +325,7 @@ class ConfigFileParam(rclpy.node.Node):
 if __name__ == '__main__':
     # Init ROS
     rclpy.init()
-    
+
     config_file_name = ConfigFileParam.get_config_path()
 
     if config_file_name is None:
