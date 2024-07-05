@@ -12,8 +12,10 @@
 #include <image_transport/image_transport.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-class FaceCroppingNode : public rclcpp::Node
+class FaceCroppingNode
 {
+    std::shared_ptr<rclcpp::Node> m_node;
+
     image_transport::ImageTransport m_imageTransport;
     image_transport::Subscriber m_inputImageSubscriber;
     image_transport::Publisher m_outputImagePublisher;
@@ -28,18 +30,18 @@ class FaceCroppingNode : public rclcpp::Node
 
 public:
     FaceCroppingNode(const FaceCroppingNodeConfiguration& configuration)
-        : Node("face_cropping_node"),
-          m_imageTransport{this->shared_from_this()},
+        : m_node{std::make_shared<rclcpp::Node>("face_cropping_node")},
+          m_imageTransport{m_node},
           m_inputImageSubscriber{
               m_imageTransport.subscribe("input_image", 1, &FaceCroppingNode::inputImageCallback, this)},
           m_outputImagePublisher{m_imageTransport.advertise("output_image", 1)},
-          m_enableCroppingSubscriber{this->create_subscription<std_msgs::msg::Bool>(
+          m_enableCroppingSubscriber{m_node->create_subscription<std_msgs::msg::Bool>(
               "enable_face_cropping",
               10,
               bind_this<std_msgs::msg::Bool>(this, &FaceCroppingNode::enableFaceCroppingCallback))},
           m_enabled{true},
           m_faceCropper{
-              createFaceDetector(*this, configuration.faceDetectionModel, configuration.useGpuIfAvailable),
+              createFaceDetector(*m_node, configuration.faceDetectionModel, configuration.useGpuIfAvailable),
               configuration.minFaceWidth,
               configuration.minFaceHeight,
               configuration.outputWidth,
@@ -49,7 +51,9 @@ public:
         m_outputImage.encoding = sensor_msgs::image_encodings::BGR8;
     }
 
-    void run() { rclcpp::spin(this->shared_from_this()); }
+    void run() { rclcpp::spin(m_node); }
+
+    rclcpp::Node& get_node() { return *m_node; }
 
 private:
     void inputImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
@@ -98,14 +102,14 @@ int main(int argc, char** argv)
 
     nodeHandle.reset();
 
-    auto node = std::make_shared<FaceCroppingNode>(*configuration);
+    FaceCroppingNode node{*configuration};
     try
     {
-        node->run();
+        node.run();
     }
     catch (const std::exception& e)
     {
-        RCLCPP_ERROR(node->get_logger(), "%s", e.what());
+        RCLCPP_ERROR(node.get_node().get_logger(), "%s", e.what());
         return -1;
     }
 

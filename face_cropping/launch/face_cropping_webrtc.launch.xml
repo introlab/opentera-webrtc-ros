@@ -10,8 +10,8 @@
     <arg name="face_detection_model" default="lbpcascade"/>
     <arg name="use_gpu_if_available" default="false"/>
 
-    <arg name="min_face_width" default="100"/>
-    <arg name="min_face_height" default="100"/>
+    <arg name="min_face_width" default="100.0"/>
+    <arg name="min_face_height" default="100.0"/>
     <arg name="output_width" default="480"/>
     <arg name="output_height" default="720"/>
 

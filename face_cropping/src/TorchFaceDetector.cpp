@@ -78,7 +78,7 @@ std::vector<FaceDetection> TorchFaceDetector::detect(const cv::Mat& bgrImage)
     m_resizedImage.copyTo(m_inputImage(cv::Rect(0, 0, m_resizedImage.cols, m_resizedImage.rows)));
 
     m_inputTensor = torch::from_blob(
-                        m_resizedImage.data,
+                        m_inputImage.data,
                         {m_inputImage.rows, m_inputImage.cols, m_inputImage.channels()},
                         torch::kByte)
                         .permute({2, 0, 1})

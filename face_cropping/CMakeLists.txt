@@ -122,6 +122,11 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")
     include_directories(SYSTEM ${CMAKE_BINARY_DIR}/torchvision/vision-0.14.1/)
     set(TORCHVISION_LIBRARIES torchvision)
     add_compile_definitions(TORCHVISION_CSRC_INCLUDE)
+
+    file(GLOB_RECURSE TORCH_SHARED_OBJECTS "${CMAKE_BINARY_DIR}/libtorch/libtorch/lib/lib*.so*")
+
+    install(FILES ${TORCH_SHARED_OBJECTS} DESTINATION lib)
+    install(TARGETS torchvision DESTINATION lib)
 else()
     message(WARNING "Torch is not supported for the CPU architecture.")
     add_compile_definitions(NO_TORCH)
