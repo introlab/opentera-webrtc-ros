@@ -58,26 +58,26 @@ inline auto bind_this(This* self, Func&& func)
 
 inline auto to_nanoseconds(const builtin_interfaces::msg::Time& time) -> std::uint64_t
 {
-    return time.sec * 1'000'000'000 + time.nanosec;
+    return time.sec * 1'000'000'000ULL + time.nanosec;
 }
 
 inline auto from_nanoseconds(std::uint64_t time) -> builtin_interfaces::msg::Time
 {
     builtin_interfaces::msg::Time result;
-    result.sec = time / 1'000'000'000;
-    result.nanosec = time % 1'000'000'000;
+    result.sec = time / 1'000'000'000ULL;
+    result.nanosec = time % 1'000'000'000ULL;
 
     return result;
 }
 
 inline auto to_microseconds(const builtin_interfaces::msg::Time& time) -> std::uint64_t
 {
-    return to_nanoseconds(time) / 1'000;
+    return to_nanoseconds(time) / 1'000ULL;
 }
 
 inline auto from_microseconds(std::uint64_t time) -> builtin_interfaces::msg::Time
 {
-    return from_nanoseconds(time * 1'000);
+    return from_nanoseconds(time * 1'000ULL);
 }
 
 class ServiceClientPruner
