@@ -14,4 +14,4 @@ echo "robot_type:" $robot_type
 echo "Client interface will be available at http://localhost:$port/index.html#/user?pwd=$password&robot=$robot_type"
 
 
-(exec $python_exec $(which opentera-signaling-server) --port $port --password $password --static_folder $static_folder)
+(exec $python_exec $(which opentera-signaling-server) --port $port --password $password --static_folder $static_folder --follow_symlinks)

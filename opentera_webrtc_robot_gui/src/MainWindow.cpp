@@ -272,6 +272,9 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_REMOVED:
             break;
 
+        case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTION_FAILED:
+            break;
+
         default:
             qWarning() << "Status not handled " << status;
             RCLCPP_WARN(m_node.get_logger(), "Status not handled : %i", status);

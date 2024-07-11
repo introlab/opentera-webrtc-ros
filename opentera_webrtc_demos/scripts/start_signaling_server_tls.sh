@@ -19,4 +19,4 @@ echo "key:" $key
 echo "Client interface will be available at http://localhost:$port/index.html#/user?pwd=$password&robot=$robot_type"
 
 
-(exec $python_exec $(which opentera-signaling-server) --port $port --password $password --static_folder $static_folder --certificate $certificate --key $key)
+(exec $python_exec $(which opentera-signaling-server) --port $port --password $password --static_folder $static_folder --follow_symlinks --certificate $certificate --key $key)

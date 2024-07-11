@@ -67,6 +67,7 @@ namespace opentera
         virtual void onCallRejected(const Client& client);
         virtual void onClientConnected(const Client& client);
         virtual void onClientDisconnected(const Client& client);
+        virtual void onClientConnectionFailed(const Client& client);
         virtual void onError(const std::string& error);
 
         template<typename PeerMsg>
@@ -397,13 +398,15 @@ namespace opentera
                 std::bind(&RosWebRTCBridge<T>::onClientConnected, this, std::placeholders::_1));
             m_signalingClient->setOnClientDisconnected(
                 std::bind(&RosWebRTCBridge<T>::onClientDisconnected, this, std::placeholders::_1));
+            m_signalingClient->setOnClientConnectionFailed(
+                std::bind(&RosWebRTCBridge<T>::onClientConnectionFailed, this, std::placeholders::_1));
 
             m_signalingClient->setOnError(std::bind(&RosWebRTCBridge<T>::onError, this, std::placeholders::_1));
         }
     }
 
     /**
-     * @brief Callback that is call when the signaling client is opened
+     * @brief Callback that is called when the signaling client is opened
      */
     template<typename T>
     void RosWebRTCBridge<T>::onSignalingConnectionOpened()
@@ -412,7 +415,7 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when the signaling client is closed
+     * @brief Callback that is called when the signaling client is closed
      */
     template<typename T>
     void RosWebRTCBridge<T>::onSignalingConnectionClosed()
@@ -421,7 +424,7 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when their's an error with the signaling client
+     * @brief Callback that is called when there is an error with the signaling client
      *
      * @param msg The error message
      */
@@ -435,9 +438,9 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when their's a change in the room
+     * @brief Callback that is called when there is a change in the room
      *
-     * @param roomClients A vector of client in the room
+     * @param roomClients A vector of clients in the room
      */
     template<typename T>
     void RosWebRTCBridge<T>::onRoomClientsChanged(const std::vector<RoomClient>& roomClients)
@@ -459,7 +462,7 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call before a call
+     * @brief Callback that is called before a call
      *
      * @param client The client who sent the call
      */
@@ -472,7 +475,7 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when a call his rejected
+     * @brief Callback that is called when a call is rejected
      *
      * @param client The client who rejected the call
      */
@@ -484,9 +487,9 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when a client his connected
+     * @brief Callback that is called when a client is connected
      *
-     * @param client The client who his connected
+     * @param client The client who is connected
      */
     template<typename T>
     void RosWebRTCBridge<T>::onClientConnected(const Client& client)
@@ -498,9 +501,9 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when a client his disconnected
+     * @brief Callback that is called when a client is disconnected
      *
-     * @param client The client who his diconnected
+     * @param client The client who is diconnected
      */
     template<typename T>
     void RosWebRTCBridge<T>::onClientDisconnected(const Client& client)
@@ -512,7 +515,21 @@ namespace opentera
     }
 
     /**
-     * @brief Callback that is call when their's an error with the signaling client
+     * @brief Callback that is called when a client is disconnected
+     *
+     * @param client The client who is diconnected
+     */
+    template<typename T>
+    void RosWebRTCBridge<T>::onClientConnectionFailed(const Client& client)
+    {
+        publishPeerStatus(client, opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTION_FAILED);
+        RCLCPP_WARN_STREAM(
+            this->get_logger(),
+            " --> Signaling on client connection failed: " << "id: " << client.id() << ", name: " << client.name());
+    }
+
+    /**
+     * @brief Callback that is called when there is an error with the signaling client
      *
      * @param error The error message
      */
