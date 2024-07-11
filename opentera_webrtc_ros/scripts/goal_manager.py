@@ -40,7 +40,7 @@ class GoalManager(rclpy.node.Node):
 
     def waypoints_cb(self, msg: WaypointArray):
         def cb(pose_goal: PoseStamped):
-            pose_goal.pose.position.z = 1 + len(self.pose_goals)
+            pose_goal.pose.position.z = float(1 + len(self.pose_goals))
             self.nav_client.add_to_image(pose_goal)
             self.pose_goals.append(pose_goal)
 
@@ -48,27 +48,21 @@ class GoalManager(rclpy.node.Node):
             self._pose_waypoint_converter.convert_waypoint_to_pose(waypoint, cb)
 
     def __stop_cb(self, _):
-        self.get_logger().info("Stopping")
+        self.get_logger().debug("Stopping")
         self.should_stop = True
         yield
         self.pose_goals.clear()
         yield
 
     def start_cb(self, msg: Bool):
-        self.get_logger().info("Starting")
+        self.get_logger().debug("Starting")
         if msg.data == True:
             self.nav_client.cancel_all_goals(False)
             self.nav_client.clear_global_path()
             self.should_stop = False
 
-            for pose_goal in self.pose_goals:
-                self.nav_client.navigate_to_goal(
-                    pose_goal, round(pose_goal.pose.position.z)
-                )
-                if self.should_stop:
-                    break
-            self.nav_client.clear_global_path()
-            self.pose_goals.clear()
+            self.nav_client.navigate_through_goals(self.pose_goals)
+            self.pose_goals = []
 
 
 def main():

@@ -6,9 +6,8 @@ import rclpy.node
 import rclpy.timer
 import json
 from pathlib import Path
-from opentera_webrtc_ros_msgs.msg import LabelSimple, LabelSimpleArray, LabelSimpleEdit
-from opentera_webrtc_ros_msgs.msg import Label, LabelArray, LabelEdit
-from opentera_webrtc_ros_msgs.msg import Waypoint
+from opentera_webrtc_ros_msgs.msg import LabelSimple, LabelSimpleEdit
+from opentera_webrtc_ros_msgs.msg import Label, LabelArray
 import rclpy.timer
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
@@ -112,7 +111,7 @@ class LabelsManager(rclpy.node.Node):
         labels_text_json_message = {
             "type": "labels", "labels": labels_text}
         labels_text_msg = json.dumps(labels_text_json_message)
-        self.stored_labels_text_pub.publish(labels_text_msg)
+        self.stored_labels_text_pub.publish(String(data=labels_text_msg))
 
     def publish_stored_labels_marker(self) -> None:
         markers = MarkerArray()
@@ -122,7 +121,7 @@ class LabelsManager(rclpy.node.Node):
 
     def publish_stored_labels(self) -> None:
         labels = tuple(e.label for e in self.db.values())
-        self.stored_labels_pub.publish(labels)
+        self.stored_labels_pub.publish(LabelArray(labels=labels))
 
     def add_label_simple_callback(self, msg: LabelSimple) -> None:
         def cb(label: Label):
@@ -171,7 +170,7 @@ class LabelsManager(rclpy.node.Node):
 
         label = self.db[msg.data].label
         self.nav_client.add_to_image(label.pose)
-        self.nav_client.navigate_to_goal(label.pose, 1)
+        self.nav_client.navigate_through_goals([label.pose])
 
     # def _label2simple(self, label: Label, callback: Callable) -> None:
     #     def cb(waypoint: Waypoint):
