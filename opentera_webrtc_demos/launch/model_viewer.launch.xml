@@ -1,20 +1,16 @@
 <?xml version="1.0"?>
 <launch>
-
-    <arg name="model" default="waffle" description="model type [burger, waffle, waffle_pi]"/>
-
     <!-- Standalone launcher to visualize the robot model. -->
-    <let name="robot_description_command" value="$(exec-in-pkg xacro xacro) '$(find-pkg-share turtlebot3_beam_description)/urdf/turtlebot3_$(var model).urdf.xacro'" />
+    <let name="robot_description_command" value="$(find-pkg-prefix xacro)/lib/xacro/xacro '$(find-pkg-share turtlebot3_beam_description)/urdf/turtlebot3_waffle.urdf.xacro'" />
     <let name="robot_description" value="$(command '$(var robot_description_command)')" />
 
     <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui">
-        <param name="robot_description" value="$(val robot_description)" />
     </node>
 
-    <node name="rviz" pkg="rviz" exec="rviz" args="-d $(find-pkg-share opentera_webrtc_demos)/config/model.rviz" />
+    <node name="rviz" pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share opentera_webrtc_demos)/config/model.rviz" />
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher">
-        <param name="robot_description" value="$(val robot_description)" />
+        <param name="robot_description" value="$(var robot_description)" />
     </node>
 
 </launch>
