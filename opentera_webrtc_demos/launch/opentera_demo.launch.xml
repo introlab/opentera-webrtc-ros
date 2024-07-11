@@ -2,11 +2,11 @@
     <arg name="signaling_server_hostname" default="localhost"/>
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
-    <arg name="model" default="waffle" description="model type [burger, waffle, waffle_pi]"/>
     <arg name="centered_robot" default="true"/>
     <arg name="robot_vertical_offset" default="180"/>
     <arg name="map_refresh_rate" default="5.0"/>
     <arg name="rviz" default="false"/>
+    <arg name="gazebo_gui" default="false"/>
     <arg name="is_stand_alone" default="false"/>
     <arg name="camera_id" default="0"/>
     <arg name="use_outgoing_face_cropping" default="false"/>
@@ -14,8 +14,8 @@
 
     <!-- Turtlebot simulator -->
     <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch.xml">
-        <arg name="model" value="$(var model)" />
         <arg name="open_rviz" value="$(var rviz)" />
+        <arg name="gazebo_gui" value="$(var gazebo_gui)" />
     </include></group>
 
     <!-- Map image generator -->
@@ -24,6 +24,7 @@
         <arg name="input_global_path_topic" value="/move_base/NavfnROS/plan"/>
         <arg name="centered_robot" value="$(var centered_robot)"/>
         <arg name="robot_vertical_offset" value="$(var robot_vertical_offset)"/>
+        <arg name="rtabmap_list_label_service" value="/rtabmap/rtabmap/list_labels"/>
     </include></group>
 
     <!-- Face cropper local -->
@@ -56,8 +57,6 @@
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(var signaling_server_password)"/>
         <arg name="input_camera_topic" value="$(var input_camera_topic_based_on_face_cropping)"/>
-        <!-- <arg if="$(var use_outgoing_face_cropping)" name="input_camera_topic" value="/face_camera/image_raw"/> -->
-        <!-- <arg unless="$(var use_outgoing_face_cropping)" name="input_camera_topic" value="/front_camera/image_raw"/> -->
     </include></group>
 
     <!-- Bottom camera -->
