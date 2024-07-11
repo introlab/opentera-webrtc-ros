@@ -68,7 +68,7 @@
       <command_topic>cmd_vel</command_topic>
       <odometry_topic>odom</odometry_topic>
       <odometry_frame>odom</odometry_frame>
-      <odometry_source>world</odometry_source>
+      <odometry_source>1</odometry_source>  <!-- ENCODER=0, WORLD=1 -->
       <publish_odom>true</publish_odom>
       <publish_odom_tf>true</publish_odom_tf>
       <robot_base_frame>base_footprint</robot_base_frame>
