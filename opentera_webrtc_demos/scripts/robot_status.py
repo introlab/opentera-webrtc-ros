@@ -92,9 +92,9 @@ class RobotStatusPublisher(rclpy.node.Node):
                     subprocess_output = subprocess_result.communicate()[
                         0], subprocess_result.returncode
                     network_name = subprocess_output[0].decode('utf-8')
-                    status.wifi_network = network_name
-                    if status.wifi_network:
-                        wifi_interface_name = status.wifi_network.split()[0]
+                    if network_name:
+                        wifi_interface_name = network_name.split()[0]
+                        status.wifi_network = network_name.split('"')[1]
 
                         command = "iwconfig %s | grep 'Link Quality='" % wifi_interface_name
                         subprocess_result = subprocess.Popen(
@@ -115,6 +115,7 @@ class RobotStatusPublisher(rclpy.node.Node):
                         self.bytes_sent = io_2[wifi_interface_name].bytes_sent
                         self.bytes_recv = io_2[wifi_interface_name].bytes_recv
                     else:
+                        status.wifi_network = ""
                         status.wifi_strength = 0.0
                         status.local_ip = '127.0.0.1'
 
