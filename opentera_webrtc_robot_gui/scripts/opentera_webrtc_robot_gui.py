@@ -9,6 +9,7 @@ from PyQt5.QtCore import pyqtSignal
 # ROS
 import rclpy
 import rclpy.node
+import rclpy.executors
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from opentera_webrtc_ros_msgs.msg import PeerImage
@@ -21,8 +22,18 @@ class AsyncSpinner:
     def __init__(self) -> None:
         self._spinner = None
     
-    def start_spin(self, *nodes: rclpy.node.Node):
-        self._spinner = Thread(target=rclpy.spin, args=(nodes,))
+    def make_run(self, node: rclpy.node.Node, app: QApplication):
+        def ros_thread_run():
+            try:
+                rclpy.spin(node)
+            except rclpy.executors.ExternalShutdownException:
+                pass
+            if not app.aboutToQuit():
+                app.quit()
+        return ros_thread_run
+
+    def start_spin(self, node: rclpy.node.Node, app: QApplication, ):
+        self._spinner = Thread(target=self.make_run(node, app))
         self._spinner.start()
 
     def stop(self):
