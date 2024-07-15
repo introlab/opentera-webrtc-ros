@@ -59,8 +59,6 @@ add_custom_target(
 
 install(PROGRAMS
     scripts/robot_status.py
-    scripts/start_signaling_server.sh
-    scripts/start_signaling_server_tls.sh
     DESTINATION lib/${PROJECT_NAME}
 )
 
