@@ -47,8 +47,8 @@ public:
         rclcpp::Rate loop_rate{m_parameters.refreshRate()};
         if (rclcpp::ok())
         {
-            loop_rate.sleep();
             rclcpp::spin_some(m_node);
+            loop_rate.sleep();
         }
 
         while (rclcpp::ok())
@@ -56,8 +56,11 @@ public:
             m_mapImageGenerator.generate(m_mapImage);
             m_mapImagePublisher.publish(m_mapImage);
 
-            loop_rate.sleep();
-            rclcpp::spin_some(m_node);
+            if (rclcpp::ok())
+            {
+                rclcpp::spin_some(m_node);
+                loop_rate.sleep();
+            }
         }
     }
 };
