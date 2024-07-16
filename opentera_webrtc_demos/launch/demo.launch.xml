@@ -11,6 +11,8 @@
     <arg name="use_outgoing_face_cropping" default="false"/>
     <arg name="use_incoming_face_cropping" default="false"/>
 
+    <set_parameter name="use_sim_time" value="true"/>
+
     <!-- Offline Demo (if is_stand_alone) -->
     <group><include if="$(var is_stand_alone)" file="$(find-pkg-share opentera_webrtc_demos)/launch/demo_offline.launch.xml">
         <arg name="signaling_server_hostname" value="$(var signaling_server_hostname)"/>

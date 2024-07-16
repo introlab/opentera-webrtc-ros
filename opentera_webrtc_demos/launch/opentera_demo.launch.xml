@@ -12,6 +12,8 @@
     <arg name="use_outgoing_face_cropping" default="false"/>
     <arg name="use_incoming_face_cropping" default="false"/>
 
+    <set_parameter name="use_sim_time" value="true"/>
+
     <!-- Turtlebot simulator -->
     <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch.xml">
         <arg name="open_rviz" value="$(var rviz)" />
@@ -41,6 +43,9 @@
 
     <let name="input_camera_topic_based_on_face_cropping" if="$(var use_outgoing_face_cropping)" value="/face_camera/image_raw"/>
     <let name="input_camera_topic_based_on_face_cropping" unless="$(var use_outgoing_face_cropping)" value="/front_camera/image_raw"/>
+
+    <let name="webrtc_image_topic_based_on_face_cropping" if="$(var use_incoming_face_cropping)" value="/face_webrtc_image"/>
+    <let name="webrtc_image_topic_based_on_face_cropping" unless="$(var use_incoming_face_cropping)" value="/webrtc_image"/>
 
     <!-- Front camera -->
     <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
@@ -120,14 +125,11 @@
         <param name="device_id" value="$(var camera_id)"/>
     </node>
 
-    <node unless="$(var use_incoming_face_cropping)" pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui" respawn="true">
-        <param name="device_properties_path" value="$(find-pkg-share opentera_webrtc_robot_gui)/resources/DeviceProperties.json"/>
-    </node>
-    <node if="$(var use_incoming_face_cropping)" pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui" respawn="true">
+    <node pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui" respawn="true">
         <param name="device_properties_path" value="$(find-pkg-share opentera_webrtc_robot_gui)/resources/DeviceProperties.json"/>
 
-        <remap from="webrtc_image" to="face_webrtc_image"/>
-        <remap from="/front_camera/image_raw" to="/face_camera/image_raw"/>
+        <remap from="/webrtc_image" to="$(var webrtc_image_topic_based_on_face_cropping)"/>
+        <remap from="/front_camera/image_raw" to="$(var input_camera_topic_based_on_face_cropping)"/>
     </node>
 
 </launch>

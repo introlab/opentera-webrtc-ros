@@ -9,7 +9,6 @@
     <arg name="use_rtabmap" default="true" />
     <arg name="open_rviz" default="false"/>
     <arg name="rtabmap_viz" default="false"/>
-    <arg name="move_forward_only" default="true"/>
     <arg name="gazebo_gui" default="false"/>
 
     <arg name="use_nav2" default="true" />
@@ -17,8 +16,11 @@
     <arg name="with_camera" default="true"/>
     <arg name="localization" default="false"/>
     <arg name="database_path" default="~/.ros/rtabmap.db"/>
-    <arg if="$(var localization)" name="rtabmap_args" default=""/>
-    <arg unless="$(var localization)" name="rtabmap_args" default="-d"/>
+
+    <let if="$(var localization)" name="rtabmap_args" value=""/>
+    <let unless="$(var localization)" name="rtabmap_args" value="-d"/>
+
+    <set_parameter name="use_sim_time" value="true"/>
 
     <!-- Gazebo -->
     <group><include file="$(find-pkg-share gazebo_ros)/launch/gazebo.launch.py">

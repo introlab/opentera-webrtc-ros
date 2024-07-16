@@ -1,5 +1,4 @@
 <launch>
-    <arg name="signalling_server_hostname" default="localhost"/>
     <arg name="signaling_server_port" default="8080"/>
     <arg name="signaling_server_password" default="abc"/>
 

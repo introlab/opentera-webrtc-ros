@@ -9,7 +9,7 @@
     <arg name="room_password" default="password"/>
 
     <node name="client" pkg="opentera_client_ros" exec="opentera_client_ros.py">
-        <param name="config_file" value="$(find-pkg-share opentera_client_ros)/config/local_config.json" />
+        <param name="config_file" value="~/.ros/opentera/client_config.json" />
     </node>
 
 
