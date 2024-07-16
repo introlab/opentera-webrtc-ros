@@ -206,7 +206,6 @@ install(DIRECTORY launch
 
 install(
     PROGRAMS
-        scripts/opentera_webrtc_audio_mixer.py
         scripts/goal_manager.py
         scripts/labels_manager.py
     DESTINATION lib/${PROJECT_NAME}

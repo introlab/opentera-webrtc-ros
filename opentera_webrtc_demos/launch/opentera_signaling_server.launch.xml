@@ -18,6 +18,6 @@
     <executable     if="$(var use_tls)" cmd="opentera-signaling-server --port $(var port) --password $(var password) --static_folder $(var static_folder) --follow_symlinks --certificate $(var certificate) --key $(var key)" />
     <executable unless="$(var use_tls)" cmd="opentera-signaling-server --port $(var port) --password $(var password) --static_folder $(var static_folder) --follow_symlinks" />
 
-    <log message="Client interface will be available at $(var http_type)://localhost:$(var port)/index.html#/user?pwd=$(var password)&amp;robot=$(var robot_type)" />
+    <log message="Client interface will be available at $(var http_type)://localhost:$(var port)/index.html#/user?name=&amp;pwd=$(var password)&amp;robot=$(var robot_type)" />
 
 </launch>

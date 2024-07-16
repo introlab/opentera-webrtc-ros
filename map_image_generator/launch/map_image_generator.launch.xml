@@ -1,8 +1,7 @@
 <launch>
 
     <arg name="input_occupancy_grid_topic" default="/map"/>
-    <arg name="input_global_path_topic" default="/move_base/GlobalPlanner/plan"/>
-    <arg name="input_goal_topic" default="/move_base_simple/goal"/>
+    <arg name="input_global_path_topic" default="/plan"/>
     <arg name="input_laser_scan_topic" default="/scan"/>
     <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
     <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
@@ -33,7 +32,6 @@
     <node name="map_image_generator" pkg="map_image_generator" exec="map_image_generator" respawn="true">
         <remap from="occupancy_grid" to="$(var input_occupancy_grid_topic)"/>
         <remap from="global_path" to="$(var input_global_path_topic)"/>
-        <remap from="input_goal" to="$(var input_goal_topic)"/>
         <remap from="laser_scan" to="$(var input_laser_scan_topic)"/>
         <remap from="map_image_goal" to="$(var input_map_image_goal_topic)"/>
         <remap from="map_labels" to="$(var input_map_labels_topic)"/>

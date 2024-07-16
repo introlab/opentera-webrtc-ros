@@ -80,7 +80,7 @@ void RosDataChannelBridge::initAdvertiseTopics()
 }
 
 /**
- * @brief Initialize the subscriber and publisher
+ * @brief Clear the subscriber and publisher
  */
 void RosDataChannelBridge::stopAdvertiseTopics()
 {

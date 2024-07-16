@@ -22,4 +22,4 @@ $ ros2 launch opentera_webrtc_demos demo_odas.launch is_stand_alone:=true
 ```
 
 Once launched go to the following URL :
->[http://localhost:8080/index.html#/user?pwd=abc&robot=BEAM](http://localhost:8080/index.html#/user?pwd=abc&robot=BEAM)
+>[http://localhost:8080/index.html#/user?name=&pwd=abc&robot=BEAM](http://localhost:8080/index.html#/user?name=&pwd=abc&robot=BEAM)
