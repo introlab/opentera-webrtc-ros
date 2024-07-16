@@ -87,12 +87,6 @@ target_include_directories(
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 install(TARGETS ${PROJECT_NAME}_node DESTINATION lib/${PROJECT_NAME})
-# set_property(TARGET ${PROJECT_NAME}_node PROPERTY CXX_STANDARD 11)
-
-install(PROGRAMS
-    scripts/${PROJECT_NAME}.py
-    DESTINATION lib/${PROJECT_NAME}
-)
 
 install(FILES
     src/resources/DeviceProperties.json

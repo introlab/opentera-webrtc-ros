@@ -18,11 +18,6 @@ class PeerImageDisplay(rclpy.node.Node):
         cv2.imshow(msg.sender.id, self._cv_bridge.imgmsg_to_cv2(msg.frame, 'bgr8'))
         cv2.waitKey(1)
 
-    def _publish_peer_image(self, id, image):
-        msg = PeerImage()
-        msg.sender.id = id
-        msg.frame = image
-
     def run(self):
         rclpy.spin(self)
 

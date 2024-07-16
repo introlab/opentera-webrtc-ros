@@ -14,7 +14,6 @@
 
 
     <node name="$(var name)" pkg="opentera_webrtc_ros" exec="data_channel_bridge">
-        <!-- <rosparam param="is_stand_alone" subst_value="true">$(var is_stand_alone)</rosparam> -->
         <param name="is_stand_alone" value="$(var is_stand_alone)"/>
         <param name="signaling">
             <param name="server_url" value="$(var server_url)"/>         <!-- Signaling server URL -->
@@ -22,13 +21,5 @@
             <param name="room_name" value="$(var room_name)"/>           <!-- Room name to join -->
             <param name="room_password" value="$(var room_password)"/>   <!-- Room password -->
         </param>
-        <!-- <rosparam param="signaling" subst_value="true">
-            {
-                server_url: "$(var server_url)",      # Signaling server URL
-                client_name: $(var client_name),      # Peer name as which to join the room
-                room_name: $(var room_name),          # Room name to join
-                room_password: $(var room_password)   # Room password
-            }
-        </rosparam> -->
     </node>
 </launch>

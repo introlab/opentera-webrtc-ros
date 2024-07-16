@@ -4,8 +4,8 @@
     <name>face_cropping</name>
     <version>0.0.0</version>
     <description>The face_cropping package</description>
-    <maintainer email="joli1801@usherbrooke.ca">joli1801</maintainer>
-    <license>TODO: License declaration</license>
+    <maintainer email="dominic.letourneau@usherbrooke.ca">Dominic Létourneau</maintainer>
+    <license>Apache-2.0</license>
 
     <buildtool_depend>ament_cmake</buildtool_depend>
 

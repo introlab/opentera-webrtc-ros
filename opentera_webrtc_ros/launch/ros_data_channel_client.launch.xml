@@ -21,16 +21,6 @@
             <param name="room_password" value="$(var room_password)"/>   <!-- Room password -->
             <param name="verify_ssl" value="$(var verify_ssl)"/>         <!-- SSL peer verification -->
         </param>
-        <!-- <rosparam param="is_stand_alone" subst_value="true">$(var is_stand_alone)</rosparam>
-        <rosparam param="signaling" subst_value="true">
-            {
-                server_url: "$(var server_url)",      # Signaling server URL
-                client_name: $(var client_name),      # Peer name as which to join the room
-                room_name: $(var room_name),          # Room name to join
-                room_password: $(var room_password),  # Room password
-                verify_ssl: $(var verify_ssl)         # SSL peer verification
-            }
-        </rosparam> -->
 
         <remap from="webrtc_data_outgoing" to="$(var input_topic)"/>
         <remap from="webrtc_data_incoming" to="$(var output_topic)"/>
