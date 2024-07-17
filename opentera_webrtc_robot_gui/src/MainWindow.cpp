@@ -139,75 +139,77 @@ void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::msg::Open
 {
     // WARNING THIS IS CALLED FROM ANOTHER THREAD (ROS SPINNER)
 
+    // TODO: The OpenTeraEvent event are not sent in offline mode, so everything is being handled in PeerStatus callback
+
     // We are only interested in JoinSession, StopSession, LeaveSession events for now
-    for (auto i = 0; i < msg->join_session_events.size(); i++)
-    {
-        QList<QString> session_participants;
-        for (auto j = 0; j < msg->join_session_events[i].session_participants.size(); j++)
-        {
-            session_participants.append(QString::fromStdString(msg->join_session_events[i].session_participants[j]));
-        }
+    // for (auto i = 0; i < msg->join_session_events.size(); i++)
+    // {
+    //     QList<QString> session_participants;
+    //     for (auto j = 0; j < msg->join_session_events[i].session_participants.size(); j++)
+    //     {
+    //         session_participants.append(QString::fromStdString(msg->join_session_events[i].session_participants[j]));
+    //     }
 
-        QList<QString> session_users;
-        for (auto j = 0; j < msg->join_session_events[i].session_users.size(); j++)
-        {
-            session_users.append(QString::fromStdString(msg->join_session_events[i].session_users[j]));
-        }
+    //     QList<QString> session_users;
+    //     for (auto j = 0; j < msg->join_session_events[i].session_users.size(); j++)
+    //     {
+    //         session_users.append(QString::fromStdString(msg->join_session_events[i].session_users[j]));
+    //     }
 
-        QList<QString> session_devices;
-        for (auto j = 0; j < msg->join_session_events[i].session_devices.size(); j++)
-        {
-            session_devices.append(QString::fromStdString(msg->join_session_events[i].session_devices[j]));
-        }
+    //     QList<QString> session_devices;
+    //     for (auto j = 0; j < msg->join_session_events[i].session_devices.size(); j++)
+    //     {
+    //         session_devices.append(QString::fromStdString(msg->join_session_events[i].session_devices[j]));
+    //     }
 
-        emit eventJoinSession(
-            QString::fromStdString(msg->join_session_events[i].session_url),
-            QString::fromStdString(msg->join_session_events[i].session_creator_name),
-            QString::fromStdString(msg->join_session_events[i].session_uuid),
-            session_participants,
-            session_users,
-            session_devices,
-            QString::fromStdString(msg->join_session_events[i].join_msg),
-            QString::fromStdString(msg->join_session_events[i].session_parameters),
-            QString::fromStdString(msg->join_session_events[i].service_uuid));
-    }
+    //     emit eventJoinSession(
+    //         QString::fromStdString(msg->join_session_events[i].session_url),
+    //         QString::fromStdString(msg->join_session_events[i].session_creator_name),
+    //         QString::fromStdString(msg->join_session_events[i].session_uuid),
+    //         session_participants,
+    //         session_users,
+    //         session_devices,
+    //         QString::fromStdString(msg->join_session_events[i].join_msg),
+    //         QString::fromStdString(msg->join_session_events[i].session_parameters),
+    //         QString::fromStdString(msg->join_session_events[i].service_uuid));
+    // }
 
-    for (auto i = 0; i < msg->leave_session_events.size(); i++)
-    {
-        QList<QString> leaving_participants;
-        for (auto j = 0; j < msg->leave_session_events[i].leaving_participants.size(); j++)
-        {
-            leaving_participants.append(QString::fromStdString(msg->leave_session_events[i].leaving_participants[j]));
-        }
+    // for (auto i = 0; i < msg->leave_session_events.size(); i++)
+    // {
+    //     QList<QString> leaving_participants;
+    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_participants.size(); j++)
+    //     {
+    //         leaving_participants.append(QString::fromStdString(msg->leave_session_events[i].leaving_participants[j]));
+    //     }
 
-        QList<QString> leaving_users;
-        for (auto j = 0; j < msg->leave_session_events[i].leaving_users.size(); j++)
-        {
-            leaving_users.append(QString::fromStdString(msg->leave_session_events[i].leaving_users[j]));
-        }
+    //     QList<QString> leaving_users;
+    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_users.size(); j++)
+    //     {
+    //         leaving_users.append(QString::fromStdString(msg->leave_session_events[i].leaving_users[j]));
+    //     }
 
-        QList<QString> leaving_devices;
-        for (auto j = 0; j < msg->leave_session_events[i].leaving_devices.size(); j++)
-        {
-            leaving_devices.append(QString::fromStdString(msg->leave_session_events[i].leaving_devices[j]));
-        }
+    //     QList<QString> leaving_devices;
+    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_devices.size(); j++)
+    //     {
+    //         leaving_devices.append(QString::fromStdString(msg->leave_session_events[i].leaving_devices[j]));
+    //     }
 
-        emit eventLeaveSession(
-            QString::fromStdString(msg->leave_session_events[i].session_uuid),
-            QString::fromStdString(msg->leave_session_events[i].service_uuid),
-            leaving_participants,
-            leaving_users,
-            leaving_devices);
-    }
+    //     emit eventLeaveSession(
+    //         QString::fromStdString(msg->leave_session_events[i].session_uuid),
+    //         QString::fromStdString(msg->leave_session_events[i].service_uuid),
+    //         leaving_participants,
+    //         leaving_users,
+    //         leaving_devices);
+    // }
 
-    for (auto i = 0; i < msg->stop_session_events.size(); i++)
-    {
-        emit eventStopSession(
-            QString::fromStdString(msg->stop_session_events[i].session_uuid),
-            QString::fromStdString(msg->stop_session_events[i].service_uuid));
+    // for (auto i = 0; i < msg->stop_session_events.size(); i++)
+    // {
+    //     emit eventStopSession(
+    //         QString::fromStdString(msg->stop_session_events[i].session_uuid),
+    //         QString::fromStdString(msg->stop_session_events[i].service_uuid));
 
-        setLocalCameraStyle(CameraStyle::widget);
-    }
+    //     setLocalCameraStyle(CameraStyle::widget);
+    // }
 }
 
 void MainWindow::_onLocalImage(const QImage& image)
@@ -250,7 +252,9 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
     switch (status)
     {
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTED:
+            m_ui.hangUpButton->setEnabled(true);  // TODO: replaces OpenTeraEvent JoinSession callback
             m_ui.hangUpButton->setChecked(true);
+            m_inSession = true;  // TODO: replaces OpenTeraEvent JoinSession callback
             break;
 
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_DISCONNECTED:
@@ -261,6 +265,7 @@ void MainWindow::_onPeerStatus(const QString& id, const QString& name, int statu
 
                 if (m_remoteViews.empty())
                 {
+                    _onStopSessionEvent("", "");  // TODO: replaces OpenTeraEvent StopSession callback
                     setLocalCameraStyle(CameraStyle::widget);
                 }
             }
