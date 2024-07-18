@@ -99,50 +99,11 @@ signals:
         float mic_volume,
         bool is_camera_on,
         float volume);
-    void eventJoinSession(
-        const QString& session_url,
-        const QString& session_creator_name,
-        const QString& session_uuid,
-        QList<QString> session_participants,
-        QList<QString> session_users,
-        QList<QString> session_devices,
-        const QString& join_msg,
-        const QString& session_parameters,
-        const QString& service_uuid);
-
-    void eventStopSession(const QString& session_uuid, const QString& service_uuid);
-
-    void eventLeaveSession(
-        const QString& session_uuid,
-        const QString& service_uuid,
-        QList<QString> leaving_participants,
-        QList<QString> leaving_users,
-        QList<QString> leaving_devices);
 
 private slots:
     void _onLocalImage(const QImage& image);
     void _onPeerImage(const QString& id, const QString& name, const QImage& image);
     void _onPeerStatus(const QString& id, const QString& name, int status);
-
-    void _onJoinSessionEvent(
-        const QString& session_url,
-        const QString& session_creator_name,
-        const QString& session_uuid,
-        QList<QString> session_participants,
-        QList<QString> session_users,
-        QList<QString> session_devices,
-        const QString& join_msg,
-        const QString& session_parameters,
-        const QString& service_uuid);
-
-    void _onStopSessionEvent(const QString& session_uuid, const QString& service_uuid);
-
-    void _onLeaveSessionEvent(
-        const QString& session_uuid,
-        const QString& service_uuid,
-        QList<QString> leaving_participants,
-        QList<QString> leaving_users,
-        QList<QString> leaving_devices);
 
     void _onRobotStatus(
         bool is_charging,
@@ -181,6 +142,9 @@ private:
     void moveEvent(QMoveEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
+    void onPeerStatusClientConnected();
+    void onPeerStatusClientDisconnected(const QString& id);
+
     bool m_inSession;
 
     // Main View
@@ -205,14 +169,12 @@ private:
     void localImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
     void peerImageCallback(const opentera_webrtc_ros_msgs::msg::PeerImage::ConstSharedPtr& msg);
     void peerStatusCallback(const opentera_webrtc_ros_msgs::msg::PeerStatus::ConstSharedPtr& msg);
-    void openteraEventCallback(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg);
     void robotStatusCallback(const opentera_webrtc_ros_msgs::msg::RobotStatus::ConstSharedPtr& msg);
 
     rclcpp::Node& m_node;
     rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerImage>::SharedPtr m_peerImageSubscriber;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_localImageSubscriber;
     rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::PeerStatus>::SharedPtr m_peerStatusSubscriber;
-    rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>::SharedPtr m_openteraEventSubscriber;
     rclcpp::Subscription<opentera_webrtc_ros_msgs::msg::RobotStatus>::SharedPtr m_robotStatusSubscriber;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_enableFaceCroppingPublisher;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_micVolumePublisher;

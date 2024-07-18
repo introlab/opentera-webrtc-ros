@@ -57,11 +57,6 @@ MainWindow::MainWindow(QString devicePropertiesPath, rclcpp::Node& node, QWidget
         m_cameraView,
         [this] { m_cameraView->setVisible(!m_ui.cameraButton->isChecked()); });
     connect(m_ui.speakerButton, &QPushButton::clicked, this, &MainWindow::_onSpeakerButtonClicked);
-
-    // Signaling events
-    connect(this, &MainWindow::eventJoinSession, this, &MainWindow::_onJoinSessionEvent, Qt::QueuedConnection);
-    connect(this, &MainWindow::eventLeaveSession, this, &MainWindow::_onLeaveSessionEvent, Qt::QueuedConnection);
-    connect(this, &MainWindow::eventStopSession, this, &MainWindow::_onStopSessionEvent, Qt::QueuedConnection);
 }
 
 void MainWindow::setupROS()
@@ -81,11 +76,6 @@ void MainWindow::setupROS()
         "/webrtc_peer_status",
         10,
         bind_this<opentera_webrtc_ros_msgs::msg::PeerStatus>(this, &MainWindow::peerStatusCallback));
-
-    m_openteraEventSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(
-        "/events",
-        10,
-        bind_this<opentera_webrtc_ros_msgs::msg::OpenTeraEvent>(this, &MainWindow::openteraEventCallback));
 
     m_robotStatusSubscriber = m_node.create_subscription<opentera_webrtc_ros_msgs::msg::RobotStatus>(
         "/robot_status",
@@ -135,83 +125,6 @@ void MainWindow::localImageCallback(const sensor_msgs::msg::Image::ConstSharedPt
     }
 }
 
-void MainWindow::openteraEventCallback(const opentera_webrtc_ros_msgs::msg::OpenTeraEvent::ConstSharedPtr& msg)
-{
-    // WARNING THIS IS CALLED FROM ANOTHER THREAD (ROS SPINNER)
-
-    // TODO: The OpenTeraEvent event are not sent in offline mode, so everything is being handled in PeerStatus callback
-
-    // We are only interested in JoinSession, StopSession, LeaveSession events for now
-    // for (auto i = 0; i < msg->join_session_events.size(); i++)
-    // {
-    //     QList<QString> session_participants;
-    //     for (auto j = 0; j < msg->join_session_events[i].session_participants.size(); j++)
-    //     {
-    //         session_participants.append(QString::fromStdString(msg->join_session_events[i].session_participants[j]));
-    //     }
-
-    //     QList<QString> session_users;
-    //     for (auto j = 0; j < msg->join_session_events[i].session_users.size(); j++)
-    //     {
-    //         session_users.append(QString::fromStdString(msg->join_session_events[i].session_users[j]));
-    //     }
-
-    //     QList<QString> session_devices;
-    //     for (auto j = 0; j < msg->join_session_events[i].session_devices.size(); j++)
-    //     {
-    //         session_devices.append(QString::fromStdString(msg->join_session_events[i].session_devices[j]));
-    //     }
-
-    //     emit eventJoinSession(
-    //         QString::fromStdString(msg->join_session_events[i].session_url),
-    //         QString::fromStdString(msg->join_session_events[i].session_creator_name),
-    //         QString::fromStdString(msg->join_session_events[i].session_uuid),
-    //         session_participants,
-    //         session_users,
-    //         session_devices,
-    //         QString::fromStdString(msg->join_session_events[i].join_msg),
-    //         QString::fromStdString(msg->join_session_events[i].session_parameters),
-    //         QString::fromStdString(msg->join_session_events[i].service_uuid));
-    // }
-
-    // for (auto i = 0; i < msg->leave_session_events.size(); i++)
-    // {
-    //     QList<QString> leaving_participants;
-    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_participants.size(); j++)
-    //     {
-    //         leaving_participants.append(QString::fromStdString(msg->leave_session_events[i].leaving_participants[j]));
-    //     }
-
-    //     QList<QString> leaving_users;
-    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_users.size(); j++)
-    //     {
-    //         leaving_users.append(QString::fromStdString(msg->leave_session_events[i].leaving_users[j]));
-    //     }
-
-    //     QList<QString> leaving_devices;
-    //     for (auto j = 0; j < msg->leave_session_events[i].leaving_devices.size(); j++)
-    //     {
-    //         leaving_devices.append(QString::fromStdString(msg->leave_session_events[i].leaving_devices[j]));
-    //     }
-
-    //     emit eventLeaveSession(
-    //         QString::fromStdString(msg->leave_session_events[i].session_uuid),
-    //         QString::fromStdString(msg->leave_session_events[i].service_uuid),
-    //         leaving_participants,
-    //         leaving_users,
-    //         leaving_devices);
-    // }
-
-    // for (auto i = 0; i < msg->stop_session_events.size(); i++)
-    // {
-    //     emit eventStopSession(
-    //         QString::fromStdString(msg->stop_session_events[i].session_uuid),
-    //         QString::fromStdString(msg->stop_session_events[i].service_uuid));
-
-    //     setLocalCameraStyle(CameraStyle::widget);
-    // }
-}
-
 void MainWindow::_onLocalImage(const QImage& image)
 {
     m_cameraView->setImage(image, NO_REPAINT);
@@ -247,28 +160,45 @@ void MainWindow::_onPeerImage(const QString& id, const QString& name, const QIma
     }
 }
 
+void MainWindow::onPeerStatusClientConnected()
+{
+    m_ui.hangUpButton->setEnabled(true);
+    m_ui.hangUpButton->setChecked(true);
+    m_inSession = true;
+}
+
+void MainWindow::onPeerStatusClientDisconnected(const QString& id)
+{
+    if (m_remoteViews.contains(id))
+    {
+        m_remoteViews[id]->deleteLater();
+        m_remoteViews.remove(id);
+
+        if (m_remoteViews.empty())
+        {
+            m_inSession = false;
+
+            // Put back full size self camera
+            m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+            m_ui.hangUpButton->setEnabled(false);
+            m_ui.hangUpButton->setChecked(false);
+
+            setLocalCameraStyle(CameraStyle::widget);
+        }
+    }
+}
+
 void MainWindow::_onPeerStatus(const QString& id, const QString& name, int status)
 {
     switch (status)
     {
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_CONNECTED:
-            m_ui.hangUpButton->setEnabled(true);  // TODO: replaces OpenTeraEvent JoinSession callback
-            m_ui.hangUpButton->setChecked(true);
-            m_inSession = true;  // TODO: replaces OpenTeraEvent JoinSession callback
+            onPeerStatusClientConnected();
             break;
 
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_CLIENT_DISCONNECTED:
-            if (m_remoteViews.contains(id))
-            {
-                m_remoteViews[id]->deleteLater();
-                m_remoteViews.remove(id);
-
-                if (m_remoteViews.empty())
-                {
-                    _onStopSessionEvent("", "");  // TODO: replaces OpenTeraEvent StopSession callback
-                    setLocalCameraStyle(CameraStyle::widget);
-                }
-            }
+            onPeerStatusClientDisconnected(id);
             break;
 
         case opentera_webrtc_ros_msgs::msg::PeerStatus::STATUS_REMOTE_STREAM_ADDED:
@@ -348,53 +278,6 @@ void MainWindow::robotStatusCallback(const opentera_webrtc_ros_msgs::msg::RobotS
         msg->mic_volume,
         msg->is_camera_on,
         msg->volume);
-}
-
-
-void MainWindow::_onJoinSessionEvent(
-    const QString& session_url,
-    const QString& session_creator_name,
-    const QString& session_uuid,
-    QList<QString> session_participants,
-    QList<QString> session_users,
-    QList<QString> session_devices,
-    const QString& join_msg,
-    const QString& session_parameters,
-    const QString& service_uuid)
-{
-    m_ui.hangUpButton->setEnabled(true);
-    m_inSession = true;
-}
-
-void MainWindow::_onStopSessionEvent(const QString& session_uuid, const QString& service_uuid)
-{
-    qDebug() << "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)";
-    RCLCPP_DEBUG(m_node.get_logger(), "_onStopSessionEvent(const QString &session_uuid, const QString &service_uuid)");
-
-    m_inSession = false;
-    // Remove all remote views
-    foreach (QString key, m_remoteViews.keys())
-    {
-        m_remoteViews[key]->deleteLater();
-    }
-
-    m_remoteViews.clear();
-
-    // Put back full size self camera
-    m_cameraView->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    m_ui.hangUpButton->setEnabled(false);
-    m_ui.hangUpButton->setChecked(false);
-}
-
-void MainWindow::_onLeaveSessionEvent(
-    const QString& session_uuid,
-    const QString& service_uuid,
-    QList<QString> leaving_participants,
-    QList<QString> leaving_users,
-    QList<QString> leaving_devices)
-{
-    m_ui.hangUpButton->setEnabled(false);
-    m_ui.hangUpButton->setChecked(false);
 }
 
 void MainWindow::_onRobotStatus(
