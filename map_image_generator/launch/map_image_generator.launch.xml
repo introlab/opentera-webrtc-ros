@@ -4,14 +4,14 @@
     <arg name="input_global_path_topic" default="/plan"/>
     <arg name="input_laser_scan_topic" default="/scan"/>
     <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
-    <arg name="input_map_labels_topic" default="/rtabmap/labels"/>
+    <arg name="input_map_labels_topic" default="/rtabmap/rtabmap/labels"/>
     <arg name="input_sound_sources_topic" default="/odas/sst"/>
 
     <arg name="output_map_image_topic" default="/map_image_generator/image"/>
-    <arg name="output_goal_topic" default="/rtabmap/goal"/>
+    <arg name="output_goal_topic" default="/rtabmap/rtabmap/goal"/>
     <arg name="output_map_image_labels_topic" default="/map_image_generator/labels"/>
 
-    <arg name="rtabmap_list_label_service" default="/rtabmap/list_labels"/>
+    <arg name="rtabmap_list_label_service" default="/rtabmap/rtabmap/list_labels"/>
 
     <arg name="refresh_rate_param" default="1.0"/>
     <arg name="resolution_param" default="40"/>

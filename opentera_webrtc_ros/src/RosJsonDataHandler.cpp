@@ -24,8 +24,8 @@ RosJsonDataHandler::RosJsonDataHandler()
           20,
           bind_this<opentera_webrtc_ros_msgs::msg::PeerData>(this, &RosJsonDataHandler::onWebRTCDataReceived))},
       m_dockingClient{this->create_client<std_srvs::srv::SetBool>("do_docking")},
-      m_localizationModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_localization")},
-      m_mappingModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/set_mode_mapping")},
+      m_localizationModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/rtabmap/set_mode_localization")},
+      m_mappingModeClient{this->create_client<std_srvs::srv::Empty>("/rtabmap/rtabmap/set_mode_mapping")},
       m_changeMapViewClient{this->create_client<opentera_webrtc_ros_msgs::srv::ChangeMapView>("change_map_view")},
       m_setMovementModeClient{this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("set_movement_mode")},
       m_doMovementClient{this->create_client<opentera_webrtc_ros_msgs::srv::SetString>("do_movement")},
@@ -119,6 +119,8 @@ void RosJsonDataHandler::onWebRTCDataReceived(const opentera_webrtc_ros_msgs::ms
         {
             std::cout << "Switching to mapping mode" << std::endl;
             auto request = std::make_shared<std_srvs::srv::Empty::Request>();
+
+            m_mappingModeClient->async_send_request(request);
         }
         else if (serializedData["action"] == "setMovementMode")
         {
