@@ -8,11 +8,10 @@ on:
     branches: [main]
 
   workflow_dispatch:
-    branches: [main]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +20,7 @@ jobs:
           path: catkin_ws/src/opentera-webrtc-ros
       - uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: noetic
+          required-ros-distributions: humble
 
       - uses: actions/setup-node@v4
         with:
@@ -30,7 +29,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-cv-camera ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
+          sudo apt-get install ros-humble-turtlebot3 ros-humble-turtlebot3-gazebo ros-humble-cv-camera ros-humble-dwa-local-planner ros-humble-rtabmap-ros
           sudo apt-get install libglib2.0-dev libgtk-3-dev libpulse-dev libasound2-dev
           sudo apt-get install python3-pip portaudio19-dev
           sudo apt-get install build-essential gfortran texinfo libasound2-dev
@@ -40,34 +39,34 @@ jobs:
           sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools
 
       - name: Clone audio_utils in ROS workspace
-        working-directory: catkin_ws/src
+        working-directory: colcon_ws/src
         run: |
-          source /opt/ros/noetic/setup.bash
+          source /opt/ros/humble/setup.bash
           git clone https://github.com/introlab/audio_utils.git --recurse-submodules
 
       - name: Clone odas_ros in ROS workspace
-        working-directory: catkin_ws/src
+        working-directory: colcon_ws/src
         run: |
-          source /opt/ros/noetic/setup.bash
+          source /opt/ros/humble/setup.bash
           git clone https://github.com/introlab/odas_ros.git --recurse-submodules
 
       - name: Install Python requirements packaging and documentation
-        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
+        working-directory: colcon_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc
         run: |
           python3 -m pip install -r requirements.txt
 
       - name: Install Python requirements for OpenTera client
-        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_client_ros
+        working-directory: colcon_ws/src/opentera-webrtc-ros/opentera_client_ros
         run: |
           python3 -m pip install -r requirements.txt
 
       - name: Install Python requirements for Signaling server
-        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
+        working-directory: colcon_ws/src/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server
         run: |
           python3 -m pip install -r requirements.txt
-          
+
       - name: Install the VUE.js frontend
-        working-directory: catkin_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
+        working-directory: colcon_ws/src/opentera-webrtc-ros/opentera_webrtc_demos/opentera-webrtc-teleop-frontend/teleop-vue
         run: |
           npm --version
           node --version
@@ -76,7 +75,7 @@ jobs:
           npm run build
 
       - name: Compile packages in ROS workspace
-        working-directory: catkin_ws
+        working-directory: colcon_ws
         run: |
-          source /opt/ros/noetic/setup.bash
-          catkin_make -j1
+          source /opt/ros/humble/setup.bash
+          colcon build --executor sequential
