@@ -1,17 +1,19 @@
 #include "map_image_generator/drawers/GlobalPathImageDrawer.h"
 
-#include <tf/tf.h>
-
 using namespace map_image_generator;
 
 GlobalPathImageDrawer::GlobalPathImageDrawer(
     const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_globalPathSubscriber{nodeHandle.subscribe("global_path", 1, &GlobalPathImageDrawer::globalPathCallback, this)},
-      m_clearGlobalPathService{
-          m_nodeHandle.advertiseService("clear_global_path", &GlobalPathImageDrawer::clearGlobalPath, this)}
+    rclcpp::Node& node,
+    tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer),
+      m_globalPathSubscriber{m_node.create_subscription<nav_msgs::msg::Path>(
+          "global_path",
+          1,
+          bind_this<nav_msgs::msg::Path>(this, &GlobalPathImageDrawer::globalPathCallback))},
+      m_clearGlobalPathService{m_node.create_service<std_srvs::srv::SetBool>(
+          "clear_global_path",
+          bind_this<std_srvs::srv::SetBool>(this, &GlobalPathImageDrawer::clearGlobalPath))}
 {
 }
 
@@ -31,22 +33,22 @@ void GlobalPathImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::Path::Ptr& globalPath)
+void GlobalPathImageDrawer::globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr& globalPath)
 {
-    m_lastGlobalPath = globalPath;
+    m_lastGlobalPath = globalPath ? std::make_unique<nav_msgs::msg::Path>(*globalPath) : std::move(m_lastGlobalPath);
 }
 
-void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transform)
+void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf2::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.globalPathColor();
     int thickness = m_parameters.globalPathThickness();
 
-    for (int i = 0; i + 1 < m_lastGlobalPath->poses.size(); i++)
+    for (std::size_t i = 0; i + 1 < m_lastGlobalPath->poses.size(); i++)
     {
-        tf::Pose startPose;
-        tf::poseMsgToTF(m_lastGlobalPath->poses[i].pose, startPose);
-        tf::Pose endPose;
-        tf::poseMsgToTF(m_lastGlobalPath->poses[i + 1].pose, endPose);
+        tf2::Transform startPose;
+        tf2::fromMsg(m_lastGlobalPath->poses[i].pose, startPose);
+        tf2::Transform endPose;
+        tf2::fromMsg(m_lastGlobalPath->poses[i + 1].pose, endPose);
 
         startPose = transform * startPose;
         endPose = transform * endPose;
@@ -62,15 +64,21 @@ void GlobalPathImageDrawer::drawGlobalPath(cv::Mat& image, tf::Transform& transf
     }
 }
 
-bool GlobalPathImageDrawer::clearGlobalPath(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)
+void GlobalPathImageDrawer::clearGlobalPath(
+    const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+    const std_srvs::srv::SetBool::Response::SharedPtr& res)
 {
-    if (req.data)
+    if (req->data)
     {
         if (!m_lastGlobalPath)
-            return true;
+        {
+            res->success = true;
+            return;
+        }
         m_lastGlobalPath->poses.clear();
-        res.success = true;
-        return true;
+        res->success = true;
+        return;
     }
-    return false;
+    res->success = false;
+    return;
 }

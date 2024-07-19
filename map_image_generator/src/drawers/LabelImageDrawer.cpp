@@ -2,20 +2,22 @@
 
 #include <opencv2/imgproc.hpp>
 
+#include <tf2/utils.h>
+
 using namespace map_image_generator;
 
-LabelImageDrawer::LabelImageDrawer(
-    const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_labelArraySubscriber{m_nodeHandle.subscribe("stored_labels", 1, &LabelImageDrawer::labelArrayCallback, this)}
+LabelImageDrawer::LabelImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer),
+      m_labelArraySubscriber{m_node.create_subscription<opentera_webrtc_ros_msgs::msg::LabelArray>(
+          "stored_labels",
+          1,
+          bind_this<opentera_webrtc_ros_msgs::msg::LabelArray>(this, &LabelImageDrawer::labelArrayCallback))}
 {
 }
 
 LabelImageDrawer::~LabelImageDrawer() = default;
 
-void LabelImageDrawer::labelArrayCallback(const opentera_webrtc_ros_msgs::LabelArray::ConstPtr& labelArray)
+void LabelImageDrawer::labelArrayCallback(const opentera_webrtc_ros_msgs::msg::LabelArray::ConstSharedPtr& labelArray)
 {
     m_lastLabelArray = labelArray;
 }
@@ -38,16 +40,19 @@ void LabelImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void LabelImageDrawer::drawLabel(const opentera_webrtc_ros_msgs::Label& label, cv::Mat& image, tf::Transform& transform)
+void LabelImageDrawer::drawLabel(
+    const opentera_webrtc_ros_msgs::msg::Label& label,
+    cv::Mat& image,
+    tf2::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.labelColor();
     int size = m_parameters.labelSize();
 
-    tf::Pose labelPose;
-    tf::poseMsgToTF(label.pose.pose, labelPose);
+    tf2::Transform labelPose;
+    tf2::fromMsg(label.pose.pose, labelPose);
     labelPose = transform * labelPose;
     adjustTransformForRobotRef(labelPose);
-    double yaw = tf::getYaw(labelPose.getRotation());
+    double yaw = tf2::getYaw(labelPose.getRotation());
 
     int startX, startY;
     convertTransformToMapCoordinates(labelPose, startX, startY);

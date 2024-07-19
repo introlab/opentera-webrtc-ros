@@ -47,9 +47,9 @@ It can be enabled and disabled from the robot GUI by pressing the face cropping 
 
 ### Subscribed Topics
 
-- `enable_face_cropping` [std_msgs/Bool](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Bool.html): The topic to enable or disable the node.
-- `input_image` [sensor_msgs/Image](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html): The input image topic.
+- `enable_face_cropping` [std_msgs/Bool](http://docs.ros2.org/foxy/api/std_msgs/msg/Bool.html): The topic to enable or disable the node.
+- `input_image` [sensor_msgs/Image](http://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html): The input image topic.
 
 ### Published Topics
 
-- `output_image` [sensor_msgs/Image](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html): The output image topic.
+- `output_image` [sensor_msgs/Image](http://docs.ros2.org/foxy/api/sensor_msgs/msg/Image.html): The output image topic.

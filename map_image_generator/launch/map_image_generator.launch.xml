@@ -1,0 +1,68 @@
+<launch>
+
+    <arg name="input_occupancy_grid_topic" default="/map"/>
+    <arg name="input_global_path_topic" default="/plan"/>
+    <arg name="input_laser_scan_topic" default="/scan"/>
+    <arg name="input_map_image_goal_topic" default="/map_image_generator/goal"/>
+    <arg name="input_map_labels_topic" default="/rtabmap/rtabmap/labels"/>
+    <arg name="input_sound_sources_topic" default="/odas/sst"/>
+
+    <arg name="output_map_image_topic" default="/map_image_generator/image"/>
+    <arg name="output_goal_topic" default="/rtabmap/rtabmap/goal"/>
+    <arg name="output_map_image_labels_topic" default="/map_image_generator/labels"/>
+
+    <arg name="rtabmap_list_label_service" default="/rtabmap/rtabmap/list_labels"/>
+
+    <arg name="refresh_rate_param" default="1.0"/>
+    <arg name="resolution_param" default="40"/>
+    <arg name="width_param" default="25"/>
+    <arg name="height_param" default="25"/>
+    <arg name="x_origin_param" default="500"/>
+    <arg name="y_origin_param" default="500"/>
+    <arg name="robot_frame_param" default="base_footprint"/>
+    <arg name="map_frame_param" default="map"/>
+    <arg name="draw_goals" default="true"/>
+    <arg name="draw_robot" default="true"/>
+    <arg name="draw_sound_sources" default="true"/>
+    <arg name="draw_global_path" default="true"/>
+    <arg name="centered_robot" default="true"/>
+    <arg name="robot_vertical_offset" default="180"/>
+
+
+    <node name="map_image_generator" pkg="map_image_generator" exec="map_image_generator" respawn="true">
+        <remap from="occupancy_grid" to="$(var input_occupancy_grid_topic)"/>
+        <remap from="global_path" to="$(var input_global_path_topic)"/>
+        <remap from="laser_scan" to="$(var input_laser_scan_topic)"/>
+        <remap from="map_image_goal" to="$(var input_map_image_goal_topic)"/>
+        <remap from="map_labels" to="$(var input_map_labels_topic)"/>
+        <remap from="sound_sources" to="$(var input_sound_sources_topic)"/>
+
+        <remap from="map_image" to="$(var output_map_image_topic)"/>
+        <remap from="output_goal" to="$(var output_goal_topic)"/>
+        <remap from="map_image_labels" to="$(var output_map_image_labels_topic)"/>
+
+        <remap from="rtabmap_list_label_service" to="$(var rtabmap_list_label_service)"/>
+
+        <param name="refresh_rate" value="$(var refresh_rate_param)"/>
+        <param name="resolution" value="$(var resolution_param)"/>
+        <param name="width" value="$(var width_param)"/>
+        <param name="height" value="$(var height_param)"/>
+        <param name="x_origin" value="$(var x_origin_param)"/>
+        <param name="y_origin" value="$(var y_origin_param)"/>
+        <param name="robot_frame_id" value="$(var robot_frame_param)"/>
+        <param name="map_frame_id" value="$(var map_frame_param)"/>
+        <param name="draw_goals" value="$(var draw_goals)" />
+        <param name="draw_robot" value="$(var draw_robot)" />
+        <param name="draw_sound_sources" value="$(var draw_sound_sources)" />
+        <param name="draw_global_path" value="$(var draw_global_path)" />
+        <param name="wall_color" value="0 224 225"/>
+        <param name="free_space_color" value="24 39 52"/>
+        <param name="unknown_space_color" value="12 12 12"/>
+        <param name="robot_size" value="30"/>
+        <param name="global_path_thickness" value="2"/>
+        <param name="laser_scan_size" value="3"/>
+        <param name="centered_robot" value="$(var centered_robot)"/>
+        <param name="robot_vertical_offset" value="$(var robot_vertical_offset)"/>
+    </node>
+
+</launch>

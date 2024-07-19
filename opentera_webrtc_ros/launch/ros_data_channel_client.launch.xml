@@ -1,0 +1,28 @@
+<launch>
+    <!-- Arguments -->
+    <arg name="name" default="data_channel_bridge"/>
+    <arg name="is_stand_alone" default="true"/>
+
+    <arg name="server_url" default="http://localhost:8080"/>
+    <arg name="client_name" default="data_streamer"/>
+    <arg name="room_name" default="chat"/>
+    <arg name="room_password" default="abc"/>
+    <arg name="verify_ssl" default="true"/>
+
+    <arg name="input_topic" default="webrtc_data_outgoing"/>
+    <arg name="output_topic" default="webrtc_data_incoming"/>
+
+    <node name="$(var name)" pkg="opentera_webrtc_ros" exec="data_channel_bridge" respawn="true">
+        <param name="is_stand_alone" value="$(var is_stand_alone)"/>
+        <param name="signaling">
+            <param name="server_url" value="$(var server_url)"/>         <!-- Signaling server URL -->
+            <param name="client_name" value="$(var client_name)"/>       <!-- Peer name as which to join the room -->
+            <param name="room_name" value="$(var room_name)"/>           <!-- Room name to join -->
+            <param name="room_password" value="$(var room_password)"/>   <!-- Room password -->
+            <param name="verify_ssl" value="$(var verify_ssl)"/>         <!-- SSL peer verification -->
+        </param>
+
+        <remap from="webrtc_data_outgoing" to="$(var input_topic)"/>
+        <remap from="webrtc_data_incoming" to="$(var output_topic)"/>
+    </node>
+</launch>

@@ -1,12 +1,12 @@
 #ifndef OCCUPANCY_GRID_IMAGE_DRAWER_H
 #define OCCUPANCY_GRID_IMAGE_DRAWER_H
 
-#include "map_image_generator/ChangeMapView.h"
 #include "map_image_generator/drawers/ImageDrawer.h"
+#include "opentera_webrtc_ros_msgs/srv/change_map_view.hpp"
 
-#include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/msg/occupancy_grid.hpp>
 #include <opencv2/opencv.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace map_image_generator
 {
@@ -14,27 +14,26 @@ namespace map_image_generator
     {
         Parameters& m_mutableParameters;
 
-        ros::Subscriber m_occupancyGridSubscriber;
-        nav_msgs::OccupancyGrid::ConstPtr m_lastOccupancyGrid;
-        ros::ServiceServer m_mapViewChangerService;
+        rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr m_occupancyGridSubscriber;
+        nav_msgs::msg::OccupancyGrid::ConstSharedPtr m_lastOccupancyGrid;
+        rclcpp::Service<opentera_webrtc_ros_msgs::srv::ChangeMapView>::SharedPtr m_mapViewChangerService;
 
         cv::Mat m_notScaledOccupancyGridImage;
         cv::Mat m_scaledOccupancyGridImage;
         cv::Mat m_zoomedOccupancyGridImage;
 
     public:
-        OccupancyGridImageDrawer(
-            Parameters& parameters,
-            ros::NodeHandle& nodeHandle,
-            tf::TransformListener& tfListener);
+        OccupancyGridImageDrawer(Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer);
         ~OccupancyGridImageDrawer() override;
 
         void draw(cv::Mat& image) override;
 
     private:
-        void occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid);
+        void occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr& occupancyGrid);
 
-        bool changeMapViewCallback(ChangeMapView::Request& req, ChangeMapView::Response& res);
+        void changeMapViewCallback(
+            const opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::ConstSharedPtr& req,
+            const opentera_webrtc_ros_msgs::srv::ChangeMapView::Response::SharedPtr& res);
 
         void drawNotScaledOccupancyGridImage();
         void changeNotScaledOccupancyGridImageIfNeeded();
@@ -48,8 +47,7 @@ namespace map_image_generator
         void drawOccupancyGridImage(cv::Mat& image);
         void drawOccupancyGridImageCenteredAroundRobot(cv::Mat& image);
 
-        // Replace with std::optional in C++17
-        std::unique_ptr<tf::Transform> getRobotTransform() const;
+        std::optional<tf2::Transform> getRobotTransform() const;
 
         struct DirectionalValues
         {
@@ -72,7 +70,7 @@ namespace map_image_generator
 
         const cv::Mat& getZoomedOccupancyImage();
 
-        MapCoordinates getMapCoordinatesFromTf(const tf::Transform& transform) const;
+        MapCoordinates getMapCoordinatesFromTf(const tf2::Transform& transform) const;
         static DirectionalValues
             getDirectionsFromMapCoordinates(const MapCoordinates& mapCoordinates, const cv::Mat& map);
     };

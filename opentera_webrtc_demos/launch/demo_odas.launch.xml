@@ -1,0 +1,66 @@
+<launch>
+    <!-- Arguments Demo-->
+    <arg name="signaling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="centered_robot" default="true"/>
+    <arg name="robot_vertical_offset" default="180"/>
+    <arg name="rviz" default="false"/>
+    <arg name="gazebo_gui" default="false"/>
+    <arg name="rtabmap_viz" default="false"/>
+    <arg name="is_stand_alone" default="true"/>
+    <arg name="camera_id" default="0"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
+    <arg name="force_gstreamer_video_hardware_acceleration" default="false"/>
+
+    <!-- Arguments ODAS-->
+    <arg name="frame_id" default="odas"/>
+    <arg name="visualization" default="true"/>
+    <arg name="odas_rviz" default="false"/>
+    <arg name="odas_rviz_cfg" default="-d $(find-pkg-share odas_ros)/config/rviz/odas_rviz.rviz"/>
+    <arg name="local" default="true" />
+    <arg name="use_echo_cancellation" default="true"/>
+    <arg name="echo_cancellation_source" default="alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.multichannel-input" />
+    <arg name="echo_cancellation_sink" default="__default" />
+    <arg name="echo_cancellation_dest" default="odas_echo_cancelled" />
+    <arg name="ec_volume_percent" default="100" />
+    <arg if="$(var use_echo_cancellation)" name="configuration_path" default="$(find-pkg-share opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array_ec.cfg"/>
+    <arg unless="$(var use_echo_cancellation)" name="configuration_path" default="$(find-pkg-share opentera_webrtc_demos)/config/demo_respeaker_usb_4_mic_array.cfg"/>
+
+    <set_parameter name="use_sim_time" value="true"/>
+
+     <!-- Demo -->
+    <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/demo.launch.xml">
+        <arg name="signaling_server_hostname" value="$(var signaling_server_hostname)"/>
+        <arg name="signaling_server_port" value="$(var signaling_server_port)"/>
+        <arg name="signaling_server_password" value="$(var signaling_server_password)"/>
+        <arg name="centered_robot" value="$(var centered_robot)"/>
+        <arg name="robot_vertical_offset" value="$(var robot_vertical_offset)"/>
+        <arg name="rviz" value="$(var rviz)"/>
+        <arg name="gazebo_gui" value="$(var gazebo_gui)"/>
+        <arg name="rtabmap_viz" value="$(var rtabmap_viz)" />
+        <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
+        <arg name="camera_id" value="$(var camera_id)"/>
+        <arg name="use_outgoing_face_cropping" value="$(var use_outgoing_face_cropping)"/>
+        <arg name="use_incoming_face_cropping" value="$(var use_incoming_face_cropping)"/>
+        <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+    </include></group>
+
+    <!-- Sound interface echo cancellation -->
+    <node if="$(var use_echo_cancellation)" pkg="odas_ros" exec="echocancel.sh" name="echocancel" args="$(var echo_cancellation_source) $(var echo_cancellation_sink) $(var echo_cancellation_dest) $(var ec_volume_percent)" />
+
+    <!-- ODAS -->
+    <group><include file="$(find-pkg-share odas_ros)/launch/odas.launch.xml">
+        <arg name="configuration_path" value="$(var configuration_path)"/>
+        <arg name="frame_id" value="$(var frame_id)"/>
+        <arg name="visualization" value="$(var visualization)"/>
+        <arg name="rviz" value="$(var odas_rviz)"/>
+        <arg name="rviz_cfg" value="$(var odas_rviz_cfg)"/>
+        <arg name="local" value="$(var local)" />
+        <arg name="force_publish_tf" value="true"/>
+        <arg name="use_echo_cancellation" value="$(var use_echo_cancellation)"/>
+        <arg name="echo_cancelled_signal_topic" value="/sss"/>
+    </include></group>
+
+</launch>

@@ -11,56 +11,53 @@
 using namespace map_image_generator;
 using namespace std;
 
-MapImageGenerator::MapImageGenerator(
-    Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
+MapImageGenerator::MapImageGenerator(Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
     : m_parameters(parameters),
-      m_nodeHandle(nodeHandle),
-      m_tfListener(tfListener)
+      m_node(node),
+      m_tfBuffer(tfBuffer)
 {
     // The order of the drawers is important as it determines the layering of the
     // elements.
     if (m_parameters.drawOccupancyGrid())
     {
-        m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<OccupancyGridImageDrawer>(parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawGlobalPath())
     {
-        m_drawers.push_back(std::make_unique<GlobalPathImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<GlobalPathImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawRobot())
     {
-        m_drawers.push_back(std::make_unique<RobotImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<RobotImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawLabels())
     {
-        m_drawers.push_back(std::make_unique<LabelImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<LabelImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawGoals())
     {
-        m_drawers.push_back(std::make_unique<GoalImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<GoalImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawLaserScan())
     {
-        m_drawers.push_back(std::make_unique<LaserScanImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<LaserScanImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     if (m_parameters.drawSoundSources())
     {
-        m_drawers.push_back(std::make_unique<SoundSourceImageDrawer>(m_parameters, nodeHandle, m_tfListener));
+        m_drawers.push_back(std::make_unique<SoundSourceImageDrawer>(m_parameters, node, m_tfBuffer));
     }
 
     int imageWidth = parameters.resolution() * parameters.width();
     int imageHeight = parameters.resolution() * parameters.height();
 
-    m_cvImage.header.seq = 0;
-    m_cvImage.header.stamp = ros::Time::now();
+
+    m_cvImage.header.stamp = m_node.now();
     m_cvImage.header.frame_id = "map_image";
 
     m_cvImage.encoding = sensor_msgs::image_encodings::BGR8;
@@ -69,10 +66,9 @@ MapImageGenerator::MapImageGenerator(
 
 MapImageGenerator::~MapImageGenerator() = default;
 
-void MapImageGenerator::generate(sensor_msgs::Image& sensorImage)
+void MapImageGenerator::generate(sensor_msgs::msg::Image& sensorImage)
 {
-    m_cvImage.header.seq++;
-    m_cvImage.header.stamp = ros::Time::now();
+    m_cvImage.header.stamp = m_node.now();
     m_cvImage.image = m_parameters.unknownSpaceColor();
 
     for (auto& drawer : m_drawers)

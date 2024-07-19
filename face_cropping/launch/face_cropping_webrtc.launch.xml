@@ -1,0 +1,36 @@
+<launch>
+    <arg name="name" default="face_cropping_webrtc_node"/>
+
+    <arg name="input_camera_topic" default="/camera1/image_raw"/>
+    <arg name="output_camera_topic" default="/face_camera/image_raw"/>
+
+    <!-- haarcascade, lbpcascade,
+         small_yunet_0.25_160, small_yunet_0.25_320, small_yunet_0.25_640,
+         small_yunet_0.5_160, small_yunet_0.5_320 or small_yunet_0.5_640 -->
+    <arg name="face_detection_model" default="lbpcascade"/>
+    <arg name="use_gpu_if_available" default="false"/>
+
+    <arg name="min_face_width" default="100.0"/>
+    <arg name="min_face_height" default="100.0"/>
+    <arg name="output_width" default="480"/>
+    <arg name="output_height" default="720"/>
+
+    <arg name="adjust_brightness" default="true"/>
+
+    <node name="$(var name)" pkg="face_cropping" exec="face_cropping_webrtc_node">
+        <remap from="input_image" to="$(var input_camera_topic)"/>
+        <remap from="output_image" to="$(var output_camera_topic)"/>
+
+        <param name="face_detection_model" value="$(var face_detection_model)"/>
+        <param name="use_gpu_if_available" value="$(var use_gpu_if_available)"/>
+
+        <param name="min_face_width" value="$(var min_face_width)"/>
+        <param name="min_face_height" value="$(var min_face_height)"/>
+        <param name="output_width" value="$(var output_width)"/>
+        <param name="output_height" value="$(var output_height)"/>
+
+        <param name="adjust_brightness" value="$(var adjust_brightness)"/>
+
+        <env name="OMP_NUM_THREADS" value="1"/>
+    </node>
+</launch>

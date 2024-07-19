@@ -3,31 +3,30 @@
 
 #include "map_image_generator/drawers/ImageDrawer.h"
 
-#include <nav_msgs/Path.h>
-#include <ros/ros.h>
-#include <std_srvs/SetBool.h>
+#include <nav_msgs/msg/path.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_srvs/srv/set_bool.hpp>
 
 namespace map_image_generator
 {
     class GlobalPathImageDrawer : public ImageDrawer
     {
-        ros::Subscriber m_globalPathSubscriber;
-        nav_msgs::Path::Ptr m_lastGlobalPath;
-        ros::ServiceServer m_clearGlobalPathService;
+        rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr m_globalPathSubscriber;
+        nav_msgs::msg::Path::UniquePtr m_lastGlobalPath;
+        rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr m_clearGlobalPathService;
 
     public:
-        GlobalPathImageDrawer(
-            const Parameters& parameters,
-            ros::NodeHandle& nodeHandle,
-            tf::TransformListener& tfListener);
+        GlobalPathImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer);
         ~GlobalPathImageDrawer() override;
 
         void draw(cv::Mat& image) override;
 
     private:
-        void globalPathCallback(const nav_msgs::Path::Ptr& globalPath);
-        void drawGlobalPath(cv::Mat& image, tf::Transform& transform);
-        bool clearGlobalPath(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
+        void globalPathCallback(const nav_msgs::msg::Path::ConstSharedPtr& globalPath);
+        void drawGlobalPath(cv::Mat& image, tf2::Transform& transform);
+        void clearGlobalPath(
+            const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+            const std_srvs::srv::SetBool::Response::SharedPtr& res);
     };
 }
 #endif

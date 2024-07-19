@@ -1,0 +1,11 @@
+<launch>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+
+    <!-- Signaling server -->
+    <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_signaling_server.launch.xml">
+        <arg name="port" value="$(var signaling_server_port)" />
+        <arg name="password" value="$(var signaling_server_password)" />
+    </include></group>
+
+</launch>

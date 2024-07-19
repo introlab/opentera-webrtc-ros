@@ -1,10 +1,11 @@
-#include <RosAudioSource.h>
-#include <ros/ros.h>
+#include <opentera_webrtc_ros/RosAudioSource.h>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace opentera;
 
 
 RosAudioSource::RosAudioSource(
+    rclcpp::Node& node,
     unsigned int soundCardTotalDelayMs,
     bool echoCancellation,
     bool autoGainControl,
@@ -24,11 +25,12 @@ RosAudioSource::RosAudioSource(
               transientSuppression),
           16,
           48000,
-          1)
+          1),
+      m_node{node}
 {
 }
 
-void RosAudioSource::sendFrame(const audio_utils::AudioFrameConstPtr& msg)
+void RosAudioSource::sendFrame(const audio_utils_msgs::msg::AudioFrame::ConstSharedPtr& msg)
 {
     // Checking if frame fits default configuration and send frame
     if (msg->channel_count == 1 && msg->sampling_frequency == 48000 && msg->format == "signed_16")
@@ -38,7 +40,8 @@ void RosAudioSource::sendFrame(const audio_utils::AudioFrameConstPtr& msg)
     }
     else
     {
-        ROS_ERROR(
+        RCLCPP_ERROR(
+            m_node.get_logger(),
             "Invalid audio frame (channel_count=%i, sampling_frequency=%i, format=%s)",
             msg->channel_count,
             msg->sampling_frequency,

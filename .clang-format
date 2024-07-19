@@ -89,5 +89,4 @@ Standard: c++14
 StatementAttributeLikeMacros: [emit]
 StatementMacros: [Q_UNUSED, Q_OBJECT]
 TabWidth: 4
-UseCRLF: false
 UseTab: Never

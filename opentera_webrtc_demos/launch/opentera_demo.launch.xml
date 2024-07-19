@@ -1,0 +1,142 @@
+<launch>
+    <arg name="signaling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="centered_robot" default="true"/>
+    <arg name="robot_vertical_offset" default="180"/>
+    <arg name="map_refresh_rate" default="5.0"/>
+    <arg name="rviz" default="false"/>
+    <arg name="gazebo_gui" default="false"/>
+    <arg name="rtabmap_viz" default="false"/>
+    <arg name="is_stand_alone" default="false"/>
+    <arg name="camera_id" default="0"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
+    <arg name="force_gstreamer_video_hardware_acceleration" default="false"/>
+
+    <set_parameter name="use_sim_time" value="true"/>
+
+    <!-- Turtlebot simulator -->
+    <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_turtlebot_sim.launch.xml">
+        <arg name="open_rviz" value="$(var rviz)" />
+        <arg name="gazebo_gui" value="$(var gazebo_gui)" />
+        <arg name="rtabmap_viz" value="$(var rtabmap_viz)" />
+    </include></group>
+
+    <!-- Map image generator -->
+    <group><include file="$(find-pkg-share map_image_generator)/launch/map_image_generator.launch.xml" >
+        <arg name="refresh_rate_param" value="$(var map_refresh_rate)"/>
+        <arg name="centered_robot" value="$(var centered_robot)"/>
+        <arg name="robot_vertical_offset" value="$(var robot_vertical_offset)"/>
+        <arg name="input_sound_sources_topic" value="/sst"/>
+    </include></group>
+
+    <!-- Face cropper local -->
+    <group><include if="$(var use_outgoing_face_cropping)" file="$(find-pkg-share face_cropping)/launch/face_cropping.launch.xml" >
+        <arg name="input_camera_topic" value="/camera1/image_raw"/>
+        <arg name="output_camera_topic" value="/face_camera/image_raw"/>
+    </include></group>
+
+    <!-- Face cropper webrtc -->
+    <group><include if="$(var use_incoming_face_cropping)" file="$(find-pkg-share face_cropping)/launch/face_cropping_webrtc.launch.xml" >
+        <arg name="input_camera_topic" value="/webrtc_image"/>
+        <arg name="output_camera_topic" value="/face_webrtc_image"/>
+    </include></group>
+
+    <let name="input_camera_topic_based_on_face_cropping" if="$(var use_outgoing_face_cropping)" value="/face_camera/image_raw"/>
+    <let name="input_camera_topic_based_on_face_cropping" unless="$(var use_outgoing_face_cropping)" value="/front_camera/image_raw"/>
+
+    <let name="webrtc_image_topic_based_on_face_cropping" if="$(var use_incoming_face_cropping)" value="/face_webrtc_image"/>
+    <let name="webrtc_image_topic_based_on_face_cropping" unless="$(var use_incoming_face_cropping)" value="/webrtc_image"/>
+
+    <!-- Front camera -->
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
+        <arg name="name" value="topic_streamer1"/>
+        <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
+        <arg name="can_send_audio_stream" value="true"/>
+        <arg name="can_receive_audio_stream" value="true"/>
+        <arg name="can_send_video_stream" value="true"/>
+        <arg name="can_receive_video_stream" value="true"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://$(var signaling_server_hostname):$(var signaling_server_port)"/>
+        <arg name="client_name" value="Robot Camera 1"/>
+        <arg name="room_name" value="VideoConf"/>
+        <arg name="room_password" value="$(var signaling_server_password)"/>
+        <arg name="input_camera_topic" value="$(var input_camera_topic_based_on_face_cropping)"/>
+        <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+    </include></group>
+
+    <!-- Bottom camera -->
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
+        <arg name="name" value="topic_streamer2"/>
+        <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
+        <arg name="can_send_audio_stream" value="false"/>
+        <arg name="can_receive_audio_stream" value="false"/>
+        <arg name="can_send_video_stream" value="true"/>
+        <arg name="can_receive_video_stream" value="false"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://$(var signaling_server_hostname):$(var signaling_server_port)"/>
+        <arg name="client_name" value="Robot Camera 2"/>
+        <arg name="room_name" value="CameraX"/>
+        <arg name="room_password" value="$(var signaling_server_password)"/>
+        <arg name="input_camera_topic" value="/r200/rgb/image_raw"/>
+        <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+    </include></group>
+
+    <!-- Map image stream -->
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
+        <arg name="name" value="topic_streamer3"/>
+        <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
+        <arg name="can_send_audio_stream" value="false"/>
+        <arg name="can_receive_audio_stream" value="false"/>
+        <arg name="can_send_video_stream" value="true"/>
+        <arg name="can_receive_video_stream" value="false"/>
+        <arg name="is_screen_cast" value="false"/>
+        <arg name="needs_denoising" value="false"/>
+        <arg name="server_url" value="http://$(var signaling_server_hostname):$(var signaling_server_port)"/>
+        <arg name="client_name" value="Map image"/>
+        <arg name="room_name" value="Map"/>
+        <arg name="room_password" value="$(var signaling_server_password)"/>
+        <arg name="input_camera_topic" value="/map_image_generator/image"/>
+        <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+    </include></group>
+
+    <!-- Data Channel  -->
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_data_channel_client.launch.xml">
+        <arg name="name" value="data_streamer"/>
+        <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
+
+        <arg name="server_url" value="http://$(var signaling_server_hostname):$(var signaling_server_port)"/>
+        <arg name="client_name" value="Robot Data Channel"/>
+        <arg name="room_name" value="Teleop"/>
+        <arg name="room_password" value="$(var signaling_server_password)"/>
+    </include></group>
+
+    <!-- Json Message Handler -->
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_json_data_handler.launch.xml">
+        <arg name="name" value="json_data_handler"/>
+        <arg name="input_topic" value="/webrtc_data_incoming"/>
+        <arg name="linear_multiplier" value="0.5"/>
+        <arg name="angular_multiplier" value="0.35"/>
+    </include></group>
+
+    <!-- Robot status simulated data -->
+    <node name="robot_status" exec="robot_status.py" pkg="opentera_webrtc_demos" />
+
+    <!-- Loopback or webcam camera -->
+    <node if="$(var use_outgoing_face_cropping)" pkg="cv_camera" exec="cv_camera_node" name="camera1">
+        <param name="device_id" value="$(var camera_id)"/>
+
+        <remap from="image_raw" to="/camera1/image_raw" />
+    </node>
+
+    <node pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui" respawn="true">
+        <param name="device_properties_path" value="$(find-pkg-share opentera_webrtc_robot_gui)/resources/DeviceProperties.json"/>
+
+        <remap from="/webrtc_image" to="$(var webrtc_image_topic_based_on_face_cropping)"/>
+        <remap from="/front_camera/image_raw" to="$(var input_camera_topic_based_on_face_cropping)"/>
+    </node>
+
+</launch>

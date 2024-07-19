@@ -3,20 +3,26 @@
 #include "map_image_generator/utils.h"
 
 #include <queue>
-#include <tf/tf.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2/utils.h>
 
 using namespace map_image_generator;
 
 OccupancyGridImageDrawer::OccupancyGridImageDrawer(
     Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer{parameters, nodeHandle, tfListener},
+    rclcpp::Node& node,
+    tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer{parameters, node, tfBuffer},
       m_mutableParameters{parameters},
-      m_occupancyGridSubscriber{
-          m_nodeHandle.subscribe("occupancy_grid", 1, &OccupancyGridImageDrawer::occupancyGridCallback, this)},
-      m_mapViewChangerService{
-          m_nodeHandle.advertiseService("change_map_view", &OccupancyGridImageDrawer::changeMapViewCallback, this)}
+      m_occupancyGridSubscriber{m_node.create_subscription<nav_msgs::msg::OccupancyGrid>(
+          "occupancy_grid",
+          1,
+          bind_this<nav_msgs::msg::OccupancyGrid>(this, &OccupancyGridImageDrawer::occupancyGridCallback))},
+      m_mapViewChangerService{m_node.create_service<opentera_webrtc_ros_msgs::srv::ChangeMapView>(
+          "change_map_view",
+          bind_this<opentera_webrtc_ros_msgs::srv::ChangeMapView>(
+              this,
+              &OccupancyGridImageDrawer::changeMapViewCallback))}
 {
 }
 
@@ -42,29 +48,31 @@ void OccupancyGridImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void OccupancyGridImageDrawer::occupancyGridCallback(const nav_msgs::OccupancyGrid::ConstPtr& occupancyGrid)
+void OccupancyGridImageDrawer::occupancyGridCallback(const nav_msgs::msg::OccupancyGrid::ConstSharedPtr& occupancyGrid)
 {
     m_lastOccupancyGrid = occupancyGrid;
 }
 
-bool OccupancyGridImageDrawer::changeMapViewCallback(ChangeMapView::Request& req, ChangeMapView::Response& res)
+void OccupancyGridImageDrawer::changeMapViewCallback(
+    const opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::ConstSharedPtr& req,
+    const opentera_webrtc_ros_msgs::srv::ChangeMapView::Response::SharedPtr& res)
 {
-    res.success = true;
-    if (req.view_new == ChangeMapView::Request::VIEW_CENTERED_ROBOT)
+    res->success = true;
+    if (req->view_new == opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::VIEW_CENTERED_ROBOT)
     {
         m_mutableParameters.setCenteredRobot(true);
     }
-    else if (req.view_new == ChangeMapView::Request::VIEW_STATIC_MAP)
+    else if (req->view_new == opentera_webrtc_ros_msgs::srv::ChangeMapView::Request::VIEW_STATIC_MAP)
     {
         m_mutableParameters.setCenteredRobot(false);
     }
     else
     {
-        ROS_ERROR("Unknown view type: %s. View was not changed.", req.view_new.c_str());
-        res.success = false;
-        res.message = "unknown view type";
+        RCLCPP_ERROR(m_node.get_logger(), "Unknown view type: %s. View was not changed.", req->view_new.c_str());
+        res->success = false;
+        res->message = "unknown view type";
     }
-    return true;
+    return;
 }
 
 void OccupancyGridImageDrawer::drawNotScaledOccupancyGridImage()
@@ -149,23 +157,23 @@ void OccupancyGridImageDrawer::changeScaledOccupancyGridImageIfNeeded()
     }
 }
 
-// Replace with std::optional in C++17
-std::unique_ptr<tf::Transform> OccupancyGridImageDrawer::getRobotTransform() const
+std::optional<tf2::Transform> OccupancyGridImageDrawer::getRobotTransform() const
 {
-    tf::StampedTransform transform;
+    tf2::Stamped<tf2::Transform> transform;
 
     try
     {
-        m_tfListener.lookupTransform(m_parameters.mapFrameId(), m_parameters.robotFrameId(), ros::Time(0), transform);
+        auto transformMsg =
+            m_tfBuffer.lookupTransform(m_parameters.mapFrameId(), m_parameters.robotFrameId(), tf2::TimePointZero);
+        tf2::fromMsg(transformMsg, transform);
     }
-    catch (tf::TransformException& ex)
+    catch (const tf2::TransformException& ex)
     {
-        ROS_ERROR("%s", ex.what());
+        RCLCPP_ERROR(m_node.get_logger(), "%s", ex.what());
         return {};
     }
 
-    // Replace with std::optional in C++17
-    return std::make_unique<tf::Transform>(transform);
+    return transform;
 }
 
 void OccupancyGridImageDrawer::rotateImageAboutPoint(cv::Mat& image, double angle, const cv::Point& point) const
@@ -199,7 +207,7 @@ OccupancyGridImageDrawer::DirectionalValues
 }
 
 OccupancyGridImageDrawer::MapCoordinates
-    OccupancyGridImageDrawer::getMapCoordinatesFromTf(const tf::Transform& transform) const
+    OccupancyGridImageDrawer::getMapCoordinatesFromTf(const tf2::Transform& transform) const
 {
     MapCoordinates mapCoordinates{};
     convertTransformToInputMapCoordinates(transform, m_lastOccupancyGrid->info, mapCoordinates.x, mapCoordinates.y);
@@ -238,7 +246,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
     double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
     double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
 
-    tf::Pose mapOriginPose;
+    tf2::Transform mapOriginPose;
     mapOriginPose.setOrigin({0.0, 0.0, 0.0});
 
     MapCoordinates mapOriginCoordinates = getMapCoordinatesFromTf(mapOriginPose);
@@ -312,7 +320,7 @@ void OccupancyGridImageDrawer::drawOccupancyGridImageCenteredAroundRobot(cv::Mat
 
     using namespace map_image_generator;
 
-    double rotationAngle = rad2deg(tf::getYaw(robotTransform->getRotation()));
+    double rotationAngle = rad2deg(tf2::getYaw(robotTransform->getRotation()));
     cv::Point rotationCenter{robotCoordinates.x + padding.left, robotCoordinates.y + padding.top};
     rotateImageAboutPoint(paddedImage, rotationAngle, rotationCenter);
 

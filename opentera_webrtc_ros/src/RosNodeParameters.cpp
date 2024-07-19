@@ -1,17 +1,62 @@
-#include <ros/ros.h>
-#include <RosNodeParameters.h>
-#include <RosParamUtils.h>
+#include <rclcpp/rclcpp.hpp>
+#include <opentera_webrtc_ros/RosNodeParameters.h>
 
 #include <stdexcept>
 
 using namespace opentera;
-using namespace ros;
-using namespace std;
 
-bool RosNodeParameters::isStandAlone()
+namespace
 {
-    NodeHandle pnh("~");
-    return pnh.param<bool>("is_stand_alone", true);
+    std::vector<std::string> remove_empty_strings(const std::vector<std::string>& vec)
+    {
+        std::vector<std::string> out;
+        std::copy_if(
+            vec.begin(),
+            vec.end(),
+            std::back_inserter(out),
+            [](const std::string& codecString) { return !codecString.empty(); });
+
+        return out;
+    }
+}
+
+RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
+{
+    m_node.declare_parameter("is_stand_alone", true);
+
+    // Signaling params
+    m_node.declare_parameter("signaling.client_name", "streamer");
+    m_node.declare_parameter("signaling.room_name", "chat");
+    m_node.declare_parameter("signaling.server_url", "http://localhost:8080");
+    m_node.declare_parameter("signaling.room_password", "abc");
+    m_node.declare_parameter("signaling.verify_ssl", true);
+
+    // Video stream params
+    m_node.declare_parameter("video_stream.can_send_video_stream", false);
+    m_node.declare_parameter("video_stream.can_receive_video_stream", false);
+    m_node.declare_parameter("video_stream.needs_denoising", false);
+    m_node.declare_parameter("video_stream.is_screen_cast", false);
+
+    // Video codec params
+    m_node.declare_parameter("video_codecs.forced_codecs", std::vector<std::string>());
+    m_node.declare_parameter("video_codecs.force_gstreamer_hardware_acceleration", false);
+    m_node.declare_parameter("video_codecs.use_gstreamer_software_encoder_decoder", false);
+
+    // Audio stream params
+    m_node.declare_parameter("audio_stream.can_send_audio_stream", false);
+    m_node.declare_parameter("audio_stream.can_receive_audio_stream", false);
+    m_node.declare_parameter("audio_stream.sound_card_total_delay_ms", 40);
+    m_node.declare_parameter("audio_stream.echo_cancellation", true);
+    m_node.declare_parameter("audio_stream.auto_gain_control", true);
+    m_node.declare_parameter("audio_stream.noise_suppression", true);
+    m_node.declare_parameter("audio_stream.high_pass_filter", false);
+    m_node.declare_parameter("audio_stream.stereo_swapping", false);
+    m_node.declare_parameter("audio_stream.transient_suppression", true);
+}
+
+bool RosNodeParameters::isStandAlone() const
+{
+    return m_node.get_parameter("is_stand_alone").as_bool();
 }
 
 /**
@@ -20,15 +65,10 @@ bool RosNodeParameters::isStandAlone()
  * @param clientName Client's name
  * @param room Room's name
  */
-void RosNodeParameters::loadSignalingParams(std::string& clientName, std::string& room)
+void RosNodeParameters::loadSignalingParams(std::string& clientName, std::string& room) const
 {
-    NodeHandle pnh("~");
-
-    std::map<std::string, std::string> dict;
-    opentera::param::getParam(pnh, "signaling", dict);
-
-    clientName = isInParams("client_name", dict) ? dict["client_name"] : "streamer";
-    room = isInParams("room_name", dict) ? dict["room_name"] : "chat";
+    clientName = m_node.get_parameter("signaling.client_name").as_string();
+    room = m_node.get_parameter("signaling.room_name").as_string();
 }
 
 /**
@@ -43,17 +83,12 @@ void RosNodeParameters::loadSignalingParams(
     std::string& serverUrl,
     std::string& clientName,
     std::string& room,
-    std::string& password)
+    std::string& password) const
 {
-    NodeHandle pnh("~");
-
-    // String parameters
-    std::map<std::string, std::string> dictString;
-    opentera::param::getParam(pnh, "signaling", dictString);
-    serverUrl = isInParams("server_url", dictString) ? dictString["server_url"] : "http://localhost:8080";
-    clientName = isInParams("client_name", dictString) ? dictString["client_name"] : "streamer";
-    room = isInParams("room_name", dictString) ? dictString["room_name"] : "chat";
-    password = isInParams("room_password", dictString) ? dictString["room_password"] : "abc";
+    serverUrl = m_node.get_parameter("signaling.server_url").as_string();
+    clientName = m_node.get_parameter("signaling.client_name").as_string();
+    room = m_node.get_parameter("signaling.room_name").as_string();
+    password = m_node.get_parameter("signaling.room_password").as_string();
 }
 
 /**
@@ -61,13 +96,9 @@ void RosNodeParameters::loadSignalingParams(
  *
  * @param verifySSL Verify SSL peer
  */
-void RosNodeParameters::loadSignalingParamsVerifySSL(bool& verifySSL)
+void RosNodeParameters::loadSignalingParamsVerifySSL(bool& verifySSL) const
 {
-    NodeHandle pnh("~");
-    // Bool parameters
-    std::map<std::string, bool> dictBool;
-    opentera::param::getParam(pnh, "signaling", dictBool);
-    verifySSL = isInParams("verify_ssl", dictBool) ? dictBool["verify_ssl"] : true;
+    verifySSL = m_node.get_parameter("signaling.verify_ssl").as_bool();
 }
 
 /**
@@ -82,17 +113,12 @@ void RosNodeParameters::loadVideoStreamParams(
     bool& canSendVideoStream,
     bool& canReceiveVideoStream,
     bool& denoise,
-    bool& screencast)
+    bool& screencast) const
 {
-    NodeHandle pnh("~");
-
-    std::map<std::string, bool> dict;
-    opentera::param::getParam(pnh, "video_stream", dict);
-
-    canSendVideoStream = isInParams("can_send_video_stream", dict) ? dict["can_send_video_stream"] : false;
-    canReceiveVideoStream = isInParams("can_receive_video_stream", dict) ? dict["can_receive_video_stream"] : false;
-    denoise = isInParams("needs_denoising", dict) ? dict["needs_denoising"] : false;
-    screencast = isInParams("is_screen_cast", dict) ? dict["is_screen_cast"] : false;
+    canSendVideoStream = m_node.get_parameter("video_stream.can_send_video_stream").as_bool();
+    canReceiveVideoStream = m_node.get_parameter("video_stream.can_receive_video_stream").as_bool();
+    denoise = m_node.get_parameter("video_stream.needs_denoising").as_bool();
+    screencast = m_node.get_parameter("video_stream.is_screen_cast").as_bool();
 }
 
 /**
@@ -103,19 +129,18 @@ void RosNodeParameters::loadVideoStreamParams(
  * @param useGStreamerSoftwareEncoderDecoder whether to use GStreamer software encoders/decoders
  */
 void RosNodeParameters::loadVideoCodecParams(
-    unordered_set<VideoStreamCodec>& forcedCodecs,
+    std::unordered_set<VideoStreamCodec>& forcedCodecs,
     bool& forceGStreamerHardwareAcceleration,
-    bool& useGStreamerSoftwareEncoderDecoder)
+    bool& useGStreamerSoftwareEncoderDecoder) const
 {
-    NodeHandle pnh("~");
+    std::vector<std::string> forcedCodecStrings =
+        remove_empty_strings(m_node.get_parameter("video_codecs.forced_codecs").as_string_array());
 
-    vector<string> forcedCodecStrings;
-    pnh.getParam("video_codecs/forced_codecs", forcedCodecStrings);
-    transform(
+    std::transform(
         forcedCodecStrings.begin(),
         forcedCodecStrings.end(),
         inserter(forcedCodecs, forcedCodecs.begin()),
-        [](const string& codecString)
+        [](const std::string& codecString)
         {
             auto codec = stringToVideoStreamCodec(codecString);
             if (codec.has_value())
@@ -124,12 +149,14 @@ void RosNodeParameters::loadVideoCodecParams(
             }
             else
             {
-                throw runtime_error("Invalid codec: " + codecString);
+                throw std::runtime_error("Invalid codec: " + codecString);
             }
         });
 
-    forceGStreamerHardwareAcceleration = pnh.param<bool>("video_codecs/force_gstreamer_hardware_acceleration", false);
-    useGStreamerSoftwareEncoderDecoder = pnh.param<bool>("video_codecs/use_gstreamer_software_encoder_decoder", false);
+    forceGStreamerHardwareAcceleration =
+        m_node.get_parameter("video_codecs.force_gstreamer_hardware_acceleration").as_bool();
+    useGStreamerSoftwareEncoderDecoder =
+        m_node.get_parameter("video_codecs.use_gstreamer_software_encoder_decoder").as_bool();
 }
 
 /**
@@ -147,25 +174,15 @@ void RosNodeParameters::loadAudioStreamParams(
     bool& noiseSuppression,
     bool& highPassFilter,
     bool& stereoSwapping,
-    bool& transientSuppression)
+    bool& transientSuppression) const
 {
-    NodeHandle pnh("~");
-
-    std::map<std::string, bool> dict;
-    opentera::param::getParam(pnh, "audio_stream", dict);
-
-    std::map<std::string, int> dictInt;
-    opentera::param::getParam(pnh, "audio_stream", dictInt);
-
-
-    canSendAudioStream = isInParams("can_send_audio_stream", dict) ? dict["can_send_audio_stream"] : false;
-    canReceiveAudioStream = isInParams("can_receive_audio_stream", dict) ? dict["can_receive_audio_stream"] : false;
-    soundCardTotalDelayMs =
-        isInParams("sound_card_total_delay_ms", dictInt) ? dictInt["sound_card_total_delay_ms"] : 40;
-    echoCancellation = isInParams("echo_cancellation", dict) ? dict["echo_cancellation"] : true;
-    autoGainControl = isInParams("auto_gain_control", dict) ? dict["auto_gain_control"] : true;
-    noiseSuppression = isInParams("noise_suppression", dict) ? dict["noise_suppression"] : true;
-    highPassFilter = isInParams("high_pass_filter", dict) ? dict["high_pass_filter"] : false;
-    stereoSwapping = isInParams("stereo_swapping", dict) ? dict["stereo_swapping"] : false;
-    transientSuppression = isInParams("transient_suppression", dict) ? dict["transient_suppression"] : true;
+    canSendAudioStream = m_node.get_parameter("audio_stream.can_send_audio_stream").as_bool();
+    canReceiveAudioStream = m_node.get_parameter("audio_stream.can_receive_audio_stream").as_bool();
+    soundCardTotalDelayMs = m_node.get_parameter("audio_stream.sound_card_total_delay_ms").as_int();
+    echoCancellation = m_node.get_parameter("audio_stream.echo_cancellation").as_bool();
+    autoGainControl = m_node.get_parameter("audio_stream.auto_gain_control").as_bool();
+    noiseSuppression = m_node.get_parameter("audio_stream.noise_suppression").as_bool();
+    highPassFilter = m_node.get_parameter("audio_stream.high_pass_filter").as_bool();
+    stereoSwapping = m_node.get_parameter("audio_stream.stereo_swapping").as_bool();
+    transientSuppression = m_node.get_parameter("audio_stream.transient_suppression").as_bool();
 }

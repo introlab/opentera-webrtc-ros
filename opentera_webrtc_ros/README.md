@@ -31,25 +31,21 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 #### Default Parameters
 
 ```xml
-<rosparam param="is_stand_alone">true</rosparam>
-<rosparam param="stream">
-  {
-    can_send_audio_stream: true,        # Send audio stream to the signaling server
-    can_receive_audio_stream: true,     # Receive audio stream from the signaling server
-    can_send_video_stream: true,        # Send video stream to the signaling server
-    can_receive_video_stream: true,     # Receive video stream from the signaling server
-    is_screen_cast: false,        # Is the image source a screen capture?
-    needs_denoising: false        # Does the image source needs denoising?
-  }
-</rosparam>
-<rosparam param="signaling">
-  {
-    server_url: "http://localhost:8080",    # Signaling server URL used in stand_alone mode
-    client_name: "streamer",                # Peer name as which to join the room
-    room_name: "chat",                      # Room name to join
-    room_password: "abc"                    # Room password used in stand alone mode
-  }
-</rosparam>
+<param name="is_stand_alone" value="true"/>
+<param name="stream">
+  <param name="can_send_audio_stream" value="true"/>     <!-- Send audio stream to the signaling server -->
+  <param name="can_receive_audio_stream" value="true"/>  <!-- Receive audio stream from the signaling server -->
+  <param name="can_send_video_stream" value="true"/>     <!-- Send video stream to the signaling server -->
+  <param name="can_receive_video_stream" value="true"/>  <!-- Receive video stream from the signaling server -->
+  <param name="is_screen_cast" value="false"/>           <!-- Is the image source a screen capture? -->
+  <param name="needs_denoising" value="false"/>          <!-- Does the image source needs denoising? -->
+</param>
+<param value="signaling">
+  <param name="server_url" value="http://localhost:8080"/>  <!-- Signaling server URL used in stand_alone mode -->
+  <param name="client_name" value="streamer"/>              <!-- Peer name as which to join the room -->
+  <param name="room_name" value="chat"/>                    <!-- Room name to join -->
+  <param name="room_password" value="abc"/>                 <!-- Room password used in stand alone mode -->
+</param>
 ```
 
 For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.launch).
@@ -72,15 +68,13 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 #### Default Parameters (RosDataChannelBridge)
 
 ```xml
-<rosparam param="is_stand_alone" >true</rosparam>
-<rosparam param="signaling">
-  {
-    server_url: "http://localhost:8080",    # Signaling server URL used in stand_alone mode
-    client_name: "data_bridge",             # Peer name as which to join the room
-    room_name: "chat",                      # Room name to join
-    room_password: "abc"                    # Room password used in stand_alone mode
-  }
-</rosparam>
+<param name="is_stand_alone" value="true"/>
+<param value="signaling">
+  <param name="server_url" value="http://localhost:8080"/>  <!-- Signaling server URL used in stand_alone mode -->
+  <param name="client_name" value="data_bridge"/>           <!-- Peer name as which to join the room -->
+  <param name="room_name" value="chat"/>                    <!-- Room name to join -->
+  <param name="room_password" value="abc"/>                 <!-- Room password used in stand alone mode -->
+</param>
 ```
 
 For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_channel_client.launch).

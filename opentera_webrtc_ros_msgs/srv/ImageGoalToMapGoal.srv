@@ -1,0 +1,4 @@
+geometry_msgs/PoseStamped image_goal
+---
+bool success
+geometry_msgs/PoseStamped map_goal

@@ -1,7 +1,7 @@
 #ifndef FACE_CROPPING_NODE_CONFIGURATION_H
 #define FACE_CROPPING_NODE_CONFIGURATION_H
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <optional>
 
@@ -17,7 +17,7 @@ struct FaceCroppingNodeConfiguration
 
     bool adjustBrightness;
 
-    static std::optional<FaceCroppingNodeConfiguration> fromRosParameters(const ros::NodeHandle& privateNodeHandle);
+    static std::optional<FaceCroppingNodeConfiguration> fromRosParameters(rclcpp::Node& nodeHandle);
 };
 
 #endif

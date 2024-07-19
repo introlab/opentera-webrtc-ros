@@ -1,0 +1,20 @@
+<launch>
+
+    <arg name="model" default="lbpcascade" />
+
+    <node pkg="cv_camera" exec="cv_camera_node" name="cv_camera_node">
+        <param name="rate" value="30.0"/>
+        <param name="device_id" value="0"/>
+    </node>
+
+    <group><include file="$(find-pkg-share face_cropping)/launch/face_cropping.launch.xml">
+        <arg name="input_camera_topic" value="image_raw"/>
+        <arg name="output_camera_topic" value="image_raw/cropped"/>
+        <arg name="face_detection_model" value="$(var model)"/>
+    </include></group>
+
+    <node pkg="rqt_image_view" exec="rqt_image_view" name="image_display">
+        <param name="topic" value="image_raw/cropped" />
+    </node>
+
+</launch>

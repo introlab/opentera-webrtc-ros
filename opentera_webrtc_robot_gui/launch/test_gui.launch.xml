@@ -1,0 +1,16 @@
+<launch>
+    <arg name="loopback_cam" default="0"/>
+
+    <!-- Loopback or webcam camera -->
+    <node pkg="cv_camera" exec="cv_camera_node" name="camera1">
+        <param name="device_id" value="$(var loopback_cam)"/>
+
+        <remap from="image_raw" to="/front_camera/image_raw" />
+    </node>
+
+    <!-- Robot GUI-->
+    <node pkg="opentera_webrtc_robot_gui" exec="opentera_webrtc_robot_gui_node" name="robot_gui">
+        <param name="device_properties_path" value="$(find-pkg-share opentera_webrtc_robot_gui)/resources/DeviceProperties.json"/>
+    </node>
+
+</launch>

@@ -2,44 +2,51 @@
 
 #include <cmath>
 #include <sstream>
-#include <tf/tf.h>
+
+#include <tf2/utils.h>
 
 using namespace map_image_generator;
 using namespace std;
 
 SoundSourceImageDrawer::SoundSourceImageDrawer(
     const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_soundSourcesArraySubscriber{
-          nodeHandle.subscribe("sound_sources", 1, &SoundSourceImageDrawer::soundSourcesCallback, this)},
-      m_laserScanSubscriber{nodeHandle.subscribe("laser_scan", 1, &SoundSourceImageDrawer::laserScanCallback, this)}
+    rclcpp::Node& node,
+    tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer),
+      m_soundSourcesArraySubscriber{node.create_subscription<odas_ros_msgs::msg::OdasSstArrayStamped>(
+          "sound_sources",
+          1,
+          bind_this<odas_ros_msgs::msg::OdasSstArrayStamped>(this, &SoundSourceImageDrawer::soundSourcesCallback))},
+      m_laserScanSubscriber{m_node.create_subscription<sensor_msgs::msg::LaserScan>(
+          "laser_scan",
+          1,
+          bind_this<sensor_msgs::msg::LaserScan>(this, &SoundSourceImageDrawer::laserScanCallback))}
 {
 }
 
 SoundSourceImageDrawer::~SoundSourceImageDrawer() = default;
 
-void SoundSourceImageDrawer::soundSourcesCallback(const odas_ros::OdasSstArrayStamped::ConstPtr& soundSources)
+void SoundSourceImageDrawer::soundSourcesCallback(
+    const odas_ros_msgs::msg::OdasSstArrayStamped::ConstSharedPtr& soundSources)
 {
     m_lastSoundSourcesArray = soundSources;
 }
 
-void SoundSourceImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan)
+void SoundSourceImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }
 
-tf::Pose SoundSourceImageDrawer::getPoseFromSst(const odas_ros::OdasSst& sst)
+tf2::Transform SoundSourceImageDrawer::getPoseFromSst(const odas_ros_msgs::msg::OdasSst& sst)
 {
-    tf::Pose pose;
+    tf2::Transform pose;
     pose.setOrigin({0, 0, 0});
 
     double yaw = std::atan2(sst.y, sst.x);
     double pitch = -std::atan2(sst.z, std::sqrt(sst.x * sst.x + sst.y * sst.y));
     double roll = 0;
 
-    tf::Quaternion quaternion;
+    tf2::Quaternion quaternion;
     quaternion.setRPY(roll, pitch, yaw);
     pose.setRotation(quaternion.normalized());
 
@@ -66,19 +73,19 @@ void SoundSourceImageDrawer::draw(cv::Mat& image)
 
 void SoundSourceImageDrawer::drawWithLidar(cv::Mat& image)
 {
-    tf::StampedTransform sourceToLidarTf;
+    tf2::Stamped<tf2::Transform> sourceToLidarTf;
 
     try
     {
-        m_tfListener.lookupTransform(
+        auto transformMsg = m_tfBuffer.lookupTransform(
             m_lastLaserScan->header.frame_id,
             m_lastSoundSourcesArray->header.frame_id,
-            ros::Time(0),
-            sourceToLidarTf);
+            tf2::TimePointZero);
+        tf2::fromMsg(transformMsg, sourceToLidarTf);
     }
-    catch (tf::TransformException& ex)
+    catch (tf2::TransformException& ex)
     {
-        ROS_ERROR("%s", ex.what());
+        RCLCPP_ERROR(m_node.get_logger(), "%s", ex.what());
         return;
     }
 
@@ -100,33 +107,36 @@ void SoundSourceImageDrawer::drawWithoutLidar(cv::Mat& image)
 
 void SoundSourceImageDrawer::drawSoundSourcesWithLidar(
     cv::Mat& image,
-    const tf::Transform& sourceToLidarTf,
-    const tf::Transform& lidarToRefTf)
+    const tf2::Transform& sourceToLidarTf,
+    const tf2::Transform& lidarToRefTf)
 {
     for (const auto& source : m_lastSoundSourcesArray->sources)
     {
-        tf::Pose poseSource = getPoseFromSst(source);
-        tf::Pose poseLidar = sourceToLidarTf * poseSource;
+        tf2::Transform poseSource = getPoseFromSst(source);
+        tf2::Transform poseLidar = sourceToLidarTf * poseSource;
 
-        tf::Pose poseRef = getRangePose(poseLidar);
+        tf2::Transform poseRef = getRangePose(poseLidar);
         poseRef = lidarToRefTf * poseRef;
 
         drawSoundSource(image, source, poseRef);
     }
 }
 
-void SoundSourceImageDrawer::drawSoundSourcesWithoutLidar(cv::Mat& image, const tf::Transform& sourceToRefTf)
+void SoundSourceImageDrawer::drawSoundSourcesWithoutLidar(cv::Mat& image, const tf2::Transform& sourceToRefTf)
 {
     for (const auto& source : m_lastSoundSourcesArray->sources)
     {
-        tf::Pose poseSource = getPoseFromSst(source);
-        tf::Pose poseRef = sourceToRefTf * poseSource;
+        tf2::Transform poseSource = getPoseFromSst(source);
+        tf2::Transform poseRef = sourceToRefTf * poseSource;
 
         drawSoundSource(image, source, getRefEndPose(poseRef));
     }
 }
 
-void SoundSourceImageDrawer::drawSoundSource(cv::Mat& image, const odas_ros::OdasSst& source, tf::Pose poseInRef)
+void SoundSourceImageDrawer::drawSoundSource(
+    cv::Mat& image,
+    const odas_ros_msgs::msg::OdasSst& source,
+    tf2::Transform poseInRef)
 {
     int size = m_parameters.soundSourceSize();
 
@@ -155,7 +165,7 @@ float SoundSourceImageDrawer::getRangeForAngle(double angle)
     }
 
     int index = static_cast<int>(std::floor((angle - m_lastLaserScan->angle_min) / m_lastLaserScan->angle_increment));
-    if (index < 0 || index >= m_lastLaserScan->ranges.size())
+    if (index < 0 || index >= static_cast<int64_t>(m_lastLaserScan->ranges.size()))
     {
         std::ostringstream oss;
         oss << "Index out of range, this shouldn't happen. => angle: " << angle << " ; angle_range: ["
@@ -174,10 +184,10 @@ float SoundSourceImageDrawer::getRangeForAngle(double angle)
     return range;
 }
 
-tf::Pose SoundSourceImageDrawer::getRangePose(const tf::Pose& lidarPose)
+tf2::Transform SoundSourceImageDrawer::getRangePose(const tf2::Transform& lidarPose)
 {
-    double angle = tf::getYaw(lidarPose.getRotation());
-    angle = tfNormalizeAngle0To2Pi(angle);
+    double angle = tf2::getYaw(lidarPose.getRotation());
+    angle = tf2NormalizeAngle0To2Pi(angle);
     float range = getRangeForAngle(angle);
 
     if (range < 0)
@@ -189,13 +199,13 @@ tf::Pose SoundSourceImageDrawer::getRangePose(const tf::Pose& lidarPose)
         range = m_parameters.soundSourceMaxRange();
     }
 
-    return tf::Pose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
+    return tf2::Transform(tf2::Quaternion(0, 0, 0, 0), tf2::Vector3(range * cos(angle), range * sin(angle), 0));
 }
 
-tf::Pose SoundSourceImageDrawer::getRefEndPose(const tf::Pose& refPose)
+tf2::Transform SoundSourceImageDrawer::getRefEndPose(const tf2::Transform& refPose)
 {
-    double angle = tf::getYaw(refPose.getRotation());
+    double angle = tf2::getYaw(refPose.getRotation());
     float range = m_parameters.soundSourceRange();
 
-    return tf::Pose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
+    return tf2::Transform(tf2::Quaternion(0, 0, 0, 0), tf2::Vector3(range * cos(angle), range * sin(angle), 0));
 }

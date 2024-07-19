@@ -4,14 +4,10 @@
 #include "map_image_generator/Parameters.h"
 #include "map_image_generator/utils.h"
 
-#include <experimental/optional>  // Replace with <optional> in C++17
-#include <nav_msgs/MapMetaData.h>
-#include <tf/transform_listener.h>
+#include <optional>
+#include <nav_msgs/msg/map_meta_data.hpp>
+#include <tf2_ros/buffer.h>
 
-namespace std  // Replace with <optional> onlu here in C++17
-{
-    using std::experimental::optional;
-}
 
 namespace map_image_generator
 {
@@ -19,14 +15,14 @@ namespace map_image_generator
     {
     protected:
         const Parameters& m_parameters;
-        ros::NodeHandle& m_nodeHandle;
-        tf::TransformListener& m_tfListener;
+        rclcpp::Node& m_node;
+        tf2_ros::Buffer& m_tfBuffer;
 
         ImageDrawer(const ImageDrawer&) = default;
         ImageDrawer(ImageDrawer&&) = default;
 
     public:
-        ImageDrawer(const Parameters& parameters, ros::NodeHandle& nodeHandle, tf::TransformListener& tfListener);
+        ImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer);
         virtual ~ImageDrawer();
 
         ImageDrawer& operator=(const ImageDrawer&) = delete;
@@ -35,24 +31,24 @@ namespace map_image_generator
         virtual void draw(cv::Mat& image) = 0;
 
     protected:
-        void convertTransformToMapCoordinates(const tf::Transform& transform, int& x, int& y) const;
+        void convertTransformToMapCoordinates(const tf2::Transform& transform, int& x, int& y) const;
         void convertTransformToInputMapCoordinates(
-            const tf::Transform& transform,
-            const nav_msgs::MapMetaData& mapInfo,
+            const tf2::Transform& transform,
+            const nav_msgs::msg::MapMetaData& mapInfo,
             int& x,
             int& y) const;
         void convertInputMapCoordinatesToTransform(
             int x,
             int y,
-            const nav_msgs::MapMetaData& mapInfo,
-            tf::Transform& transform) const;
+            const nav_msgs::msg::MapMetaData& mapInfo,
+            tf2::Transform& transform) const;
 
-        std::optional<tf::Transform> getTransformInRef(const std::string& frameId) const;
+        std::optional<tf2::Transform> getTransformInRef(const std::string& frameId) const;
 
-        void adjustTransformForRobotRef(tf::Transform& transform) const;
+        void adjustTransformForRobotRef(tf2::Transform& transform) const;
 
     private:
-        void adjustTransformAngleForRobotRef(tf::Transform& transform) const;
+        void adjustTransformAngleForRobotRef(tf2::Transform& transform) const;
     };
 }
 #endif

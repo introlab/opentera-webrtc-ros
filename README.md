@@ -117,6 +117,6 @@ Please see the [opentera_webrtc_demos package.](opentera_webrtc_demos/README.md)
 
 ## Sponsor
 
-![IntRoLab](images/IntRoLab.png)
+![IntRoLab](https://introlab.3it.usherbrooke.ca/IntRoLab.png)
 
 [IntRoLab - Intelligent / Interactive / Integrated / Interdisciplinary Robot Lab](https://introlab.3it.usherbrooke.ca)

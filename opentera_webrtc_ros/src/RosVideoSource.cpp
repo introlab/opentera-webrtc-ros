@@ -1,4 +1,5 @@
-#include <RosVideoSource.h>
+#include "opentera_webrtc_ros/utils.h"
+#include <opentera_webrtc_ros/RosVideoSource.h>
 #include <api/video/i420_buffer.h>
 
 // We use OpenCV for image buffer manipulation
@@ -27,7 +28,7 @@ RosVideoSource::RosVideoSource(bool needsDenoising, bool isScreenCast)
  *
  * @param msg The ROS image message
  */
-void RosVideoSource::sendFrame(const sensor_msgs::ImageConstPtr& msg)
+void RosVideoSource::sendFrame(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
 {
     cv::Mat bgr;
     if (msg->encoding.find("F") != std::string::npos)
@@ -51,6 +52,6 @@ void RosVideoSource::sendFrame(const sensor_msgs::ImageConstPtr& msg)
         bgr = cv_bridge::toCvShare(msg, "bgr8")->image;
     }
 
-    int64_t camera_time_us = msg->header.stamp.toNSec() / 1000;
+    int64_t camera_time_us = to_microseconds(msg->header.stamp);
     VideoSource::sendFrame(bgr, camera_time_us);
 }

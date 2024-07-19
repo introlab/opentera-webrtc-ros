@@ -1,33 +1,36 @@
 #include "map_image_generator/drawers/GoalImageDrawer.h"
 
 #include <cmath>
-#include <ros/subscriber.h>
-#include <tf/tf.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2/utils.h>
 
 using namespace map_image_generator;
 using namespace std;
 
-GoalImageDrawer::GoalImageDrawer(
-    const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener),
-      m_add_goal_sub{nodeHandle.subscribe("map_image_drawer/add_goal", 10, &GoalImageDrawer::addGoalCallback, this)},
-      m_remove_goal_sub{
-          nodeHandle.subscribe("map_image_drawer/remove_goal", 10, &GoalImageDrawer::removeGoalCallback, this)},
-      m_clearGoalsService{
-          nodeHandle.advertiseService("map_image_drawer/clear_goals", &GoalImageDrawer::clearGoals, this)}
+GoalImageDrawer::GoalImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer),
+      m_add_goal_sub{m_node.create_subscription<geometry_msgs::msg::PoseStamped>(
+          "map_image_drawer/add_goal",
+          10,
+          bind_this<geometry_msgs::msg::PoseStamped>(this, &GoalImageDrawer::addGoalCallback))},
+      m_remove_goal_sub{m_node.create_subscription<geometry_msgs::msg::PoseStamped>(
+          "map_image_drawer/remove_goal",
+          10,
+          bind_this<geometry_msgs::msg::PoseStamped>(this, &GoalImageDrawer::removeGoalCallback))},
+      m_clearGoalsService{m_node.create_service<std_srvs::srv::SetBool>(
+          "map_image_drawer/clear_goals",
+          bind_this<std_srvs::srv::SetBool>(this, &GoalImageDrawer::clearGoals))}
 {
 }
 
 GoalImageDrawer::~GoalImageDrawer() = default;
 
-void GoalImageDrawer::addGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
+void GoalImageDrawer::addGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal)
 {
     m_activeGoals.emplace_back(*goal);
 }
 
-void GoalImageDrawer::removeGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
+void GoalImageDrawer::removeGoalCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& goal)
 {
     if (!m_activeGoals.empty() &&
         std::round(m_activeGoals.front().pose.position.z) == std::round(goal->pose.position.z))
@@ -36,19 +39,19 @@ void GoalImageDrawer::removeGoalCallback(const geometry_msgs::PoseStamped::Const
     }
     else
     {
-        ROS_WARN("%s", "Tried to remove a goal that was not the first one");
+        RCLCPP_WARN(m_node.get_logger(), "%s", "Tried to remove a goal that was not the first one");
     }
 }
 
-bool GoalImageDrawer::clearGoals(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)
+void GoalImageDrawer::clearGoals(
+    const std_srvs::srv::SetBool::Request::ConstSharedPtr& req,
+    const std_srvs::srv::SetBool::Response::SharedPtr& res)
 {
-    if (req.data)
+    if (req->data)
     {
         m_activeGoals.clear();
-        res.success = true;
-        return true;
+        res->success = true;
     }
-    return false;
 }
 
 void GoalImageDrawer::draw(cv::Mat& image)
@@ -63,17 +66,17 @@ void GoalImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void GoalImageDrawer::drawGoal(const geometry_msgs::PoseStamped& goal, cv::Mat& image, tf::Transform& transform)
+void GoalImageDrawer::drawGoal(const geometry_msgs::msg::PoseStamped& goal, cv::Mat& image, tf2::Transform& transform)
 {
     const cv::Scalar& color = m_parameters.goalColor();
     int size = m_parameters.goalSize();
     size_t index = std::lround(goal.pose.position.z);
 
-    tf::Pose goalPose;
-    tf::poseMsgToTF(goal.pose, goalPose);
+    tf2::Transform goalPose;
+    tf2::fromMsg(goal.pose, goalPose);
     goalPose = transform * goalPose;
     adjustTransformForRobotRef(goalPose);
-    double yaw = tf::getYaw(goalPose.getRotation());
+    double yaw = tf2::getYaw(goalPose.getRotation());
 
     int startX, startY;
     convertTransformToMapCoordinates(goalPose, startX, startY);

@@ -1,0 +1,38 @@
+<launch>
+    <arg name="signaling_server_hostname" default="localhost"/>
+    <arg name="signaling_server_port" default="8080"/>
+    <arg name="signaling_server_password" default="abc"/>
+    <arg name="centered_robot" default="true"/>
+    <arg name="robot_vertical_offset" default="180"/>
+    <arg name="rviz" default="false"/>
+    <arg name="gazebo_gui" default="false"/>
+    <arg name="rtabmap_viz" default="false"/>
+    <arg name="camera_id" default="0"/>
+    <arg name="use_outgoing_face_cropping" default="false"/>
+    <arg name="use_incoming_face_cropping" default="false"/>
+    <arg name="force_gstreamer_video_hardware_acceleration" default="false"/>
+
+    <set_parameter name="use_sim_time" value="true"/>
+
+    <!-- OpenTera Client (with default config file) -->
+    <group><include file="$(find-pkg-share opentera_client_ros)/launch/client.launch.xml">
+        <arg name="opentera_client_config_file" value="~/.ros/opentera/client_config.json"/>
+    </include></group>
+
+        <!-- OpenTera Demo -->
+    <group><include file="$(find-pkg-share opentera_webrtc_demos)/launch/opentera_demo.launch.xml">
+        <arg name="signaling_server_hostname" value="$(var signaling_server_hostname)"/>
+        <arg name="signaling_server_port" value="$(var signaling_server_port)"/>
+        <arg name="signaling_server_password" value="$(var signaling_server_password)"/>
+        <arg name="centered_robot" value="$(var centered_robot)"/>
+        <arg name="robot_vertical_offset" value="$(var robot_vertical_offset)"/>
+        <arg name="rviz" value="$(var rviz)"/>
+        <arg name="gazebo_gui" value="$(var gazebo_gui)"/>
+        <arg name="rtabmap_viz" value="$(var rtabmap_viz)" />
+        <arg name="is_stand_alone" value="false"/>
+        <arg name="camera_id" value="$(var camera_id)"/>
+        <arg name="use_outgoing_face_cropping" value="$(var use_outgoing_face_cropping)"/>
+        <arg name="use_incoming_face_cropping" value="$(var use_incoming_face_cropping)"/>
+        <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+    </include></group>
+</launch>

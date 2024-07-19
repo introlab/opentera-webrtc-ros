@@ -1,61 +1,44 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
 project(opentera_webrtc_ros_msgs)
 
-find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    rospy
-    std_msgs
-    geometry_msgs
-    message_generation
-    sensor_msgs
-    audio_utils
+find_package(ament_cmake REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(audio_utils REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+    "msg/DatabaseEvent.msg"
+    "msg/DeviceEvent.msg"
+    "msg/JoinSessionEvent.msg"
+    "msg/JoinSessionReplyEvent.msg"
+    "msg/LabelArray.msg"
+    "msg/LabelEdit.msg"
+    "msg/Label.msg"
+    "msg/LabelSimple.msg"
+    "msg/LabelSimpleArray.msg"
+    "msg/LabelSimpleEdit.msg"
+    "msg/LeaveSessionEvent.msg"
+    "msg/LogEvent.msg"
+    "msg/ParticipantEvent.msg"
+    "msg/StopSessionEvent.msg"
+    "msg/UserEvent.msg"
+    "msg/OpenTeraEvent.msg"
+    "msg/Peer.msg"
+    "msg/PeerData.msg"
+    "msg/PeerImage.msg"
+    "msg/PeerAudio.msg"
+    "msg/PeerStatus.msg"
+    "msg/RobotStatus.msg"
+    "msg/Waypoint.msg"
+    "msg/WaypointArray.msg"
+
+    "srv/ChangeMapView.srv"
+    "srv/ImageGoalToMapGoal.srv"
+    "srv/SetString.srv"
+
+    DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils
 )
 
-add_message_files(
-    FILES
-        DatabaseEvent.msg
-        DeviceEvent.msg
-        JoinSessionEvent.msg
-        JoinSessionReplyEvent.msg
-        LabelArray.msg
-        LabelEdit.msg
-        Label.msg
-        LabelSimple.msg
-        LabelSimpleArray.msg
-        LabelSimpleEdit.msg
-        LeaveSessionEvent.msg
-        LogEvent.msg
-        ParticipantEvent.msg
-        StopSessionEvent.msg
-        UserEvent.msg
-        OpenTeraEvent.msg
-        Peer.msg
-        PeerData.msg
-        PeerImage.msg
-        PeerAudio.msg
-        PeerStatus.msg
-        RobotStatus.msg
-        Waypoint.msg
-        WaypointArray.msg
-)
-
-add_service_files(
-    FILES
-        SetString.srv
-)
-
-generate_messages(
-    DEPENDENCIES
-        std_msgs
-        sensor_msgs
-        audio_utils
-        geometry_msgs
-)
-
-catkin_package(
-    CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs message_runtime
-)
-
-include_directories(
-    ${catkin_INCLUDE_DIRS}
-)
+ament_package()

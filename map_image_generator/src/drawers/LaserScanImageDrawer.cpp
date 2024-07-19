@@ -1,18 +1,18 @@
 #include "map_image_generator/drawers/LaserScanImageDrawer.h"
 
 #include <cmath>
-#include <tf/tf.h>
+#include <tf2_ros/buffer.h>
 
 using namespace map_image_generator;
 using namespace std;
 
-LaserScanImageDrawer::LaserScanImageDrawer(
-    const Parameters& parameters,
-    ros::NodeHandle& nodeHandle,
-    tf::TransformListener& tfListener)
-    : ImageDrawer(parameters, nodeHandle, tfListener)
+LaserScanImageDrawer::LaserScanImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
+    : ImageDrawer(parameters, node, tfBuffer),
+      m_laserScanSubscriber{m_node.create_subscription<sensor_msgs::msg::LaserScan>(
+          "laser_scan",
+          1,
+          bind_this<sensor_msgs::msg::LaserScan>(this, &LaserScanImageDrawer::laserScanCallback))}
 {
-    m_laserScanSubscriber = m_nodeHandle.subscribe("laser_scan", 1, &LaserScanImageDrawer::laserScanCallback, this);
 }
 
 LaserScanImageDrawer::~LaserScanImageDrawer() = default;
@@ -31,13 +31,13 @@ void LaserScanImageDrawer::draw(cv::Mat& image)
     }
 }
 
-void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScan)
+void LaserScanImageDrawer::laserScanCallback(const sensor_msgs::msg::LaserScan::ConstSharedPtr& laserScan)
 {
     m_lastLaserScan = laserScan;
 }
 
 
-void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transform)
+void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf2::Transform& transform)
 {
     float angle = m_lastLaserScan->angle_min;
     for (const auto& range : m_lastLaserScan->ranges)
@@ -51,9 +51,9 @@ void LaserScanImageDrawer::drawLaserScan(cv::Mat& image, tf::Transform& transfor
     }
 }
 
-void LaserScanImageDrawer::drawRange(cv::Mat& image, tf::Transform& transform, float range, float angle)
+void LaserScanImageDrawer::drawRange(cv::Mat& image, tf2::Transform& transform, float range, float angle)
 {
-    tf::Pose rangePose(tf::Quaternion(0, 0, 0, 0), tf::Vector3(range * cos(angle), range * sin(angle), 0));
+    tf2::Transform rangePose{tf2::Quaternion(0, 0, 0, 0), tf2::Vector3(range * cos(angle), range * sin(angle), 0)};
     rangePose = transform * rangePose;
     adjustTransformForRobotRef(rangePose);
 

@@ -1,0 +1,86 @@
+<launch>
+
+    <!-- Arguments -->
+    <arg name="name" default="topic_streamer"/>
+    <arg name="is_stand_alone" default="true"/>
+
+    <!-- Video -->
+    <arg name="can_send_video_stream" default="false"/>
+    <arg name="can_receive_video_stream" default="false"/>
+    <arg name="is_screen_cast" default="false"/>
+    <arg name="needs_denoising" default="false"/>
+
+    <!-- Codec -->
+    <arg name="forced_video_codecs" default="['']"/>  <!-- "[]" is bugged (https://github.com/ros2/rclcpp/issues/1955), using "['']" and filtering empty strings in the node -->
+    <arg name="force_gstreamer_video_hardware_acceleration" default="false"/>
+    <arg name="use_gstreamer_video_software_encoder_decoder" default="false"/>
+
+    <!-- Audio -->
+    <arg name="can_send_audio_stream" default="false"/>
+    <arg name="can_receive_audio_stream" default="false"/>
+    <arg name="sound_card_total_delay_ms" default="40"/>
+    <arg name="echo_cancellation" default="true"/>
+    <arg name="auto_gain_control" default="true"/>
+    <arg name="noise_suppression" default="true"/>
+    <arg name="high_pass_filter" default="false"/>
+    <arg name="stereo_swapping" default="false"/>
+    <arg name="transient_suppression" default="true"/>
+
+    <!-- Signaling -->
+    <arg name="server_url" default="http://localhost:8080"/>
+    <arg name="client_name" default="streamer"/>
+    <arg name="room_name" default="chat"/>
+    <arg name="room_password" default="abc"/>
+    <arg name="verify_ssl" default="true"/>
+
+    <!-- Topics -->
+    <arg name="input_camera_topic" default="ros_image"/>
+    <arg name="output_webrtc_image_topic" default="webrtc_image"/>
+    <arg name="input_audio_topic" default="audio_in"/>
+    <arg name="output_audio_mixed_topic" default="audio_mixed"/>
+    <arg name="output_webrtc_audio_topic" default="webrtc_audio"/>
+
+    <node name="$(var name)" pkg="opentera_webrtc_ros" exec="topic_streamer" respawn="true">
+        <param name="is_stand_alone" value="$(var is_stand_alone)" />
+
+        <param name="video_stream">
+            <param name="can_send_video_stream" value="$(var can_send_video_stream)"/>          <!-- Can send video stream to the signaling server -->
+            <param name="can_receive_video_stream" value="$(var can_receive_video_stream)"/>    <!-- Can receive video stream from the signaling server -->
+            <param name="is_screen_cast" value="$(var is_screen_cast)"/>                        <!-- Is the image source a screen capture? -->
+            <param name="needs_denoising" value="$(var needs_denoising)"/>                      <!-- Does the image source needs denoising? -->
+        </param>
+
+        <param name="video_codecs">
+            <param name="forced_codecs" value="$(var forced_video_codecs)"/>
+            <param name="force_gstreamer_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
+            <param name="use_gstreamer_software_encoder_decoder" value="$(var use_gstreamer_video_software_encoder_decoder)"/>
+        </param>
+
+        <param name="audio_stream">
+            <param name="can_send_audio_stream" value="$(var can_send_audio_stream)"/>          <!-- Can send audio stream to the signaling server -->
+            <param name="can_receive_audio_stream" value="$(var can_receive_audio_stream)"/>    <!-- Can receive audio stream from the signaling server -->
+            <param name="sound_card_total_delay_ms" value="$(var sound_card_total_delay_ms)"/>
+            <param name="echo_cancellation" value="$(var echo_cancellation)"/>
+            <param name="auto_gain_control" value="$(var auto_gain_control)"/>
+            <param name="noise_suppression" value="$(var noise_suppression)"/>
+            <param name="high_pass_filter" value="$(var high_pass_filter)"/>
+            <param name="stereo_swapping" value="$(var stereo_swapping)"/>
+            <param name="transient_suppression" value="$(var transient_suppression)"/>
+        </param>
+
+        <param name="signaling">
+            <param name="server_url" value="$(var server_url)"/>         <!-- Signaling server URL used in stand_alone mode only -->
+            <param name="client_name" value="$(var client_name)"/>       <!-- Peer name as which to join the room -->
+            <param name="room_name" value="$(var room_name)"/>           <!-- Room name to join -->
+            <param name="room_password" value="$(var room_password)"/>   <!-- Room password used in stand_alone_mode only -->
+            <param name="verify_ssl" value="$(var verify_ssl)"/>         <!-- SSL peer verification -->
+        </param>
+
+        <remap from="ros_image" to="$(var input_camera_topic)"/>
+        <remap from="webrtc_image" to="$(var output_webrtc_image_topic)"/>
+        <remap from="audio_in" to="$(var input_audio_topic)"/>
+        <remap from="audio_mixed" to="$(var output_audio_mixed_topic)"/>
+        <remap from="webrtc_audio" to="$(var output_webrtc_audio_topic)"/>
+    </node>
+
+</launch>
