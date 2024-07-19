@@ -29,7 +29,6 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install ros-humble-turtlebot3 ros-humble-turtlebot3-gazebo ros-humble-cv-camera ros-humble-dwa-local-planner ros-humble-rtabmap-ros
           sudo apt-get install libglib2.0-dev libgtk-3-dev libpulse-dev libasound2-dev
           sudo apt-get install python3-pip portaudio19-dev
           sudo apt-get install build-essential gfortran texinfo libasound2-dev
@@ -37,6 +36,12 @@ jobs:
           sudo apt-get install libqt5charts5-dev
           sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base
           sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools
+
+      - name: Clone cv_camera in ROS workspace
+        working-directory: colcon_ws/src
+        run: |
+          source /opt/ros/humble/setup.bash
+          git clone https://github.com/Kapernikov/cv_camera.git --recurse-submodules
 
       - name: Clone audio_utils in ROS workspace
         working-directory: colcon_ws/src
