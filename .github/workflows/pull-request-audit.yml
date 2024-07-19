@@ -78,4 +78,4 @@ jobs:
         working-directory: colcon_ws
         run: |
           source /opt/ros/humble/setup.bash
-          colcon build --executor sequential --cmake-args -Wno-dev
+          colcon build --cmake-args -Wno-dev
