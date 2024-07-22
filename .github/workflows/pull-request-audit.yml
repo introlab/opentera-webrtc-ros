@@ -2,10 +2,10 @@ name: pull-request-audit
 
 on:
   push:
-    branches: [main]
+    branches: [ros2]
 
   pull_request:
-    branches: [main]
+    branches: [ros2]
 
   workflow_dispatch:
 
