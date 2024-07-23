@@ -19,14 +19,14 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 
 #### Subscribes
 
-- ros_image : `sensor_msgs::Image`
-- audio_in : `audio_utils::AudioFrame`
+- ros_image : `sensor_msg/Image`
+- audio_in : `audio_utils_msgs/AudioFrame`
 
 #### Advertises
 
-- webrtc_image : `opentera_webrtc_ros::PeerImage`
-- webrtc_audio : `opentera_webrtc_ros::PeerAudio`
-- audio_mixed : `audio_utils::AudioFrame`
+- webrtc_image : `opentera_webrtc_ros_msgs/PeerImage`
+- webrtc_audio : `opentera_webrtc_ros_msgs/PeerAudio`
+- audio_mixed : `audio_utils_msgs/AudioFrame`
 
 #### Default Parameters
 
@@ -40,7 +40,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
   <param name="is_screen_cast" value="false"/>           <!-- Is the image source a screen capture? -->
   <param name="needs_denoising" value="false"/>          <!-- Does the image source needs denoising? -->
 </param>
-<param value="signaling">
+<param name="signaling">
   <param name="server_url" value="http://localhost:8080"/>  <!-- Signaling server URL used in stand_alone mode -->
   <param name="client_name" value="streamer"/>              <!-- Peer name as which to join the room -->
   <param name="room_name" value="chat"/>                    <!-- Room name to join -->
@@ -48,7 +48,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 </param>
 ```
 
-For usage exemple look at [ros_stream_client.launch](launch/ros_stream_client.launch).
+For usage exemple look at [ros_stream_client.launch.xml](launch/ros_stream_client.launch.xml).
 
 ## RosDataChannelBridge
 
@@ -59,17 +59,17 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 
 #### Subscribes (RosDataChannelBridge)
 
-- ros_data : `std_msgs::String`
+- ros_data : `std_msgs/String`
 
 #### Advertises (RosDataChannelBridge)
 
-- webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
+- webrtc_data : `opentera_webrtc_ros_msgs/PeerData`
 
 #### Default Parameters (RosDataChannelBridge)
 
 ```xml
 <param name="is_stand_alone" value="true"/>
-<param value="signaling">
+<param name="signaling">
   <param name="server_url" value="http://localhost:8080"/>  <!-- Signaling server URL used in stand_alone mode -->
   <param name="client_name" value="data_bridge"/>           <!-- Peer name as which to join the room -->
   <param name="room_name" value="chat"/>                    <!-- Room name to join -->
@@ -77,7 +77,7 @@ data channel. It also forwards messages received on the WebRTC data channel to R
 </param>
 ```
 
-For usage exemple look at [ros_data_channel_client.launch](launch/ros_data_channel_client.launch).
+For usage exemple look at [ros_data_channel_client.launch.xml](launch/ros_data_channel_client.launch.xml).
 
 ## RosJsonDataHandler
 
@@ -87,21 +87,21 @@ Implement a ROS node that dispatch received JSON messages and forward them on th
 
 #### Subscribes (RosJsonDataHandler)
 
-- webrtc_data : `opentera_webrtc_ros_msgs::PeerData`
+- webrtc_data : `opentera_webrtc_ros_msgs/PeerData`
 
 #### Advertises (RosJsonDataHandler)
 
-- cmd_vel : `geometry_msgs::Twist`
+- cmd_vel : `geometry_msgs/Twist`
 
 #### JSON Format (RosJsonDataHandler)
 
-For usage exemple look at [ros_json_data_handler.launch](launch/ros_json_data_handler.launch).
+For usage exemple look at [ros_json_data_handler.launch.xml](launch/ros_json_data_handler.launch.xml).
 
 ## libnavigation
 
 ### Description (libnavigation)
 
-Shared library for `goal_manager` and `label_manager` to send navigation commands to `move_base` as well as navigation waypoints to `map_image_generator`.
+Shared library for `goal_manager` and `labels_manager` to send navigation commands to the `nav2` stack as well as navigation waypoints to `map_image_generator`.
 The library is embedded in both nodes, a single instance is not shared.
 
 #### Subscribed topics (libnavigation)
@@ -138,7 +138,7 @@ Manages labels.
 The stored labels are dependent on the `map` transform and the database needs to be cleaned if the map changes.
 A label represents a name grouped with an associated pose and a description.
 This node relies on a service provided by the `map_image_generator` package to convert the labels from image coordinates to map coordinates.
-This node can also send a label as a goal to `move_base` by its name.
+This node can also send a label as a goal to `nav2` by its name.
 
 #### Subscribed topics (labels_manager)
 
