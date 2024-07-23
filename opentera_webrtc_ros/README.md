@@ -19,7 +19,7 @@ It also forwards images and audio received on the WebRTC stream to ROS.
 
 #### Subscribes
 
-- ros_image : `sensor_msg/Image`
+- ros_image : `sensor_msgs/Image`
 - audio_in : `audio_utils_msgs/AudioFrame`
 
 #### Advertises
