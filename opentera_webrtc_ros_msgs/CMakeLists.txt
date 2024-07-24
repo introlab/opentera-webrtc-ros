@@ -38,7 +38,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/ImageGoalToMapGoal.srv"
     "srv/SetString.srv"
 
-    DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils
+    DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils_msgs
 )
 
 ament_package()

@@ -145,7 +145,7 @@ ament_target_dependencies(${PROJECT_NAME}_topic_streamer
     std_srvs
     sensor_msgs
     geometry_msgs
-    audio_utils
+    audio_utils_msgs
 )
 target_link_libraries(${PROJECT_NAME}_topic_streamer
     ${opentera_webrtc_native_client_libs}
@@ -167,7 +167,7 @@ ament_target_dependencies(${PROJECT_NAME}_data_channel_bridge
     std_srvs
     sensor_msgs
     geometry_msgs
-    audio_utils
+    audio_utils_msgs
 )
 target_link_libraries(${PROJECT_NAME}_data_channel_bridge
     ${opentera_webrtc_native_client_libs}
@@ -188,7 +188,7 @@ ament_target_dependencies(${PROJECT_NAME}_json_data_handler
     std_srvs
     sensor_msgs
     geometry_msgs
-    audio_utils
+    audio_utils_msgs
 )
 set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
 install(TARGETS ${PROJECT_NAME}_json_data_handler DESTINATION lib/${PROJECT_NAME})
