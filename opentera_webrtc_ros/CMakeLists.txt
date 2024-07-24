@@ -37,7 +37,7 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(audio_utils REQUIRED)
+find_package(audio_utils_msgs REQUIRED)
 find_package(opentera_webrtc_ros_msgs REQUIRED)
 find_package(map_image_generator REQUIRED)
 
