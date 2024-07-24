@@ -18,7 +18,7 @@
     <depend>std_msgs</depend>
     <depend>std_srvs</depend>
     <depend>sensor_msgs</depend>
-    <depend>audio_utils</depend>
+    <depend>audio_utils_msgs</depend>
     <depend>opentera_webrtc_ros_msgs</depend>
 
     <depend>map_image_generator</depend>
