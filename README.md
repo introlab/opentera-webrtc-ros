@@ -1,10 +1,10 @@
 # opentera-webrtc-ros
 
-Welcome to the opentera-webrtc-ros project. The goal of the project is to provide useful ROS nodes to stream audio/video/data through Google's WebRTC library wrapped in [opentera-webrtc](https://github.com/introlab/opentera-webrtc). Wrappers are written in C++ and Python and are compatible with ROS1 (Noetic) at the moment. We use the [signaling server](https://github.com/introlab/opentera-webrtc/tree/main/signaling-server) implementation provided by opentera-webrtc.
+Welcome to the opentera-webrtc-ros project. The goal of the project is to provide useful ROS nodes to stream audio/video/data through Google's WebRTC library wrapped in [opentera-webrtc](https://github.com/introlab/opentera-webrtc). Wrappers are written in C++ and Python and are compatible with ROS2 (Humble) at the moment. Support for ROS1 (Noetic) is in the [`ros1`](https://github.com/introlab/opentera-webrtc-ros/tree/ros1) branch. We use the [signaling server](https://github.com/introlab/opentera-webrtc/tree/main/signaling-server) implementation provided by opentera-webrtc.
 
 Here are the key features:
 
-* [ROS Messages](opentera_webrtc_ros_msgs) adding compatibility with ROS and [OpenTera protobuf protocol](https://github.com/introlab/opentera_messages) used in[opentera-teleop-service](https://github.com/introlab/opentera-teleop-service).
+* [ROS Messages](opentera_webrtc_ros_msgs) adding compatibility with ROS and [OpenTera protobuf protocol](https://github.com/introlab/opentera_messages) used in [opentera-teleop-service](https://github.com/introlab/opentera-teleop-service).
 
 * [ROS Streaming nodes](opentera_webrtc_ros/README.md) capable of sending / receiving audio, video and data from WebRTC streams.
 
@@ -14,7 +14,7 @@ Here are the key features:
 
 * Sound Source Localization / Tracking / Separation using [ODAS ROS](https://github.com/introlab/odas_ros).
 
-* [Stand alone demonstrations](opentera_webrtc_demos/README.md) with simulated robot in gazebo.
+* [Stand alone demonstrations](opentera_webrtc_demos/README.md) with simulated robot in Gazebo.
 
 * [Robot side front-end (Qt)](opentera_webrtc_robot_gui/README.md) to display call information and remote user interaction.
 
@@ -42,48 +42,52 @@ The project is licensed with:
 
 ## Dependencies / Requirements
 
-The procedure is written for Ubuntu 20.04 using ROS noetic. We assume ROS is already installed. If not, follow the [ROS Installation Instructions](http://wiki.ros.org/noetic/Installation/Ubuntu) first. The following packages must also be installed :
+The procedure is written for Ubuntu 22.04 using ROS2 Humble. We assume ROS is already installed. If not, follow the [ROS2 Humble Installation Instructions](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html) first. A more recent CMake than the default on Ubunuttu 22.04 is required. If the installed CMake version is 3.22, follow the [CMake Installation Instructions](https://apt.kitware.com/). The following packages must also be installed :
 
 ```bash
+# utilities
+sudo apt install unzip rsync ros-dev-tools
+
 # opentera-webrtc-ros packages
-sudo apt-get install nodejs ros-noetic-turtlebot3 ros-noetic-turtlebot3-gazebo ros-noetic-cv-camera ros-noetic-dwa-local-planner ros-noetic-rtabmap-ros
+sudo apt install ros-humble-camera-info-manager ros-humble-rtabmap-ros ros-humble-rqt-tf-tree ros-humble-turtlebot3-gazebo ros-humble-turtlebot3-description ros-humble-turtlebot3-navigation2 ros-humble-joint-state-publisher-gui
 
 # protobuf
-sudo apt-get install libprotobuf-dev protobuf-compiler python3-protobuf
+sudo apt install libprotobuf-dev protobuf-compiler python3-protobuf
 
 # python dependencies
-sudo apt-get install python3-pip portaudio19-dev
+sudo apt install python3-pip portaudio19-dev
 
 # nodejs dependencies
-sudo apt-get install nodejs npm
+sudo apt install nodejs npm
 
 # audio_utils packages
-sudo apt-get install cmake build-essential gfortran texinfo libasound2-dev libpulse-dev libgfortran-*-dev
+sudo apt install cmake build-essential gfortran texinfo libasound2-dev libpulse-dev 'libgfortran-*-dev'
 
 # odas_ros packages
-sudo apt-get install libfftw3-dev libconfig-dev
+sudo apt install libfftw3-dev libconfig-dev
+
+# gstreamer for hardware acceleration
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools
 
 # qt submodules
-sudo apt-get install libqt5charts5-dev
+sudo apt install libqt5charts5-dev
 ```
 
 ## Installation
 
-### 1 - Create a catkin workspace (if not already done)
+### 1 - Create a colcon workspace (if not already done)
 
 ```bash
-# Make sure ROS is installed first.
-source /opt/ros/noetic/setup.bash
-# Create the workspace and initial build files
+# Create the workspace
 mkdir -p ~/teleop_ws/src
-cd ~/teleop_ws/
-catkin_make
 ```
 
 ### 2 - Get all the required ROS packages
 
 ```bash
 cd ~/teleop_ws/src
+# cv_camera
+git clone https://github.com/Kapernikov/cv_camera.git
 # audio_utils
 git clone https://github.com/introlab/audio_utils.git --recurse-submodules
 # odas_ros
@@ -107,8 +111,7 @@ python3 -m pip install -r requirements.txt
 
 ```bash
 cd ~/teleop_ws
-source devel/setup.bash
-catkin_make
+colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Debug --no-warn-unused-cli
 ```
 
 ## Running the demos

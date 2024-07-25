@@ -5,7 +5,7 @@ find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(audio_utils REQUIRED)
+find_package(audio_utils_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -38,7 +38,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/ImageGoalToMapGoal.srv"
     "srv/SetString.srv"
 
-    DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils
+    DEPENDENCIES std_msgs geometry_msgs sensor_msgs audio_utils_msgs
 )
 
 ament_package()
