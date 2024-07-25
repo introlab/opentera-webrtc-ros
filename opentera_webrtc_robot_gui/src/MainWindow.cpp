@@ -104,7 +104,7 @@ void MainWindow::localImageCallback(const sensor_msgs::msg::Image::ConstSharedPt
     if (msg->encoding == "rgb8")
     {
         // Step #1 Transform ROS Image to QtImage
-        QImage image(&msg->data[0], msg->width, msg->height, QImage::Format_RGB888);
+        QImage image(&msg->data[0], msg->width, msg->height, msg->step, QImage::Format_RGB888);
 
         // Step #2 emit new signal with image
         emit newLocalImage(image.copy());
@@ -112,7 +112,7 @@ void MainWindow::localImageCallback(const sensor_msgs::msg::Image::ConstSharedPt
     else if (msg->encoding == "bgr8")
     {
         // Step #1 Transform ROS Image to QtImage
-        QImage image(&msg->data[0], msg->width, msg->height, QImage::Format_RGB888);
+        QImage image(&msg->data[0], msg->width, msg->height, msg->step, QImage::Format_RGB888);
 
         // Step #2 emit new signal with image
         // Invert R & B here
@@ -239,7 +239,7 @@ void MainWindow::closeCameraWindow()
 void MainWindow::peerImageCallback(const opentera_webrtc_ros_msgs::msg::PeerImage::ConstSharedPtr& msg)
 {
     // Step #1 Transform ROS Image to QtImage
-    QImage image(&msg->frame.data[0], msg->frame.width, msg->frame.height, QImage::Format_RGB888);
+    QImage image(&msg->frame.data[0], msg->frame.width, msg->frame.height, msg->frame.step, QImage::Format_RGB888);
 
     // Step #2 Emit signal (will be handled in Qt main thread)
     // Image will be automatically deleted when required
