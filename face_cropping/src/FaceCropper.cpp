@@ -41,31 +41,9 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
 #ifndef NO_TORCH
     else if (
         faceDetector.type() == typeid(SmallYunet025Silu160FaceDetector) ||
-        faceDetector.type() == typeid(SmallYunet05Silu160FaceDetector))
-    {
-        parameters.detectionInterval = 2;
-        parameters.xOffsetRatio = 0.f;
-        parameters.yOffsetRatio = 0.f;
-        parameters.widthScale = 1.25f;
-        parameters.heightScale = 1.5f;
-        parameters.frameBeforeChangeTarget = 10;
-
-        parameters.rPosition = 100.0f;
-    }
-    else if (
+        faceDetector.type() == typeid(SmallYunet05Silu160FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet025Silu320FaceDetector) ||
-        faceDetector.type() == typeid(SmallYunet05Silu320FaceDetector))
-    {
-        parameters.detectionInterval = 2;
-        parameters.xOffsetRatio = 0.f;
-        parameters.yOffsetRatio = 0.f;
-        parameters.widthScale = 1.5f;
-        parameters.heightScale = 1.75f;
-        parameters.frameBeforeChangeTarget = 10;
-
-        parameters.rPosition = 80.0f;
-    }
-    else if (
+        faceDetector.type() == typeid(SmallYunet05Silu320FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet025Silu640FaceDetector) ||
         faceDetector.type() == typeid(SmallYunet05Silu640FaceDetector))
     {
@@ -76,7 +54,7 @@ FaceCropperParameters FaceCropperParameters::fromFaceDetector(
         parameters.heightScale = 1.75f;
         parameters.frameBeforeChangeTarget = 10;
 
-        parameters.rPosition = 60.0f;
+        parameters.rPosition = 125.0f;
     }
 #endif
     else

@@ -23,6 +23,8 @@ namespace
 RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
 {
     m_node.declare_parameter("is_stand_alone", true);
+    m_node.declare_parameter("video_queue_size", 1);
+    m_node.declare_parameter("audio_queue_size", 1);
 
     // Signaling params
     m_node.declare_parameter("signaling.client_name", "streamer");
@@ -57,6 +59,16 @@ RosNodeParameters::RosNodeParameters(rclcpp::Node& node) : m_node{node}
 bool RosNodeParameters::isStandAlone() const
 {
     return m_node.get_parameter("is_stand_alone").as_bool();
+}
+
+size_t RosNodeParameters::videoQueueSize() const
+{
+    return m_node.get_parameter("video_queue_size").as_int();
+}
+
+size_t RosNodeParameters::audioQueueSize() const
+{
+    return m_node.get_parameter("audio_queue_size").as_int();
 }
 
 /**

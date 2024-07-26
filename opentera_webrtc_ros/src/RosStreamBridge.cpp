@@ -121,8 +121,12 @@ void RosStreamBridge::init(
 
         if (m_canReceiveAudioStream)
         {
-            m_audioPublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerAudio>("webrtc_audio", 100);
-            m_mixedAudioPublisher = this->create_publisher<audio_utils_msgs::msg::AudioFrame>("audio_mixed", 100);
+            m_audioPublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerAudio>(
+                "webrtc_audio",
+                m_nodeParameters.audioQueueSize());
+            m_mixedAudioPublisher = this->create_publisher<audio_utils_msgs::msg::AudioFrame>(
+                "audio_mixed",
+                m_nodeParameters.audioQueueSize());
 
             m_signalingClient->setOnAudioFrameReceived(
                 [this](auto&& PH1, auto&& PH2, auto&& PH3, auto&& PH4, auto&& PH5, auto&& PH6)
@@ -150,7 +154,9 @@ void RosStreamBridge::init(
 
         if (m_canReceiveVideoStream)
         {
-            m_imagePublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerImage>("webrtc_image", 10);
+            m_imagePublisher = this->create_publisher<opentera_webrtc_ros_msgs::msg::PeerImage>(
+                "webrtc_image",
+                m_nodeParameters.videoQueueSize());
             // Video and audio frame
             m_signalingClient->setOnVideoFrameReceived(
                 [this](auto&& PH1, auto&& PH2, auto&& PH3)
@@ -210,7 +216,7 @@ void RosStreamBridge::onSignalingConnectionOpened()
         // Audio
         m_audioSubscriber = this->create_subscription<audio_utils_msgs::msg::AudioFrame>(
             "audio_in",
-            10,
+            m_nodeParameters.audioQueueSize(),
             bind_this<audio_utils_msgs::msg::AudioFrame>(this, &RosStreamBridge::audioCallback));
     }
 
@@ -219,7 +225,7 @@ void RosStreamBridge::onSignalingConnectionOpened()
         // Video
         m_imageSubscriber = this->create_subscription<sensor_msgs::msg::Image>(
             "ros_image",
-            10,
+            m_nodeParameters.videoQueueSize(),
             bind_this<sensor_msgs::msg::Image>(this, &RosStreamBridge::imageCallback));
     }
 }
