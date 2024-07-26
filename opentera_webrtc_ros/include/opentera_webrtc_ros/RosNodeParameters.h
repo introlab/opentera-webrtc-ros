@@ -18,6 +18,8 @@ namespace opentera
         RosNodeParameters(rclcpp::Node& node);
 
         bool isStandAlone() const;
+        size_t videoQueueSize() const;
+        size_t audioQueueSize() const;
 
         void loadSignalingParams(std::string& clientName, std::string& room) const;
         void loadSignalingParams(
