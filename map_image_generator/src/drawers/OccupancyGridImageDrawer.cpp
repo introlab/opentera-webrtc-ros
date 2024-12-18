@@ -197,6 +197,9 @@ void OccupancyGridImageDrawer::rotateImageAboutCenter(cv::Mat& image, double ang
 OccupancyGridImageDrawer::DirectionalValues
     OccupancyGridImageDrawer::computePadding(const DirectionalValues& position, int height, int width)
 {
+    // TODO: remove pragma when using C++20
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     return {
         .top = restrictToPositive((height - 1) / 2 - position.top),
         .bottom = restrictToPositive(height / 2 - position.bottom),
@@ -204,6 +207,7 @@ OccupancyGridImageDrawer::DirectionalValues
         .left = restrictToPositive((width - 1) / 2 - position.left),
         .right = restrictToPositive(width / 2 - position.right),
     };
+#pragma GCC diagnostic pop
 }
 
 OccupancyGridImageDrawer::MapCoordinates
@@ -217,12 +221,16 @@ OccupancyGridImageDrawer::MapCoordinates
 OccupancyGridImageDrawer::DirectionalValues
     OccupancyGridImageDrawer::getDirectionsFromMapCoordinates(const MapCoordinates& mapCoordinates, const cv::Mat& map)
 {
+    // TODO: remove pragma when using C++20
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     return {
         .top = 0 + mapCoordinates.y,
         .bottom = (map.rows - 1) - mapCoordinates.y,
         .left = 0 + mapCoordinates.x,
         .right = (map.cols - 1) - mapCoordinates.x,
     };
+#pragma GCC diagnostic pop
 }
 
 void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
@@ -239,18 +247,10 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
     MapCoordinates robotCoordinates = getMapCoordinatesFromTf(*robotTransform);
     DirectionalValues robotPosition = getDirectionsFromMapCoordinates(robotCoordinates, m_scaledOccupancyGridImage);
 
-    double heightBorder = 0.1 * outHeight;
-    double widthBorder = 0.1 * outWidth;
-
-    // Map center
-    double occupancyXOrigin = m_lastOccupancyGrid->info.origin.position.x;
-    double occupancyYOrigin = m_lastOccupancyGrid->info.origin.position.y;
-
     tf2::Transform mapOriginPose;
     mapOriginPose.setOrigin({0.0, 0.0, 0.0});
 
     MapCoordinates mapOriginCoordinates = getMapCoordinatesFromTf(mapOriginPose);
-    DirectionalValues mapPosition = getDirectionsFromMapCoordinates(mapOriginCoordinates, m_scaledOccupancyGridImage);
 
     double hScaleFactor = (0.4 * outWidth) / std::abs(robotPosition.left - mapOriginCoordinates.x);
     double vScaleFactor = (0.4 * outHeight) / std::abs(robotPosition.top - mapOriginCoordinates.y);
@@ -259,10 +259,14 @@ void OccupancyGridImageDrawer::drawOccupancyGridImage(cv::Mat& image)
 
     const auto& zoomedMap = getZoomedOccupancyImage();
 
+    // TODO: remove pragma when using C++20
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     MapCoordinates zoomedMapOriginCoordinates{
         .x = static_cast<int>(mapOriginCoordinates.x * m_parameters.scaleFactor()),
         .y = static_cast<int>(mapOriginCoordinates.y * m_parameters.scaleFactor()),
     };
+#pragma GCC diagnostic pop
     DirectionalValues zoomedMapPosition = getDirectionsFromMapCoordinates(zoomedMapOriginCoordinates, zoomedMap);
 
     DirectionalValues padding = computePadding(zoomedMapPosition, outHeight, outWidth);

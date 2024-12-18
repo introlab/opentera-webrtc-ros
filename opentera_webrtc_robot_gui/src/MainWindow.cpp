@@ -189,7 +189,7 @@ void MainWindow::onPeerStatusClientDisconnected(const QString& id)
     }
 }
 
-void MainWindow::_onPeerStatus(const QString& id, const QString& name, int status)
+void MainWindow::_onPeerStatus(const QString& id, [[maybe_unused]] const QString& name, int status)
 {
     switch (status)
     {

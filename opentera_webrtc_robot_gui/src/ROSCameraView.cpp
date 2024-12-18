@@ -15,7 +15,7 @@ void CameraWidget::setImage(const QImage& image, bool repaintNow)
     }
 }
 
-void CameraWidget::paintEvent(QPaintEvent* event)
+void CameraWidget::paintEvent([[maybe_unused]] QPaintEvent* event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
@@ -27,9 +27,9 @@ void CameraWidget::paintEvent(QPaintEvent* event)
         return;
     }
 
-    float scale =
-        std::min(static_cast<float>(width()) / static_cast<float>(m_image.width()),
-            static_cast<float>(height()) / static_cast<float>(m_image.height()));
+    float scale = std::min(
+        static_cast<float>(width()) / static_cast<float>(m_image.width()),
+        static_cast<float>(height()) / static_cast<float>(m_image.height()));
     int scaledWidth = static_cast<int>(scale * m_image.width());
     int scaledHeight = static_cast<int>(scale * m_image.height());
     int offsetX = std::max(0, (width() - scaledWidth) / 2);
@@ -41,8 +41,8 @@ void CameraWidget::paintEvent(QPaintEvent* event)
 ROSCameraView::ROSCameraView(QWidget* parent)
     : QWidget{parent},
       m_layout{nullptr},
-      m_label{nullptr},
-      m_cameraWidget{nullptr}
+      m_cameraWidget{nullptr},
+      m_label{nullptr}
 {
     m_layout = new QVBoxLayout(this);
 

@@ -2,8 +2,6 @@
 
 #include <opencv2/imgproc.hpp>
 
-#include <tf2/utils.h>
-
 using namespace map_image_generator;
 
 LabelImageDrawer::LabelImageDrawer(const Parameters& parameters, rclcpp::Node& node, tf2_ros::Buffer& tfBuffer)
@@ -52,13 +50,9 @@ void LabelImageDrawer::drawLabel(
     tf2::fromMsg(label.pose.pose, labelPose);
     labelPose = transform * labelPose;
     adjustTransformForRobotRef(labelPose);
-    double yaw = tf2::getYaw(labelPose.getRotation());
 
     int startX, startY;
     convertTransformToMapCoordinates(labelPose, startX, startY);
-
-    int endX = static_cast<int>(startX + size * cos(yaw));
-    int endY = static_cast<int>(startY + size * sin(yaw));
 
     cv::drawMarker(
         image,

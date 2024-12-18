@@ -16,10 +16,6 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 if(NOT CMAKE_BUILD_TYPE )
     MESSAGE(STATUS "not define build type, set to release" )
     set(CMAKE_BUILD_TYPE Release )
@@ -55,6 +51,8 @@ set(OPENTERA_WEBRTC_ENABLE_EXAMPLES OFF)
 set(OPENTERA_WEBRTC_ENABLE_GSTREAMER ON)
 # Use system opencv that is shared with ROS
 set(OPENTERA_WEBRTC_USE_SYSTEM_OPENCV ON)
+# Disable building the documentation, the pip install for the documentation is annoying.
+set(OPENTERA_WEBRTC_ENABLE_PYTHON_HTML_DOC OFF)
 # Enable install on build for python package, which is required for using it in ROS if using devel space
 set(OPENTERA_WEBRTC_NATIVE_CLIENT_PYTHON_INSTALL_ON_BUILD OFF)
 # Install in ROS worksapce
@@ -192,6 +190,16 @@ ament_target_dependencies(${PROJECT_NAME}_json_data_handler
 )
 set_target_properties(${PROJECT_NAME}_json_data_handler PROPERTIES OUTPUT_NAME json_data_handler PREFIX "")
 install(TARGETS ${PROJECT_NAME}_json_data_handler DESTINATION lib/${PROJECT_NAME})
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${PROJECT_NAME}_topic_streamer PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(${PROJECT_NAME}_data_channel_bridge PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(${PROJECT_NAME}_json_data_handler PRIVATE -Wall -Wextra -Wpedantic)
+
+    foreach(target ${opentera_webrtc_native_client_targets})
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    endforeach()
+endif()
 
 install(
     DIRECTORY
