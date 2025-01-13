@@ -17,11 +17,12 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 
+set(OUTPUT_ONLY_IF_FAILED_SCRIPT_RELATIVE_PATH "cmake/output_only_if_failed.sh")
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue/package.json
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cmake/output_only_if_failed.sh npm install
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${OUTPUT_ONLY_IF_FAILED_SCRIPT_RELATIVE_PATH} npm install
     COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
     VERBATIM
@@ -45,7 +46,7 @@ file(
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist.stamp
     DEPENDS ${FRONTEND_FILES} ${CMAKE_CURRENT_BINARY_DIR}/node_modules.stamp opentera_werbrtc_teleop_frontend-install
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cmake/output_only_if_failed.sh npm run build
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${OUTPUT_ONLY_IF_FAILED_SCRIPT_RELATIVE_PATH} npm run build
     COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/dist.stamp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/opentera-webrtc-teleop-frontend/teleop-vue
     VERBATIM
@@ -74,6 +75,13 @@ install(DIRECTORY
     opentera-webrtc-teleop-frontend/teleop-vue/dist
     DESTINATION share/${PROJECT_NAME}/opentera-webrtc-teleop-frontend/teleop-vue
 )
+
+install(FILES
+    ${OUTPUT_ONLY_IF_FAILED_SCRIPT_RELATIVE_PATH}
+    DESTINATION share/${PROJECT_NAME}/cmake
+)
+
+list(APPEND opentera_webrtc_demos_CONFIG_EXTRAS_POST "cmake/ExportOutputOnlyIfFailedExtra.cmake.in")
 
 #######################
 ## Required programs ##
