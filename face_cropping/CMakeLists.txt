@@ -10,11 +10,6 @@ endif()
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -186,6 +181,12 @@ target_include_directories(
 install(TARGETS face_cropping_webrtc_node DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY models DESTINATION share/${PROJECT_NAME})
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(torchvision PRIVATE -w)
+    target_compile_options(face_cropping_node PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(face_cropping_webrtc_node PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)

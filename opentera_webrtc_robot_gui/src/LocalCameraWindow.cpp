@@ -61,7 +61,7 @@ void LocalCameraWindow::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void LocalCameraWindow::focusOutEvent(QFocusEvent* event)
+void LocalCameraWindow::focusOutEvent([[maybe_unused]] QFocusEvent* event)
 {
     if (isSizeGripEnabled())
     {
