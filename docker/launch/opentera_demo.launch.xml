@@ -18,7 +18,7 @@
 
     <log message="starting turtlebot sim ... " />
     <!-- Turtlebot simulator -->
-    <group><include file="/opt/ros/BIRDSEYE_WS/opentera_turtlebot_sim.launch.py">
+    <group><include file="/opt/ros/OPENTERA_WS/opentera_turtlebot_sim.launch.py">
         <arg name="open_rviz" value="$(var rviz)" />
         <arg name="gazebo_gui" value="$(var gazebo_gui)" />
         <arg name="rtabmap_viz" value="$(var rtabmap_viz)" />
@@ -52,7 +52,7 @@
     <let name="webrtc_image_topic_based_on_face_cropping" unless="$(var use_incoming_face_cropping)" value="/webrtc_image"/>
 
     <!-- Front camera -->
-    <!--group><include file="/opt/ros/BIRDSEYE_WS/ros_stream_client.launch.xml">
+    <!--group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer1"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
@@ -70,7 +70,7 @@
     </include></group-->
 
     <!-- Bottom camera -->
-    <group><include file="/opt/ros/BIRDSEYE_WS/ros_stream_client.launch.xml">
+    <group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer2"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
@@ -89,7 +89,7 @@
     </include></group>
 
     <!-- Map image stream -->
-    <group><include file="/opt/ros/BIRDSEYE_WS/ros_stream_client.launch.xml">
+    <group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer3"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>

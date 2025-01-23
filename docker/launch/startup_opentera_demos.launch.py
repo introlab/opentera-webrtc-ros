@@ -26,8 +26,8 @@ def generate_launch_description():
         DeclareLaunchArgument('force_gstreamer_video_hardware_acceleration', default_value='true'),
         DeclareLaunchArgument('client_config_file', default_value=' '),
         DeclareLaunchArgument('use_sim_time', default_value='true'),
-        DeclareLaunchArgument('certificate', default_value='/opt/ros/BIRDSEYE_WS/certificate/cert.pem'),
-        DeclareLaunchArgument('key', default_value='/opt/ros/BIRDSEYE_WS/certificate/key.pem'),
+        DeclareLaunchArgument('certificate', default_value='/opt/ros/OPENTERA_WS/certificate/cert.pem'),
+        DeclareLaunchArgument('key', default_value='/opt/ros/OPENTERA_WS/certificate/key.pem'),
         DeclareLaunchArgument('use_tls', default_value='true'),
         # Signaling server (using XML file)
         IncludeLaunchDescription(
@@ -43,7 +43,7 @@ def generate_launch_description():
 
         # OpenTera Demo
         IncludeLaunchDescription(
-            launch_description_source=os.path.join('/opt/ros/BIRDSEYE_WS' , 'opentera_demo.launch.xml'),
+            launch_description_source=os.path.join('/opt/ros/OPENTERA_WS' , 'opentera_demo.launch.xml'),
             launch_arguments={
                 'signaling_server_hostname': LaunchConfiguration('signaling_server_hostname'),
                 'signaling_server_port': LaunchConfiguration('signaling_server_port'),
