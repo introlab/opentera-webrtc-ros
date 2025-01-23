@@ -1,0 +1,54 @@
+version: "2.3"
+services:
+  robot:
+    image: opentera/webrtc_ros2:humble
+    runtime: nvidia               # Required for GPU support
+    devices:
+      - "/dev/snd:/dev/snd:rw"  # Map sound device
+    build:
+      context: .
+      dockerfile: Dockerfile.opentera_ros2
+    network_mode: host  # Use host networking for X11
+    volumes:
+      # Allow access to the host's X11 socket
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Pass the host's Xauthority file for authentication
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      # Synchronize host timezone with container
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /run/user/${UID}:/tmp/runtime-root:rw
+      - "${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native"  # Map PulseAudio socket
+    tty: true
+    cap_add:
+      - SYS_PTRACE  # Debugging capability
+    security_opt:
+      - seccomp:unconfined  # Relax security policies
+    privileged: true  # Enable privileged mode
+    restart: 'no'
+    stop_grace_period: 1s
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all  # Expose all GPUs
+      NVIDIA_DRIVER_CAPABILITIES: all  # Grant all driver capabilities
+      LIBVA_DRIVER_NAME: nvidia
+      LIBVA_DRIVERS_PATH: /usr/lib/x86_64-linux-gnu/dri
+      DISPLAY: ${DISPLAY}
+      XDG_RUNTIME_DIR: "/tmp/runtime-root"
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      QT_X11_NO_MITSHM: "1"
+      PULSE_SERVER: "unix:/run/user/$(id -u)/pulse/native"
+      PULSE_COOKIE: "/tmp/pulse-cookie"
+      AUDIODEV: "default"  # Explicitly set audio device
+      SL_CERT_FILE: "/usr/local/share/ca-certificates/cert.pem"
+      SSL_CERT_DIR: "/usr/local/share/ca-certificates"
+      # Set the display variable for X11 redirection
+      #DISPLAY: ${DISPLAY}
+      # # Enable debugging for Qt plugins
+      # QT_DEBUG_PLUGINS: "1"
+      # # Set platform for Qt applications
+      # QT_QPA_PLATFORM: xcb
+      # # Disable Qt's sandbox for WebEngine
+      # QTWEBENGINE_DISABLE_SANDBOX: "1"
+      # # Disable MIT-SHM extension to improve compatibility
+      # QT_X11_NO_MITSHM: "1"
