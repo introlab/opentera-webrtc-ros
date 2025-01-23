@@ -141,7 +141,6 @@ RUN git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-subm
 
 COPY opentera_teleop_startup.sh .
 COPY launch .
-COPY client_config.json .
 COPY turtlebot3_house ./models/turtlebot3_house
 COPY certificate ./certificate 
 
