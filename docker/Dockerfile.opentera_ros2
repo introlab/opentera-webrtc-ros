@@ -1,4 +1,3 @@
-#FROM berobotics/base@sha256:8520700d9d11667e82b709030b4d15d656a99e4c74a4dd3feba8b72f38d451f2
 FROM  osrf/ros:humble-desktop
 ARG OPENTERA_WS=/opt/ros/OPENTERA_WS
 WORKDIR $OPENTERA_WS
