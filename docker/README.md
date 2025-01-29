@@ -1,6 +1,6 @@
 # Docker Setup for opentera_webrtc_ros
 
-The docker-compose.yaml  contains configurations  build and launch opentera_webrtc_ros, including GUI support for tools like opentera_gui.
+The docker-compose.yaml contains configurations build and launch opentera_webrtc_ros, including GUI support for tools like opentera_gui.
 
 Dockerfile.opentera_ros2 contains build docker build instructions. 
 
