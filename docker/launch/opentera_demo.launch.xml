@@ -52,7 +52,7 @@
     <let name="webrtc_image_topic_based_on_face_cropping" unless="$(var use_incoming_face_cropping)" value="/webrtc_image"/>
 
     <!-- Front camera -->
-    <!--group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer1"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
@@ -61,16 +61,17 @@
         <arg name="can_receive_video_stream" value="false"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
-        <arg name="server_url" value="http://$(var signaling_server_hostname):$(var signaling_server_port)"/>
+        <arg name="server_url" value="https://$(var signaling_server_hostname):$(var signaling_server_port)"/>
         <arg name="client_name" value="Robot Camera 1"/>
         <arg name="room_name" value="VideoConf"/>
         <arg name="room_password" value="$(var signaling_server_password)"/>
         <arg name="input_camera_topic" value="$(var input_camera_topic_based_on_face_cropping)"/>
         <arg name="force_gstreamer_video_hardware_acceleration" value="$(var force_gstreamer_video_hardware_acceleration)"/>
-    </include></group-->
+        <arg name="verify_ssl" value="$(var verify_ssl)"/>
+    </include></group>
 
     <!-- Bottom camera -->
-    <group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer2"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
@@ -89,7 +90,7 @@
     </include></group>
 
     <!-- Map image stream -->
-    <group><include file="/opt/ros/OPENTERA_WS/ros_stream_client.launch.xml">
+    <group><include file="$(find-pkg-share opentera_webrtc_ros)/launch/ros_stream_client.launch.xml">
         <arg name="name" value="topic_streamer3"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>

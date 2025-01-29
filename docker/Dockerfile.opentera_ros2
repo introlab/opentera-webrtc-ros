@@ -139,9 +139,10 @@ RUN git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-subm
     colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Debug --no-warn-unused-cli --packages-skip face_cropping
 
 COPY opentera_teleop_startup.sh .
+
 COPY launch .
+
 COPY turtlebot3_house ./models/turtlebot3_house
-COPY certificate ./certificate 
 
 # Add the certificate to the system's trusted store, install missing cyclone dds and xacro package
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -151,8 +152,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-xacro \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the server's public certificate into the container
-COPY certificate/cert.pem /usr/local/share/ca-certificates/cert.pem
+# Generate certificates in the specified directory
+RUN mkdir -p /opt/ros/OPENTERA_WS/certificate && \
+    cd /opt/ros/OPENTERA_WS/certificate && \
+    chmod +x /opt/ros/OPENTERA_WS/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server/tools/generate_certificate.sh && \
+    /opt/ros/OPENTERA_WS/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server/tools/generate_certificate.sh && \
+    cd /opt/ros/OPENTERA_WS && \   
+    cp /opt/ros/OPENTERA_WS/certificate/cert.pem /usr/local/share/ca-certificates/cert.pem
 
 # Add the certificate to the trusted CA store
 RUN chmod 644 /usr/local/share/ca-certificates/cert.pem && \
