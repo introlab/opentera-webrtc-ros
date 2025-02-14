@@ -115,7 +115,6 @@ include_directories(SYSTEM
     ${opentera_webrtc_native_client_includes}
 )
 
-install(DIRECTORY ${opentera_webrtc_native_client_includes} DESTINATION include)
 install(TARGETS ${opentera_webrtc_native_client_targets} DESTINATION lib)
 install(FILES ${opentera_webrtc_native_client_raw_libs} DESTINATION lib)
 

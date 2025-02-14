@@ -118,6 +118,10 @@ elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "x86_64")
     set(TORCHVISION_LIBRARIES torchvision)
     add_compile_definitions(TORCHVISION_CSRC_INCLUDE)
 
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(torchvision PRIVATE -w)
+    endif()
+
     file(GLOB_RECURSE TORCH_SHARED_OBJECTS "${CMAKE_BINARY_DIR}/libtorch/libtorch/lib/lib*.so*")
 
     install(FILES ${TORCH_SHARED_OBJECTS} DESTINATION lib)
@@ -183,7 +187,6 @@ install(TARGETS face_cropping_webrtc_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY models DESTINATION share/${PROJECT_NAME})
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(torchvision PRIVATE -w)
     target_compile_options(face_cropping_node PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(face_cropping_webrtc_node PRIVATE -Wall -Wextra -Wpedantic)
 endif()
