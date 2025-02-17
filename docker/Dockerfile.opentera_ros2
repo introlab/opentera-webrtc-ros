@@ -51,7 +51,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxcb-sync1 \
     libxcb-util1 \
     libxcb-xkb1 \
-    libx11-xcb-dev \
     && rm -rf /var/lib/apt/lists/* 
 
 # Install nvm and Node.js
@@ -72,14 +71,14 @@ RUN apt-get update && apt-get install -y python3-pip && \
 # Clone and build other packages
 RUN git clone https://github.com/introlab/audio_utils.git --recurse-submodules -b ros2 && \
     cd audio_utils && \ 
-    git reset --hard fcc404a84fdec9bcb0c9963f394e4e29d5a9653a && \
+    git checkout fcc404a84fdec9bcb0c9963f394e4e29d5a9653a && \
     . /opt/ros/$ROS_DISTRO/setup.sh && \
     colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --symlink-install --packages-up-to audio_utils && \
     . install/setup.sh
 
 RUN git clone https://github.com/introlab/odas_ros.git --recurse-submodules -b ros2 && \
     cd odas_ros && \ 
-    git reset --hard 0d26e657fd129a5398469ed3d320d07a04462a4e && \
+    git checkout 0d26e657fd129a5398469ed3d320d07a04462a4e && \
     . /opt/ros/$ROS_DISTRO/setup.sh && \
     . ../audio_utils/install/setup.sh && \ 
     colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --symlink-install --packages-up-to odas_ros 
@@ -114,18 +113,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN python3 -m pip install --no-cache-dir transforms3d
 
-RUN git clone https://github.com/elFarto/nvidia-vaapi-driver.git
+# RUN git clone https://github.com/elFarto/nvidia-vaapi-driver.git
 
-# Build and install nvidia-vaapi-driver
-WORKDIR /opt/ros/OPENTERA_WS/nvidia-vaapi-driver
-RUN meson setup build \
-    && meson install -C build
+# # Build and install nvidia-vaapi-driver
+# WORKDIR /opt/ros/OPENTERA_WS/nvidia-vaapi-driver
+# RUN meson setup build \
+#     && meson install -C build
 
 WORKDIR /opt/ros/OPENTERA_WS
 RUN apt-get update && apt-get install -y rsync
 RUN git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules -b ros2 && \
     cd opentera-webrtc-ros && \ 
-    git reset --hard 031d48be0f8d7aef3cf656601afd528f69c5f89e && \
+    git checkout 031d48be0f8d7aef3cf656601afd528f69c5f89e && \
     cd opentera_client_ros && \
     python3 -m pip install --no-cache-dir -r requirements.txt && \
     cd ../opentera_webrtc_ros && \
@@ -137,8 +136,6 @@ RUN git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-subm
     . ../audio_utils/install/setup.sh && \ 
     . ../odas_ros/install/setup.sh && \ 
     colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Debug --no-warn-unused-cli --packages-skip face_cropping
-
-COPY opentera_teleop_startup.sh .
 
 COPY launch .
 

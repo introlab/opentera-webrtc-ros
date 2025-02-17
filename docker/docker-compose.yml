@@ -1,4 +1,3 @@
-version: "2.3"
 services:
   robot:
     image: opentera/webrtc_ros2:humble

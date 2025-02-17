@@ -9,7 +9,7 @@ export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib 
 
 # Set the Video Acceleration API (VA-API) driver to NVIDIA
-export LIBVA_DRIVER_NAME=nvidia
+# export LIBVA_DRIVER_NAME=nvidia
 
 # Add the signaling server to PATH
 export PATH=/opt/ros/OPENTERA_WS/opentera-webrtc-ros/install/opentera_webrtc_ros/local/bin:$PATH
@@ -26,4 +26,5 @@ export GAZEBO_MODEL_PATH=/opt/ros/OPENTERA_WS/models:$GAZEBO_MODEL_PATH
 sudo sysctl -w net.core.rmem_max=2147483647
 
 echo $ROS_DISTRO
+
 ros2 launch  startup_opentera_demos.launch.py

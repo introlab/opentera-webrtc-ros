@@ -56,9 +56,9 @@
         <arg name="name" value="topic_streamer1"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
-        <arg name="can_receive_audio_stream" value="false"/>
+        <arg name="can_receive_audio_stream" value="true"/>
         <arg name="can_send_video_stream" value="true"/>
-        <arg name="can_receive_video_stream" value="false"/>
+        <arg name="can_receive_video_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="https://$(var signaling_server_hostname):$(var signaling_server_port)"/>
@@ -75,9 +75,9 @@
         <arg name="name" value="topic_streamer2"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
-        <arg name="can_receive_audio_stream" value="false"/>
+        <arg name="can_receive_audio_stream" value="true"/>
         <arg name="can_send_video_stream" value="true"/>
-        <arg name="can_receive_video_stream" value="false"/>
+        <arg name="can_receive_video_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="https://$(var signaling_server_hostname):$(var signaling_server_port)"/>
@@ -94,9 +94,9 @@
         <arg name="name" value="topic_streamer3"/>
         <arg name="is_stand_alone" value="$(var is_stand_alone)"/>
         <arg name="can_send_audio_stream" value="true"/>
-        <arg name="can_receive_audio_stream" value="false"/>
+        <arg name="can_receive_audio_stream" value="true"/>
         <arg name="can_send_video_stream" value="true"/>
-        <arg name="can_receive_video_stream" value="false"/>
+        <arg name="can_receive_video_stream" value="true"/>
         <arg name="is_screen_cast" value="false"/>
         <arg name="needs_denoising" value="false"/>
         <arg name="server_url" value="https://$(var signaling_server_hostname):$(var signaling_server_port)"/>
