@@ -1,0 +1,29 @@
+services:
+  robot:
+    image: opentera/webrtc_ros2:humble
+    runtime: nvidia
+    devices:
+      - "/dev/snd:/dev/snd:rw"
+    build:
+      context: .
+      dockerfile: Dockerfile.opentera_ros2
+    network_mode: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    privileged: false
+    restart: 'no'
+    stop_grace_period: 1s
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: "1"
+      LIBGL_ALWAYS_SOFTWARE: "1"

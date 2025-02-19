@@ -1,0 +1,165 @@
+FROM  osrf/ros:humble-desktop
+ARG OPENTERA_WS=/opt/ros/OPENTERA_WS
+WORKDIR $OPENTERA_WS
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-camera-info-manager \
+    ros-humble-rtabmap-ros \
+    ros-humble-rqt-tf-tree \
+    ros-humble-turtlebot3-gazebo \
+    ros-humble-turtlebot3-description \
+    ros-humble-turtlebot3-navigation2 \ 
+    ros-humble-joint-state-publisher-gui \
+    libprotobuf-dev \
+    protobuf-compiler \
+    python3-protobuf \
+    portaudio19-dev \
+    curl \
+    build-essential \
+    gfortran \
+    texinfo \
+    libasound2-dev \
+    libpulse-dev \
+    libgfortran-*-dev \
+    libfftw3-dev \
+    libconfig-dev \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgstreamer-plugins-bad1.0-dev \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav gstreamer1.0-tools \
+    libqt5charts5-dev \
+    ros-humble-twist-mux \ 
+    ros-humble-asio-cmake-module \
+    ros-humble-ament-cmake-vendor-package \
+    valgrind \
+    kcachegrind \
+    libasio-dev \
+    libxcb-xinerama0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-xfixes0 \
+    libxcb-shm0 \
+    libxcb-randr0 \
+    libxcb-shape0 \
+    libxcb-sync1 \
+    libxcb-util1 \
+    libxcb-xkb1 \
+    && rm -rf /var/lib/apt/lists/* 
+
+# Install nvm and Node.js
+ENV NVM_DIR=/usr/local/nvm
+RUN mkdir -p $NVM_DIR && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
+    bash -c ". $NVM_DIR/nvm.sh && nvm install 16 && nvm use 16 && nvm alias default 16" && \
+    ln -s $NVM_DIR/versions/node/v16.*/bin/node /usr/bin/node && \
+    ln -s $NVM_DIR/versions/node/v16.*/bin/npm /usr/bin/npm && \
+    npm install -g npm@6
+
+
+# Uninstall the wrong urllib3 version and upgrade pip, setuptools, wheel, and urllib3
+RUN apt-get update && apt-get install -y python3-pip && \
+    python3 -m pip uninstall -y urllib3 && \
+    python3 -m pip install --no-cache-dir --upgrade pip setuptools==70.* wheel urllib3==2.0.7
+
+# Clone and build other packages
+RUN git clone https://github.com/introlab/audio_utils.git --recurse-submodules -b ros2 && \
+    cd audio_utils && \ 
+    git checkout fcc404a84fdec9bcb0c9963f394e4e29d5a9653a && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --symlink-install --packages-up-to audio_utils && \
+    . install/setup.sh
+
+RUN git clone https://github.com/introlab/odas_ros.git --recurse-submodules -b ros2 && \
+    cd odas_ros && \ 
+    git checkout 0d26e657fd129a5398469ed3d320d07a04462a4e && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    . ../audio_utils/install/setup.sh && \ 
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --symlink-install --packages-up-to odas_ros 
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  ros-humble-rviz2 \
+  libxcb-cursor0 \
+  libx11-xcb-dev \
+  libglu1-mesa-dev \
+  libxrender-dev \ 
+  libxi-dev \
+  libxkbcommon-dev \
+  libxkbcommon-x11-dev \
+  '^libxcb.*-dev' \
+  ros-humble-gazebo-ros \
+  ros-humble-rtabmap-sync \
+  ros-humble-rtabmap-slam \
+  ros-humble-nav2-bringup \
+  ros-humble-turtlebot3-gazebo \
+  ros-humble-gazebo-ros-pkgs \
+  libqt5charts5 \
+  nginx \
+  wireless-tools \
+  meson \
+  libffmpeg-nvenc-dev \
+  libva-dev \
+  libegl-dev \
+  vainfo \
+  xterm \
+  gdb \
+  && rm -rf /var/lib/apt/lists/* 
+
+RUN python3 -m pip install --no-cache-dir transforms3d
+
+# RUN git clone https://github.com/elFarto/nvidia-vaapi-driver.git
+
+# # Build and install nvidia-vaapi-driver
+# WORKDIR /opt/ros/OPENTERA_WS/nvidia-vaapi-driver
+# RUN meson setup build \
+#     && meson install -C build
+
+WORKDIR /opt/ros/OPENTERA_WS
+RUN apt-get update && apt-get install -y rsync
+RUN git clone https://github.com/introlab/opentera-webrtc-ros.git --recurse-submodules -b ros2 && \
+    cd opentera-webrtc-ros && \ 
+    git checkout 031d48be0f8d7aef3cf656601afd528f69c5f89e && \
+    cd opentera_client_ros && \
+    python3 -m pip install --no-cache-dir -r requirements.txt && \
+    cd ../opentera_webrtc_ros && \
+    python3 -m pip install --no-cache-dir -r requirements.txt && \
+    cd opentera-webrtc && \
+    python3 -m pip install --no-cache-dir -r requirements.txt && \
+    cd ../../ && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    . ../audio_utils/install/setup.sh && \ 
+    . ../odas_ros/install/setup.sh && \ 
+    colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_BUILD_TYPE=Debug --no-warn-unused-cli --packages-skip face_cropping
+
+COPY launch .
+
+COPY turtlebot3_house ./models/turtlebot3_house
+
+# Add the certificate to the system's trusted store, install missing cyclone dds and xacro package
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    openssl \
+    ros-humble-rmw-cyclonedds-cpp \
+    ros-humble-xacro \
+    && rm -rf /var/lib/apt/lists/*
+
+# Generate certificates in the specified directory
+RUN mkdir -p /opt/ros/OPENTERA_WS/certificate && \
+    cd /opt/ros/OPENTERA_WS/certificate && \
+    chmod +x /opt/ros/OPENTERA_WS/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server/tools/generate_certificate.sh && \
+    /opt/ros/OPENTERA_WS/opentera-webrtc-ros/opentera_webrtc_ros/opentera-webrtc/signaling-server/tools/generate_certificate.sh && \
+    cd /opt/ros/OPENTERA_WS && \   
+    cp /opt/ros/OPENTERA_WS/certificate/cert.pem /usr/local/share/ca-certificates/cert.pem
+
+# Add the certificate to the trusted CA store
+RUN chmod 644 /usr/local/share/ca-certificates/cert.pem && \
+    update-ca-certificates
+
+# run bash file
+CMD ["/bin/bash", "-c", "chmod +x ./opentera_teleop_startup.sh && ./opentera_teleop_startup.sh"]
