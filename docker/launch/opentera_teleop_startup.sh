@@ -26,5 +26,4 @@ export GAZEBO_MODEL_PATH=/opt/ros/OPENTERA_WS/models:$GAZEBO_MODEL_PATH
 sudo sysctl -w net.core.rmem_max=2147483647
 
 echo $ROS_DISTRO
-
-ros2 launch  startup_opentera_demos.launch.py
+ros2 launch startup_opentera_demos.launch.py
